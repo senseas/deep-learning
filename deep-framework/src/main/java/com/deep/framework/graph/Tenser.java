@@ -33,6 +33,11 @@ public class Tenser<N> implements Node<N> {
         Builder.create(this);
     }
 
+    public <M> Tenser(M[] m) {
+        this.name = "Tenser";
+        this.function = (N) m;
+    }
+
     public <M> M compute() { return null; }
 
     public void gradient() { }

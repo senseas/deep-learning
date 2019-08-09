@@ -303,8 +303,27 @@ public class TensorFlow extends Shape {
                 Node[][] A = getInput(0), B = getInput(1);
                 int height = B.length - A.length + 1, width = B[0].length - A[0].length + 1;
                 Node[][] C = zeros(new Node[height][width]);
-                forEach(height, width, A.length, A[0].length, (i, l, m, n) -> {
-                    C[i][l] = add(C[i][l], mul(B[i + m][l + n], A[m][n]));
+                forEach(height, width, A.length, A[0].length, (h, w, m, n) -> {
+                    C[h][w] = add(C[h][w], mul(B[h + m][w + n], A[m][n]));
+                });
+                return C;
+            }
+
+            public void gradient() {}
+
+        };
+    }
+
+    public Tenser convx(Node... input) {
+        return new Tenser<Node[][][]>("Conv", input) {
+
+            public Object compute() {
+                Node[][][] A = getInput(0), B = getInput(1);
+                int height = B[0].length - A[0].length + 1, width = B[0][0].length - A[0][0].length + 1;
+                Node[][][] C = zeros(new Node[A.length][height][width]);
+                forEach(B.length, A.length, (i, l) -> {
+                    Tenser<Node[][]> tenser = addx(new Tenser(C[l]), conv(new Tenser(A[l]), new Tenser(B[i])));
+                    C[l] = tenser.getFunction();
                 });
                 return C;
             }

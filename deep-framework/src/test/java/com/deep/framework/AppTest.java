@@ -61,4 +61,12 @@ public class AppTest {
         executor.run();
     }
 
+    @Test
+    public void cnnxTest() {
+        TensorFlow tf = new TensorFlow();
+        Tenser tenser = tf.convx(new Tenser(new int[]{3, 5, 5}), new Tenser(new int[]{2, 10, 10}));
+        Executor executor = new Executor(tenser);
+        executor.run();
+    }
+
 }
