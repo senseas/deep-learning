@@ -4,8 +4,6 @@ import com.deep.framework.bean.Node;
 import com.deep.framework.bean.None;
 import com.deep.framework.lang.annotation.Operator;
 
-import java.util.stream.Stream;
-
 
 public class TensorFlow extends Shape {
 
@@ -14,14 +12,16 @@ public class TensorFlow extends Shape {
 
             @Operator
             public None compute() {
-                Stream<None> stream = Stream.of(getInput()).map(Node<None>::getOutput);
-                return stream.reduce((inx, iny) -> new None(inx.getValue() + iny.getValue())).get();
+                None inx = getInput(0), iny = getInput(1);
+                Double valx = inx.getValue(), valy = iny.getValue();
+                return new None(valx + valy);
             }
 
             public void gradient() {
-                None out = getOutput();
-                Stream<None> stream = Stream.of(getInput()).map(Node<None>::getOutput);
-                stream.forEach(none -> none.setGrad(out.getGrad()));
+                None inx = getInput(0), iny = getInput(1), out = getOutput();
+                Double grad = out.getGrad();
+                inx.setGrad(grad);
+                iny.setGrad(grad);
             }
 
         };
