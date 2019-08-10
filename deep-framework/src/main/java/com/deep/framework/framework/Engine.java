@@ -1,6 +1,8 @@
 package com.deep.framework.framework;
 
+import com.deep.framework.bean.Node;
 import com.deep.framework.bean.None;
+import com.deep.framework.graph.Graph;
 import com.deep.framework.graph.Tenser;
 import com.deep.framework.lang.ForEach;
 import com.deep.framework.lang.function.Func1;
@@ -13,6 +15,28 @@ import org.apache.log4j.Logger;
 public class Engine extends ForEach {
     Logger log = Logger.getLogger(Engine.class);
     public static double rate = 0.25;
+
+    public void graph(Tenser tenser) {
+        execute(tenser, a -> {
+            Tenser<None> node = (Tenser) a;
+            _graph(node, node.getOutput().getGraph());
+        }, a -> {
+            Func1<Tenser<None>> func = node -> {
+                _graph(node, node.getOutput().getGraph());
+            };
+            forEach(a.getFunction(), func);
+        });
+    }
+
+    private void _graph(Tenser<None> tenser, Graph graph) {
+        for (Node o : tenser.getInput()) {
+            Tenser<None> a = (Tenser) o;
+            if (BeanUtil.isNotNone(a)) {
+                _graph(a, graph);
+                graph.add(a);
+            }
+        }
+    }
 
     public void forward(Tenser tenser) {
         execute(tenser, a -> {

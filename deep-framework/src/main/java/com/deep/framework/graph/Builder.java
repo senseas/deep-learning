@@ -1,7 +1,6 @@
 package com.deep.framework.graph;
 
 import com.deep.framework.bean.None;
-import com.deep.framework.lang.function.Func1;
 import com.deep.framework.lang.util.BeanUtil;
 
 public class Builder extends Shape {
@@ -26,20 +25,7 @@ public class Builder extends Shape {
 
     private static void operator(Tenser tenser) {
         None none = new None(0d);
-        Graph graph = none.getGraph();
         tenser.setOutput(none);
-        Func1<Tenser> func = node -> {
-            if (BeanUtil.isNotNone(node)) {
-                None out = (None) node.getOutput();
-                graph.addAll(out.getGraph());
-                if (BeanUtil.isOperation(node)) {
-                    graph.add(node);
-                } else {
-                    graph.add(node.getFunction());
-                }
-            }
-        };
-        forEach(tenser.getInput(), func);
     }
 
     public static <M> M build(Tenser tenser, int i) {
