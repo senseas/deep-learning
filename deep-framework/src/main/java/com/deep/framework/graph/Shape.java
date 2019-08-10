@@ -29,9 +29,14 @@ public class Shape extends ForEach {
     public static <E> E nones(Object a) {
         if (BeanUtil.isTenser(a)) {
             return (E) fill(a, shape(None.class, a), (Fill<Tenser<None>>) o -> {
+                None none = o.compute(), out = o.getOutput();
+                out.setValue(none.getValue());
                 return o.getOutput();
             });
         } else {
+            Tenser<None> o = (Tenser) a;
+            None none = o.compute(), out = o.getOutput();
+            out.setValue(none.getValue());
             return (E) ((Tenser) a).getOutput();
         }
     }

@@ -14,13 +14,13 @@ public class TensorFlow extends Shape {
 
             @Operator
             public None compute() {
-                Stream<None> stream = Stream.of((Node<None>[]) getInput()).map(Node::getOutput);
+                Stream<None> stream = Stream.of(getInput()).map(Node<None>::getOutput);
                 return stream.reduce((inx, iny) -> new None(inx.getValue() + iny.getValue())).get();
             }
 
             public void gradient() {
                 None out = getOutput();
-                Stream<None> stream = Stream.of((Node<None>[]) getInput()).map(Node::getOutput);
+                Stream<None> stream = Stream.of(getInput()).map(Node<None>::getOutput);
                 stream.forEach(none -> none.setGrad(out.getGrad()));
             }
 
