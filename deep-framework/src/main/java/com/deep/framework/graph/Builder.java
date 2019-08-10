@@ -1,8 +1,11 @@
 package com.deep.framework.graph;
 
+import com.deep.framework.bean.Node;
 import com.deep.framework.bean.None;
 import com.deep.framework.lang.function.Func1;
 import com.deep.framework.lang.util.BeanUtil;
+
+import java.util.stream.Stream;
 
 public class Builder extends Shape {
 
@@ -37,6 +40,12 @@ public class Builder extends Shape {
                 } else {
                     graph.add(node.getFunction());
                 }
+            }
+            if (BeanUtil.isAdd(tenser) && BeanUtil.isAdd(node)) {
+                Stream<Node> a = Stream.of(node.getInput());
+                Stream<Node> b = Stream.of(tenser.getInput()).filter(o -> o != node);
+                tenser.setInput(Stream.concat(a, b).toArray(Tenser[]::new));
+                graph.remove(node);
             }
         };
         forEach(tenser.getInput(), func);

@@ -4,6 +4,8 @@ import com.deep.framework.bean.Node;
 import com.deep.framework.bean.None;
 import com.deep.framework.lang.annotation.Operator;
 
+import java.util.stream.Stream;
+
 
 public class TensorFlow extends Shape {
 
@@ -12,16 +14,14 @@ public class TensorFlow extends Shape {
 
             @Operator
             public None compute() {
-                None inx = getInput(0), iny = getInput(1);
-                Double valx = inx.getValue(), valy = iny.getValue();
-                return new None(valx + valy);
+                Stream<None> stream = Stream.of((Node<None>[]) getInput()).map(Node::getOutput);
+                return stream.reduce((inx, iny) -> new None(inx.getValue() + iny.getValue())).get();
             }
 
             public void gradient() {
-                None inx = getInput(0), iny = getInput(1), out = getOutput();
-                Double grad = out.getGrad();
-                inx.setGrad(grad);
-                iny.setGrad(grad);
+                None out = getOutput();
+                Stream<None> stream = Stream.of((Node<None>[]) getInput()).map(Node::getOutput);
+                stream.forEach(none -> none.setGrad(out.getGrad()));
             }
 
         };
@@ -315,7 +315,7 @@ public class TensorFlow extends Shape {
     }
 
     public Tenser convx(Node... input) {
-        return new Tenser<Node[][][]>("Conv", input) {
+        return new Tenser<Node[][][]>("Convx", input) {
 
             public Object compute() {
                 Node[][][] A = getInput(0), B = getInput(1);

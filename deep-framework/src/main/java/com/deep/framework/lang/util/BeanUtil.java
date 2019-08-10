@@ -46,6 +46,10 @@ public class BeanUtil {
         return !o.getName().startsWith("None");
     }
 
+    public static boolean isAdd(Tenser o) {
+        return o.getName().startsWith("Tenser::Add");
+    }
+
     public static boolean startsWithNone(Tenser o) {
         return o.getName().startsWith("None::");
     }

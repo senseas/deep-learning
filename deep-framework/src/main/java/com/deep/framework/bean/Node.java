@@ -7,5 +7,7 @@ public interface Node<N> {
 
     <M> M getInput(int i);
 
+    <M> M getOutput();
+
     void setOutput(N o);
 }
