@@ -81,11 +81,12 @@ public class Shape extends ForEach {
         }
     }
 
-    public static <M> M[] reshape(Object A, Object B) {
+    public static Tenser reshape(Tenser A, Object[] B) {
+        Object C = A.getFunction();
         Queue queue = new LinkedList();
-        forEach(A, a -> queue.add(a));
+        forEach(C, c -> queue.add(c));
         forEach(B, (b, i) -> b[i] = queue.poll());
-        return (M[]) B;
+        return new Tenser(B);
     }
 }
 

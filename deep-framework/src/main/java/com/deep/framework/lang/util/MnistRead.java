@@ -48,17 +48,17 @@ public class MnistRead {
                 throw new RuntimeException("Please select the correct file!");
             } else {
                 bin.read(bytes, 0, 4);
-                int number = Integer.parseInt(bytesToHex(bytes), 16);           // 读取样本总数
+                int number = Integer.parseInt(bytesToHex(bytes), 16);      // 读取样本总数
                 bin.read(bytes, 0, 4);
-                int width = Integer.parseInt(bytesToHex(bytes), 16);           // 读取每行所含像素点数
+                int width = Integer.parseInt(bytesToHex(bytes), 16);       // 读取每行所含像素点数
                 bin.read(bytes, 0, 4);
-                int height = Integer.parseInt(bytesToHex(bytes), 16);           // 读取每列所含像素点数
+                int height = Integer.parseInt(bytesToHex(bytes), 16);      // 读取每列所含像素点数
                 images = new double[number][1][][];
                 for (int x = 0; x < number; x++) {
                     double[][] image = new double[height][width];
                     for (int i = 0; i < height; i++) {
                         for (int l = 0; l < width; l++) {
-                            image[i][l] = bin.read();                                // 逐一读取像素值
+                            image[i][l] = bin.read() / 255;                      // 逐一读取像素值
                         }
                     }
                     images[x][0] = image;
