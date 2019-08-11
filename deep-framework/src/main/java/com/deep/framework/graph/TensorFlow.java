@@ -421,8 +421,8 @@ public class TensorFlow extends Shape {
         };
     }
 
-    public Tenser maxpool(Node node) {
-        return new Tenser<Node>("Maxpool", node) {
+    public Tenser maxpool(Node input) {
+        return new Tenser<Node>("Maxpool", input) {
 
             public Node[][] compute() {
                 Node<None>[][] A = getInput(0);
@@ -430,6 +430,24 @@ public class TensorFlow extends Shape {
                 Node<None>[][] B = zeros(new Node[height][width]);
                 forEach(A.length, A[0].length, (y, x) -> {
                     B[y / 2][x / 2] = max(B[y / 2][x / 2], A[y][x]);
+                });
+                return B;
+            }
+
+            public void gradient() {}
+
+        };
+    }
+
+    public Tenser maxpoolx(Node input) {
+        return new Tenser<Node>("Maxpoolx", input) {
+
+            public Node[][][] compute() {
+                Node<None>[][][] A = getInput(0);
+                Node<None>[][][] B = new Node[A.length][][];
+                forEach(A.length, i -> {
+                    Tenser<Node[][]> tenser = maxpool(new Tenser(A[i]));
+                    B[i] = tenser.getFunction();
                 });
                 return B;
             }

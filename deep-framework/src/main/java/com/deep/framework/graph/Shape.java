@@ -9,6 +9,8 @@ import org.apache.commons.math3.random.RandomDataGenerator;
 
 import java.lang.reflect.Array;
 import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.Queue;
 
 public class Shape extends ForEach {
 
@@ -77,6 +79,13 @@ public class Shape extends ForEach {
         } else {
             func.apply(a, b);
         }
+    }
+
+    public static <M> M[] reshape(Object A, Object B) {
+        Queue queue = new LinkedList();
+        forEach(A, a -> queue.add(a));
+        forEach(B, (b, i) -> b[i] = queue.poll());
+        return (M[]) B;
     }
 }
 

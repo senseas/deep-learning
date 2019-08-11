@@ -83,6 +83,19 @@ public class ForEach {
         }
     }
 
+    public static void forEach(Object a, For1 func) {
+        if (BeanUtil.isTenser(a)) {
+            forEach(Array.getLength(a), i -> {
+                Object m = Array.get(a, i);
+                if (BeanUtil.isNotTenser(m)) {
+                    func.apply((Object[]) a, i);
+                } else {
+                    forEach(m, func);
+                }
+            });
+        }
+    }
+
     public static void forEach(Object a, Object b, For2 func) {
         if (BeanUtil.isTenser(a)) {
             forEach(Array.getLength(a), i -> {
