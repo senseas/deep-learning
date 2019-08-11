@@ -3,6 +3,7 @@ package com.deep.framework.graph;
 import com.deep.framework.bean.Node;
 import com.deep.framework.bean.None;
 import com.deep.framework.lang.annotation.Operator;
+import com.deep.framework.lang.function.Func2;
 
 
 public class TensorFlow extends Shape {
@@ -172,6 +173,26 @@ public class TensorFlow extends Shape {
         };
     }
 
+    public Tenser log(Node<None>... input) {
+        return new Tenser<None>("Log", input) {
+
+            @Operator
+            public None compute() {
+                None inx = getInput(0);
+                Double valx = inx.getValue();
+                return new None(Math.log(valx));
+            }
+
+            public void gradient() {
+                None inx = getInput(0), out = getOutput();
+                Double valx = inx.getValue();
+                Double grad = out.getGrad();
+                inx.setGrad(grad * 1 / valx);
+            }
+
+        };
+    }
+
     public Tenser relu(Node<None> input) {
         return new Tenser<None>("Relu", input) {
 
@@ -187,6 +208,42 @@ public class TensorFlow extends Shape {
                 Double valx = inx.getValue();
                 Double grad = out.getGrad();
                 inx.setGrad(grad * (valx > 0 ? 1 : 0));
+            }
+
+        };
+    }
+
+    public Tenser relux(Node input) {
+        return new Tenser<None>("Relu", input) {
+
+            public Object compute() {
+                Object A = getInput(0), B = shape(Tenser.class, A);
+                forEach(A, B, (a, b, i) -> {
+                    b[i] = relu(a);
+                });
+                return B;
+            }
+
+            public void gradient() {}
+
+        };
+    }
+
+    public Tenser max(Node<None>... input) {
+        return new Tenser<None>("Max", input) {
+
+            @Operator
+            public None compute() {
+                None inx = getInput(0), iny = getInput(1);
+                Double valx = inx.getValue(), valy = iny.getValue();
+                return new None(Math.max(valx, valy));
+            }
+
+            public void gradient() {
+                None inx = getInput(0), iny = getInput(1), out = getOutput();
+                Double grad = out.getGrad();
+                inx.setGrad(grad);
+                iny.setGrad(grad);
             }
 
         };
@@ -266,12 +323,43 @@ public class TensorFlow extends Shape {
     public Tenser squarex(Node<None>... input) {
         return new Tenser("Squarex", input) {
 
-            public Object compute() {
-                Object A = getInput(0), B = getInput(1), C = shape(Tenser.class, A);
-                forEach(A, B, C, (a, b, c, i) -> {
-                    c[i] = square(a, b);
+            public Node compute() {
+                Object A = getInput(0), B = getInput(1);
+                Node[] C = {new Tenser(0d)};
+                forEach(A, B, (Func2<Node, Node>) (a, b) -> {
+                    C[0] = add(C[0], square(a, b));
                 });
-                return C;
+                return C[0];
+            }
+
+            public void gradient() {}
+
+        };
+    }
+
+    public Tenser cross(Node<None>... input) {
+        return new Tenser<Node>("Cross", input) {
+
+            public Node compute() {
+                Node a = getInput(0), b = getInput(1);
+                return minus(mul(a, log(b)));
+            }
+
+            public void gradient() {}
+
+        };
+    }
+
+    public Tenser crossx(Node<None>... input) {
+        return new Tenser("Crossx", input) {
+
+            public Node compute() {
+                Object A = getInput(0), B = getInput(1);
+                Node[] C = {new Tenser(0d)};
+                forEach(A, B, (Func2<Node, Node>) (a, b) -> {
+                    C[0] = add(C[0], cross(a, b));
+                });
+                return C[0];
             }
 
             public void gradient() {}
@@ -336,8 +424,14 @@ public class TensorFlow extends Shape {
     public Tenser maxpool(Node node) {
         return new Tenser<Node>("Maxpool", node) {
 
-            public Node compute() {
-                return null;
+            public Node[][] compute() {
+                Node<None>[][] A = getInput(0);
+                int height = (int) Math.ceil(A.length / 2.0), width = (int) Math.ceil(A[0].length / 2.0);
+                Node<None>[][] B = zeros(new Node[height][width]);
+                forEach(A.length, A[0].length, (y, x) -> {
+                    B[y / 2][x / 2] = max(B[y / 2][x / 2], A[y][x]);
+                });
+                return B;
             }
 
             public void gradient() {}
