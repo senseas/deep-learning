@@ -29,8 +29,10 @@ public class Builder extends Shape {
     }
 
     public static <M> M build(Tenser tenser, int i) {
-        Tenser input = (Tenser) tenser.getInput()[i];
+        Tenser<Tenser> input = (Tenser) tenser.getInput()[i];
         if (BeanUtil.isOperation(tenser) && BeanUtil.isNone(input)) return (M) input.getOutput();
+        if (BeanUtil.isOperation(tenser) && BeanUtil.isOperation(input)) return (M) input.getOutput();
+        if (BeanUtil.isOperation(tenser)) return (M) input.getFunction().getOutput();
         if (BeanUtil.isNone(input)) return Shape.tensers(input.getOutput());
         if (BeanUtil.isOperation(input)) return (M) input;
         return (M) input.getFunction();

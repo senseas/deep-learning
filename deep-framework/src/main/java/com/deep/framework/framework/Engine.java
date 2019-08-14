@@ -28,12 +28,17 @@ public class Engine extends ForEach {
         });
     }
 
-    private void _graph(Tenser<None> tenser, Graph graph) {
+    private void _graph(Tenser tenser, Graph graph) {
         for (Node o : tenser.getInput()) {
-            Tenser<None> a = (Tenser) o;
+            Tenser<Tenser> a = (Tenser) o;
             if (BeanUtil.isNotNone(a)) {
-                _graph(a, graph);
-                graph.add(a);
+                if (BeanUtil.isOperation(a)) {
+                    _graph(a, graph);
+                    graph.add(a);
+                } else {
+                    _graph(a.getFunction(), graph);
+                    graph.add(a.getFunction());
+                }
             }
         }
     }
