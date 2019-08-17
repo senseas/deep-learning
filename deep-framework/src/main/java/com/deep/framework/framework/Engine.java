@@ -19,7 +19,7 @@ public class Engine extends Shape {
     public void forward(Tenser tenser) {
         execute(tenser, a -> {
             Tenser<None> node = (Tenser) a;
-            computer(node, node.getOutput().getGraph());
+            computer(node, node.getGraph());
             compute(node);
         }, a -> {
             Tenser<None> node = (Tenser) a;
@@ -75,15 +75,12 @@ public class Engine extends Shape {
         forEach(tenser.getFunction(), tenser.getOutput(), func);
     }
 
-    public void backward(Tenser<None> tenser) {
+    public void backward(Tenser tenser) {
         execute(tenser, a -> {
             gradient(a);
-            Func1<None> func = out -> {
-                out.getGraph().farEach(o -> {
-                    gradient(o);
-                });
-            };
-            forEach(a.getOutput(), func);
+            a.getGraph().farEach(o -> {
+                gradient((Tenser) o);
+            });
         }, a -> {
             gradients(a);
             a.getGraph().farEach(o -> {
@@ -91,7 +88,7 @@ public class Engine extends Shape {
             });
         });
         //log.info(JSONObject.toJSONString(tenser));
-        _backward(tenser);
+        backwards(tenser);
     }
 
     private void gradient(Tenser<None> tenser) {
@@ -110,24 +107,21 @@ public class Engine extends Shape {
         forEach(tenser.getFunction(), tenser.getOutput(), func);
     }
 
-    private void _backward(Tenser tenser) {
+    private void backwards(Tenser tenser) {
         execute(tenser, a -> {
             reduce(a);
-            Func1<None> func = out -> {
-                out.getGraph().farEach(o -> {
-                    reduce(o);
-                });
-            };
-            forEach(a.getOutput(), func);
-        }, a -> {
-            reduceTenser(a);
             a.getGraph().farEach(o -> {
-                reduceTenser((Tenser) o);
+                reduce((Tenser) o);
+            });
+        }, a -> {
+            reduces(a);
+            a.getGraph().farEach(o -> {
+                reduces((Tenser) o);
             });
         });
     }
 
-    private void reduceTenser(Tenser tenser) {
+    private void reduces(Tenser tenser) {
         Func1<Tenser<None>> func = node -> {
             reduce(node);
             node.getGraph().farEach(o -> {
