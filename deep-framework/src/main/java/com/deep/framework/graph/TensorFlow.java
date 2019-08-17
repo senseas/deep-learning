@@ -266,11 +266,12 @@ public class TensorFlow extends Shape {
         };
     }
 
-    public Tenser prod(Node node) {
-        return new Tenser<Node>("Prod", node) {
+    public Tenser shape(Node... input) {
+        return new Tenser<Node>("Shape", input) {
 
-            public Node compute() {
-                return null;
+            public Object compute() {
+                Object A = getInput(0), B = getInput(1);
+                return A;
             }
 
             public void gradient() {}

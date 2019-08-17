@@ -17,7 +17,7 @@ public class AppTest {
         Double value = 1 / (1 + Math.exp(-(-0.6354469361189982)));
         System.out.println(value);
         Double value1 = value * (1 - value);
-        System.out.println(value1*0.1694231856183997);
+        System.out.println(value1 * 0.1694231856183997);
     }
 
     @Test

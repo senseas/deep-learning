@@ -56,6 +56,14 @@ public class Shape extends ForEach {
         return (E) fill(a, o -> new Tenser(0d));
     }
 
+    public static <E> E Nones(Object a) {
+        if (BeanUtil.isTenser(a)) {
+            return (E) fill(a, shape(None.class, a), o -> new None(0d));
+        } else {
+            return (E) new None(0d);
+        }
+    }
+
     public static Object shape(Class clas, Object a) {
         return Array.newInstance(clas, shapes(a));
     }
@@ -86,7 +94,11 @@ public class Shape extends ForEach {
         Queue queue = new LinkedList();
         forEach(C, c -> queue.add(c));
         forEach(B, (b, i) -> b[i] = queue.poll());
-        return new Tenser(B);
+        Tenser tenser = new Tenser(B);
+        tenser.setName(A.getName());
+        tenser.setInput(A.getInput());
+        tenser.setGraph(A.getGraph());
+        return tenser;
     }
 }
 

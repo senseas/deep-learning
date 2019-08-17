@@ -20,6 +20,7 @@ public class BeanUtil {
 
     public static boolean isNotOperation(Node node) {
         try {
+            if(node==null) return false;
             Method method = node.getClass().getMethod("compute");
             return method.getAnnotation(Operator.class) == null;
         } catch (NoSuchMethodException e) {
@@ -46,7 +47,15 @@ public class BeanUtil {
         return !o.getName().startsWith("None");
     }
 
+    public static boolean isNotNoneTenser(Tenser o) {
+        return !(o.getName().startsWith("None") || o.getName().equals("Tenser"));
+    }
+
     public static boolean startsWithNone(Tenser o) {
         return o.getName().startsWith("None::");
+    }
+
+    public static boolean isAdd(Tenser o) {
+        return o.getName().startsWith("Tenser::Add");
     }
 }

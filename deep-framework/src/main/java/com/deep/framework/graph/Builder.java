@@ -1,11 +1,10 @@
 package com.deep.framework.graph;
 
-import com.deep.framework.bean.None;
 import com.deep.framework.lang.util.BeanUtil;
 
 public class Builder extends Shape {
 
-    public static void create(Tenser tenser) {
+    public static <M> M function(Tenser tenser) {
         if (BeanUtil.isNotOperation(tenser)) {
             Object function = tenser.compute();
             if (BeanUtil.isNotTenser(function)) {
@@ -18,14 +17,9 @@ public class Builder extends Shape {
             } else {
                 tenser.setFunction(functions(function));
             }
-        } else {
-            operator(tenser);
+            return (M) function;
         }
-    }
-
-    private static void operator(Tenser tenser) {
-        None none = new None(0d);
-        tenser.setOutput(none);
+        return null;
     }
 
     public static <M> M build(Tenser tenser, int i) {
@@ -33,8 +27,8 @@ public class Builder extends Shape {
         if (BeanUtil.isOperation(tenser) && BeanUtil.isNone(input)) return (M) input.getOutput();
         if (BeanUtil.isOperation(tenser) && BeanUtil.isOperation(input)) return (M) input.getOutput();
         if (BeanUtil.isOperation(tenser)) return (M) input.getFunction().getOutput();
-        if (BeanUtil.isNone(input)) return Shape.tensers(input.getOutput());
         if (BeanUtil.isOperation(input)) return (M) input;
-        return (M) input.getFunction();
+        return Shape.tensers(input.getOutput());
     }
+
 }

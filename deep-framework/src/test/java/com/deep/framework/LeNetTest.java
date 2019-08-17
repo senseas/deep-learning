@@ -31,7 +31,7 @@ public class LeNetTest extends Shape {
         Tenser tenser23 = tf.maxpoolx(tenser22);//16*4
 
         Tenser tenser31 = tf.convx(new Tenser("weight", new int[]{32, 4, 4}), tenser23);//32*1
-        Tenser tenser30 = Shape.reshape(tenser31, new Tenser[32][1]);
+        Tenser tenser30 = tf.shape(tenser31, new Tenser(new int[]{32, 1}));
         Tenser tenser32 = tf.matmul(new Tenser("weight", new int[]{86, 32}), tenser30);//86*1
         Tenser tenser33 = tf.addx(tenser32, new Tenser("bias", new int[]{86, 1}));//86*1
         Tenser tenser34 = tf.relux(tenser33);//86*1

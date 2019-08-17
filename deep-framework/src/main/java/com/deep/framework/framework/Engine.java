@@ -3,8 +3,8 @@ package com.deep.framework.framework;
 import com.deep.framework.bean.Node;
 import com.deep.framework.bean.None;
 import com.deep.framework.graph.Graph;
+import com.deep.framework.graph.Shape;
 import com.deep.framework.graph.Tenser;
-import com.deep.framework.lang.ForEach;
 import com.deep.framework.lang.function.Func1;
 import com.deep.framework.lang.function.Func2;
 import com.deep.framework.lang.util.BeanUtil;
@@ -12,56 +12,39 @@ import lombok.Data;
 import org.apache.log4j.Logger;
 
 @Data
-public class Engine extends ForEach {
+public class Engine extends Shape {
     Logger log = Logger.getLogger(Engine.class);
     public static double rate = 0.25;
 
-    public void graph(Tenser tenser) {
+    public void forward(Tenser tenser) {
         execute(tenser, a -> {
             Tenser<None> node = (Tenser) a;
-            _graph(node, node.getOutput().getGraph());
+            computer(node, node.getOutput().getGraph());
+            compute(node);
         }, a -> {
-            Func1<Tenser<None>> func = node -> {
-                _graph(node, node.getOutput().getGraph());
-            };
-            forEach(a.getFunction(), func);
+            Tenser<None> node = (Tenser) a;
+            graph(node, node.getGraph());
+            function(node);
         });
+        //log.info(JSONObject.toJSONString(tenser));
     }
 
-    private void _graph(Tenser tenser, Graph graph) {
+    private void computer(Tenser tenser, Graph graph) {
         for (Node o : tenser.getInput()) {
-            Tenser<Tenser> a = (Tenser) o;
-            if (BeanUtil.isNotNone(a)) {
-                if (BeanUtil.isOperation(a)) {
-                    _graph(a, graph);
-                    graph.add(a);
+            Tenser node = (Tenser) o;
+            if (BeanUtil.isNotNone(node)) {
+                if (BeanUtil.isNotOperation(node)) {
+                    Tenser func = (Tenser) node.getFunction();
+                    computer(func, graph);
+                    compute(func);
+                    graph.add(func);
                 } else {
-                    _graph(a.getFunction(), graph);
-                    graph.add(a.getFunction());
+                    computer(node, graph);
+                    compute(node);
+                    graph.add(node);
                 }
             }
         }
-    }
-
-    public void forward(Tenser tenser) {
-        execute(tenser, a -> {
-            Func1<None> func = out -> {
-                out.getGraph().forEach(o -> {
-                    compute(o);
-                });
-            };
-            forEach(a.getOutput(), func);
-            compute(a);
-        }, a -> {
-            Func1<Tenser<None>> func = node -> {
-                node.getOutput().getGraph().forEach(o -> {
-                    compute(o);
-                });
-                compute(node);
-            };
-            forEach(a.getFunction(), func);
-        });
-        //log.info(JSONObject.toJSONString(tenser));
     }
 
     private void compute(Tenser<None> tenser) {
@@ -70,6 +53,26 @@ public class Engine extends ForEach {
             out.setValue(none.getValue());
         };
         forEach(nones, outputs, func);
+    }
+
+    private void graph(Tenser tenser, Graph graph) {
+        for (Node o : tenser.getInput()) {
+            Tenser<Tenser> a = (Tenser) o;
+            if (BeanUtil.isNotNone(a)) {
+                graph(a, graph);
+                function(a);
+                graph.add(a);
+            }
+        }
+    }
+
+    private void function(Tenser tenser) {
+        Func2<Tenser<None>, None> func = (node, out) -> {
+            computer(node, node.getGraph());
+            compute(node);
+            out.setValue(node.getOutput().getValue());
+        };
+        forEach(tenser.getFunction(), tenser.getOutput(), func);
     }
 
     public void backward(Tenser<None> tenser) {
@@ -82,21 +85,29 @@ public class Engine extends ForEach {
             };
             forEach(a.getOutput(), func);
         }, a -> {
-            Func1<Tenser<None>> func = node -> {
-                gradient(node);
-                node.getOutput().getGraph().farEach(o -> {
-                    gradient(o);
-                });
-            };
-            forEach(a.getFunction(), func);
+            gradients(a);
+            a.getGraph().farEach(o -> {
+                gradients((Tenser) o);
+            });
         });
         //log.info(JSONObject.toJSONString(tenser));
         _backward(tenser);
     }
 
-    private void gradient(Tenser<None> node) {
-        node.gradient();
-        node.getOutput().setGrad(null);
+    private void gradient(Tenser<None> tenser) {
+        tenser.gradient();
+        tenser.getOutput().setGrad(null);
+    }
+
+    private void gradients(Tenser tenser) {
+        Func2<Tenser<None>, None> func = (node, out) -> {
+            node.getOutput().setGrad(out.getGrad());
+            gradient(node);
+            node.getGraph().farEach(o -> {
+                gradient(o);
+            });
+        };
+        forEach(tenser.getFunction(), tenser.getOutput(), func);
     }
 
     private void _backward(Tenser tenser) {
@@ -109,14 +120,21 @@ public class Engine extends ForEach {
             };
             forEach(a.getOutput(), func);
         }, a -> {
-            Func1<Tenser<None>> func = node -> {
-                reduce(node);
-                node.getOutput().getGraph().farEach(o -> {
-                    reduce(o);
-                });
-            };
-            forEach(a.getFunction(), func);
+            reduceTenser(a);
+            a.getGraph().farEach(o -> {
+                reduceTenser((Tenser) o);
+            });
         });
+    }
+
+    private void reduceTenser(Tenser tenser) {
+        Func1<Tenser<None>> func = node -> {
+            reduce(node);
+            node.getGraph().farEach(o -> {
+                reduce(o);
+            });
+        };
+        forEach(tenser.getFunction(), func);
     }
 
     private void reduce(Tenser tenser) {
