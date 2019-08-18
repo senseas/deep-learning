@@ -16,10 +16,6 @@ public class Shape extends ForEach {
 
     static RandomDataGenerator random = new RandomDataGenerator();
 
-    public static Double random() {
-        return random.nextGaussian(0, 1);
-    }
-
     public static <E> E random(int... x) {
         return (E) fill(Array.newInstance(None.class, x), o -> new None(random.nextGaussian(0, 1)));
     }
@@ -89,16 +85,10 @@ public class Shape extends ForEach {
         }
     }
 
-    public static Tenser reshape(Tenser A, Object[] B) {
-        Object C = A.getFunction();
-        Queue queue = new LinkedList();
-        forEach(C, c -> queue.add(c));
-        forEach(B, (b, i) -> b[i] = queue.poll());
-        Tenser tenser = new Tenser(B);
-        tenser.setName(A.getName());
-        tenser.setInput(A.getInput());
-        tenser.setGraph(A.getGraph());
-        return tenser;
+    public static void reshape(Object A, Object B) {
+        Queue link = new LinkedList();
+        forEach(A, a -> link.add(a));
+        forEach(B, (b, i) -> b[i] = link.poll());
     }
 }
 

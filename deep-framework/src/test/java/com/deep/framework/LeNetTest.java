@@ -23,15 +23,18 @@ public class LeNetTest extends Shape {
         Tenser label = new Tenser(new int[]{10, 1});
 
         Tenser tenser11 = tf.convx(new Tenser("weight", new int[]{6, 5, 5}), input);//6*24
-        Tenser tenser12 = tf.relux(tenser11);//6*24
+        Tenser tenser10 = tf.prod(tenser11, new Tenser(1/6d));//6*24
+        Tenser tenser12 = tf.relux(tenser10);//6*24
         Tenser tenser13 = tf.maxpoolx(tenser12);//6*12
 
         Tenser tenser21 = tf.convx(new Tenser("weight", new int[]{16, 5, 5}), tenser13);//16*8
-        Tenser tenser22 = tf.relux(tenser21);//16*8
+        Tenser tenser20 = tf.prod(tenser21, new Tenser(1/16d));//6*24
+        Tenser tenser22 = tf.relux(tenser20);//16*8
         Tenser tenser23 = tf.maxpoolx(tenser22);//16*4
 
         Tenser tenser31 = tf.convx(new Tenser("weight", new int[]{32, 4, 4}), tenser23);//32*1
-        Tenser tenser30 = tf.shape(tenser31, new Tenser(new int[]{32, 1}));
+        Tenser tenser39 = tf.prod(tenser31, new Tenser(1/32d));//6*24
+        Tenser tenser30 = tf.shape(tenser39, new Tenser(new int[]{32, 1}));
         Tenser tenser32 = tf.matmul(new Tenser("weight", new int[]{86, 32}), tenser30);//86*1
         Tenser tenser33 = tf.addx(tenser32, new Tenser("bias", new int[]{86, 1}));//86*1
         Tenser tenser34 = tf.relux(tenser33);//86*1

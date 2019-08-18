@@ -59,7 +59,7 @@ public class Tenser<N> implements Node<N> {
 
     public N getOutput() {
         if (output != null) return output;
-        this.output = Shape.Nones(function);
+        output = Shape.Nones(function);
         return output;
     }
 

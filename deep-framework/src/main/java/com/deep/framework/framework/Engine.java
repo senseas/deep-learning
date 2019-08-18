@@ -72,6 +72,7 @@ public class Engine extends Shape {
             compute(node);
             out.setValue(node.getOutput().getValue());
         };
+        BeanUtil.nameNode(tenser);
         forEach(tenser.getFunction(), tenser.getOutput(), func);
     }
 

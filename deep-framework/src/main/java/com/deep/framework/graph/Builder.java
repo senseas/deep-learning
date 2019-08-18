@@ -26,7 +26,8 @@ public class Builder extends Shape {
         if (BeanUtil.isOperation(tenser) && BeanUtil.isOperation(input)) return (M) input.getOutput();
         if (BeanUtil.isOperation(tenser)) return (M) input.getFunction().getOutput();
         if (BeanUtil.isOperation(input)) return (M) input;
-        return Shape.tensers(input.getOutput());
+        if (BeanUtil.isNoneNode(input)) return (M) tensers(input.getOutput());
+        return (M) input.getFunction();
     }
 
 }

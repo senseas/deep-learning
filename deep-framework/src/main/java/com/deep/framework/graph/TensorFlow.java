@@ -267,11 +267,34 @@ public class TensorFlow extends Shape {
     }
 
     public Tenser shape(Node... input) {
-        return new Tenser<Node>("Shape", input) {
+        return new Tenser("Shape", input) {
 
             public Object compute() {
-                Object A = getInput(0), B = getInput(1);
-                return A;
+                Tenser A = (Tenser) input[0], B = (Tenser) input[1];
+                Object C = shape(Tenser.class, B.getOutput());
+                reshape(A.getOutput(), B.getOutput());
+                reshape(A.getFunction(), C);
+                setName(A.getName());
+                setOutput(B.getOutput());
+                setFunction(C);
+                return C;
+            }
+
+            public void gradient() {}
+
+        };
+    }
+
+    public Tenser prod(Node... input) {
+        return new Tenser("Prod", input) {
+
+            public Object compute() {
+                Object A = getInput(0), C = shape(Tenser.class, A);
+                Tenser b = (Tenser) getInput(1);
+                forEach(A, C, (a, c, i) -> {
+                    c[i] = mul(a, b);
+                });
+                return C;
             }
 
             public void gradient() {}
