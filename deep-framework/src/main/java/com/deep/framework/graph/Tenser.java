@@ -52,8 +52,8 @@ public class Tenser<N> implements Node<N> {
     }
 
     public N getFunction() {
-        if (function == null)
-            this.function = Builder.function(this);
+        if (function != null) return function;
+        Builder.function(this);
         return function;
     }
 

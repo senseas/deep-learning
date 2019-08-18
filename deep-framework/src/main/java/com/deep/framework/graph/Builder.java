@@ -4,7 +4,7 @@ import com.deep.framework.lang.util.BeanUtil;
 
 public class Builder extends Shape {
 
-    public static <M> M function(Tenser tenser) {
+    public static void function(Tenser tenser) {
         if (BeanUtil.isNotOperation(tenser)) {
             Object function = tenser.compute();
             if (BeanUtil.isNotTenser(function)) {
@@ -17,9 +17,7 @@ public class Builder extends Shape {
             } else {
                 tenser.setFunction(functions(function));
             }
-            return (M) function;
         }
-        return null;
     }
 
     public static <M> M build(Tenser tenser, int i) {
