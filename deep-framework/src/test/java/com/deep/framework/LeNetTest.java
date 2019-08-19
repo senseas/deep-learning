@@ -56,7 +56,7 @@ public class LeNetTest extends Shape {
             Object inSet = inputSet[l], labSet = labelSet[l];
 
             executor.run(inSet, labSet);
-            if (i % 1000 == 0) {
+            if (i % 10 == 0) {
                 if (executor.rate > 0.00001)
                     executor.rate = executor.rate - 0.0001;
                 log.info("---------{" + i + "}------------");
