@@ -9,7 +9,7 @@ import java.io.IOException;
 import java.util.stream.IntStream;
 
 public class MnistRead {
-    public static final String BASE_PATH = "/Applications/GitHub/deep-learning/deep-framework/src/main/resources/DataSet/";
+    public static final String BASE_PATH = "D:/GitHub/deep-learning/deep-framework/src/main/resources/DataSet/";
     public static final String TRAIN_IMAGES_FILE = BASE_PATH.concat("train-images-idx3-ubyte");
     public static final String TRAIN_LABELS_FILE = BASE_PATH.concat("train-labels-idx1-ubyte");
     public static final String TEST_IMAGES_FILE = "data/mnist/t10k-images.idx3-ubyte";

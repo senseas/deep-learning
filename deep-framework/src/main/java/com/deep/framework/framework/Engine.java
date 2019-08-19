@@ -2,7 +2,6 @@ package com.deep.framework.framework;
 
 import com.deep.framework.bean.Node;
 import com.deep.framework.bean.None;
-import com.deep.framework.graph.Graph;
 import com.deep.framework.graph.Tenser;
 import com.deep.framework.lang.ForEach;
 import com.deep.framework.lang.function.Func1;
@@ -16,52 +15,38 @@ public class Engine extends ForEach {
     Logger log = Logger.getLogger(Engine.class);
     public static double rate = 0.25;
 
-    public void graph(Tenser tenser) {
-        execute(tenser, a -> {
-            Tenser<None> node = (Tenser) a;
-            _graph(node, node.getOutput().getGraph());
-        }, a -> {
-            Func1<Tenser<None>> func = node -> {
-                _graph(node, node.getOutput().getGraph());
-            };
-            forEach(a.getFunction(), func);
-        });
-    }
-
-    private void _graph(Tenser tenser, Graph graph) {
-        for (Node o : tenser.getInput()) {
-            Tenser<Tenser> a = (Tenser) o;
-            if (BeanUtil.isNotNone(a)) {
-                if (BeanUtil.isOperation(a)) {
-                    _graph(a, graph);
-                    graph.add(a);
-                } else {
-                    _graph(a.getFunction(), graph);
-                    graph.add(a.getFunction());
-                }
-            }
-        }
-    }
-
     public void forward(Tenser tenser) {
         execute(tenser, a -> {
-            Func1<None> func = out -> {
-                out.getGraph().forEach(o -> {
-                    compute(o);
-                });
-            };
-            forEach(a.getOutput(), func);
-            compute(a);
+            Tenser<None> node = (Tenser) a;
+            computer(node);
+            compute(node);
         }, a -> {
             Func1<Tenser<None>> func = node -> {
-                node.getOutput().getGraph().forEach(o -> {
-                    compute(o);
-                });
+                computer(node);
                 compute(node);
             };
             forEach(a.getFunction(), func);
         });
         //log.info(JSONObject.toJSONString(tenser));
+    }
+
+    private void computer(Tenser tenser) {
+        for (Node o : tenser.getInput()) {
+            Tenser a = (Tenser) o;
+            if (BeanUtil.isNotNone(a)) {
+                if (BeanUtil.isOperation(a)) {
+                    computer(a);
+                    compute(a);
+                } else {
+                    Tenser<Tenser> m = a;
+                    computer(m.getFunction());
+                    compute(m.getFunction());
+                }
+            } else {
+                Tenser<None> m = a;
+                m.getOutput().setReduce(false);
+            }
+        }
     }
 
     private void compute(Tenser<None> tenser) {
@@ -75,18 +60,11 @@ public class Engine extends ForEach {
     public void backward(Tenser<None> tenser) {
         execute(tenser, a -> {
             gradient(a);
-            Func1<None> func = out -> {
-                out.getGraph().farEach(o -> {
-                    gradient(o);
-                });
-            };
-            forEach(a.getOutput(), func);
+            gradienter(a);
         }, a -> {
-            Func1<Tenser<None>> func = node -> {
+            Func1<Tenser> func = node -> {
                 gradient(node);
-                node.getOutput().getGraph().farEach(o -> {
-                    gradient(o);
-                });
+                gradienter(node);
             };
             forEach(a.getFunction(), func);
         });
@@ -94,7 +72,23 @@ public class Engine extends ForEach {
         _backward(tenser);
     }
 
-    private void gradient(Tenser<None> node) {
+    private void gradienter(Tenser tenser) {
+        for (Node o : tenser.getInput()) {
+            Tenser<Tenser> a = (Tenser) o;
+            if (BeanUtil.isNotNone(a)) {
+                if (BeanUtil.isOperation(a)) {
+                    gradient(a);
+                    gradienter(a);
+                } else {
+                    gradient(a.getFunction());
+                    gradienter(a.getFunction());
+                }
+            }
+        }
+    }
+
+    private void gradient(Tenser tenser) {
+        Tenser<None> node = tenser;
         node.gradient();
         node.getOutput().setGrad(null);
     }
@@ -102,34 +96,41 @@ public class Engine extends ForEach {
     private void _backward(Tenser tenser) {
         execute(tenser, a -> {
             reduce(a);
-            Func1<None> func = out -> {
-                out.getGraph().farEach(o -> {
-                    reduce(o);
-                });
-            };
-            forEach(a.getOutput(), func);
+            reducer(a);
         }, a -> {
             Func1<Tenser<None>> func = node -> {
                 reduce(node);
-                node.getOutput().getGraph().farEach(o -> {
-                    reduce(o);
-                });
+                reducer(node);
             };
             forEach(a.getFunction(), func);
         });
+        //log.info(JSONObject.toJSONString(tenser));
     }
 
-    private void reduce(Tenser tenser) {
-        Func1<Tenser> func = node -> {
-            forEach(node.getOutput(), (Func1<None>) a -> {
-                if (BeanUtil.startsWithNone(node)) {
-                    Double value = a.getValue() - rate * a.getGrad();
-                    a.setValue(value);
+    private void reducer(Tenser tenser) {
+        for (Node o : tenser.getInput()) {
+            Tenser a = (Tenser) o;
+            if (BeanUtil.isNotNone(a)) {
+                if (BeanUtil.isOperation(a)) {
+                    reducer(a);
+                } else {
+                    Tenser<Tenser> m = a;
+                    reducer(m.getFunction());
                 }
-                a.setGrad(null);
-            });
-        };
-        forEach(tenser.getInput(), func);
+            } else {
+                reduce(a);
+            }
+        }
+    }
+
+    private void reduce(Tenser<None> node) {
+        None a = node.getOutput();
+        if (BeanUtil.startsWithNone(node) && !a.getReduce()) {
+            a.setReduce(true);
+            Double value = a.getValue() - rate * a.getGrad();
+            a.setValue(value);
+        }
+        a.setGrad(null);
     }
 
     private void execute(Tenser tenser, Func1<Tenser>... func) {
