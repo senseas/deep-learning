@@ -271,13 +271,10 @@ public class TensorFlow extends Shape {
 
             public Object compute() {
                 Tenser A = (Tenser) input[0], B = (Tenser) input[1];
-                Object C = shape(Tenser.class, B.getOutput());
-                reshape(A.getOutput(), B.getOutput());
-                reshape(A.getFunction(), C);
-                setName(A.getName());
-                setOutput(B.getOutput());
-                setFunction(C);
-                return C;
+                Object C = Nones(B.getOutput());
+                reshape(A.getOutput(), C);
+                setOutput(C);
+                return new Tenser[0];
             }
 
             public void gradient() {}

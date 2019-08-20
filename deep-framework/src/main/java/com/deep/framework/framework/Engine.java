@@ -13,7 +13,7 @@ import org.apache.log4j.Logger;
 @Data
 public class Engine extends Shape {
     Logger log = Logger.getLogger(Engine.class);
-    public static double rate = 0.25;
+    public static double rate = 0.003;
 
     public void forward(Tenser tenser) {
         execute(tenser, a -> {

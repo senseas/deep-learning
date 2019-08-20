@@ -61,7 +61,7 @@ public class LeNetTest extends Shape {
                     executor.rate = executor.rate - 0.0001;
                 log.info("---------{" + i + "}------------");
                 log(tenser61.getOutput());
-                log(tenser62);
+                log(tenser62.getOutput());
             }
         });
     }
