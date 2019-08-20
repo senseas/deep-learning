@@ -1,6 +1,5 @@
 package com.deep.framework.framework;
 
-import com.alibaba.fastjson.JSONObject;
 import com.deep.framework.bean.Node;
 import com.deep.framework.bean.None;
 import com.deep.framework.graph.Shape;

@@ -1,5 +1,6 @@
 package com.deep.framework.framework;
 
+import com.alibaba.fastjson.JSONObject;
 import com.deep.framework.graph.Tenser;
 import lombok.Data;
 
