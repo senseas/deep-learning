@@ -9,7 +9,7 @@ import java.io.IOException;
 import java.util.stream.IntStream;
 
 public class MnistRead {
-    public static final String BASE_PATH = "/Applications/GitHub/deep-learning/deep-framework/src/main/resources/DataSet/";
+    public static final String BASE_PATH =System.getProperty("user.dir").concat("/deep-framework/src/main/resources/DataSet/");
     public static final String TRAIN_IMAGES_FILE = BASE_PATH.concat("train-images-idx3-ubyte");
     public static final String TRAIN_LABELS_FILE = BASE_PATH.concat("train-labels-idx1-ubyte");
     public static final String TEST_IMAGES_FILE = "data/mnist/t10k-images.idx3-ubyte";
@@ -58,7 +58,7 @@ public class MnistRead {
                     double[][] image = new double[height][width];
                     for (int i = 0; i < height; i++) {
                         for (int l = 0; l < width; l++) {
-                            image[i][l] = bin.read() / 255;                      // 逐一读取像素值
+                            image[i][l] = bin.read()/255d;                      // 逐一读取像素值
                         }
                     }
                     images[x][0] = image;
@@ -118,9 +118,10 @@ public class MnistRead {
 
 
     public static void main(String[] args) {
+        System.out.println(ClassLoader.class.getResource(""));
         double[][][][] images = getImages(TRAIN_IMAGES_FILE);
         IntStream.range(0, 2).forEach(i -> {
-            String fileName = BASE_PATH.concat(BASE_PATH.concat(String.valueOf(i)).concat(".JPEG"));
+            String fileName = BASE_PATH.concat(String.valueOf(i)).concat(".JPEG");
             drawGrayPicture(images[i][0], fileName);
         });
         double[][][] labels = getLabels(TRAIN_LABELS_FILE);
