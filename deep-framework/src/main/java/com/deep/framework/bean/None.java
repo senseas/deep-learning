@@ -2,8 +2,10 @@ package com.deep.framework.bean;
 
 import lombok.Data;
 
+import java.io.Serializable;
+
 @Data
-public class None {
+public class None implements Serializable {
 
     public None(Double value) {
         this.name = "None";

@@ -4,10 +4,11 @@ import com.deep.framework.graph.Tenser;
 import com.deep.framework.lang.function.*;
 import com.deep.framework.lang.util.BeanUtil;
 
+import java.io.Serializable;
 import java.lang.reflect.Array;
 import java.util.stream.IntStream;
 
-public class ForEach {
+public class ForEach implements Serializable {
 
     public static void forEach(int a, Range1 r) {
         IntStream.range(0, a).forEach(i -> r.apply(i));

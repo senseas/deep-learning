@@ -1,6 +1,8 @@
 package com.deep.framework.bean;
 
-public interface Node<N> {
+import java.io.Serializable;
+
+public interface Node<N> extends Serializable {
     <M> M compute();
 
     void gradient();

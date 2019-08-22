@@ -7,6 +7,7 @@ import com.deep.framework.lang.function.Func2;
 import com.deep.framework.lang.util.BeanUtil;
 import org.apache.commons.math3.random.RandomDataGenerator;
 
+import java.io.*;
 import java.lang.reflect.Array;
 import java.util.Arrays;
 import java.util.LinkedList;
@@ -17,11 +18,11 @@ public class Shape extends ForEach {
     static RandomDataGenerator random = new RandomDataGenerator();
 
     public static <E> E random(int... x) {
-        return (E) fill(Array.newInstance(None.class, x), o -> new None(random.nextGaussian(0, 1)));
+        return (E) fill(Array.newInstance(None.class, x), o -> new None(random.nextGaussian(0, 0.1)));
     }
 
     public static <E> E random(String name, int... x) {
-        return (E) fill(Array.newInstance(None.class, x), o -> new None(random.nextGaussian(0, 1), name));
+        return (E) fill(Array.newInstance(None.class, x), o -> new None(random.nextGaussian(0, 0.1), name));
     }
 
     public static <E> E nones(Object a) {
@@ -89,6 +90,24 @@ public class Shape extends ForEach {
         Queue link = new LinkedList();
         forEach(A, a -> link.add(a));
         forEach(B, (b, i) -> b[i] = link.poll());
+    }
+
+    public void saveModel(Object obj, String src) {
+        try (ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(src));) {
+            out.writeObject(obj);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public <E> E loadModel(String src) {
+        try (ObjectInputStream in = new ObjectInputStream(new FileInputStream(new File(src)))) {
+            Object o = in.readObject();
+            return (E) o;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 }
 
