@@ -51,13 +51,13 @@ public class Engine extends Shape {
     }
 
     private void computser(Tenser tenser) {
-        for (Node o : tenser.getInput()) {
+        farEach(tenser.getInput(), o -> {
             Tenser<Tenser> a = (Tenser) o;
             if (BeanUtil.isNotNone(a)) {
                 computser(a);
                 computs(a);
             }
-        }
+        });
     }
 
     private void computs(Tenser tenser) {
@@ -67,7 +67,7 @@ public class Engine extends Shape {
             out.setValue(node.getOutput().getValue());
         };
         BeanUtil.nameNode(tenser);
-        forEach(tenser.getFunction(), tenser.getOutput(), func);
+        farEach(tenser.getFunction(), tenser.getOutput(), func);
     }
 
     public void backward(Tenser tenser) {
@@ -103,13 +103,13 @@ public class Engine extends Shape {
     }
 
     private void gradientser(Tenser tenser) {
-        for (Node o : tenser.getInput()) {
+        farEach(tenser.getInput(), o -> {
             Tenser<Tenser> a = (Tenser) o;
             if (BeanUtil.isNotNone(a)) {
                 gradients(a);
                 gradientser(a);
             }
-        }
+        });
     }
 
     private void gradients(Tenser tenser) {
@@ -118,7 +118,7 @@ public class Engine extends Shape {
             gradient(node);
             gradienter(node);
         };
-        forEach(tenser.getFunction(), tenser.getOutput(), func);
+        farEach(tenser.getFunction(), tenser.getOutput(), func);
     }
 
     private void backwards(Tenser tenser) {
@@ -157,22 +157,22 @@ public class Engine extends Shape {
         }
     }
 
-    private void reduces(Tenser tenser) {
-        for (Node o : tenser.getInput()) {
+    private void reduceser(Tenser tenser) {
+        farEach(tenser.getInput(), o -> {
             Tenser a = (Tenser) o;
             if (BeanUtil.isNotNone(a)) {
                 reduces(a);
                 reduceser(a);
             }
-        }
+        });
     }
 
-    private void reduceser(Tenser tenser) {
+    private void reduces(Tenser tenser) {
         Func1<Tenser<None>> func = node -> {
             reduce(node);
             reducer(node);
         };
-        forEach(tenser.getFunction(), func);
+        farEach(tenser.getFunction(), func);
     }
 
     private void execute(Tenser tenser, Func1<Tenser>... func) {
@@ -187,6 +187,6 @@ public class Engine extends Shape {
         Func2<None, Double> func = (m, n) -> {
             m.setValue(n);
         };
-        forEach(a.getOutput(), b, func);
+        farEach(a.getOutput(), b, func);
     }
 }

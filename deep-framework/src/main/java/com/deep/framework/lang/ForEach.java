@@ -10,6 +10,10 @@ import java.util.stream.IntStream;
 
 public class ForEach implements Serializable {
 
+    public static void farEach(int a, Range1 r) {
+        IntStream.range(0, a).parallel().forEach(i -> r.apply(i));
+    }
+
     public static void forEach(int a, Range1 r) {
         IntStream.range(0, a).forEach(i -> r.apply(i));
     }
@@ -42,7 +46,7 @@ public class ForEach implements Serializable {
 
     public static Object fill(Object a, Object b, Fill func) {
         if (BeanUtil.isTenser(a)) {
-            forEach(Array.getLength(a), i -> {
+            farEach(Array.getLength(a), i -> {
                 Object m = Array.get(a, i), n = Array.get(b, i);
                 if (BeanUtil.isNotTenser(m)) {
                     Array.set(b, i, func.apply(m));
@@ -69,6 +73,21 @@ public class ForEach implements Serializable {
         }
     }
 
+    public static void farEach(Object a, Func1 func) {
+        if (BeanUtil.isTenser(a)) {
+            farEach(Array.getLength(a), i -> {
+                Object m = Array.get(a, i);
+                if (BeanUtil.isNotTenser(m)) {
+                    func.apply(m);
+                } else {
+                    farEach(m, func);
+                }
+            });
+        } else {
+            func.apply(a);
+        }
+    }
+
     public static void forEach(Object a, Object b, Func2 func) {
         if (BeanUtil.isTenser(a)) {
             forEach(Array.getLength(a), i -> {
@@ -77,6 +96,21 @@ public class ForEach implements Serializable {
                     func.apply(m, n);
                 } else {
                     forEach(m, n, func);
+                }
+            });
+        } else {
+            func.apply(a, b);
+        }
+    }
+
+    public static void farEach(Object a, Object b, Func2 func) {
+        if (BeanUtil.isTenser(a)) {
+            farEach(Array.getLength(a), i -> {
+                Object m = Array.get(a, i), n = Array.get(b, i);
+                if (BeanUtil.isNotTenser(m)) {
+                    func.apply(m, n);
+                } else {
+                    farEach(m, n, func);
                 }
             });
         } else {

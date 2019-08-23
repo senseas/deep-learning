@@ -53,7 +53,7 @@ public class LeNetTest extends Shape {
             Object inSet = inputSet[i], labSet = labelSet[i];
 
             executor.run(inSet, labSet);
-            if (i % 10 == 0) {
+            if (i % 100 == 0) {
                 saveModel(executor, MnistRead.BASE_PATH.concat("LetNet.obj"));
                 if (executor.rate > 0.00001)
                     executor.rate = executor.rate - 0.0001;
@@ -61,6 +61,31 @@ public class LeNetTest extends Shape {
                 log(labSet);
                 log(tenser61.getOutput());
                 log(tenser62.getOutput());
+            }
+        });
+    }
+
+    @Test
+    public void TrainTest() {
+        double[][][][] inputSet = MnistRead.getImages(MnistRead.TRAIN_IMAGES_FILE);
+        double[][][] labelSet = MnistRead.getLabels(MnistRead.TRAIN_LABELS_FILE);
+
+        Executor executor = loadModel(MnistRead.BASE_PATH.concat("LetNet.obj"));
+        executor.rate = 0.003;
+        forEach(60000, i -> {
+            Object inSet = inputSet[i], labSet = labelSet[i];
+            Tenser crossx = executor.getTenser();
+            Tenser softmax = (Tenser) crossx.getInput()[1];
+
+            executor.run(inSet, labSet);
+            if (i % 100 == 0) {
+                saveModel(executor, MnistRead.BASE_PATH.concat("LetNet.obj"));
+                if (executor.rate > 0.00001)
+                    executor.rate = executor.rate - 0.0001;
+                log.info("---------{" + i + "}------------");
+                log(labSet);
+                log(softmax.getOutput());
+                log(crossx.getOutput());
             }
         });
     }
