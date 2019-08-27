@@ -1,13 +1,17 @@
 package com.deep.framework;
 
 import com.alibaba.fastjson.JSONObject;
+import com.deep.framework.bean.None;
 import com.deep.framework.framework.Executor;
 import com.deep.framework.graph.Shape;
 import com.deep.framework.graph.Tenser;
 import com.deep.framework.graph.TensorFlow;
+import com.deep.framework.lang.function.Func1;
 import com.deep.framework.lang.util.MnistRead;
 import org.apache.log4j.Logger;
 import org.junit.Test;
+
+import java.util.stream.IntStream;
 
 public class LeNetTest extends Shape {
     Logger log = Logger.getLogger(LeNetTest.class);
@@ -44,23 +48,20 @@ public class LeNetTest extends Shape {
         Tenser tenser52 = tf.addx(tenser51, new Tenser("bias", new int[]{10, 1}));//10
         Tenser tenser53 = tf.relux(tenser52);//10
 
-        Tenser tenser61 = tf.softmax(tenser53);
-        Tenser tenser62 = tf.crossx(label, tenser61);
+        Tenser softmax = tf.softmax(tenser53);
+        Tenser<None> crossx = tf.crossx(label, softmax);
 
-        Executor executor = new Executor(tenser62, input, label);
+        Executor executor = new Executor(crossx, input, label);
         forEach(60000, i -> {
-            int l = (int) (Math.random() * labelSet.length);
             Object inSet = inputSet[i], labSet = labelSet[i];
-
-            executor.run(inSet, labSet);
+            Func1 func = o -> executor.rate = crossx.getOutput().getValue() / 1000;
+            executor.run(inSet, labSet, func);
             if (i % 100 == 0) {
-                saveModel(executor, MnistRead.BASE_PATH.concat("LetNet.obj"));
-                if (executor.rate > 0.00001)
-                    executor.rate = executor.rate - 0.0001;
                 log.info("---------{" + i + "}------------");
+                saveModel(executor, MnistRead.BASE_PATH.concat("LetNet.obj"));
                 log(labSet);
-                log(tenser61.getOutput());
-                log(tenser62.getOutput());
+                log(softmax.getOutput());
+                log(crossx.getOutput());
             }
         });
     }
@@ -71,22 +72,28 @@ public class LeNetTest extends Shape {
         double[][][] labelSet = MnistRead.getLabels(MnistRead.TRAIN_LABELS_FILE);
 
         Executor executor = loadModel(MnistRead.BASE_PATH.concat("LetNet.obj"));
-        executor.rate = 0.003;
+        Tenser<None> crossx = executor.getTenser();
+        Tenser softmax = (Tenser) crossx.getInput()[1];
         forEach(60000, i -> {
             Object inSet = inputSet[i], labSet = labelSet[i];
-            Tenser crossx = executor.getTenser();
-            Tenser softmax = (Tenser) crossx.getInput()[1];
-
-            executor.run(inSet, labSet);
+            Func1 func = o -> executor.rate = crossx.getOutput().getValue() / 1000;
+            executor.run(inSet, labSet, func);
             if (i % 100 == 0) {
-                saveModel(executor, MnistRead.BASE_PATH.concat("LetNet.obj"));
-                if (executor.rate > 0.00001)
-                    executor.rate = executor.rate - 0.0001;
                 log.info("---------{" + i + "}------------");
+                saveModel(executor, MnistRead.BASE_PATH.concat("LetNet.obj"));
                 log(labSet);
                 log(softmax.getOutput());
                 log(crossx.getOutput());
             }
+        });
+    }
+
+    @Test
+    public void imgTest() {
+        double[][][][] images = MnistRead.getImages(MnistRead.TRAIN_IMAGES_FILE);
+        IntStream.range(37426, 37426 + 1).forEach(i -> {
+            String fileName = MnistRead.BASE_PATH.concat(String.valueOf(i)).concat(".JPEG");
+            MnistRead.drawGrayPicture(images[i][0], fileName);
         });
     }
 
