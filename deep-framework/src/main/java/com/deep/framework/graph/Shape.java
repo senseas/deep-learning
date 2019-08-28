@@ -93,7 +93,7 @@ public class Shape extends ForEach {
     }
 
     public void saveModel(Object obj, String src) {
-        try (ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(src));) {
+        try (ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(src))) {
             out.writeObject(obj);
         } catch (Exception e) {
             e.printStackTrace();

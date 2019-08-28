@@ -11,7 +11,7 @@ import lombok.Data;
 
 @Data
 public class Engine extends Shape {
-    public static double rate = 0.03;
+    public double rate = 0.03;
 
     public void forward(Tenser tenser) {
         execute(tenser, a -> {
