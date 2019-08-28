@@ -1,8 +1,8 @@
 package com.deep.framework;
 
 import com.alibaba.fastjson.JSONObject;
-import com.deep.framework.graph.None;
 import com.deep.framework.framework.Executor;
+import com.deep.framework.graph.None;
 import com.deep.framework.graph.Shape;
 import com.deep.framework.graph.Tensor;
 import com.deep.framework.graph.TensorFlow;
@@ -52,17 +52,19 @@ public class LeNetTest extends Shape {
         Tensor<None> crossx = tf.crossx(label, softmax);
 
         Executor executor = new Executor(crossx, input, label);
-        forEach(60000, i -> {
-            Object inSet = inputSet[i], labSet = labelSet[i];
-            Func1 func = o -> executor.rate = crossx.getOutput().getValue() / 1000;
-            executor.run(inSet, labSet, func);
-            if (i % 100 == 0) {
-                log.info("---------{" + i + "}------------");
-                saveModel(executor, MnistRead.BASE_PATH.concat("LetNet.obj"));
-                log(labSet);
-                log(softmax.getOutput());
-                log(crossx.getOutput());
-            }
+        forEach(3, x -> {
+            forEach(60000, i -> {
+                Object inSet = inputSet[i], labSet = labelSet[i];
+                Func1 func = o -> executor.rate = crossx.getOutput().getValue() / 1000;
+                executor.run(inSet, labSet, func);
+                if (i % 100 == 0) {
+                    log.info("---------{" + i + "}------------");
+                    saveModel(executor, MnistRead.BASE_PATH.concat("LetNet.obj"));
+                    log(labSet);
+                    log(softmax.getOutput());
+                    log(crossx.getOutput());
+                }
+            });
         });
     }
 
