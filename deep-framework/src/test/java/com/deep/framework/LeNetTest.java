@@ -73,7 +73,7 @@ public class LeNetTest extends Shape {
 
         Executor executor = loadModel(MnistRead.BASE_PATH.concat("LetNet.obj"));
         Tensor<None> crossx = executor.getTensor();
-        Tensor softmax = (Tensor) crossx.getInput()[1];
+        Tensor softmax = crossx.getInput()[1];
         forEach(60000, i -> {
             Object inSet = inputSet[i], labSet = labelSet[i];
             Func1 func = o -> executor.rate = crossx.getOutput().getValue() / 1000;

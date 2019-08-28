@@ -2,8 +2,10 @@ package com.deep.framework.graph;
 
 import lombok.Data;
 
+import java.io.Serializable;
+
 @Data
-public class Tensor<N> implements Node<N> {
+public class Tensor<N> implements Serializable {
 
     public Tensor(Double input) {
         this.name = "None";
@@ -25,7 +27,7 @@ public class Tensor<N> implements Node<N> {
         this.output = (N) input;
     }
 
-    public Tensor(String name, Node... input) {
+    public Tensor(String name, Tensor... input) {
         this.name = this.name.concat(name);
         this.input = input;
     }
@@ -56,7 +58,7 @@ public class Tensor<N> implements Node<N> {
     }
 
     private String name = "Tensor::";
-    private Node[] input;
+    private Tensor[] input;
     private transient N function;
     private N output;
 }

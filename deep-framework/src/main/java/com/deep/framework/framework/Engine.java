@@ -1,6 +1,5 @@
 package com.deep.framework.framework;
 
-import com.deep.framework.graph.Node;
 import com.deep.framework.graph.None;
 import com.deep.framework.graph.Shape;
 import com.deep.framework.graph.Tensor;
@@ -24,30 +23,26 @@ public class Engine extends Shape {
     }
 
     private void computer(Tensor tensor) {
-        for (Node o : tensor.getInput()) {
-            Tensor a = (Tensor) o;
-            if (BeanUtil.isNotNone(a)) {
-                if (BeanUtil.isOperation(a)) {
-                    computer(a);
-                    compute(a);
+        for (Tensor o : tensor.getInput()) {
+            if (BeanUtil.isNotNone(o)) {
+                if (BeanUtil.isOperation(o)) {
+                    computer(o);
+                    compute(o);
                 } else {
-                    Tensor m = (Tensor) a.getFunction();
+                    Tensor m = (Tensor) o.getFunction();
                     computer(m);
                     compute(m);
                 }
             } else {
-                Tensor<None> m = a;
+                Tensor<None> m = o;
                 m.getOutput().setReduce(false);
             }
         }
     }
 
     private void compute(Tensor<None> tensor) {
-        None nones = tensor.compute(), outputs = tensor.getOutput();
-        Func2<None, None> func = (none, out) -> {
-            out.setValue(none.getValue());
-        };
-        forEach(nones, outputs, func);
+        None none = tensor.compute(), out = tensor.getOutput();
+        out.setValue(none.getValue());
     }
 
     private void computser(Tensor tensor) {
@@ -82,14 +77,13 @@ public class Engine extends Shape {
     }
 
     private void gradienter(Tensor tensor) {
-        for (Node o : tensor.getInput()) {
-            Tensor a = (Tensor) o;
-            if (BeanUtil.isNotNone(a)) {
-                if (BeanUtil.isOperation(a)) {
-                    gradient(a);
-                    gradienter(a);
+        for (Tensor o : tensor.getInput()) {
+            if (BeanUtil.isNotNone(o)) {
+                if (BeanUtil.isOperation(o)) {
+                    gradient(o);
+                    gradienter(o);
                 } else {
-                    Tensor m = (Tensor) a.getFunction();
+                    Tensor m = (Tensor) o.getFunction();
                     gradient(m);
                     gradienter(m);
                 }
@@ -131,9 +125,9 @@ public class Engine extends Shape {
         });
     }
 
-    private void reduce(Tensor<None> node) {
-        None none = node.getOutput();
-        if (BeanUtil.startsWithNone(node) && !none.getReduce()) {
+    private void reduce(Tensor<None> tensor) {
+        None none = tensor.getOutput();
+        if (BeanUtil.startsWithNone(tensor) && !none.getReduce()) {
             none.setReduce(true);
             Double value = none.getValue() - rate * none.getGrad();
             none.setValue(value);
@@ -142,17 +136,16 @@ public class Engine extends Shape {
     }
 
     private void reducer(Tensor tensor) {
-        for (Node o : tensor.getInput()) {
-            Tensor a = (Tensor) o;
-            if (BeanUtil.isNotNone(a)) {
-                if (BeanUtil.isOperation(a)) {
-                    reducer(a);
+        for (Tensor o : tensor.getInput()) {
+            if (BeanUtil.isNotNone(o)) {
+                if (BeanUtil.isOperation(o)) {
+                    reducer(o);
                 } else {
-                    Tensor<Tensor> m = a;
+                    Tensor<Tensor> m = o;
                     reducer(m.getFunction());
                 }
             } else {
-                reduce(a);
+                reduce(o);
             }
         }
     }

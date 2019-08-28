@@ -21,7 +21,7 @@ public class AppTest {
     }
 
     @Test
-    public void appaTest() {
+    public void appTest() {
         TensorFlow tf = new TensorFlow();
         Tensor x = new Tensor(2d);
         Tensor m = tf.mul(tf.minus(new Tensor(6d), x), x);
