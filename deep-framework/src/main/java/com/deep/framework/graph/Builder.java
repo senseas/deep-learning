@@ -4,29 +4,29 @@ import com.deep.framework.lang.util.BeanUtil;
 
 public class Builder extends Shape {
 
-    public static void function(Tenser tenser) {
-        if (BeanUtil.isNotOperation(tenser)) {
-            Object function = tenser.compute();
-            if (BeanUtil.isNotTenser(function)) {
-                Tenser tense = (Tenser) function;
+    public static void function(Tensor tensor) {
+        if (BeanUtil.isNotOperation(tensor)) {
+            Object function = tensor.compute();
+            if (BeanUtil.isNotTensor(function)) {
+                Tensor tense = (Tensor) function;
                 if (BeanUtil.isNotOperation(tense)) {
-                    tenser.setFunction(tense.getFunction());
+                    tensor.setFunction(tense.getFunction());
                 } else {
-                    tenser.setFunction(function);
+                    tensor.setFunction(function);
                 }
             } else {
-                tenser.setFunction(functions(function));
+                tensor.setFunction(functions(function));
             }
         }
     }
 
-    public static <M> M build(Tenser tenser, int i) {
-        Tenser<Tenser> input = (Tenser) tenser.getInput()[i];
-        if (BeanUtil.isOperation(tenser) && BeanUtil.isNone(input)) return (M) input.getOutput();
-        if (BeanUtil.isOperation(tenser) && BeanUtil.isOperation(input)) return (M) input.getOutput();
-        if (BeanUtil.isOperation(tenser)) return (M) input.getFunction().getOutput();
+    public static <M> M build(Tensor tensor, int i) {
+        Tensor<Tensor> input = (Tensor) tensor.getInput()[i];
+        if (BeanUtil.isOperation(tensor) && BeanUtil.isNone(input)) return (M) input.getOutput();
+        if (BeanUtil.isOperation(tensor) && BeanUtil.isOperation(input)) return (M) input.getOutput();
+        if (BeanUtil.isOperation(tensor)) return (M) input.getFunction().getOutput();
         if (BeanUtil.isOperation(input)) return (M) input;
-        if (BeanUtil.isNoneNode(input)) return (M) tensers(input.getOutput());
+        if (BeanUtil.isNoneNode(input)) return (M) tensors(input.getOutput());
         return (M) input.getFunction();
     }
 

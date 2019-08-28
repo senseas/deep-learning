@@ -1,6 +1,5 @@
 package com.deep.framework.graph;
 
-import com.deep.framework.bean.None;
 import com.deep.framework.lang.ForEach;
 import com.deep.framework.lang.function.Fill;
 import com.deep.framework.lang.function.Func2;
@@ -26,23 +25,23 @@ public class Shape extends ForEach {
     }
 
     public static <E> E nones(Object a) {
-        if (BeanUtil.isTenser(a)) {
-            return (E) fill(a, shape(None.class, a), (Fill<Tenser<None>>) o -> o.getOutput());
+        if (BeanUtil.isTensor(a)) {
+            return (E) fill(a, shape(None.class, a), (Fill<Tensor<None>>) o -> o.getOutput());
         } else {
-            return (E) ((Tenser) a).getOutput();
+            return (E) ((Tensor) a).getOutput();
         }
     }
 
-    public static <E> E tensers(Object a) {
-        if (BeanUtil.isTenser(a)) {
-            return (E) fill(a, shape(Tenser.class, a), (Fill<None>) o -> new Tenser(o));
+    public static <E> E tensors(Object a) {
+        if (BeanUtil.isTensor(a)) {
+            return (E) fill(a, shape(Tensor.class, a), (Fill<None>) o -> new Tensor(o));
         } else {
-            return (E) new Tenser((None) a);
+            return (E) new Tensor((None) a);
         }
     }
 
     public static <E> E functions(Object a) {
-        return (E) fill(a, a, (Fill<Tenser>) o -> {
+        return (E) fill(a, a, (Fill<Tensor>) o -> {
             if (BeanUtil.isOperation(o))
                 return o;
             return o.getFunction();
@@ -50,11 +49,11 @@ public class Shape extends ForEach {
     }
 
     public static <E> E zeros(Object a) {
-        return (E) fill(a, o -> new Tenser(0d));
+        return (E) fill(a, o -> new Tensor(0d));
     }
 
     public static <E> E Nones(Object a) {
-        if (BeanUtil.isTenser(a)) {
+        if (BeanUtil.isTensor(a)) {
             return (E) fill(a, shape(None.class, a), o -> new None(0d));
         } else {
             return (E) new None(0d);
@@ -66,7 +65,7 @@ public class Shape extends ForEach {
     }
 
     public static <E> int[] shapes(E a, int... list) {
-        if (BeanUtil.isTenser(a)) {
+        if (BeanUtil.isTensor(a)) {
             int length = Array.getLength(list);
             list = Arrays.copyOf(list, length + 1);
             Array.set(list, length, Array.getLength(a));
@@ -76,7 +75,7 @@ public class Shape extends ForEach {
     }
 
     public static void each(Object a, Object b, Func2 func) {
-        if (BeanUtil.isTenser(a)) {
+        if (BeanUtil.isTensor(a)) {
             forEach(Array.getLength(a), i -> {
                 Object m = Array.get(a, i), n = Array.get(b, i);
                 func.apply(m, n);

@@ -1,39 +1,37 @@
 package com.deep.framework.graph;
 
-import com.deep.framework.bean.Node;
-import com.deep.framework.bean.None;
 import lombok.Data;
 
 @Data
-public class Tenser<N> implements Node<N> {
+public class Tensor<N> implements Node<N> {
 
-    public Tenser(Double input) {
+    public Tensor(Double input) {
         this.name = "None";
         this.output = (N) new None(input);
     }
 
-    public Tenser(int[] shape) {
+    public Tensor(int[] shape) {
         this.name = "None";
         this.output = Shape.random(shape);
     }
 
-    public Tenser(String name, int[] shape) {
+    public Tensor(String name, int[] shape) {
         this.name = "None::".concat(name);
         this.output = Shape.random(this.name, shape);
     }
 
-    public Tenser(None input) {
+    public Tensor(None input) {
         this.name = input.getName();
         this.output = (N) input;
     }
 
-    public Tenser(String name, Node... input) {
+    public Tensor(String name, Node... input) {
         this.name = this.name.concat(name);
         this.input = input;
     }
 
-    public <M> Tenser(M[] m) {
-        this.name = "Tenser";
+    public <M> Tensor(M[] m) {
+        this.name = "Tensor";
         this.function = (N) m;
     }
 
@@ -57,7 +55,7 @@ public class Tenser<N> implements Node<N> {
         return output;
     }
 
-    private String name = "Tenser::";
+    private String name = "Tensor::";
     private Node[] input;
     private transient N function;
     private N output;

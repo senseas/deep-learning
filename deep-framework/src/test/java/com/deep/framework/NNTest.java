@@ -3,7 +3,7 @@ package com.deep.framework;
 import com.alibaba.fastjson.JSONObject;
 import com.deep.framework.framework.Executor;
 import com.deep.framework.graph.Shape;
-import com.deep.framework.graph.Tenser;
+import com.deep.framework.graph.Tensor;
 import com.deep.framework.graph.TensorFlow;
 import org.apache.log4j.Logger;
 import org.junit.Test;
@@ -22,23 +22,23 @@ public class NNTest extends Shape {
         };
 
         TensorFlow tf = new TensorFlow();
-        Tenser input = new Tenser(new int[]{2, 1});
-        Tenser label = new Tenser(new int[]{1, 1});
+        Tensor input = new Tensor(new int[]{2, 1});
+        Tensor label = new Tensor(new int[]{1, 1});
 
-        Tenser tenser11 = tf.matmul(new Tenser("weight", new int[]{4, 2}), input);
-        Tenser tenser12 = tf.addx(tenser11, new Tenser("bias", new int[]{4, 1}));
-        Tenser tenser13 = tf.sigmoidx(tenser12);
+        Tensor tensor11 = tf.matmul(new Tensor("weight", new int[]{4, 2}), input);
+        Tensor tensor12 = tf.addx(tensor11, new Tensor("bias", new int[]{4, 1}));
+        Tensor tensor13 = tf.sigmoidx(tensor12);
 
-        Tenser tenser21 = tf.matmul(new Tenser("weight", new int[]{6, 4}), tenser13);
-        Tenser tenser22 = tf.addx(tenser21, new Tenser("bias", new int[]{6, 1}));
-        Tenser tenser23 = tf.sigmoidx(tenser22);
+        Tensor tensor21 = tf.matmul(new Tensor("weight", new int[]{6, 4}), tensor13);
+        Tensor tensor22 = tf.addx(tensor21, new Tensor("bias", new int[]{6, 1}));
+        Tensor tensor23 = tf.sigmoidx(tensor22);
 
-        Tenser tenser31 = tf.matmul(new Tenser("weight", new int[]{1, 6}), tenser23);
-        Tenser tenser32 = tf.addx(tenser31, new Tenser("bias", new int[]{1, 1}));
-        Tenser tenser33 = tf.sigmoidx(tenser32);
-        Tenser tenser34 = tf.squarex(label, tenser33);
+        Tensor tensor31 = tf.matmul(new Tensor("weight", new int[]{1, 6}), tensor23);
+        Tensor tensor32 = tf.addx(tensor31, new Tensor("bias", new int[]{1, 1}));
+        Tensor tensor33 = tf.sigmoidx(tensor32);
+        Tensor tensor34 = tf.squarex(label, tensor33);
 
-        Executor executor = new Executor(tenser34, input, label);
+        Executor executor = new Executor(tensor34, input, label);
         forEach(100000000, i -> {
             int l = (int) (Math.random() * labelSet.length);
             Object inSet = inputSet[l], labSet = labelSet[l];
@@ -48,8 +48,8 @@ public class NNTest extends Shape {
                 if (executor.rate > 0.00001)
                     executor.rate = executor.rate - 0.0001;
                 log.info("---------{" + i + "}------------");
-                log(tenser33.getOutput());
-                log(tenser34);
+                log(tensor33.getOutput());
+                log(tensor34);
             }
         });
     }

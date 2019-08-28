@@ -43,8 +43,6 @@
 		</dependency>
 	</dependencies>
 	<modules>
-		<module>deep-math</module>
-		<module>deep-gradient</module>
 		<module>deep-framework</module>
 	</modules>
 </project>

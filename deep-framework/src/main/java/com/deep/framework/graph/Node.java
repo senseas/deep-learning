@@ -1,4 +1,4 @@
-package com.deep.framework.bean;
+package com.deep.framework.graph;
 
 import java.io.Serializable;
 

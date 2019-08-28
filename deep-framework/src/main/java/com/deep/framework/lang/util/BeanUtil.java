@@ -1,7 +1,7 @@
 package com.deep.framework.lang.util;
 
-import com.deep.framework.bean.Node;
-import com.deep.framework.graph.Tenser;
+import com.deep.framework.graph.Node;
+import com.deep.framework.graph.Tensor;
 import com.deep.framework.lang.annotation.Operator;
 
 import java.lang.reflect.Method;
@@ -29,34 +29,34 @@ public class BeanUtil {
         return false;
     }
 
-    public static boolean isTenser(Object o) {
+    public static boolean isTensor(Object o) {
         if (o == null) return false;
         return o.getClass().isArray();
     }
 
-    public static boolean isNotTenser(Object o) {
+    public static boolean isNotTensor(Object o) {
         if (o == null) return true;
         return !o.getClass().isArray();
     }
 
-    public static boolean isNone(Tenser o) {
+    public static boolean isNone(Tensor o) {
         return o.getName().startsWith("None");
     }
 
-    public static boolean isNotNone(Tenser o) {
+    public static boolean isNotNone(Tensor o) {
         return !o.getName().startsWith("None");
     }
 
-    public static boolean startsWithNone(Tenser o) {
+    public static boolean startsWithNone(Tensor o) {
         return o.getName().startsWith("None::");
     }
 
-    public static boolean isNoneNode(Tenser o) {
+    public static boolean isNoneNode(Tensor o) {
         return o.getName().startsWith("Node") || o.getName().startsWith("None");
     }
 
-    public static void nameNode(Tenser o) {
-        o.setName(o.getName().replace("Tenser", "Node"));
+    public static void nameNode(Tensor o) {
+        o.setName(o.getName().replace("Tensor", "Node"));
     }
 
 }

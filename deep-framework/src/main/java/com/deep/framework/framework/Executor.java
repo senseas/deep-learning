@@ -1,39 +1,39 @@
 package com.deep.framework.framework;
 
-import com.deep.framework.graph.Tenser;
+import com.deep.framework.graph.Tensor;
 import com.deep.framework.lang.function.Func1;
 import lombok.Data;
 
 @Data
 public class Executor<E> extends Engine {
-    private Tenser tenser;
-    private Tenser input, label;
+    private Tensor tensor;
+    private Tensor input, label;
 
-    public Executor(Tenser tenser) {
-        this.tenser = tenser;
+    public Executor(Tensor tensor) {
+        this.tensor = tensor;
     }
 
-    public Executor(Tenser tenser, Tenser input, Tenser label) {
-        this.tenser = tenser;
+    public Executor(Tensor tensor, Tensor input, Tensor label) {
+        this.tensor = tensor;
         this.input = input;
         this.label = label;
     }
 
     public void run() {
-        forward(tenser);
-        backward(tenser);
+        forward(tensor);
+        backward(tensor);
     }
 
     public void run(Func1 a) {
-        forward(tenser);
+        forward(tensor);
         a.apply(this);
-        backward(tenser);
+        backward(tensor);
     }
 
     public void run(Func1 a, Func1 b) {
-        forward(tenser);
+        forward(tensor);
         a.apply(this);
-        backward(tenser);
+        backward(tensor);
         b.apply(this);
     }
 

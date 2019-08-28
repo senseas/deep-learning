@@ -1,15 +1,13 @@
 package com.deep.framework.graph;
 
-import com.deep.framework.bean.Node;
-import com.deep.framework.bean.None;
 import com.deep.framework.lang.annotation.Operator;
 import com.deep.framework.lang.function.Func2;
 
 
 public class TensorFlow extends Shape {
 
-    public Tenser add(Node<None>... input) {
-        return new Tenser<None>("Add", input) {
+    public Tensor add(Node<None>... input) {
+        return new Tensor<None>("Add", input) {
 
             @Operator
             public None compute() {
@@ -28,11 +26,11 @@ public class TensorFlow extends Shape {
         };
     }
 
-    public Tenser addx(Node... input) {
-        return new Tenser("Addx", input) {
+    public Tensor addx(Node... input) {
+        return new Tensor("Addx", input) {
 
             public Object compute() {
-                Object A = getInput(0), B = getInput(1), C = shape(Tenser.class, A);
+                Object A = getInput(0), B = getInput(1), C = shape(Tensor.class, A);
                 forEach(A, B, C, (a, b, c, i) -> {
                     c[i] = add(a, b);
                 });
@@ -44,8 +42,8 @@ public class TensorFlow extends Shape {
         };
     }
 
-    public Tenser minus(Node<None>... input) {
-        return new Tenser<None>("Minus", input) {
+    public Tensor minus(Node<None>... input) {
+        return new Tensor<None>("Minus", input) {
 
             @Operator
             public None compute() {
@@ -76,8 +74,8 @@ public class TensorFlow extends Shape {
         };
     }
 
-    public Tenser mul(Node<None>... input) {
-        return new Tenser<None>("Mul", input) {
+    public Tensor mul(Node<None>... input) {
+        return new Tensor<None>("Mul", input) {
 
             @Operator
             public None compute() {
@@ -97,8 +95,8 @@ public class TensorFlow extends Shape {
         };
     }
 
-    public Tenser div(Node<None>... input) {
-        return new Tenser<None>("Div", input) {
+    public Tensor div(Node<None>... input) {
+        return new Tensor<None>("Div", input) {
 
             @Operator
             public None compute() {
@@ -118,8 +116,8 @@ public class TensorFlow extends Shape {
         };
     }
 
-    public Tenser exp(Node<None>... input) {
-        return new Tenser<None>("Exp", input) {
+    public Tensor exp(Node<None>... input) {
+        return new Tensor<None>("Exp", input) {
 
             @Operator
             public None compute() {
@@ -138,11 +136,11 @@ public class TensorFlow extends Shape {
         };
     }
 
-    public Tenser expx(Node input) {
-        return new Tenser("Expx", input) {
+    public Tensor expx(Node input) {
+        return new Tensor("Expx", input) {
 
             public Object compute() {
-                Object A = getInput(0), B = shape(Tenser.class, A);
+                Object A = getInput(0), B = shape(Tensor.class, A);
                 forEach(A, B, (a, b, i) -> {
                     b[i] = exp(a);
                 });
@@ -154,8 +152,8 @@ public class TensorFlow extends Shape {
         };
     }
 
-    public Tenser pow(Node<None>... input) {
-        return new Tenser<None>("Pow", input) {
+    public Tensor pow(Node<None>... input) {
+        return new Tensor<None>("Pow", input) {
 
             @Operator
             public None compute() {
@@ -173,8 +171,8 @@ public class TensorFlow extends Shape {
         };
     }
 
-    public Tenser log(Node<None>... input) {
-        return new Tenser<None>("Log", input) {
+    public Tensor log(Node<None>... input) {
+        return new Tensor<None>("Log", input) {
 
             @Operator
             public None compute() {
@@ -193,8 +191,8 @@ public class TensorFlow extends Shape {
         };
     }
 
-    public Tenser relu(Node<None> input) {
-        return new Tenser<None>("Relu", input) {
+    public Tensor relu(Node<None> input) {
+        return new Tensor<None>("Relu", input) {
 
             @Operator
             public None compute() {
@@ -213,11 +211,11 @@ public class TensorFlow extends Shape {
         };
     }
 
-    public Tenser relux(Node input) {
-        return new Tenser<None>("Relu", input) {
+    public Tensor relux(Node input) {
+        return new Tensor<None>("Relu", input) {
 
             public Object compute() {
-                Object A = getInput(0), B = shape(Tenser.class, A);
+                Object A = getInput(0), B = shape(Tensor.class, A);
                 forEach(A, B, (a, b, i) -> {
                     b[i] = relu(a);
                 });
@@ -229,8 +227,8 @@ public class TensorFlow extends Shape {
         };
     }
 
-    public Tenser max(Node<None>... input) {
-        return new Tenser<None>("Max", input) {
+    public Tensor max(Node<None>... input) {
+        return new Tensor<None>("Max", input) {
 
             @Operator
             public None compute() {
@@ -249,8 +247,8 @@ public class TensorFlow extends Shape {
         };
     }
 
-    public Tenser matmul(Node<Node[][]>... input) {
-        return new Tenser<Node[][]>("Matmul", input) {
+    public Tensor matmul(Node<Node[][]>... input) {
+        return new Tensor<Node[][]>("Matmul", input) {
 
             public Node[][] compute() {
                 Node[][] A = getInput(0), B = getInput(1);
@@ -266,15 +264,15 @@ public class TensorFlow extends Shape {
         };
     }
 
-    public Tenser shape(Node... input) {
-        return new Tenser("Shape", input) {
+    public Tensor shape(Node... input) {
+        return new Tensor("Shape", input) {
 
             public Object compute() {
-                Tenser A = (Tenser) input[0], B = (Tenser) input[1];
+                Tensor A = (Tensor) input[0], B = (Tensor) input[1];
                 Object C = Nones(B.getOutput());
                 reshape(A.getOutput(), C);
                 setOutput(C);
-                return new Tenser[0];
+                return new Tensor[0];
             }
 
             public void gradient() {}
@@ -282,12 +280,12 @@ public class TensorFlow extends Shape {
         };
     }
 
-    public Tenser prod(Node... input) {
-        return new Tenser("Prod", input) {
+    public Tensor prod(Node... input) {
+        return new Tensor("Prod", input) {
 
             public Object compute() {
-                Object A = getInput(0), C = shape(Tenser.class, A);
-                Tenser b = (Tenser) getInput(1);
+                Object A = getInput(0), C = shape(Tensor.class, A);
+                Tensor b = (Tensor) getInput(1);
                 forEach(A, C, (a, c, i) -> {
                     c[i] = mul(a, b);
                 });
@@ -299,12 +297,12 @@ public class TensorFlow extends Shape {
         };
     }
 
-    public Tenser sigmoid(Node<Tenser> input) {
-        return new Tenser<Node>("Sigmoid", input) {
+    public Tensor sigmoid(Node<Tensor> input) {
+        return new Tensor<Node>("Sigmoid", input) {
 
             public Node compute() {
-                Tenser A = getInput(0);
-                return div(new Tenser(1d), add(new Tenser(1d), exp(minus(A))));
+                Tensor A = getInput(0);
+                return div(new Tensor(1d), add(new Tensor(1d), exp(minus(A))));
             }
 
             public void gradient() {}
@@ -312,11 +310,11 @@ public class TensorFlow extends Shape {
         };
     }
 
-    public Tenser sigmoidx(Node<None> input) {
-        return new Tenser("Sigmoidx", input) {
+    public Tensor sigmoidx(Node<None> input) {
+        return new Tensor("Sigmoidx", input) {
 
             public Object compute() {
-                Object A = getInput(0), B = shape(Tenser.class, A);
+                Object A = getInput(0), B = shape(Tensor.class, A);
                 forEach(A, B, (a, b, i) -> {
                     b[i] = sigmoid(a);
                 });
@@ -328,12 +326,12 @@ public class TensorFlow extends Shape {
         };
     }
 
-    public Tenser square(Node<None>... input) {
-        return new Tenser<Node>("Square", input) {
+    public Tensor square(Node<None>... input) {
+        return new Tensor<Node>("Square", input) {
 
             public Node compute() {
                 Node a = getInput(0), b = getInput(1);
-                return mul(new Tenser(0.5), pow(minus(a, b), new Tenser(2d)));
+                return mul(new Tensor(0.5), pow(minus(a, b), new Tensor(2d)));
             }
 
             public void gradient() {}
@@ -341,12 +339,12 @@ public class TensorFlow extends Shape {
         };
     }
 
-    public Tenser squarex(Node<None>... input) {
-        return new Tenser("Squarex", input) {
+    public Tensor squarex(Node<None>... input) {
+        return new Tensor("Squarex", input) {
 
             public Node compute() {
                 Object A = getInput(0), B = getInput(1);
-                Node[] C = {new Tenser(0d)};
+                Node[] C = {new Tensor(0d)};
                 forEach(A, B, (Func2<Node, Node>) (a, b) -> {
                     C[0] = add(C[0], square(a, b));
                 });
@@ -358,8 +356,8 @@ public class TensorFlow extends Shape {
         };
     }
 
-    public Tenser cross(Node<None>... input) {
-        return new Tenser<Node>("Cross", input) {
+    public Tensor cross(Node<None>... input) {
+        return new Tensor<Node>("Cross", input) {
 
             public Node compute() {
                 Node a = getInput(0), b = getInput(1);
@@ -371,12 +369,12 @@ public class TensorFlow extends Shape {
         };
     }
 
-    public Tenser crossx(Node<None>... input) {
-        return new Tenser("Crossx", input) {
+    public Tensor crossx(Node<None>... input) {
+        return new Tensor("Crossx", input) {
 
             public Node compute() {
                 Object A = getInput(0), B = getInput(1);
-                Node[] C = {new Tenser(0d)};
+                Node[] C = {new Tensor(0d)};
                 forEach(A, B, (Func2<Node, Node>) (a, b) -> {
                     C[0] = add(C[0], cross(a, b));
                 });
@@ -388,14 +386,14 @@ public class TensorFlow extends Shape {
         };
     }
 
-    public Tenser sum(Node<None> input) {
-        return new Tenser<Node>("Sum", input) {
+    public Tensor sum(Node<None> input) {
+        return new Tensor<Node>("Sum", input) {
 
             public Node compute() {
                 Object A = getInput(0);
-                Node[] B = {new Tenser(0d)};
+                Node[] B = {new Tensor(0d)};
                 forEach(A, a -> {
-                    B[0] = add((Tenser) a, B[0]);
+                    B[0] = add((Tensor) a, B[0]);
                 });
                 return B[0];
             }
@@ -405,8 +403,8 @@ public class TensorFlow extends Shape {
         };
     }
 
-    public Tenser conv(Node<None[][]>... input) {
-        return new Tenser<Node[][]>("Conv", input) {
+    public Tensor conv(Node<None[][]>... input) {
+        return new Tensor<Node[][]>("Conv", input) {
 
             public Object compute() {
                 Node[][] A = getInput(0), B = getInput(1);
@@ -423,16 +421,16 @@ public class TensorFlow extends Shape {
         };
     }
 
-    public Tenser convx(Node... input) {
-        return new Tenser<Node[][][]>("Convx", input) {
+    public Tensor convx(Node... input) {
+        return new Tensor<Node[][][]>("Convx", input) {
 
             public Object compute() {
                 Node[][][] A = getInput(0), B = getInput(1);
                 int height = B[0].length - A[0].length + 1, width = B[0][0].length - A[0][0].length + 1;
                 Node[][][] C = zeros(new Node[A.length][height][width]);
                 forEach(B.length, A.length, (i, l) -> {
-                    Tenser<Node[][]> tenser = addx(new Tenser(C[l]), conv(new Tenser(A[l]), new Tenser(B[i])));
-                    C[l] = tenser.getFunction();
+                    Tensor<Node[][]> tensor = addx(new Tensor(C[l]), conv(new Tensor(A[l]), new Tensor(B[i])));
+                    C[l] = tensor.getFunction();
                 });
                 return C;
             }
@@ -442,8 +440,8 @@ public class TensorFlow extends Shape {
         };
     }
 
-    public Tenser maxpool(Node input) {
-        return new Tenser<Node>("Maxpool", input) {
+    public Tensor maxpool(Node input) {
+        return new Tensor<Node>("Maxpool", input) {
 
             public Node[][] compute() {
                 Node<None>[][] A = getInput(0);
@@ -460,15 +458,15 @@ public class TensorFlow extends Shape {
         };
     }
 
-    public Tenser maxpoolx(Node input) {
-        return new Tenser<Node>("Maxpoolx", input) {
+    public Tensor maxpoolx(Node input) {
+        return new Tensor<Node>("Maxpoolx", input) {
 
             public Node[][][] compute() {
                 Node<None>[][][] A = getInput(0);
                 Node<None>[][][] B = new Node[A.length][][];
                 forEach(A.length, i -> {
-                    Tenser<Node[][]> tenser = maxpool(new Tenser(A[i]));
-                    B[i] = tenser.getFunction();
+                    Tensor<Node[][]> tensor = maxpool(new Tensor(A[i]));
+                    B[i] = tensor.getFunction();
                 });
                 return B;
             }
@@ -478,11 +476,11 @@ public class TensorFlow extends Shape {
         };
     }
 
-    public Tenser softmax(Node input) {
-        return new Tenser("Softmax", input) {
+    public Tensor softmax(Node input) {
+        return new Tensor("Softmax", input) {
 
             public Object compute() {
-                Object A = getInput(0), B = shape(Tenser.class, A);
+                Object A = getInput(0), B = shape(Tensor.class, A);
                 forEach(A, B, (a, b, i) -> {
                     b[i] = div(exp(a), sum(expx(input)));
                 });
