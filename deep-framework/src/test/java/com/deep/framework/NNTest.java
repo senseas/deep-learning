@@ -2,6 +2,7 @@ package com.deep.framework;
 
 import com.alibaba.fastjson.JSONObject;
 import com.deep.framework.framework.Executor;
+import com.deep.framework.graph.None;
 import com.deep.framework.graph.Shape;
 import com.deep.framework.graph.Tensor;
 import com.deep.framework.graph.TensorFlow;
@@ -45,16 +46,19 @@ public class NNTest extends Shape {
 
             executor.run(inSet, labSet);
             if (i % 1000 == 0) {
-                if (executor.rate > 0.00001)
-                    executor.rate = executor.rate - 0.0001;
+                if (executor.rate > 0.00001) executor.rate = executor.rate - 0.0001;
                 log.info("---------{" + i + "}------------");
-                log(tensor33.getOutput());
-                log(tensor34);
+                None[][] output = (None[][]) tensor33.getOutput();
+                None loss = (None) tensor34.getOutput();
+                log("输入：", inSet);
+                log("标签：", labSet);
+                log("输出：", output[0][0].getValue());
+                log("误差：", loss.getValue());
             }
         });
     }
 
-    public void log(Object obj) {
-        log.info(JSONObject.toJSONString(obj));
+    public void log(String name, Object obj) {
+        log.info(name.concat(JSONObject.toJSONString(obj)));
     }
 }
