@@ -24,18 +24,16 @@ public class Engine extends Shape {
 
     private void computer(Tensor tensor) {
         for (Tensor o : tensor.getInput()) {
-            if (BeanUtil.isNotNone(o)) {
-                if (BeanUtil.isOperation(o)) {
-                    computer(o);
-                    compute(o);
-                } else {
-                    Tensor m = (Tensor) o.getFunction();
-                    computer(m);
-                    compute(m);
-                }
-            } else {
+            if (BeanUtil.isNone(o)) {
                 Tensor<None> m = o;
                 m.getOutput().setReduce(false);
+            } else if (BeanUtil.isOperation(o)) {
+                computer(o);
+                compute(o);
+            } else {
+                Tensor m = (Tensor) o.getFunction();
+                computer(m);
+                compute(m);
             }
         }
     }
@@ -78,15 +76,15 @@ public class Engine extends Shape {
 
     private void gradienter(Tensor tensor) {
         for (Tensor o : tensor.getInput()) {
-            if (BeanUtil.isNotNone(o)) {
-                if (BeanUtil.isOperation(o)) {
-                    gradient(o);
-                    gradienter(o);
-                } else {
-                    Tensor m = (Tensor) o.getFunction();
-                    gradient(m);
-                    gradienter(m);
-                }
+            if (BeanUtil.isNone(o)) {
+
+            } else if (BeanUtil.isOperation(o)) {
+                gradient(o);
+                gradienter(o);
+            } else {
+                Tensor m = (Tensor) o.getFunction();
+                gradient(m);
+                gradienter(m);
             }
         }
     }
@@ -137,15 +135,13 @@ public class Engine extends Shape {
 
     private void reducer(Tensor tensor) {
         for (Tensor o : tensor.getInput()) {
-            if (BeanUtil.isNotNone(o)) {
-                if (BeanUtil.isOperation(o)) {
-                    reducer(o);
-                } else {
-                    Tensor<Tensor> m = o;
-                    reducer(m.getFunction());
-                }
-            } else {
+            if (BeanUtil.isNone(o)) {
                 reduce(o);
+            } else if (BeanUtil.isOperation(o)) {
+                reducer(o);
+            } else {
+                Tensor<Tensor> m = o;
+                reducer(m.getFunction());
             }
         }
     }
