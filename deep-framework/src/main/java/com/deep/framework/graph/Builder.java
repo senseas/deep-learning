@@ -11,7 +11,7 @@ public class Builder extends Shape {
         }
     }
 
-    public static <M> M build(Tensor tensor, int i) {
+    public static <M> M getInput(Tensor tensor, int i) {
         Tensor<Tensor> input = (Tensor) tensor.getInput()[i];
         if (BeanUtil.isOperation(tensor)) {
             if (BeanUtil.isNone(input)) return (M) input.getOutput();

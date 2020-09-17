@@ -42,7 +42,7 @@ public class Tensor<N> implements Serializable {
     public void gradient() { }
 
     public <M> M getInput(int i) {
-        return Builder.build(this, i);
+        return Builder.getInput(this, i);
     }
 
     public N getFunction() {
