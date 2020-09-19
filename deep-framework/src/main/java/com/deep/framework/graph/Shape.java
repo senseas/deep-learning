@@ -26,7 +26,10 @@ public class Shape extends ForEach {
 
     public static <E> E outputs(Object a) {
         if (BeanUtil.isTensor(a)) {
-            return (E) fill(a, shape(None.class, a), (Fill<Tensor<None>>) o -> o.getOutput());
+            return (E) fill(a, shape(None.class, a), (Fill<Tensor<None>>) o -> {
+                o.setOutput(new None(0d));
+                return o.getOutput();
+            });
         } else {
             Tensor o = (Tensor) a;
             o.setOutput(new None(0d));
