@@ -6,6 +6,7 @@ import com.deep.framework.lang.util.BeanUtil;
 
 import java.io.Serializable;
 import java.lang.reflect.Array;
+import java.util.Objects;
 import java.util.stream.IntStream;
 
 public class ForEach implements Serializable {
@@ -74,6 +75,7 @@ public class ForEach implements Serializable {
     }
 
     public static void farEach(Object a, Func1 func) {
+        if (Objects.isNull(a)) return;
         if (BeanUtil.isTensor(a)) {
             farEach(Array.getLength(a), i -> {
                 Object m = Array.get(a, i);

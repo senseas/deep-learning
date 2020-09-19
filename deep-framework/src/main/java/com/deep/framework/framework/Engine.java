@@ -8,6 +8,8 @@ import com.deep.framework.lang.function.Func2;
 import com.deep.framework.lang.util.BeanUtil;
 import lombok.Data;
 
+import java.util.Objects;
+
 @Data
 public class Engine extends Shape {
     public double rate = 0.03;
@@ -40,12 +42,16 @@ public class Engine extends Shape {
 
     private void compute(Tensor<None> tensor) {
         None none = tensor.compute(), out = tensor.getOutput();
-        out.setValue(none.getValue());
+        if (Objects.isNull(out)) {
+            tensor.setOutput(none);
+        } else {
+            out.setValue(none.getValue());
+        }
     }
 
     private void computser(Tensor tensor) {
         farEach(tensor.getInput(), o -> {
-            Tensor<Tensor> a = (Tensor) o;
+            Tensor a = (Tensor) o;
             if (BeanUtil.isNotNone(a)) {
                 computser(a);
                 computs(a);
@@ -54,13 +60,12 @@ public class Engine extends Shape {
     }
 
     private void computs(Tensor tensor) {
-        Func2<Tensor<None>, None> func = (node, out) -> {
+        Func1<Tensor> func = (node) -> {
             computer(node);
             compute(node);
-            out.setValue(node.getOutput().getValue());
         };
         BeanUtil.nameNode(tensor);
-        farEach(tensor.getFunction(), tensor.getOutput(), func);
+        farEach(tensor.getFunction(), func);
     }
 
     public void backward(Tensor tensor) {
@@ -105,12 +110,11 @@ public class Engine extends Shape {
     }
 
     private void gradients(Tensor tensor) {
-        Func2<Tensor<None>, None> func = (node, out) -> {
-            node.getOutput().setGrad(out.getGrad());
+        Func1<Tensor<None>> func = (node) -> {
             gradient(node);
             gradienter(node);
         };
-        farEach(tensor.getFunction(), tensor.getOutput(), func);
+        farEach(tensor.getFunction(), func);
     }
 
     private void backwards(Tensor tensor) {
@@ -173,9 +177,7 @@ public class Engine extends Shape {
     }
 
     public void init(Tensor a, Object b) {
-        Func2<None, Double> func = (m, n) -> {
-            m.setValue(n);
-        };
+        Func2<None, Double> func = (m, n) -> m.setValue(n);
         farEach(a.getOutput(), b, func);
     }
 }

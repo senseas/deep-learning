@@ -24,11 +24,13 @@ public class Shape extends ForEach {
         return (E) fill(Array.newInstance(None.class, x), o -> new None(random.nextGaussian(0, 0.1), name));
     }
 
-    public static <E> E nones(Object a) {
+    public static <E> E outputs(Object a) {
         if (BeanUtil.isTensor(a)) {
             return (E) fill(a, shape(None.class, a), (Fill<Tensor<None>>) o -> o.getOutput());
         } else {
-            return (E) ((Tensor) a).getOutput();
+            Tensor o = (Tensor) a;
+            o.setOutput(new None(0d));
+            return (E) o.getOutput();
         }
     }
 
@@ -42,8 +44,7 @@ public class Shape extends ForEach {
 
     public static <E> E functions(Object a) {
         return (E) fill(a, a, (Fill<Tensor>) o -> {
-            if (BeanUtil.isOperation(o))
-                return o;
+            if (BeanUtil.isOperation(o)) return o;
             return o.getFunction();
         });
     }

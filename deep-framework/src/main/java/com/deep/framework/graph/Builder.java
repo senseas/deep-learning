@@ -2,12 +2,17 @@ package com.deep.framework.graph;
 
 import com.deep.framework.lang.util.BeanUtil;
 
+import java.util.Objects;
+
 public class Builder extends Shape {
 
     public static void function(Tensor tensor) {
         if (BeanUtil.isNotOperation(tensor)) {
             Object function = tensor.compute();
-            tensor.setFunction(functions(function));
+            if (Objects.nonNull(function)) {
+                tensor.setFunction(functions(function));
+                tensor.setOutput(outputs(function));
+            }
         }
     }
 
@@ -16,7 +21,7 @@ public class Builder extends Shape {
         if (BeanUtil.isOperation(tensor)) {
             if (BeanUtil.isNone(input)) return (M) input.getOutput();
             if (BeanUtil.isOperation(input)) return (M) input.getOutput();
-            return (M) input.getFunction().getOutput();
+            return (M) input.getOutput();
         } else {
             if (BeanUtil.isOperation(input)) return (M) input;
             if (BeanUtil.isNoneNode(input)) return (M) tensors(input.getOutput());

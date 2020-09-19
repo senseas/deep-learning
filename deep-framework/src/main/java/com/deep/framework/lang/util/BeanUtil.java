@@ -4,6 +4,7 @@ import com.deep.framework.graph.Tensor;
 import com.deep.framework.lang.annotation.Operator;
 
 import java.lang.reflect.Method;
+import java.util.Objects;
 
 public class BeanUtil {
 
@@ -19,7 +20,7 @@ public class BeanUtil {
 
     public static boolean isNotOperation(Tensor tensor) {
         try {
-            if (tensor == null) return false;
+            if (Objects.isNull(tensor)) return false;
             Method method = tensor.getClass().getMethod("compute");
             return method.getAnnotation(Operator.class) == null;
         } catch (NoSuchMethodException e) {
@@ -29,12 +30,12 @@ public class BeanUtil {
     }
 
     public static boolean isTensor(Object o) {
-        if (o == null) return false;
+        if (Objects.isNull(o)) return false;
         return o.getClass().isArray();
     }
 
     public static boolean isNotTensor(Object o) {
-        if (o == null) return true;
+        if (Objects.isNull(o)) return true;
         return !o.getClass().isArray();
     }
 

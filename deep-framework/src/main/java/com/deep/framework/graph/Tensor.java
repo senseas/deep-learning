@@ -51,12 +51,6 @@ public class Tensor<N> implements Serializable {
         return function;
     }
 
-    public N getOutput() {
-        if (output != null) return output;
-        output = Shape.Nones(function);
-        return output;
-    }
-
     private String name = "Tensor::";
     private Tensor[] input;
     private transient N function;

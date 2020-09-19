@@ -272,7 +272,7 @@ public class TensorFlow extends Shape {
                 Object C = Nones(B.getOutput());
                 reshape(A.getOutput(), C);
                 setOutput(C);
-                return new Tensor[0];
+                return null;
             }
 
             public void gradient() {}
