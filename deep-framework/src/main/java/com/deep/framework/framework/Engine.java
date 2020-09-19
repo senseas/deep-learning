@@ -60,12 +60,12 @@ public class Engine extends Shape {
     }
 
     private void computs(Tensor tensor) {
-        Func1<Tensor> func = (node) -> {
-            computer(node);
-            compute(node);
-        };
         BeanUtil.nameNode(tensor);
-        farEach(tensor.getFunction(), func);
+        farEach(tensor.getFunction(), o -> {
+            Tensor a = (Tensor) o;
+            computer(a);
+            compute(a);
+        });
     }
 
     public void backward(Tensor tensor) {
@@ -110,11 +110,12 @@ public class Engine extends Shape {
     }
 
     private void gradients(Tensor tensor) {
-        Func1<Tensor> func = (node) -> {
-            gradient(node);
-            gradienter(node);
-        };
         farEach(tensor.getFunction(), func);
+        farEach(tensor.getFunction(), o -> {
+            Tensor a = (Tensor) o;
+            gradient(a);
+            gradienter(a);
+        });
     }
 
     private void backwards(Tensor tensor) {
@@ -161,11 +162,11 @@ public class Engine extends Shape {
     }
 
     private void reduces(Tensor tensor) {
-        Func1<Tensor> func = node -> {
-            reduce(node);
-            reducer(node);
-        };
-        farEach(tensor.getFunction(), func);
+        farEach(tensor.getFunction(), o -> {
+            Tensor a = (Tensor) o;
+            reduce(a);
+            reducer(a);
+        });
     }
 
     private void execute(Tensor tensor, Func1<Tensor>... func) {
