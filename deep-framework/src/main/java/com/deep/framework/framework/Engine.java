@@ -101,7 +101,7 @@ public class Engine extends Shape {
 
     private void gradientser(Tensor tensor) {
         farEach(tensor.getInput(), o -> {
-            Tensor<Tensor> a = (Tensor) o;
+            Tensor a = (Tensor) o;
             if (BeanUtil.isNotNone(a)) {
                 gradients(a);
                 gradientser(a);
@@ -110,7 +110,7 @@ public class Engine extends Shape {
     }
 
     private void gradients(Tensor tensor) {
-        Func1<Tensor<None>> func = (node) -> {
+        Func1<Tensor> func = (node) -> {
             gradient(node);
             gradienter(node);
         };
@@ -161,7 +161,7 @@ public class Engine extends Shape {
     }
 
     private void reduces(Tensor tensor) {
-        Func1<Tensor<None>> func = node -> {
+        Func1<Tensor> func = node -> {
             reduce(node);
             reducer(node);
         };
