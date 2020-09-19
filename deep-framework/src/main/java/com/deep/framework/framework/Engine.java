@@ -110,7 +110,6 @@ public class Engine extends Shape {
     }
 
     private void gradients(Tensor tensor) {
-        farEach(tensor.getFunction(), func);
         farEach(tensor.getFunction(), o -> {
             Tensor a = (Tensor) o;
             gradient(a);
