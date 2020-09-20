@@ -52,10 +52,8 @@ public class Engine extends Shape {
     private void computser(Tensor tensor) {
         farEach(tensor.getInput(), o -> {
             Tensor a = (Tensor) o;
-            if (BeanUtil.isNotNone(a)) {
-                computser(a);
-                computs(a);
-            }
+            computser(a);
+            computs(a);
         });
     }
 
@@ -102,10 +100,8 @@ public class Engine extends Shape {
     private void gradientser(Tensor tensor) {
         farEach(tensor.getInput(), o -> {
             Tensor a = (Tensor) o;
-            if (BeanUtil.isNotNone(a)) {
-                gradients(a);
-                gradientser(a);
-            }
+            gradients(a);
+            gradientser(a);
         });
     }
 
@@ -153,10 +149,8 @@ public class Engine extends Shape {
     private void reduceser(Tensor tensor) {
         farEach(tensor.getInput(), o -> {
             Tensor a = (Tensor) o;
-            if (BeanUtil.isNotNone(a)) {
-                reduces(a);
-                reduceser(a);
-            }
+            reduces(a);
+            reduceser(a);
         });
     }
 
