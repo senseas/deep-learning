@@ -11,7 +11,6 @@ public class Builder extends Shape {
             Object function = tensor.compute();
             if (Objects.nonNull(function)) {
                 tensor.setFunction(functions(function));
-                tensor.setOutput(outputs(function));
             }
         }
     }
@@ -24,8 +23,20 @@ public class Builder extends Shape {
             return (M) input.getOutput();
         } else {
             if (BeanUtil.isOperation(input)) return (M) input;
-            if (BeanUtil.isNoneNode(input)) return (M) tensors(input.getOutput());
-            return (M) input.getFunction();
+            if (BeanUtil.isFunction(input)) return (M) input.getFunction();
+            return (M) tensors(input.getOutput());
+        }
+    }
+
+    public static <E> E getOutput(Object a) {
+        if (BeanUtil.isTensor(a)) {
+            return (E) fill(a, shape(None.class, a), b -> {
+                Tensor o = (Tensor) b;
+                return o.getOutput();
+            });
+        } else {
+            Tensor o = (Tensor) a;
+            return (E) o.getOutput();
         }
     }
 

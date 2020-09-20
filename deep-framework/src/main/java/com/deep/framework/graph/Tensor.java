@@ -51,6 +51,12 @@ public class Tensor<N> implements Serializable {
         return function;
     }
 
+    public N getOutput() {
+        if (output != null) return output;
+        if (getFunction() != null) output = Builder.getOutput(function);
+        return output;
+    }
+
     private String name = "Tensor::";
     private Tensor[] input;
     private transient N function;

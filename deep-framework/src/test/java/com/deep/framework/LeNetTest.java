@@ -8,6 +8,7 @@ import com.deep.framework.graph.Tensor;
 import com.deep.framework.graph.TensorFlow;
 import com.deep.framework.lang.function.Func1;
 import com.deep.framework.lang.util.MnistRead;
+import com.deep.framework.lang.util.ModelUtil;
 import org.apache.log4j.Logger;
 import org.junit.Test;
 
@@ -59,7 +60,7 @@ public class LeNetTest extends Shape {
                 executor.run(inSet, labSet, func);
                 if (i % 100 == 0) {
                     log.info("---------{" + i + "}------------");
-                    saveModel(executor, MnistRead.BASE_PATH.concat("LetNet.obj"));
+                    ModelUtil.save(executor, MnistRead.BASE_PATH.concat("LetNet.obj"));
                     log(labSet);
                     log(softmax.getOutput());
                     log(crossx.getOutput());
@@ -73,7 +74,7 @@ public class LeNetTest extends Shape {
         double[][][][] inputSet = MnistRead.getImages(MnistRead.TRAIN_IMAGES_FILE);
         double[][][] labelSet = MnistRead.getLabels(MnistRead.TRAIN_LABELS_FILE);
 
-        Executor executor = loadModel(MnistRead.BASE_PATH.concat("LetNet.obj"));
+        Executor executor = ModelUtil.load(MnistRead.BASE_PATH.concat("LetNet.obj"));
         Tensor<None> crossx = executor.getTensor();
         Tensor softmax = crossx.getInput()[1];
         forEach(60000, i -> {
@@ -82,7 +83,7 @@ public class LeNetTest extends Shape {
             executor.run(inSet, labSet, func);
             if (i % 100 == 0) {
                 log.info("---------{" + i + "}------------");
-                saveModel(executor, MnistRead.BASE_PATH.concat("LetNet.obj"));
+                ModelUtil.save(executor, MnistRead.BASE_PATH.concat("LetNet.obj"));
                 log(labSet);
                 log(softmax.getOutput());
                 log(crossx.getOutput());

@@ -269,7 +269,7 @@ public class TensorFlow extends Shape {
 
             public Object compute() {
                 Tensor A = input[0], B = input[1];
-                Object C = Nones(B.getOutput());
+                Object C = nones(B.getOutput());
                 reshape(A.getOutput(), C);
                 setOutput(C);
                 return null;
