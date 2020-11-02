@@ -41,10 +41,6 @@ public class Tensor<N> implements Serializable {
 
     public void gradient() { }
 
-    public <M> M getInput(int i) {
-        return Builder.getInput(this, i);
-    }
-
     public N getFunction() {
         if (function != null) return function;
         Builder.function(this);
@@ -53,12 +49,11 @@ public class Tensor<N> implements Serializable {
 
     public N getOutput() {
         if (output != null) return output;
-        if (getFunction() != null) output = Builder.getOutput(function);
         return output;
     }
 
     private String name = "Tensor::";
     private Tensor[] input;
-    private transient N function;
-    private N output;
+    protected transient N function;
+    protected N output;
 }
