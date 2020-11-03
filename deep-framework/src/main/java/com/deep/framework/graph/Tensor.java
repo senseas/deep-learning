@@ -47,11 +47,6 @@ public class Tensor<N> implements Serializable {
         return function;
     }
 
-    public N getOutput() {
-        if (output != null) return output;
-        return output;
-    }
-
     private String name = "Tensor::";
     private Tensor[] input;
     protected transient N function;
