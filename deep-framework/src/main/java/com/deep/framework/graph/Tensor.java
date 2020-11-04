@@ -41,12 +41,6 @@ public class Tensor<N> implements Serializable {
 
     public void gradient() { }
 
-    public N getFunction() {
-        if (function != null) return function;
-        Builder.function(this);
-        return function;
-    }
-
     private String name = "Tensor::";
     private Tensor[] input;
     protected transient N function;

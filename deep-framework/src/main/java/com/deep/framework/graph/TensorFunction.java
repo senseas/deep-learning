@@ -2,6 +2,8 @@ package com.deep.framework.graph;
 
 import com.deep.framework.lang.util.BeanUtil;
 
+import java.util.Objects;
+
 public class TensorFunction extends Tensor {
 
     public TensorFunction(String name, Tensor... input) {
@@ -16,8 +18,16 @@ public class TensorFunction extends Tensor {
     }
 
     public Object getOutput() {
-        if (output != null) return output;
-        if (getFunction() != null) output = Builder.getOutput(function);
+        if (Objects.nonNull(output)) return output;
+        if (Objects.nonNull(getFunction())) output = Builder.getOutput(function);
         return output;
     }
+
+    public Object getFunction() {
+        if (Objects.nonNull(function)) return function;
+        Object functions = compute();
+        if (Objects.nonNull(functions)) function = Shape.functions(functions);
+        return function;
+    }
+
 }

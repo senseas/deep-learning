@@ -265,7 +265,7 @@ public class TensorFlow extends Shape {
     }
 
     public Tensor shape(Tensor... input) {
-        return new Tensor("Shape", input) {
+        return new TensorFunction("Shape", input) {
 
             public Object compute() {
                 Tensor A = input[0], B = input[1];
