@@ -30,4 +30,12 @@ public class TensorFunction extends Tensor {
         return function;
     }
 
+    public void execute() {
+        Shape.farEach(getInput(), o -> {
+            Tensor tensor = (Tensor) o;
+            tensor.execute();
+        });
+        Builder.computer(this);
+    }
+
 }

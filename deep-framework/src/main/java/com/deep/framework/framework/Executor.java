@@ -3,9 +3,12 @@ package com.deep.framework.framework;
 import com.deep.framework.graph.Tensor;
 import com.deep.framework.lang.function.Func1;
 import lombok.Data;
+import org.apache.log4j.Logger;
 
 @Data
 public class Executor<E> extends Engine {
+    Logger log = Logger.getLogger(Executor.class);
+
     private Tensor tensor;
     private Tensor input, label;
 
@@ -25,7 +28,8 @@ public class Executor<E> extends Engine {
     }
 
     public void run(Func1 a) {
-        forward(tensor);
+        tensor.execute();
+        // forward(tensor);
         a.apply(this);
         backward(tensor);
     }
