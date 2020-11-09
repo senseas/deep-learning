@@ -43,6 +43,7 @@ public class Tensor<N> implements Serializable {
 
     public void execute() { }
 
+    private Boolean computed = false;
     private String name = "Tensor::";
     private Tensor[] input;
     protected transient N function;

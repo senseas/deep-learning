@@ -7,7 +7,6 @@ public class TensorOparetor extends Tensor {
 
     public None getInput(int i) {
         Tensor input = getInput()[i];
-        Builder.computer(input);
         return (None) input.getOutput();
     }
 

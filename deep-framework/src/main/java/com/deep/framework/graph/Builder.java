@@ -17,17 +17,19 @@ public class Builder extends Shape {
     public static void function(Tensor tensor) {
         farEach(tensor.getFunction(), o -> {
             Tensor a = (Tensor) o;
-            computer(a);
+            a.execute();
         });
     }
 
     public static void compute(Tensor<None> tensor) {
+        if(tensor.getComputed()) return;
         None none = tensor.compute(), out = tensor.getOutput();
         if (Objects.isNull(out)) {
             tensor.setOutput(none);
         } else {
             out.setValue(none.getValue());
         }
+        tensor.setComputed(true);
     }
 
     public static <E> E getOutput(Object a) {
