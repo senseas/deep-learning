@@ -22,7 +22,7 @@ public class Builder extends Shape {
     }
 
     public static void compute(Tensor<None> tensor) {
-        if(tensor.getComputed()) return;
+        if (tensor.getComputed()) return;
         None none = tensor.compute(), out = tensor.getOutput();
         if (Objects.isNull(out)) {
             tensor.setOutput(none);

@@ -15,10 +15,7 @@ public class TensorOparetor extends Tensor {
     }
 
     public void execute() {
-        Shape.farEach(getInput(), o -> {
-            Tensor tensor = (Tensor) o;
-            tensor.execute();
-        });
+        Shape.farEach(getInput(), o -> ((Tensor) o).execute());
         Builder.computer(this);
     }
 }
