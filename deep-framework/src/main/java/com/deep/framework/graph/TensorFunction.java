@@ -32,7 +32,7 @@ public class TensorFunction extends Tensor {
 
     public void execute() {
         Shape.farEach(getInput(), o -> ((Tensor) o).execute());
-        Builder.computer(this);
+        Builder.function(this);
     }
 
 }

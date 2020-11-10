@@ -6,14 +6,6 @@ import java.util.Objects;
 
 public class Builder extends Shape {
 
-    public static void computer(Tensor tensor) {
-        if (BeanUtil.isOperation(tensor)) {
-            compute(tensor);
-        } else if (BeanUtil.isFunction(tensor)) {
-            function(tensor);
-        }
-    }
-
     public static void function(Tensor tensor) {
         farEach(tensor.getFunction(), o -> {
             Tensor a = (Tensor) o;
