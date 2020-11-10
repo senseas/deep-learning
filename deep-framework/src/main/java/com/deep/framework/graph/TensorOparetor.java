@@ -15,7 +15,9 @@ public class TensorOparetor extends Tensor {
     }
 
     public void execute() {
+        if (getComputed()) return;
         Shape.farEach(getInput(), o -> ((Tensor) o).execute());
         Builder.computer(this);
+        setComputed(true);
     }
 }
