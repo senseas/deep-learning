@@ -19,7 +19,6 @@ public class Builder extends Shape {
         farEach(tensor.getFunction(), o -> {
             Tensor a = (Tensor) o;
             a.gradienting();
-
         });
     }
 
@@ -49,7 +48,7 @@ public class Builder extends Shape {
 
     public static void gradientCompute(Tensor<None> tensor) {
         tensor.gradient();
-        //tensor.getOutput().setGrad(null);
+        tensor.getOutput().setGrad(null);
     }
 
     public static void reducer(Tensor<None> tensor) {
