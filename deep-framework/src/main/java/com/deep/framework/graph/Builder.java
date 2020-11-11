@@ -9,7 +9,14 @@ public class Builder extends Shape {
     public static void function(Tensor tensor) {
         farEach(tensor.getFunction(), o -> {
             Tensor a = (Tensor) o;
-            a.execute();
+            a.computeing();
+        });
+    }
+
+    public static void gradientFunction(Tensor tensor) {
+        farEach(tensor.getFunction(), o -> {
+            Tensor a = (Tensor) o;
+            a.gradienting();
         });
     }
 
@@ -20,6 +27,11 @@ public class Builder extends Shape {
         } else {
             out.setValue(none.getValue());
         }
+    }
+
+    public static void gradientCompute(Tensor<None> tensor) {
+        tensor.gradient();
+        tensor.getOutput().setGrad(null);
     }
 
     public static <E> E getOutput(Object a) {

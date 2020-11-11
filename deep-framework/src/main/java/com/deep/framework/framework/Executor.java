@@ -28,7 +28,8 @@ public class Executor<E> extends Engine {
     }
 
     public void run(Func1 a) {
-        tensor.execute();
+        tensor.computeing();
+        tensor.gradienting();
         // forward(tensor);
         a.apply(this);
         backward(tensor);

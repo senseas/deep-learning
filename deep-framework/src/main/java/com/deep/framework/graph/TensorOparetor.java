@@ -14,10 +14,17 @@ public class TensorOparetor extends Tensor {
         return (None) output;
     }
 
-    public void execute() {
+    public void computeing() {
         if (getComputed()) return;
-        Shape.farEach(getInput(), o -> ((Tensor) o).execute());
+        Shape.farEach(getInput(), o -> ((Tensor) o).computeing());
         Builder.compute(this);
         setComputed(true);
+    }
+
+    public void gradienting() {
+        if (!getComputed()) return;
+        Builder.gradientCompute(this);
+        setComputed(false);
+        Shape.farEach(getInput(), o -> ((Tensor) o).gradienting());
     }
 }
