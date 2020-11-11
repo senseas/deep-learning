@@ -1,6 +1,7 @@
 package com.deep.framework.graph;
 
 public class TensorOparetor extends Tensor {
+
     public TensorOparetor(String name, Tensor... input) {
         super(name, input);
     }
@@ -27,4 +28,12 @@ public class TensorOparetor extends Tensor {
         setComputed(false);
         Shape.farEach(getInput(), o -> ((Tensor) o).gradienting());
     }
+
+    public void reducer() {
+        if (getComputed()) return;
+        Builder.reducerFunction(this);
+        Shape.farEach(getInput(), o -> ((Tensor) o).reducer());
+        setComputed(true);
+    }
+
 }

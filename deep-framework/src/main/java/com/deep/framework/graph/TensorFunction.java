@@ -40,4 +40,9 @@ public class TensorFunction extends Tensor {
         Shape.farEach(getInput(), o -> ((Tensor) o).gradienting());
     }
 
+    public void reducer() {
+        Builder.reducerFunction(this);
+        Shape.farEach(getInput(), o -> ((Tensor) o).reducer());
+    }
+
 }
