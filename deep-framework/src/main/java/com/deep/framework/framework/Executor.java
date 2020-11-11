@@ -29,8 +29,9 @@ public class Executor<E> extends Engine {
 
     public void run(Func1 a) {
         tensor.computeing();
-        a.apply(this);
         tensor.gradienting();
+        a.apply(this);
+        tensor.reduceing();
     }
 
     public void run(Func1 a, Func1 b) {

@@ -1,11 +1,12 @@
 package com.deep.framework.graph;
 
+import com.alibaba.fastjson.JSONObject;
 import com.deep.framework.lang.util.BeanUtil;
+import org.apache.log4j.Logger;
 
 import java.util.Objects;
-
 public class TensorFunction extends Tensor {
-
+    static Logger log = Logger.getLogger(TensorFunction.class);
     public TensorFunction(String name, Tensor... input) {
         super(name, input);
     }
@@ -40,9 +41,9 @@ public class TensorFunction extends Tensor {
         Shape.farEach(getInput(), o -> ((Tensor) o).gradienting());
     }
 
-    public void reducer() {
+    public void reduceing() {
         Builder.reducerFunction(this);
-        Shape.farEach(getInput(), o -> ((Tensor) o).reducer());
+        Shape.farEach(getInput(), o -> ((Tensor) o).reduceing());
     }
 
 }

@@ -45,9 +45,9 @@ public class Tensor<N> implements Serializable {
 
     public void gradienting() { }
 
-    public void reducer() { }
+    public void reduceing() { }
 
-    private Boolean computed = false;
+    private String computed = "";
     private String name = "Tensor::";
     private Tensor[] input;
     protected transient N function;

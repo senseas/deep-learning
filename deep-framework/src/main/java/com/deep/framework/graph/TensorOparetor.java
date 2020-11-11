@@ -16,24 +16,23 @@ public class TensorOparetor extends Tensor {
     }
 
     public void computeing() {
-        if (getComputed()) return;
-        Shape.farEach(getInput(), o -> ((Tensor) o).computeing());
+        if (getComputed().equals("computed")) return;
+        Shape.farEach(getInput(), o -> Builder.computer((Tensor) o));
         Builder.compute(this);
-        setComputed(true);
+        setComputed("computed");
     }
 
     public void gradienting() {
-        if (!getComputed()) return;
+        if (getComputed().equals("gradient")) return;
         Builder.gradientCompute(this);
-        setComputed(false);
+        setComputed("gradient");
         Shape.farEach(getInput(), o -> ((Tensor) o).gradienting());
     }
 
-    public void reducer() {
-        if (getComputed()) return;
-        Builder.reducerFunction(this);
-        Shape.farEach(getInput(), o -> ((Tensor) o).reducer());
-        setComputed(true);
+    public void reduceing() {
+        if (getComputed().equals("reduce")) return;
+        Shape.farEach(getInput(), o -> Builder.reducer((Tensor) o));
+        setComputed("reduce");
     }
 
 }

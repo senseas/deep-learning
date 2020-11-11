@@ -19,13 +19,14 @@ public class Builder extends Shape {
         farEach(tensor.getFunction(), o -> {
             Tensor a = (Tensor) o;
             a.gradienting();
+
         });
     }
 
     public static void reducerFunction(Tensor tensor) {
         farEach(tensor.getFunction(), o -> {
             Tensor a = (Tensor) o;
-            a.reducer();
+            a.reduceing();
         });
     }
 
@@ -38,19 +39,31 @@ public class Builder extends Shape {
         }
     }
 
+    public static void computer(Tensor<None> tensor) {
+        if (BeanUtil.isNone(tensor)) {
+            tensor.getOutput().setReduce(false);
+        } else {
+            tensor.computeing();
+        }
+    }
+
     public static void gradientCompute(Tensor<None> tensor) {
         tensor.gradient();
-        tensor.getOutput().setGrad(null);
+        //tensor.getOutput().setGrad(null);
     }
 
     public static void reducer(Tensor<None> tensor) {
-        None none = tensor.getOutput();
-        if (BeanUtil.startsWithNone(tensor) && !none.getReduce()) {
-            none.setReduce(true);
-            Double value = none.getValue() - rate * none.getGrad();
-            none.setValue(value);
+        if (BeanUtil.isNone(tensor)) {
+            None none = tensor.getOutput();
+            if (BeanUtil.startsWithNone(tensor) && !none.getReduce()) {
+                none.setReduce(true);
+                Double value = none.getValue() - rate * none.getGrad();
+                none.setValue(value);
+            }
+            none.setGrad(null);
+        } else {
+            tensor.reduceing();
         }
-        none.setGrad(null);
     }
 
     public static <E> E getOutput(Object a) {
