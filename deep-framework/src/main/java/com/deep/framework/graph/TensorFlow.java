@@ -212,7 +212,7 @@ public class TensorFlow extends Shape {
     }
 
     public Tensor relux(Tensor input) {
-        return new TensorFunction("Relu", input) {
+        return new TensorFunction("Relux", input) {
 
             public Object compute() {
                 Object A = getInput(0), B = shape(Tensor.class, A);
