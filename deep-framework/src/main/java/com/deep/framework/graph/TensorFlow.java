@@ -479,9 +479,9 @@ public class TensorFlow extends Shape {
         return new TensorFunction("Softmax", input) {
 
             public Object compute() {
-                Object A = getInput(0), B = shape(Tensor.class, A);
+                Object[] A = getInput(0); Object B = shape(Tensor.class, A);
                 forEach(A, B, (a, b, i) -> {
-                    b[i] = div(exp(a), sum(expx(input)));
+                    b[i] = div(exp(a), sum(expx(new Tensor(A))));
                 });
                 return B;
             }

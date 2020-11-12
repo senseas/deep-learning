@@ -36,5 +36,5 @@ public class None implements Serializable {
     private String name;
     private Double value;
     private Double grad;
-    private Boolean reduce=false;
+    private Boolean reduce;
 }
