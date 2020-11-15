@@ -47,7 +47,7 @@ public class Builder extends Shape {
         }
     }
 
-    public static void gradientCompute(Tensor<None> tensor) {
+    public static void gradient(Tensor<None> tensor) {
         tensor.gradient();
         tensor.getOutput().setGrad(null);
     }

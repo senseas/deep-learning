@@ -25,7 +25,7 @@ public class TensorOparetor extends Tensor {
 
     public void backward() {
         if (!getComputed().equals("gradient")) {
-            Builder.gradientCompute(this);
+            Builder.gradient(this);
             setComputed("gradient");
             Shape.farEach(getInput(), o -> ((Tensor) o).backward());
         }
