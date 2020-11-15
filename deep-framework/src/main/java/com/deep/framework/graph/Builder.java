@@ -9,6 +9,7 @@ public class Builder extends Shape {
     public static double rate = 0.03;
 
     public static void function(Tensor tensor) {
+        BeanUtil.nameNode(tensor);
         farEach(tensor.getFunction(), o -> {
             Tensor a = (Tensor) o;
             a.computeing();

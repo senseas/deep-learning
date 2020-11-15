@@ -1,32 +1,18 @@
 package com.deep.framework.lang.util;
 
 import com.deep.framework.graph.Tensor;
-import com.deep.framework.lang.annotation.Operator;
+import com.deep.framework.graph.TensorOparetor;
 
-import java.lang.reflect.Method;
 import java.util.Objects;
 
 public class BeanUtil {
 
     public static boolean isOperation(Tensor tensor) {
-        try {
-            Method method = tensor.getClass().getMethod("compute");
-            return method.getAnnotation(Operator.class) != null;
-        } catch (NoSuchMethodException e) {
-            e.printStackTrace();
-        }
-        return false;
+        return tensor instanceof TensorOparetor;
     }
 
     public static boolean isNotOperation(Tensor tensor) {
-        try {
-            if (Objects.isNull(tensor)) return false;
-            Method method = tensor.getClass().getMethod("compute");
-            return method.getAnnotation(Operator.class) == null;
-        } catch (NoSuchMethodException e) {
-            e.printStackTrace();
-        }
-        return false;
+        return !(tensor instanceof TensorOparetor);
     }
 
     public static boolean isTensor(Object o) {

@@ -32,6 +32,7 @@ public class Shape extends ForEach {
 
     public static <E> E functions(Object a) {
         return (E) fill(a, a, (Fill<Tensor>) o -> {
+            if (BeanUtil.isNone(o)) return o;
             if (BeanUtil.isOperation(o)) return o;
             return o.getFunction();
         });
