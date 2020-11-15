@@ -31,18 +31,18 @@ public class TensorFunction extends Tensor {
     }
 
     public void forward() {
-        Shape.farEach(getInput(), o -> ((Tensor) o).forward());
+        for (Tensor o : getInput()) o.forward();
         Builder.forward(this);
     }
 
     public void backward() {
         Builder.backward(this);
-        Shape.farEach(getInput(), o -> ((Tensor) o).backward());
+        for (Tensor o : getInput()) o.backward();
     }
 
     public void reduce() {
         Builder.reduce(this);
-        Shape.farEach(getInput(), o -> ((Tensor) o).reduce());
+        for (Tensor o : getInput()) o.reduce();
     }
 
 }
