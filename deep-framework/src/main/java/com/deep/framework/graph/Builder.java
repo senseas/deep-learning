@@ -8,25 +8,25 @@ public class Builder extends Shape {
 
     public static double rate = 0.03;
 
-    public static void function(Tensor tensor) {
+    public static void forward(Tensor tensor) {
         BeanUtil.nameNode(tensor);
         farEach(tensor.getFunction(), o -> {
             Tensor a = (Tensor) o;
-            a.computeing();
+            a.forward();
         });
     }
 
-    public static void gradientFunction(Tensor tensor) {
+    public static void backward(Tensor tensor) {
         farEach(tensor.getFunction(), o -> {
             Tensor a = (Tensor) o;
-            a.gradienting();
+            a.backward();
         });
     }
 
-    public static void reducerFunction(Tensor tensor) {
+    public static void reduce(Tensor tensor) {
         farEach(tensor.getFunction(), o -> {
             Tensor a = (Tensor) o;
-            a.reduceing();
+            a.reduce();
         });
     }
 
@@ -43,7 +43,7 @@ public class Builder extends Shape {
         if (BeanUtil.isNone(tensor)) {
             tensor.getOutput().setReduce(false);
         } else {
-            tensor.computeing();
+            tensor.forward();
         }
     }
 
@@ -62,7 +62,7 @@ public class Builder extends Shape {
             }
             none.setGrad(null);
         } else {
-            tensor.reduceing();
+            tensor.reduce();
         }
     }
 

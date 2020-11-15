@@ -41,11 +41,11 @@ public class Tensor<N> implements Serializable {
 
     public void gradient() { }
 
-    public void computeing() { }
+    public void forward() { }
 
-    public void gradienting() { }
+    public void backward() { }
 
-    public void reduceing() { }
+    public void reduce() { }
 
     private String computed = "";
     private String name = "Tensor::";

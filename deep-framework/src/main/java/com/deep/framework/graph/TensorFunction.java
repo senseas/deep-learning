@@ -30,19 +30,19 @@ public class TensorFunction extends Tensor {
         return function;
     }
 
-    public void computeing() {
-        Shape.farEach(getInput(), o -> ((Tensor) o).computeing());
-        Builder.function(this);
+    public void forward() {
+        Shape.farEach(getInput(), o -> ((Tensor) o).forward());
+        Builder.forward(this);
     }
 
-    public void gradienting() {
-        Builder.gradientFunction(this);
-        Shape.farEach(getInput(), o -> ((Tensor) o).gradienting());
+    public void backward() {
+        Builder.backward(this);
+        Shape.farEach(getInput(), o -> ((Tensor) o).backward());
     }
 
-    public void reduceing() {
-        Builder.reducerFunction(this);
-        Shape.farEach(getInput(), o -> ((Tensor) o).reduceing());
+    public void reduce() {
+        Builder.reduce(this);
+        Shape.farEach(getInput(), o -> ((Tensor) o).reduce());
     }
 
 }
