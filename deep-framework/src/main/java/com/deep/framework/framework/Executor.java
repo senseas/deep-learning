@@ -3,11 +3,9 @@ package com.deep.framework.framework;
 import com.deep.framework.graph.Tensor;
 import com.deep.framework.lang.function.Func1;
 import lombok.Data;
-import org.apache.log4j.Logger;
 
 @Data
 public class Executor<E> extends Sense {
-    Logger log = Logger.getLogger(Executor.class);
 
     private Tensor tensor;
     private Tensor input, label;
