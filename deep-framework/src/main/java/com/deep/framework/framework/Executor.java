@@ -6,7 +6,7 @@ import lombok.Data;
 import org.apache.log4j.Logger;
 
 @Data
-public class Executor<E> extends Engine {
+public class Executor<E> extends Sense {
     Logger log = Logger.getLogger(Executor.class);
 
     private Tensor tensor;
@@ -36,9 +36,10 @@ public class Executor<E> extends Engine {
     }
 
     public void run(Func1 a, Func1 b) {
-        forward(tensor);
+        tensor.forward();
+        tensor.backward();
         a.apply(this);
-        backward(tensor);
+        tensor.reduce();
         b.apply(this);
     }
 

@@ -3,7 +3,7 @@ package com.deep.framework;
 import com.alibaba.fastjson.JSONObject;
 import com.deep.framework.framework.Executor;
 import com.deep.framework.graph.None;
-import com.deep.framework.graph.Shape;
+import com.deep.framework.lang.Shape;
 import com.deep.framework.graph.Tensor;
 import com.deep.framework.graph.TensorFlow;
 import com.deep.framework.lang.function.Func1;
@@ -57,7 +57,6 @@ public class LeNetTest extends Shape {
             forEach(60000, i -> {
                 Object inSet = inputSet[i], labSet = labelSet[i];
                 executor.run(inSet, labSet, o -> {
-                    executor.rate = crossx.getOutput().getValue() / 100;
                     if (i % 100 == 0) {
                         log.info("---------{" + i + "}------------");
                         ModelUtil.save(executor, MnistRead.BASE_PATH.concat("LetNet.obj"));

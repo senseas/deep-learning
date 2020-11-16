@@ -1,5 +1,7 @@
 package com.deep.framework.graph;
 
+import com.deep.framework.framework.Sense;
+import com.deep.framework.lang.Shape;
 import com.deep.framework.lang.util.BeanUtil;
 
 import java.util.Objects;
@@ -19,7 +21,7 @@ public class TensorFunction extends Tensor {
 
     public Object getOutput() {
         if (Objects.nonNull(output)) return output;
-        if (Objects.nonNull(getFunction())) output = Builder.getOutput(function);
+        if (Objects.nonNull(getFunction())) output = Sense.getOutput(function);
         return output;
     }
 
@@ -32,16 +34,16 @@ public class TensorFunction extends Tensor {
 
     public void forward() {
         for (Tensor o : getInput()) o.forward();
-        Builder.forward(this);
+        Sense.forward(this);
     }
 
     public void backward() {
-        Builder.backward(this);
+        Sense.backward(this);
         for (Tensor o : getInput()) o.backward();
     }
 
     public void reduce() {
-        Builder.reduce(this);
+        Sense.reduce(this);
         for (Tensor o : getInput()) o.reduce();
     }
 

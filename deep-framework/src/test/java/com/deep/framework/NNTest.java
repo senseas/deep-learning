@@ -3,7 +3,7 @@ package com.deep.framework;
 import com.alibaba.fastjson.JSONObject;
 import com.deep.framework.framework.Executor;
 import com.deep.framework.graph.None;
-import com.deep.framework.graph.Shape;
+import com.deep.framework.lang.Shape;
 import com.deep.framework.graph.Tensor;
 import com.deep.framework.graph.TensorFlow;
 import org.apache.log4j.Logger;
@@ -46,7 +46,6 @@ public class NNTest extends Shape {
 
             executor.run(inSet, labSet);
             if (i % 1000 == 0) {
-                if (executor.rate > 0.00001) executor.rate = executor.rate - 0.0001;
                 log.info("---------{" + i + "}------------");
                 None[][] output = (None[][]) tensor33.getOutput();
                 None loss = (None) tensor34.getOutput();

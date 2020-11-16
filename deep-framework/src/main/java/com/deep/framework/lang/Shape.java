@@ -1,6 +1,7 @@
-package com.deep.framework.graph;
+package com.deep.framework.lang;
 
-import com.deep.framework.lang.ForEach;
+import com.deep.framework.graph.None;
+import com.deep.framework.graph.Tensor;
 import com.deep.framework.lang.function.Fill;
 import com.deep.framework.lang.util.BeanUtil;
 import org.apache.commons.math3.random.RandomDataGenerator;
@@ -40,14 +41,6 @@ public class Shape extends ForEach {
 
     public static <E> E zeros(Object a) {
         return (E) fill(a, o -> new Tensor(0d));
-    }
-
-    public static <E> E nones(Object a) {
-        if (BeanUtil.isTensor(a)) {
-            return (E) fill(a, shape(None.class, a), o -> new None(0d));
-        } else {
-            return (E) new None(0d);
-        }
     }
 
     public static Object shape(Class clas, Object a) {

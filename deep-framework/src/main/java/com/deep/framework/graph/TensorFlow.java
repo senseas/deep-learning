@@ -1,5 +1,6 @@
 package com.deep.framework.graph;
 
+import com.deep.framework.lang.Shape;
 import com.deep.framework.lang.annotation.Operator;
 import com.deep.framework.lang.function.Func2;
 
