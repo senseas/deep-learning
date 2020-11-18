@@ -6,7 +6,6 @@ import com.deep.framework.graph.None;
 import com.deep.framework.lang.Shape;
 import com.deep.framework.graph.Tensor;
 import com.deep.framework.graph.TensorFlow;
-import com.deep.framework.lang.function.Func1;
 import com.deep.framework.lang.util.MnistRead;
 import com.deep.framework.lang.util.ModelUtil;
 import org.apache.log4j.Logger;
@@ -79,8 +78,7 @@ public class LeNetTest extends Shape {
         Tensor softmax = crossx.getInput()[1];
         forEach(60000, i -> {
             Object inSet = inputSet[i], labSet = labelSet[i];
-            Func1 func = o -> executor.rate = crossx.getOutput().getValue() / 1000;
-            executor.run(inSet, labSet, func);
+            executor.run(inSet, labSet);
             if (i % 100 == 0) {
                 log.info("---------{" + i + "}------------");
                 ModelUtil.save(executor, MnistRead.BASE_PATH.concat("LetNet.obj"));

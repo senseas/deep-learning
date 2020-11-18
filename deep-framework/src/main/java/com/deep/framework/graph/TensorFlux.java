@@ -1,14 +1,11 @@
-package com.deep.framework.framework;
+package com.deep.framework.graph;
 
-import com.deep.framework.graph.None;
-import com.deep.framework.graph.Tensor;
 import com.deep.framework.lang.Shape;
-import com.deep.framework.lang.function.Func2;
 import com.deep.framework.lang.util.BeanUtil;
 
 import java.util.Objects;
 
-public class Sense extends Shape {
+public class TensorFlux extends Shape {
 
     public static double rate = 0.03;
 
@@ -80,11 +77,6 @@ public class Sense extends Shape {
             Tensor o = (Tensor) a;
             return (E) o.getOutput();
         }
-    }
-
-    public void init(Tensor a, Object b) {
-        Func2<None, Double> func = (m, n) -> m.setValue(n);
-        farEach(a.getOutput(), b, func);
     }
 
 }
