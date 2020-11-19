@@ -7,7 +7,7 @@ import java.util.Objects;
 
 public class TensorFlux extends Shape {
 
-    public static double rate = 0.03;
+    public static double rate = 0.0003;
 
     public static void forward(Tensor tensor) {
         BeanUtil.nameNode(tensor);
@@ -69,7 +69,7 @@ public class TensorFlux extends Shape {
 
     public static <E> E getOutput(Object a) {
         if (BeanUtil.isTensor(a)) {
-            return (E) fill(a, shape(None.class, a), b -> {
+            return (E) fill(a, shape(Object.class, a), b -> {
                 Tensor o = (Tensor) b;
                 return o.getOutput();
             });

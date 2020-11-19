@@ -31,16 +31,12 @@ public class Shape extends ForEach {
         }
     }
 
-    public static <E> E functions(Object a) {
-        return (E) fill(a, a, (Fill<Tensor>) o -> {
-            if (BeanUtil.isNone(o)) return o;
-            if (BeanUtil.isOperation(o)) return o;
-            return o.getFunction();
-        });
-    }
-
     public static <E> E zeros(Object a) {
         return (E) fill(a, o -> new Tensor(0d));
+    }
+
+    public static <E> E zeros(Object a, int b[]) {
+        return (E) fill(a, o -> new Tensor(b));
     }
 
     public static Object shape(Class clas, Object a) {

@@ -427,10 +427,9 @@ public class TensorFlow extends Shape {
             public Object compute() {
                 Tensor[][][] A = getInput(0), B = getInput(1);
                 int height = B[0].length - A[0].length + 1, width = B[0][0].length - A[0][0].length + 1;
-                Tensor[][][] C = zeros(new Tensor[A.length][height][width]);
+                Tensor[] C = zeros(new Tensor[A.length], new int[]{height, width});
                 forEach(B.length, A.length, (i, l) -> {
-                    Tensor<Tensor[][]> tensor = addx(new Tensor(C[l]), conv(new Tensor(A[l]), new Tensor(B[i])));
-                    C[l] = tensor.getFunction();
+                    C[l] = addx(C[l], conv(new Tensor(A[l]), new Tensor(B[i])));
                 });
                 return C;
             }
@@ -444,9 +443,9 @@ public class TensorFlow extends Shape {
         return new TensorFunction("Maxpool", input) {
 
             public Tensor[][] compute() {
-                Tensor<None>[][] A = getInput(0);
+                Tensor[][] A = getInput(0);
                 int height = (int) Math.ceil(A.length / 2.0), width = (int) Math.ceil(A[0].length / 2.0);
-                Tensor<None>[][] B = zeros(new Tensor[height][width]);
+                Tensor[][] B = zeros(new Tensor[height][width]);
                 forEach(A.length, A[0].length, (y, x) -> {
                     B[y / 2][x / 2] = max(B[y / 2][x / 2], A[y][x]);
                 });
@@ -461,12 +460,11 @@ public class TensorFlow extends Shape {
     public Tensor maxpoolx(Tensor input) {
         return new TensorFunction("Maxpoolx", input) {
 
-            public Tensor[][][] compute() {
-                Tensor<None>[][][] A = getInput(0);
-                Tensor<None>[][][] B = new Tensor[A.length][][];
+            public Object compute() {
+                Tensor[][][] A = getInput(0);
+                Tensor[] B = new Tensor[A.length];
                 forEach(A.length, i -> {
-                    Tensor<Tensor[][]> tensor = maxpool(new Tensor(A[i]));
-                    B[i] = tensor.getFunction();
+                    B[i] = maxpool(new Tensor(A[i]));
                 });
                 return B;
             }
