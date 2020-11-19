@@ -23,14 +23,6 @@ public class Shape extends ForEach {
         return (E) fill(Array.newInstance(None.class, x), o -> new None(random.nextGaussian(0, 0.1), name));
     }
 
-    public static <E> E tensors(Object a) {
-        if (BeanUtil.isTensor(a)) {
-            return (E) fill(a, shape(Tensor.class, a), (Fill<None>) o -> new Tensor(o));
-        } else {
-            return (E) new Tensor((None) a);
-        }
-    }
-
     public static <E> E zeros(Object a) {
         return (E) fill(a, o -> new Tensor(0d));
     }
