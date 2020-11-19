@@ -26,9 +26,7 @@ public class TensorFunction extends Tensor {
 
     public Object getFunction() {
         if (Objects.nonNull(function)) return function;
-        Object functions = compute();
-        if (Objects.nonNull(functions)) function = functions;
-        return function;
+        return function = compute();
     }
 
     public void forward() {
