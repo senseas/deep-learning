@@ -34,7 +34,7 @@ public class Tensor<N> implements Serializable {
     }
 
     public <M> Tensor(M[] m) {
-        this.name = "Tensor";
+        this.name = "Function";
         this.function = (N) m;
     }
 

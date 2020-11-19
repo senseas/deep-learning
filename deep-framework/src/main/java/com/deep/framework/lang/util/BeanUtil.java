@@ -34,7 +34,7 @@ public class BeanUtil {
     }
 
     public static boolean isFunction(Tensor o) {
-        return o.getName().startsWith("Tensor");
+        return o.getName().equals("Function");
     }
 
     public static boolean startsWithNone(Tensor o) {
