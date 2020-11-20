@@ -8,7 +8,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.stream.IntStream;
 
-public class MnistRead {
+public class MnistUtil {
     public static final String BASE_PATH =System.getProperty("user.dir").concat("/src/main/resources/DataSet/");
     public static final String TRAIN_IMAGES_FILE = BASE_PATH.concat("train-images-idx3-ubyte");
     public static final String TRAIN_LABELS_FILE = BASE_PATH.concat("train-labels-idx1-ubyte");
