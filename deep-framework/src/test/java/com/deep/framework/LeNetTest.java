@@ -11,8 +11,6 @@ import com.deep.framework.lang.util.ModelUtil;
 import org.apache.log4j.Logger;
 import org.junit.Test;
 
-import java.util.stream.IntStream;
-
 public class LeNetTest extends Shape {
     Logger log = Logger.getLogger(LeNetTest.class);
 
@@ -91,11 +89,10 @@ public class LeNetTest extends Shape {
 
     @Test
     public void imgTest() {
+        int index = 59400;
         double[][][][] images = MnistUtil.getImages(MnistUtil.TRAIN_IMAGES_FILE);
-        IntStream.range(34500, 34500 + 1).forEach(i -> {
-            String fileName = MnistUtil.BASE_PATH.concat(String.valueOf(i)).concat(".JPEG");
-            MnistUtil.drawGrayPicture(images[i][0], fileName);
-        });
+        String fileName = MnistUtil.BASE_PATH.concat(String.valueOf(index)).concat(".JPEG");
+        MnistUtil.drawGrayPicture(images[index][0], fileName);
     }
 
     public void log(Object obj) {
