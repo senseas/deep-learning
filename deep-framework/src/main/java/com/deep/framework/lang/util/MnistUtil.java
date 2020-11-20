@@ -105,7 +105,7 @@ public class MnistUtil {
             BufferedImage bufferedImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
             for (int i = 0; i < width; i++) {
                 for (int l = 0; l < height; l++) {
-                    int pixel = 255 - (int) pixels[i][l];
+                    int pixel = 255 - (int) (pixels[i][l]*255d);
                     int value = pixel + (pixel << 8) + (pixel << 16);
                     bufferedImage.setRGB(l, i, value);
                 }
