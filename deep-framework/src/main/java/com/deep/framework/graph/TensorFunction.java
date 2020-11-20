@@ -1,6 +1,5 @@
 package com.deep.framework.graph;
 
-import com.deep.framework.lang.Shape;
 import com.deep.framework.lang.util.BeanUtil;
 
 import java.util.Objects;
