@@ -45,10 +45,11 @@ public class Shape extends ForEach {
         return list;
     }
 
-    public static void reshape(Object A, Object B) {
+    public static <M> M reshape(Object A, Object B) {
         Queue link = new LinkedList();
         forEach(A, a -> link.add(a));
         forEach(B, (b, i) -> b[i] = link.poll());
+        return (M) B;
     }
 
 }

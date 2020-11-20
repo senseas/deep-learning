@@ -3,9 +3,9 @@ package com.deep.framework;
 import com.alibaba.fastjson.JSONObject;
 import com.deep.framework.framework.Executor;
 import com.deep.framework.graph.None;
-import com.deep.framework.lang.Shape;
 import com.deep.framework.graph.Tensor;
 import com.deep.framework.graph.TensorFlow;
+import com.deep.framework.lang.Shape;
 import com.deep.framework.lang.util.MnistRead;
 import com.deep.framework.lang.util.ModelUtil;
 import org.apache.log4j.Logger;
@@ -59,8 +59,8 @@ public class LeNetTest extends Shape {
                     if (i % 100 == 0) {
                         log.info("---------{" + i + "}------------");
                         ModelUtil.save(executor, MnistRead.BASE_PATH.concat("LetNet.obj"));
-                        log(labSet);
-                        log(softmax.getOutput());
+                        log(Shape.reshape(labSet, new Double[10]));
+                        log(Shape.reshape(softmax.getOutput(), new None[10]));
                         log(crossx.getOutput());
                     }
                 });
@@ -82,8 +82,8 @@ public class LeNetTest extends Shape {
             if (i % 100 == 0) {
                 log.info("---------{" + i + "}------------");
                 ModelUtil.save(executor, MnistRead.BASE_PATH.concat("LetNet.obj"));
-                log(labSet);
-                log(softmax.getOutput());
+                log(Shape.reshape(labSet, new Double[10]));
+                log(Shape.reshape(softmax.getOutput(), new None[10]));
                 log(crossx.getOutput());
             }
         });
@@ -92,7 +92,7 @@ public class LeNetTest extends Shape {
     @Test
     public void imgTest() {
         double[][][][] images = MnistRead.getImages(MnistRead.TRAIN_IMAGES_FILE);
-        IntStream.range(37426, 37426 + 1).forEach(i -> {
+        IntStream.range(2200, 2200 + 1).forEach(i -> {
             String fileName = MnistRead.BASE_PATH.concat(String.valueOf(i)).concat(".JPEG");
             MnistRead.drawGrayPicture(images[i][0], fileName);
         });

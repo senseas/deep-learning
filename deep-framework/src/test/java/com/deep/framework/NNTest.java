@@ -47,11 +47,10 @@ public class NNTest extends Shape {
             executor.run(inSet, labSet);
             if (i % 1000 == 0) {
                 log.info("---------{" + i + "}------------");
-                None[][] output = (None[][]) tensor33.getOutput();
                 None loss = (None) tensor34.getOutput();
                 log("输入：", inSet);
                 log("标签：", labSet);
-                log("输出：", output[0][0].getValue());
+                log("输出：", tensor33.getOutput());
                 log("误差：", loss.getValue());
             }
         });

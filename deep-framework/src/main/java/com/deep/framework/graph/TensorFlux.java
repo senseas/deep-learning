@@ -7,7 +7,7 @@ import java.util.Objects;
 
 public class TensorFlux extends Shape {
 
-    public static double rate = 0.003;
+    public static double rate = 0.0003;
 
     public static void forward(Tensor tensor) {
         farEach(tensor.getFunction(), o -> {
