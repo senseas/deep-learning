@@ -4,6 +4,11 @@ import com.deep.framework.lang.Shape;
 import com.deep.framework.lang.annotation.Operator;
 import com.deep.framework.lang.function.Func2;
 
+import java.util.Arrays;
+import java.util.function.DoubleBinaryOperator;
+import java.util.stream.DoubleStream;
+import java.util.stream.IntStream;
+
 
 public class TensorFlow extends Shape {
 
@@ -12,16 +17,15 @@ public class TensorFlow extends Shape {
 
             @Operator
             public None compute() {
-                None inx = getInput(0), iny = getInput(1);
-                Double valx = inx.getValue(), valy = iny.getValue();
-                return new None(valx + valy);
+                IntStream intStream = IntStream.range(0, getInput().length).parallel();
+                Double value = intStream.mapToDouble(i -> getInput(i).getValue()).sum();
+                return new None(value);
             }
 
             public void gradient() {
-                None inx = getInput(0), iny = getInput(1), out = getOutput();
-                Double grad = out.getGrad();
-                inx.setGrad(grad);
-                iny.setGrad(grad);
+                None out = getOutput();
+                IntStream intStream = IntStream.range(0, getInput().length).parallel();
+                intStream.forEach(i -> getInput(i).setGrad(out.getGrad()));
             }
 
         };
@@ -80,17 +84,15 @@ public class TensorFlow extends Shape {
 
             @Operator
             public None compute() {
-                None inx = getInput(0), iny = getInput(1);
-                Double valx = inx.getValue(), valy = iny.getValue();
-                return new None(valx * valy);
+                IntStream intStream = IntStream.range(0, getInput().length).parallel();
+                Double value = intStream.mapToDouble(i -> getInput(i).getValue()).reduce(1, (a, b) -> a * b);
+                return new None(value);
             }
 
             public void gradient() {
-                None inx = getInput(0), iny = getInput(1), out = getOutput();
-                Double valx = inx.getValue(), valy = iny.getValue();
-                Double grad = out.getGrad();
-                inx.setGrad(grad * valy);
-                iny.setGrad(grad * valx);
+                None out = getOutput();
+                IntStream intStream = IntStream.range(0, getInput().length).parallel();
+                intStream.forEach(i -> getInput(i).setGrad(out.getValue() / getInput(i).getValue() * out.getGrad()));
             }
 
         };
