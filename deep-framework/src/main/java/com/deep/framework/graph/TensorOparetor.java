@@ -7,7 +7,7 @@ public class TensorOparetor extends Tensor {
 
     public TensorOparetor(String name, Tensor... input) {
         super(name, input);
-        if (Arrays.asList("Add", "Mul").contains(name)) {
+        if (Arrays.asList("Add").contains(name)) {
             Stream<Tensor> stream = Stream.of();
             for (Tensor o : input) {
                 Stream<Tensor> children = o.getName().equals(getName()) ? Arrays.stream(o.getInput()) : Stream.of(o);

@@ -80,18 +80,17 @@ public class TensorFlow extends Shape {
 
             @Operator
             public None compute() {
-                IntStream intStream = IntStream.range(0, getInput().length).parallel();
-                Double value = intStream.mapToDouble(i -> getInput(i).getValue()).reduce(1, (a, b) -> a * b);
-                return new None(value);
+                None inx = getInput(0), iny = getInput(1);
+                Double valx = inx.getValue(), valy = iny.getValue();
+                return new None(valx * valy);
             }
 
             public void gradient() {
-                IntStream intStream = IntStream.range(0, getInput().length).parallel();
-                intStream.forEach(i -> {
-                    IntStream stream = IntStream.range(0, getInput().length).parallel().filter(l -> l != i);
-                    Double value = stream.mapToDouble(l -> getInput(l).getValue()).reduce(1,(a, b) -> a * b);
-                    getInput(i).setGrad(getOutput().getGrad() * value);
-                });
+                None inx = getInput(0), iny = getInput(1), out = getOutput();
+                Double valx = inx.getValue(), valy = iny.getValue();
+                Double grad = out.getGrad();
+                inx.setGrad(grad * valy);
+                iny.setGrad(grad * valx);
             }
 
         };
