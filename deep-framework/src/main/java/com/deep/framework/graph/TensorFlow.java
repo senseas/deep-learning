@@ -4,11 +4,7 @@ import com.deep.framework.lang.Shape;
 import com.deep.framework.lang.annotation.Operator;
 import com.deep.framework.lang.function.Func2;
 
-import java.util.Arrays;
-import java.util.function.DoubleBinaryOperator;
-import java.util.stream.DoubleStream;
 import java.util.stream.IntStream;
-
 
 public class TensorFlow extends Shape {
 
@@ -90,9 +86,12 @@ public class TensorFlow extends Shape {
             }
 
             public void gradient() {
-                None out = getOutput();
                 IntStream intStream = IntStream.range(0, getInput().length).parallel();
-                intStream.forEach(i -> getInput(i).setGrad(out.getValue() / getInput(i).getValue() * out.getGrad()));
+                intStream.forEach(i -> {
+                    IntStream stream = IntStream.range(0, getInput().length).parallel().filter(l -> l != i);
+                    Double value = stream.mapToDouble(l -> getInput(l).getValue()).reduce(1,(a, b) -> a * b);
+                    getInput(i).setGrad(getOutput().getGrad() * value);
+                });
             }
 
         };
