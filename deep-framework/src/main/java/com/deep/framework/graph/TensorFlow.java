@@ -186,7 +186,7 @@ public class TensorFlow extends Shape {
                 None inx = getInput(0), out = getOutput();
                 Double valx = inx.getValue();
                 Double grad = out.getGrad();
-                inx.setGrad(grad * 1 / valx);
+                inx.setGrad(grad / valx);
             }
 
         };
@@ -206,7 +206,7 @@ public class TensorFlow extends Shape {
                 None inx = getInput(0), out = getOutput();
                 Double valx = inx.getValue();
                 Double grad = out.getGrad();
-                inx.setGrad(grad * (valx > 0 ? 1 : 0));
+                inx.setGrad(valx > 0 ? grad : 0);
             }
 
         };
