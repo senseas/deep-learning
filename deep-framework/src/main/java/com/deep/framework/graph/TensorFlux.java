@@ -7,7 +7,7 @@ import java.util.Objects;
 
 public class TensorFlux extends Shape {
 
-    public static double rate = 0.0003;
+    public static double rate = 0.003;
 
     public static void forward(Tensor tensor) {
         farEach(tensor.getFunction(), o -> {
@@ -55,9 +55,9 @@ public class TensorFlux extends Shape {
     public static void reducer(Tensor<None> tensor) {
         if (BeanUtil.isNone(tensor)) {
             None none = tensor.getOutput();
-            if (BeanUtil.startsWithNone(tensor) && !none.getReduce()) {
+            if (BeanUtil.startsWithNone(tensor) && !none.isReduce()) {
                 none.setReduce(true);
-                Double value = none.getValue() - rate * none.getGrad();
+                double value = none.getValue() - rate * none.getGrad();
                 none.setValue(value);
             }
             none.setGrad(null);

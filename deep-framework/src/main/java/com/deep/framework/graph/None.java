@@ -34,7 +34,7 @@ public class None implements Serializable {
     }
 
     private String name;
-    private Double value;
+    private double value;
     private Double grad;
-    private transient Boolean reduce;
+    private transient boolean reduce;
 }

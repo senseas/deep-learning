@@ -14,7 +14,7 @@ public class TensorFlow extends Shape {
             @Operator
             public None compute() {
                 IntStream intStream = IntStream.range(0, getInput().length).parallel();
-                Double value = intStream.mapToDouble(i -> getInput(i).getValue()).sum();
+                double value = intStream.mapToDouble(i -> getInput(i).getValue()).sum();
                 return new None(value);
             }
 
@@ -50,11 +50,11 @@ public class TensorFlow extends Shape {
             public None compute() {
                 if (input.length == 1) {
                     None inx = getInput(0);
-                    Double valx = inx.getValue();
+                    double valx = inx.getValue();
                     return new None(-valx);
                 } else {
                     None inx = getInput(0), iny = getInput(1);
-                    Double valx = inx.getValue(), valy = iny.getValue();
+                    double valx = inx.getValue(), valy = iny.getValue();
                     return new None(valx - valy);
                 }
             }
@@ -62,11 +62,11 @@ public class TensorFlow extends Shape {
             public void gradient() {
                 if (input.length == 1) {
                     None inx = getInput(0), out = getOutput();
-                    Double grad = out.getGrad();
+                    double grad = out.getGrad();
                     inx.setGrad(-grad);
                 } else {
                     None inx = getInput(0), iny = getInput(1), out = getOutput();
-                    Double grad = out.getGrad();
+                    double grad = out.getGrad();
                     inx.setGrad(grad);
                     iny.setGrad(-grad);
                 }
@@ -81,14 +81,14 @@ public class TensorFlow extends Shape {
             @Operator
             public None compute() {
                 None inx = getInput(0), iny = getInput(1);
-                Double valx = inx.getValue(), valy = iny.getValue();
+                double valx = inx.getValue(), valy = iny.getValue();
                 return new None(valx * valy);
             }
 
             public void gradient() {
                 None inx = getInput(0), iny = getInput(1), out = getOutput();
-                Double valx = inx.getValue(), valy = iny.getValue();
-                Double grad = out.getGrad();
+                double valx = inx.getValue(), valy = iny.getValue();
+                double grad = out.getGrad();
                 inx.setGrad(grad * valy);
                 iny.setGrad(grad * valx);
             }
@@ -102,14 +102,14 @@ public class TensorFlow extends Shape {
             @Operator
             public None compute() {
                 None inx = getInput(0), iny = getInput(1);
-                Double valx = inx.getValue(), valy = iny.getValue();
+                double valx = inx.getValue(), valy = iny.getValue();
                 return new None(valx / valy);
             }
 
             public void gradient() {
                 None inx = getInput(0), iny = getInput(1), out = getOutput();
-                Double valx = inx.getValue(), valy = iny.getValue();
-                Double grad = out.getGrad();
+                double valx = inx.getValue(), valy = iny.getValue();
+                double grad = out.getGrad();
                 inx.setGrad(grad * valy / Math.pow(valy, 2));
                 iny.setGrad(-grad * valx / Math.pow(valy, 2));
             }
@@ -123,14 +123,14 @@ public class TensorFlow extends Shape {
             @Operator
             public None compute() {
                 None inx = getInput(0);
-                Double valx = inx.getValue();
+                double valx = inx.getValue();
                 return new None(Math.exp(valx));
             }
 
             public void gradient() {
                 None inx = getInput(0), out = getOutput();
-                Double valx = inx.getValue();
-                Double grad = out.getGrad();
+                double valx = inx.getValue();
+                double grad = out.getGrad();
                 inx.setGrad(grad * Math.exp(valx));
             }
 
@@ -159,13 +159,13 @@ public class TensorFlow extends Shape {
             @Operator
             public None compute() {
                 None inx = getInput(0), iny = getInput(1);
-                Double valx = inx.getValue(), valy = iny.getValue();
+                double valx = inx.getValue(), valy = iny.getValue();
                 return new None(Math.pow(valx, valy));
             }
 
             public void gradient() {
                 None inx = getInput(0), iny = getInput(1);
-                Double valx = inx.getValue(), valy = iny.getValue();
+                double valx = inx.getValue(), valy = iny.getValue();
                 inx.setGrad(valy * Math.pow(valx, valy - 1));
             }
 
@@ -178,14 +178,14 @@ public class TensorFlow extends Shape {
             @Operator
             public None compute() {
                 None inx = getInput(0);
-                Double valx = inx.getValue();
+                double valx = inx.getValue();
                 return new None(Math.log(valx));
             }
 
             public void gradient() {
                 None inx = getInput(0), out = getOutput();
-                Double valx = inx.getValue();
-                Double grad = out.getGrad();
+                double valx = inx.getValue();
+                double grad = out.getGrad();
                 inx.setGrad(grad / valx);
             }
 
@@ -198,14 +198,14 @@ public class TensorFlow extends Shape {
             @Operator
             public None compute() {
                 None inx = getInput(0);
-                Double valx = inx.getValue();
+                double valx = inx.getValue();
                 return new None(valx > 0 ? valx : 0);
             }
 
             public void gradient() {
                 None inx = getInput(0), out = getOutput();
-                Double valx = inx.getValue();
-                Double grad = out.getGrad();
+                double valx = inx.getValue();
+                double grad = out.getGrad();
                 inx.setGrad(valx > 0 ? grad : 0);
             }
 
@@ -234,13 +234,13 @@ public class TensorFlow extends Shape {
             @Operator
             public None compute() {
                 None inx = getInput(0), iny = getInput(1);
-                Double valx = inx.getValue(), valy = iny.getValue();
+                double valx = inx.getValue(), valy = iny.getValue();
                 return new None(Math.max(valx, valy));
             }
 
             public void gradient() {
                 None inx = getInput(0), iny = getInput(1), out = getOutput();
-                Double grad = out.getGrad();
+                double grad = out.getGrad();
                 inx.setGrad(grad);
                 iny.setGrad(grad);
             }
