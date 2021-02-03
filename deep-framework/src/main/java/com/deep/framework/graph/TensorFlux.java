@@ -35,12 +35,15 @@ public class TensorFlux extends Shape {
         if (Objects.isNull(out)) {
             tensor.setOutput(none);
         } else {
+            out.setGrad(null);
+            out.setReduce(false);
             out.setValue(none.getValue());
         }
     }
 
     public static void computer(Tensor<None> tensor) {
         if (BeanUtil.isNone(tensor)) {
+            tensor.getOutput().setGrad(null);
             tensor.getOutput().setReduce(false);
         } else {
             tensor.forward();
@@ -49,7 +52,6 @@ public class TensorFlux extends Shape {
 
     public static void gradient(Tensor<None> tensor) {
         tensor.gradient();
-        tensor.getOutput().setGrad(null);
     }
 
     public static void reducer(Tensor<None> tensor) {
@@ -60,7 +62,6 @@ public class TensorFlux extends Shape {
                 double value = none.getValue() - rate * none.getGrad();
                 none.setValue(value);
             }
-            none.setGrad(null);
         } else {
             tensor.reduce();
         }
