@@ -7,12 +7,12 @@ import java.io.Serializable;
 @Data
 public class None implements Serializable {
 
-    public None(Double value) {
+    public None(double value) {
         this.name = "None";
         this.value = value;
     }
 
-    public None(Double value, String name) {
+    public None(double value, String name) {
         this.name = name;
         this.value = value;
     }
