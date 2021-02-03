@@ -75,7 +75,6 @@ public class ForEach implements Serializable {
     }
 
     public static void farEach(Object a, Func1 func) {
-        if (Objects.isNull(a)) return;
         if (BeanUtil.isTensor(a)) {
             farEach(Array.getLength(a), i -> {
                 Object m = Array.get(a, i);

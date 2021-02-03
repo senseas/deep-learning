@@ -8,7 +8,7 @@ import java.io.Serializable;
 @Data
 public class Tensor<N> implements Serializable {
 
-    public Tensor(Double input) {
+    public Tensor(double input) {
         this.name = "None";
         this.output = (N) new None(input);
     }
