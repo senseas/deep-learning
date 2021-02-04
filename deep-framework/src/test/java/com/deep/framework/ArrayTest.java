@@ -2,39 +2,34 @@ package com.deep.framework;
 
 import org.junit.Test;
 
+import java.util.Arrays;
 import java.util.function.IntConsumer;
 
 public class ArrayTest {
 
-    public class Array<T> {
-        private int[] shape;
-        private T[] data;
-
-        private int row;
-        private int[] d;
+    public static class Array<T> {
+        private final int[] shape;
+        private final T[] data;
 
         public Array(int[] shape, T[] data) {
-            this.shape = shape;
             this.data = data;
-            this.row = data.length / shape[0];
-            this.shape();
+            this.shape = shape;
         }
 
         public <E> E get(Integer index) {
-            if (shape.length == 1) {
-                return (E) data[index];
-            } else {
-                T[] b = (T[]) new Object[row];
-                for (int i = 0; i < row; i++)
-                    b[i] = data[index * row + i];
-                return (E) new Array<>(d, b);
-            }
+            if (shape.length == 1) return (E) data[index];
+            int row = data.length / shape[0];
+            int[] d = Arrays.copyOfRange(shape, 1, shape.length);
+            T[] b = Arrays.copyOfRange(data, index * row, index * row + row);
+            return (E) new Array(d, b);
         }
 
-        public void shape() {
-            d = new int[shape.length - 1];
-            for (int i = 0; i < shape.length - 1; i++)
-                d[i] = shape[1 + i];
+        public <E> E get(Integer... index) {
+            Object a = this.get(index[0]);
+            if (index.length == 1) return (E) a;
+            index = Arrays.copyOfRange(index, 1, index.length);
+            Array b = (Array) a;
+            return (E) b.get(index);
         }
 
         public void forEach(IntConsumer a) {
@@ -45,32 +40,34 @@ public class ArrayTest {
 
     @Test
     public void arrayTest() {
+        Double[][][] cc = new Double[][][]{
+            {
+                {1d, 2d, 5d},
+                {6d, 3d, 4d},
+            },
+            {
+                {7d, 8d, 9d},
+                {10d, 11d, 12d}
+            },
+            {
+                {13d, 14d, 15d},
+                {16d, 17d, 18d},
+            }
+        };
 
         Array<Double> array = new Array(
-
             new int[]{3, 2, 3},
-
             new Double[]{
-                1d,  2d,  3d,
-                4d,  5d,  6d,
-                7d,  8d,  9d,
+                1d, 2d, 3d,
+                4d, 5d, 6d,
+                7d, 8d, 9d,
                 10d, 11d, 12d,
                 13d, 14d, 15d,
                 16d, 17d, 18d
             }
-
         );
 
-        array.forEach(x -> {
-            Array<Double> a = array.get(x);
-            a.forEach(y -> {
-                Array<Double> b = a.get(y);
-                b.forEach(z -> {
-                    Double c = b.get(z);
-                    System.out.println(c);
-                });
-            });
-        });
-
+        Array a = array.get(2, 0);
+        a.forEach(i -> System.out.println(a.get(i)));
     }
 }
