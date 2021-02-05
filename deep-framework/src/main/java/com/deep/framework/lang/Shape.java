@@ -2,7 +2,6 @@ package com.deep.framework.lang;
 
 import com.deep.framework.graph.None;
 import com.deep.framework.graph.Tensor;
-import com.deep.framework.lang.function.Fill;
 import com.deep.framework.lang.util.BeanUtil;
 import org.apache.commons.math3.random.RandomDataGenerator;
 
