@@ -15,7 +15,7 @@ public class Tenser<T> {
         this.shape = shape;
     }
 
-    public <E> E get(Integer index) {
+    public <E> E get(int index) {
         if (shape.length == 1) return (E) data[index];
         int row = data.length / shape[0];
         int[] d = Arrays.copyOfRange(shape, 1, shape.length);
@@ -23,12 +23,12 @@ public class Tenser<T> {
         return (E) new Tenser(d, b);
     }
 
-    public <E> E get(Integer... index) {
+    public <E> E get(int... index) {
         Object a = this.get(index[0]);
         if (index.length == 1) return (E) a;
-        index = Arrays.copyOfRange(index, 1, index.length);
+        int[] indexs = Arrays.copyOfRange(index, 1, index.length);
         Tenser b = (Tenser) a;
-        return (E) b.get(index);
+        return (E) b.get(indexs);
     }
 
 }
