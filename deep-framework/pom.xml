@@ -42,5 +42,27 @@
 			<artifactId>aparapi</artifactId>
 			<version>2.0.0</version>
 		</dependency>
+		<dependency>
+			<groupId>org.jogamp.jocl</groupId>
+			<artifactId>jocl</artifactId>
+			<version>2.3.2</version>
+		</dependency>
+		<dependency>
+			<groupId>org.jogamp.jocl</groupId>
+			<artifactId>jocl</artifactId>
+			<version>2.3.2</version>
+			<classifier>natives-windows-amd64</classifier>
+		</dependency>
+		<dependency>
+			<groupId>org.jogamp.gluegen</groupId>
+			<artifactId>gluegen-rt</artifactId>
+			<version>2.3.2</version>
+		</dependency>
+		<dependency>
+			<groupId>org.jogamp.gluegen</groupId>
+			<artifactId>gluegen-rt</artifactId>
+			<version>2.3.2</version>
+			<classifier>natives-windows-amd64</classifier>
+		</dependency>
 	</dependencies>
 </project>
