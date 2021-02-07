@@ -32,7 +32,7 @@ public class AppTest {
     @Test
     public void matmulTest() {
         TensorFlow tf = new TensorFlow();
-        Tensor tensor = tf.matmul(new Tensor(new int[]{500, 500}), new Tensor(new int[]{500, 500}));
+        Tensor tensor = tf.matmul(new Tensor(new int[]{6, 4}), new Tensor(new int[]{4, 1}));
         Executor executor = new Executor(tensor);
         executor.run();
     }
