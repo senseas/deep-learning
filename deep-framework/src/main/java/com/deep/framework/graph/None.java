@@ -8,12 +8,6 @@ import java.io.Serializable;
 public class None implements Serializable {
 
     public None(double value) {
-        this.name = "None";
-        this.value = value;
-    }
-
-    public None(double value, String name) {
-        this.name = name;
         this.value = value;
     }
 
@@ -33,7 +27,6 @@ public class None implements Serializable {
         }
     }
 
-    private String name;
     private double value;
     private Double grad;
     private transient boolean reduce;

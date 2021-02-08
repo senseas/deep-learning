@@ -18,10 +18,6 @@ public class Shape extends ForEach {
         return (E) fill(Array.newInstance(None.class, x), o -> new None(random.nextGaussian(0, 0.1)));
     }
 
-    public static <E> E random(String name, int... x) {
-        return (E) fill(Array.newInstance(None.class, x), o -> new None(random.nextGaussian(0, 0.1), name));
-    }
-
     public static <E> E zeros(Object a) {
         return (E) fill(a, o -> new Tensor(0d));
     }

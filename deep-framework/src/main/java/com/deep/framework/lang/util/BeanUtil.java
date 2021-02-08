@@ -37,12 +37,4 @@ public class BeanUtil {
         return o.getName().equals("Function");
     }
 
-    public static boolean startsWithNone(Tensor o) {
-        return o.getName().startsWith("None::");
-    }
-
-    public static void nameNode(Tensor o) {
-        o.setName(o.getName().replace("Tensor", "Node"));
-    }
-
 }

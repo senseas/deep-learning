@@ -57,7 +57,7 @@ public class TensorFlux extends Shape {
     public static void reducer(Tensor<None> tensor) {
         if (BeanUtil.isNone(tensor)) {
             None none = tensor.getOutput();
-            if (BeanUtil.startsWithNone(tensor) && !none.isReduce()) {
+            if (!(tensor instanceof TensorConst) && !none.isReduce()) {
                 none.setReduce(true);
                 double value = none.getValue() - rate * none.getGrad();
                 none.setValue(value);

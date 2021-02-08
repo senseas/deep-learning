@@ -20,11 +20,11 @@ public class Tensor<N> implements Serializable {
 
     public Tensor(String name, int[] shape) {
         this.name = "None::".concat(name);
-        this.output = Shape.random(this.name, shape);
+        this.output = Shape.random(shape);
     }
 
     public Tensor(None input) {
-        this.name = input.getName();
+        this.name = "None";
         this.output = (N) input;
     }
 

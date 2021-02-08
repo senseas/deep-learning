@@ -302,7 +302,7 @@ public class TensorFlow extends Shape {
 
             public Tensor compute() {
                 Tensor A = getInput(0);
-                return div(new Tensor(1d), add(new Tensor(1d), exp(minus(A))));
+                return div(new TensorConst(1d), add(new TensorConst(1d), exp(minus(A))));
             }
 
             public void gradient() { }
@@ -331,7 +331,7 @@ public class TensorFlow extends Shape {
 
             public Tensor compute() {
                 Tensor a = getInput(0), b = getInput(1);
-                return mul(new Tensor(0.5), pow(minus(a, b), new Tensor(2d)));
+                return mul(new TensorConst(0.5), pow(minus(a, b), new TensorConst(2d)));
             }
 
             public void gradient() { }
@@ -344,7 +344,7 @@ public class TensorFlow extends Shape {
 
             public Tensor compute() {
                 Object A = getInput(0), B = getInput(1);
-                Tensor[] C = {new Tensor(0d)};
+                Tensor[] C = {new TensorConst(0d)};
                 forEach(A, B, (Func2<Tensor, Tensor>) (a, b) -> {
                     C[0] = add(C[0], square(a, b));
                 });
@@ -374,7 +374,7 @@ public class TensorFlow extends Shape {
 
             public Tensor compute() {
                 Object A = getInput(0), B = getInput(1);
-                Tensor[] C = {new Tensor(0d)};
+                Tensor[] C = {new TensorConst(0d)};
                 forEach(A, B, (Func2<Tensor, Tensor>) (a, b) -> {
                     C[0] = add(C[0], cross(a, b));
                 });
@@ -391,7 +391,7 @@ public class TensorFlow extends Shape {
 
             public Tensor compute() {
                 Object A = getInput(0);
-                Tensor[] B = {new Tensor(0d)};
+                Tensor[] B = {new TensorConst(0d)};
                 forEach(A, a -> {
                     B[0] = add((Tensor) a, B[0]);
                 });

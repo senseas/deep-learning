@@ -5,6 +5,7 @@ import com.deep.framework.graph.Tensor;
 import com.deep.framework.lang.ForEach;
 import com.deep.framework.lang.function.Func1;
 import com.deep.framework.lang.function.Func2;
+import com.deep.framework.lang.util.StopWatch;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -38,10 +39,14 @@ public class Executor<E> implements Serializable {
     }
 
     public void run(Func1 a) {
+        StopWatch stopWatch = new StopWatch();
+        stopWatch.start();
         tensor.forward();
         tensor.backward();
         a.apply(this);
         tensor.reduce();
+        stopWatch.stop();
+       // System.out.println(stopWatch.shortSummary());
     }
 
     public void run(Func1 a, Func1 b) {
