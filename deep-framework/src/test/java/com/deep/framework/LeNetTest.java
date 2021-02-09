@@ -8,11 +8,11 @@ import com.deep.framework.graph.TensorFlow;
 import com.deep.framework.lang.Shape;
 import com.deep.framework.lang.util.MnistUtil;
 import com.deep.framework.lang.util.ModelUtil;
-import org.apache.log4j.Logger;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.Test;
 
+@Slf4j
 public class LeNetTest extends Shape {
-    Logger log = Logger.getLogger(LeNetTest.class);
 
     @Test
     public void LeNetTest() {
@@ -53,15 +53,14 @@ public class LeNetTest extends Shape {
         forEach(3, x -> {
             forEach(60000, i -> {
                 Object inSet = inputSet[i], labSet = labelSet[i];
-                executor.run(inSet, labSet, o -> {
-                    if (i % 100 == 0) {
-                        log.info("---------{" + i + "}------------");
-                        ModelUtil.save(executor, MnistUtil.BASE_PATH.concat("LetNet.obj"));
-                        log(Shape.reshape(labSet, new Double[10]));
-                        log(Shape.reshape(softmax.getOutput(), new None[10]));
-                        log(crossx.getOutput());
-                    }
-                });
+                executor.run(inSet, labSet);
+                if (i % 100 == 0) {
+                    log.info("---------{}------------", i);
+                    ModelUtil.save(executor, MnistUtil.BASE_PATH.concat("LetNet.obj"));
+                    log(Shape.reshape(labSet, new Double[10]));
+                    log(Shape.reshape(softmax.getOutput(), new None[10]));
+                    log(crossx.getOutput());
+                }
             });
         });
     }
@@ -78,7 +77,7 @@ public class LeNetTest extends Shape {
             Object inSet = inputSet[i], labSet = labelSet[i];
             executor.run(inSet, labSet);
             if (i % 100 == 0) {
-                log.info("---------{" + i + "}------------");
+                log.info("---------{}------------", i);
                 ModelUtil.save(executor, MnistUtil.BASE_PATH.concat("LetNet.obj"));
                 log(Shape.reshape(labSet, new Double[10]));
                 log(Shape.reshape(softmax.getOutput(), new None[10]));

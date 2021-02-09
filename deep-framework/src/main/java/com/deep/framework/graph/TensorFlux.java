@@ -1,13 +1,12 @@
 package com.deep.framework.graph;
 
+import com.deep.framework.framework.Executor;
 import com.deep.framework.lang.Shape;
 import com.deep.framework.lang.util.BeanUtil;
 
 import java.util.Objects;
 
 public class TensorFlux extends Shape {
-
-    public static double rate = 0.003;
 
     public static void forward(Tensor tensor) {
         farEach(tensor.getFunction(), o -> {
@@ -59,7 +58,7 @@ public class TensorFlux extends Shape {
             None none = tensor.getOutput();
             if (!(tensor instanceof TensorConst) && !none.isReduce()) {
                 none.setReduce(true);
-                double value = none.getValue() - rate * none.getGrad();
+                double value = none.getValue() - Executor.rate * none.getGrad();
                 none.setValue(value);
             }
         } else {

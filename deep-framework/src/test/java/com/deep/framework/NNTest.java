@@ -3,14 +3,14 @@ package com.deep.framework;
 import com.alibaba.fastjson.JSONObject;
 import com.deep.framework.framework.Executor;
 import com.deep.framework.graph.None;
-import com.deep.framework.lang.Shape;
 import com.deep.framework.graph.Tensor;
 import com.deep.framework.graph.TensorFlow;
-import org.apache.log4j.Logger;
+import com.deep.framework.lang.Shape;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.Test;
 
+@Slf4j
 public class NNTest extends Shape {
-    Logger log = Logger.getLogger(NNTest.class);
 
     @Test
     public void NNTest() {
@@ -43,10 +43,9 @@ public class NNTest extends Shape {
         forEach(100000000, i -> {
             int l = (int) (Math.random() * labelSet.length);
             Object inSet = inputSet[l], labSet = labelSet[l];
-
             executor.run(inSet, labSet);
             if (i % 1000 == 0) {
-                log.info("---------{" + i + "}------------");
+                log.info("---------{}------------", i);
                 None loss = (None) tensor34.getOutput();
                 log("输入：", inSet);
                 log("标签：", labSet);
