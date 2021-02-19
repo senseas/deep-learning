@@ -25,6 +25,7 @@ public class TensorFunction extends Tensor {
 
     public Object getFunction() {
         if (Objects.nonNull(function)) return function;
+        output = null;
         return function = compute();
     }
 
