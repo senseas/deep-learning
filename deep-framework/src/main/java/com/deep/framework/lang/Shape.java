@@ -9,6 +9,7 @@ import java.lang.reflect.Array;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.Queue;
+import java.util.stream.IntStream;
 
 public class Shape extends ForEach {
 
@@ -16,6 +17,11 @@ public class Shape extends ForEach {
 
     public static <E> E random(int... x) {
         return (E) fill(Array.newInstance(None.class, x), o -> new None(random.nextGaussian(0, 0.1)));
+    }
+
+    public static <E> E randomx(int... x) {
+        int length = Arrays.stream(x).reduce((a, b) -> a * b).getAsInt();
+        return (E) IntStream.range(0, length).mapToObj(a -> new None(random.nextGaussian(0, 0.1))).toArray(None[]::new);
     }
 
     public static <E> E zeros(Object a) {

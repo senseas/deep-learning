@@ -110,8 +110,8 @@ public class TensorFlow extends Shape {
                 None inx = getInput(0), iny = getInput(1), out = getOutput();
                 double valx = inx.getValue(), valy = iny.getValue();
                 double grad = out.getGrad();
-                inx.setGrad(grad * valy / Math.pow(valy, 2));
-                iny.setGrad(-grad * valx / Math.pow(valy, 2));
+                inx.setGrad(grad / valy);
+                iny.setGrad(-grad * valx / (valy*valy));
             }
 
         };

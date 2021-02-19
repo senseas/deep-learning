@@ -1,5 +1,6 @@
 package com.deep.framework;
 
+import com.deep.framework.lang.Tenser;
 import org.junit.Test;
 
 import java.util.Arrays;
@@ -42,8 +43,8 @@ public class ArrayTest {
     public void arrayTest() {
         Double[][][] cc = new Double[][][]{
             {
-                {1d, 2d, 5d},
-                {6d, 3d, 4d},
+                {1d, 2d, 3d},
+                {5d, 4d, 6d},
             },
             {
                 {7d, 8d, 9d},
@@ -67,7 +68,13 @@ public class ArrayTest {
             }
         );
 
-        Array a = array.get(2, 0);
+        Array a = array.get(0, 0);
         a.forEach(i -> System.out.println(a.get(i)));
+    }
+
+    @Test
+    public void tenserTest() {
+        Tenser<Double> array = new Tenser(new int[]{3, 2, 3});
+        Tenser a = array.get(2, 0);
     }
 }
