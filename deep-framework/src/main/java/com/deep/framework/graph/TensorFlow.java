@@ -356,8 +356,38 @@ public class TensorFlow extends Shape {
         };
     }
 
-    public Tensor cross(Tensor<None>... input) {
-        return new TensorFunction("Cross", input) {
+    public Tensor softmaxCross(Tensor<None>... input) {
+        return new TensorFunction("SoftmaxCross", input) {
+
+            public Tensor compute() {
+                Tensor a = getInput(0), b = getInput(1);
+                return minus(add(mul(a, log(b))));
+            }
+
+            public void gradient() { }
+
+        };
+    }
+
+    public Tensor softmaxCrossx(Tensor<None>... input) {
+        return new TensorFunction("SoftmaxCrossx", input) {
+
+            public Tensor compute() {
+                Object A = getInput(0), B = getInput(1);
+                Tensor[] C = {new TensorConst(0d)};
+                forEach(A, B, (Func2<Tensor, Tensor>) (a, b) -> {
+                    C[0] = add(C[0], softmaxCross(a, b));
+                });
+                return C[0];
+            }
+
+            public void gradient() { }
+
+        };
+    }
+
+    public Tensor sigmoidCross(Tensor<None>... input) {
+        return new TensorFunction("SigmoidCross", input) {
 
             public Tensor compute() {
                 Tensor a = getInput(0), b = getInput(1);
@@ -369,14 +399,14 @@ public class TensorFlow extends Shape {
         };
     }
 
-    public Tensor crossx(Tensor<None>... input) {
-        return new TensorFunction("Crossx", input) {
+    public Tensor sigmoidCrossx(Tensor<None>... input) {
+        return new TensorFunction("SigmoidCrossx", input) {
 
             public Tensor compute() {
                 Object A = getInput(0), B = getInput(1);
                 Tensor[] C = {new TensorConst(0d)};
                 forEach(A, B, (Func2<Tensor, Tensor>) (a, b) -> {
-                    C[0] = add(C[0], cross(a, b));
+                    C[0] = add(C[0], sigmoidCross(a, b));
                 });
                 return C[0];
             }

@@ -47,7 +47,7 @@ public class LeNetTest extends Shape {
         Tensor tensor53 = tf.relux(tensor52);//10
 
         Tensor softmax = tf.softmax(tensor53);
-        Tensor<None> crossx = tf.crossx(label, softmax);
+        Tensor<None> crossx = tf.softmaxCrossx(label, softmax);
 
         Executor executor = new Executor(crossx, input, label);
         forEach(3, x -> {
