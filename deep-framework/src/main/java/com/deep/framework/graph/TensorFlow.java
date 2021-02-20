@@ -361,7 +361,7 @@ public class TensorFlow extends Shape {
 
             public Tensor compute() {
                 Tensor a = getInput(0), b = getInput(1);
-                return minus(mul(a, log(b)));
+                return minus(add(mul(a, log(b)), mul(minus(new TensorConst(1), a), log(minus(new TensorConst(1), b)))));
             }
 
             public void gradient() { }
