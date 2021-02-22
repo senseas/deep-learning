@@ -87,8 +87,26 @@ public class LeNetTest extends Shape {
     }
 
     @Test
+    public void evalTest() {
+        double[][][][] inputSet = MnistUtil.getImages(MnistUtil.TRAIN_IMAGES_FILE);
+        double[][][] labelSet = MnistUtil.getLabels(MnistUtil.TRAIN_LABELS_FILE);
+
+        Executor executor = ModelUtil.load(MnistUtil.BASE_PATH.concat("LetNet.obj"));
+        Tensor<None> crossx = executor.getTensor();
+        Tensor softmax = crossx.getInput()[1];
+        forEach(60000, i -> {
+            Object inSet = inputSet[i], labSet = labelSet[i];
+            executor.forward(inSet, labSet);
+            log.info("---------{}------------", i);
+            log(Shape.reshape(labSet, new Double[10]));
+            log(Shape.reshape(softmax.getOutput(), new None[10]));
+            log(crossx.getOutput());
+        });
+    }
+
+    @Test
     public void imgTest() {
-        int index = 59400;
+        int index = 12500;
         double[][][][] images = MnistUtil.getImages(MnistUtil.TRAIN_IMAGES_FILE);
         String fileName = MnistUtil.BASE_PATH.concat(String.valueOf(index)).concat(".JPEG");
         MnistUtil.drawGrayPicture(images[index][0], fileName);

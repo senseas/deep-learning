@@ -24,9 +24,10 @@ public class Executor<E> implements Serializable {
         this.label = label;
     }
 
-    public void init(Tensor a, Object b) {
-        Func2<None, Double> func = (m, n) -> m.setValue(n);
-        ForEach.farEach(a.getOutput(), b, func);
+    public void run(E input, E label) {
+        setInput(input);
+        setLabel(label);
+        run();
     }
 
     public void run() {
@@ -35,10 +36,20 @@ public class Executor<E> implements Serializable {
         tensor.reduce();
     }
 
-    public void run(E input, E label) {
-        init(this.input, input);
-        init(this.label, label);
-        this.run();
+    public void forward(E input, E label) {
+        setInput(input);
+        setLabel(label);
+        tensor.forward();
+    }
+
+    public void setInput(Object o) {
+        Func2<None, Double> func = (m, n) -> m.setValue(n);
+        ForEach.farEach(input.getOutput(), o, func);
+    }
+
+    public void setLabel(Object o) {
+        Func2<None, Double> func = (m, n) -> m.setValue(n);
+        ForEach.farEach(label.getOutput(), o, func);
     }
 
 }
