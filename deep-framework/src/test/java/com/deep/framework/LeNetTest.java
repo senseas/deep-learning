@@ -12,7 +12,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.junit.Test;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
+import java.util.TreeMap;
+import java.util.stream.IntStream;
 
 @Slf4j
 public class LeNetTest extends Shape {
@@ -47,17 +50,17 @@ public class LeNetTest extends Shape {
 
         Tensor tensor51 = tf.matmul(new Tensor("weight", new int[]{10, 32}), tensor43);//32*86
         Tensor tensor52 = tf.addx(tensor51, new Tensor("bias", new int[]{10, 1}));//10
-        Tensor tensor53 = tf.relux(tensor52);//10
+        Tensor tensor53 = tf.sigmoidx(tensor52);//10
 
         Tensor softmax = tf.softmax(tensor53);
         Tensor<None> crossx = tf.softmaxCrossx(label, softmax);
 
         Executor executor = new Executor(crossx, input, label);
-        forEach(3, x -> {
+        forEach(20, x -> {
             forEach(60000, i -> {
                 Object inSet = inputSet[i], labSet = labelSet[i];
                 executor.run(inSet, labSet);
-                if (i % 100 == 0) {
+                if (i % 500 == 0) {
                     log.info("---------{}------------", i);
                     ModelUtil.save(executor, MnistUtil.BASE_PATH.concat(i + "LetNet.obj"));
                     log(Shape.reshape(labSet, new Double[10]));
@@ -76,16 +79,18 @@ public class LeNetTest extends Shape {
         Executor executor = ModelUtil.load(MnistUtil.BASE_PATH.concat("LetNet.obj"));
         Tensor<None> crossx = executor.getTensor();
         Tensor softmax = crossx.getInput()[1];
-        forEach(60000, i -> {
-            Object inSet = inputSet[i], labSet = labelSet[i];
-            executor.run(inSet, labSet);
-            if (i % 100 == 0) {
-                log.info("---------{}------------", i);
-                ModelUtil.save(executor, MnistUtil.BASE_PATH.concat(i + "LetNet.obj"));
-                log(Shape.reshape(labSet, new Double[10]));
-                log(Shape.reshape(softmax.getOutput(), new None[10]));
-                log(crossx.getOutput());
-            }
+        forEach(20, x -> {
+            forEach(60000, i -> {
+                Object inSet = inputSet[i], labSet = labelSet[i];
+                executor.run(inSet, labSet);
+                if (i % 500 == 0) {
+                    log.info("---------{}------------", i);
+                    ModelUtil.save(executor, MnistUtil.BASE_PATH.concat(i + "LetNet.obj"));
+                    log(Shape.reshape(labSet, new Double[10]));
+                    log(Shape.reshape(softmax.getOutput(), new None[10]));
+                    log(crossx.getOutput());
+                }
+            });
         });
     }
 
@@ -99,13 +104,19 @@ public class LeNetTest extends Shape {
         Tensor softmax = crossx.getInput()[1];
         List list = new ArrayList();
         forEach(60000, i -> {
+            log.info("---------{}------------", i);
             Object inSet = inputSet[i], labSet = labelSet[i];
             executor.forward(inSet, labSet);
-            if (crossx.getOutput().getValue() > 1.8)
-                list.add(crossx.getOutput());
-            log.info("---------{}:{}-----------", i, list.size());
-            log(Shape.reshape(labSet, new Double[10]));
-            log(Shape.reshape(softmax.getOutput(), new None[10]));
+            Double[] label = Shape.reshape(labSet, new Double[10]);
+            None[] output = Shape.reshape(softmax.getOutput(), new None[10]);
+
+            double sum = IntStream.range(0, 9).mapToDouble(a -> a * label[a]).sum();
+            TreeMap<Double, Integer> map = new TreeMap<>(Comparator.reverseOrder());
+            IntStream.range(0, 9).forEach(a -> map.put(output[a].getValue(), a));
+            if (sum == map.get(map.firstKey())) list.add(output);
+            log.info("标签：  {}", sum);
+            log.info("输出：  {}", JSONObject.toJSONString(map));
+            log.info("识别率: {}", ((double) list.size()) / (i == 0 ? 1 : i));
             log(crossx.getOutput());
         });
     }
