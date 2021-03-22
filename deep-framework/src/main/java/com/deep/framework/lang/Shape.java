@@ -28,6 +28,10 @@ public class Shape extends ForEach {
         return (E) fill(a, o -> new Tensor(0d));
     }
 
+    public static <E> E zeroNones(Object a) {
+        return (E) fill(a, o -> new None(0d));
+    }
+
     public static <E> E zeros(Object a, int b[]) {
         return (E) fill(a, o -> new Tensor(b));
     }

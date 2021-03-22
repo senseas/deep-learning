@@ -29,38 +29,46 @@ public class TensorFlux extends Shape {
         });
     }
 
-    public static void compute(Tensor<None> tensor) {
-        None none = tensor.compute(), out = tensor.getOutput();
-        if (Objects.isNull(out)) {
-            tensor.setOutput(none);
+    public static void compute(Tensor tensor) {
+        Object nones = tensor.compute(), outs = tensor.getOutput();
+        if (Objects.nonNull(outs)) {
+            farEach(nones, outs, (n, o) -> {
+                None none = (None) n, out = (None) o;
+                out.setGrad(null);
+                out.setReduce(false);
+                out.setValue(none.getValue());
+            });
         } else {
-            out.setGrad(null);
-            out.setReduce(false);
-            out.setValue(none.getValue());
+            tensor.setOutput(nones);
         }
     }
 
-    public static void computer(Tensor<None> tensor) {
+    public static void computer(Tensor tensor) {
         if (BeanUtil.isNone(tensor)) {
-            tensor.getOutput().setGrad(null);
-            tensor.getOutput().setReduce(false);
+            farEach(tensor.getOutput(), o -> {
+                None out = (None) o;
+                out.setGrad(null);
+                out.setReduce(false);
+            });
         } else {
             tensor.forward();
         }
     }
 
-    public static void gradient(Tensor<None> tensor) {
+    public static void gradient(Tensor tensor) {
         tensor.gradient();
     }
 
-    public static void reducer(Tensor<None> tensor) {
+    public static void reducer(Tensor tensor) {
         if (BeanUtil.isNone(tensor)) {
-            None none = tensor.getOutput();
-            if (!(tensor instanceof TensorConst) && !none.isReduce()) {
-                none.setReduce(true);
-                double value = none.getValue() - Executor.rate * none.getGrad();
-                none.setValue(value);
-            }
+            farEach(tensor.getOutput(), o -> {
+                None none = (None) o;
+                if (!(tensor instanceof TensorConst) && !none.isReduce()) {
+                    none.setReduce(true);
+                    double value = none.getValue() - Executor.rate * none.getGrad();
+                    none.setValue(value);
+                }
+            });
         } else {
             tensor.reduce();
         }

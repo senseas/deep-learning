@@ -17,13 +17,13 @@ public class TensorOparetor extends Tensor {
         }
     }
 
-    public None getInput(int i) {
+    public <M> M getInput(int i) {
         Tensor input = getInput()[i];
-        return (None) input.getOutput();
+        return (M) input.getOutput();
     }
 
-    public None getOutput() {
-        return (None) output;
+    public Object getOutput() {
+        return output;
     }
 
     public void forward() {
