@@ -6,6 +6,7 @@ import com.deep.framework.lang.util.BeanUtil;
 
 import java.io.Serializable;
 import java.lang.reflect.Array;
+import java.util.Objects;
 import java.util.stream.IntStream;
 
 public class ForEach implements Serializable {
@@ -32,16 +33,29 @@ public class ForEach implements Serializable {
 
     public static Object fill(Object a, Fill func) {
         if (BeanUtil.isTensor(a)) {
-            forEach(Array.getLength(a), i -> {
-                Object m = Array.get(a, i);
+            final Object[] b = {null};
+            final int length = Array.getLength(a);
+            forEach(length, i -> {
+                Object m = Array.get(a, i), n = b[0];
                 if (BeanUtil.isNotTensor(m)) {
-                    Array.set(a, i, func.apply(m));
+                    Object o = func.apply(m);
+                    if (Objects.isNull(n)) {
+                        n = Array.newInstance(o.getClass(), length);
+                        b[0] = n;
+                    }
+                    Array.set(n, i, o);
                 } else {
-                    fill(m, func);
+                    Object o = fill(m, func);
+                    if (Objects.isNull(n)) {
+                        n = Array.newInstance(o.getClass(), length);
+                        b[0] = n;
+                    }
+                    Array.set(n, i, o);
                 }
             });
+            return b[0];
         }
-        return a;
+        return func.apply(a);
     }
 
     public static Object fill(Object a, Object b, Fill func) {

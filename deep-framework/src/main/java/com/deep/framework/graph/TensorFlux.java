@@ -68,7 +68,7 @@ public class TensorFlux extends Shape {
 
     public static <E> E getOutput(Object a) {
         if (BeanUtil.isTensor(a)) {
-            return (E) fill(a, shape(Object.class, a), b -> {
+            return (E) fill(a, b -> {
                 Tensor o = (Tensor) b;
                 return o.getOutput();
             });
@@ -80,7 +80,7 @@ public class TensorFlux extends Shape {
 
     public static <E> E getTensor(Object a) {
         if (BeanUtil.isTensor(a)) {
-            return (E) fill(a, shape(Tensor.class, a), b -> {
+            return (E) fill(a, b -> {
                 None o = (None) b;
                 return new Tensor(o);
             });
