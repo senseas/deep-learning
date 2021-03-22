@@ -24,16 +24,16 @@ public class Shape extends ForEach {
         return (E) IntStream.range(0, length).mapToObj(a -> new None(random.nextGaussian(0, 0.1))).toArray(None[]::new);
     }
 
-    public static <E> E zeros(Object a) {
+    public static <E> E zeroTensors(Object a) {
         return (E) fill(a, o -> new Tensor(0d));
+    }
+
+    public static <E> E zeroTensors(Object a, int b[]) {
+        return (E) fill(a, o -> new Tensor(b));
     }
 
     public static <E> E zeroNones(Object a) {
         return (E) fill(a, o -> new None(0d));
-    }
-
-    public static <E> E zeros(Object a, int b[]) {
-        return (E) fill(a, o -> new Tensor(b));
     }
 
     public static Object shape(Class clas, Object a) {

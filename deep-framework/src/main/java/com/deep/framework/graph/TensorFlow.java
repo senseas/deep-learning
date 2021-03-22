@@ -450,7 +450,7 @@ public class TensorFlow extends Shape {
             public Object compute() {
                 Tensor[][] A = getInput(0), B = getInput(1);
                 int height = B.length - A.length + 1, width = B[0].length - A[0].length + 1;
-                Tensor[][] C = zeros(new Tensor[height][width]);
+                Tensor[][] C = zeroTensors(new Tensor[height][width]);
                 forEach(height, width, A.length, A[0].length, (h, w, m, n) -> {
                     C[h][w] = add(C[h][w], mul(B[h + m][w + n], A[m][n]));
                 });
@@ -468,7 +468,7 @@ public class TensorFlow extends Shape {
             public Object compute() {
                 Tensor[][][] A = getInput(0), B = getInput(1);
                 int height = B[0].length - A[0].length + 1, width = B[0][0].length - A[0][0].length + 1;
-                Tensor[] C = zeros(new Tensor[A.length], new int[]{height, width});
+                Tensor[] C = zeroTensors(new Tensor[A.length], new int[]{height, width});
                 forEach(B.length, A.length, (i, l) -> {
                     C[l] = addx(C[l], conv(new Tensor(A[l]), new Tensor(B[i])));
                 });
@@ -486,7 +486,7 @@ public class TensorFlow extends Shape {
             public Tensor[][] compute() {
                 Tensor[][] A = getInput(0);
                 int height = (int) Math.ceil(A.length / 2.0), width = (int) Math.ceil(A[0].length / 2.0);
-                Tensor[][] B = zeros(new Tensor[height][width]);
+                Tensor[][] B = zeroTensors(new Tensor[height][width]);
                 forEach(A.length, A[0].length, (y, x) -> {
                     B[y / 2][x / 2] = max(B[y / 2][x / 2], A[y][x]);
                 });
