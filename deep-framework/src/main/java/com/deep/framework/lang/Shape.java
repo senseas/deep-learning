@@ -2,13 +2,10 @@ package com.deep.framework.lang;
 
 import com.deep.framework.graph.None;
 import com.deep.framework.graph.Tensor;
-import com.deep.framework.lang.util.BeanUtil;
 import org.apache.commons.math3.random.RandomDataGenerator;
 
 import java.lang.reflect.Array;
-import java.util.Arrays;
-import java.util.LinkedList;
-import java.util.Queue;
+import java.util.*;
 import java.util.stream.IntStream;
 
 public class Shape extends ForEach {
@@ -40,21 +37,20 @@ public class Shape extends ForEach {
         return Array.newInstance(clas, shapes(a));
     }
 
-    public static <E> int[] shapes(E a, int... list) {
-        if (BeanUtil.isTensor(a)) {
-            int length = Array.getLength(list);
-            list = Arrays.copyOf(list, length + 1);
-            Array.set(list, length, Array.getLength(a));
-            return shapes(Array.get(a, 0), list);
-        }
-        return list;
-    }
-
     public static <M> M reshape(Object A, Object B) {
         Queue link = new LinkedList();
         forEach(A, a -> link.add(a));
         forEach(B, (b, i) -> b[i] = link.poll());
         return (M) B;
+    }
+
+    public static int[] shapes(Object arr) {
+        List<Integer> list = new ArrayList();
+        while (Objects.nonNull(arr) && arr.getClass().isArray()) {
+            list.add(Array.getLength(arr));
+            arr = Array.get(arr, 0);
+        }
+        return list.stream().mapToInt(Integer::intValue).toArray();
     }
 
 }
