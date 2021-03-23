@@ -276,6 +276,32 @@ public class TensorFlow extends Shape {
         };
     }
 
+    public Tensor matmulTran(Tensor<Tensor[][]>... input) {
+        return new TensorOparetor("MatmulTran", input) {
+
+            public Object compute() {
+                None[][] A = getInput(0), B = getInput(1);
+                None[][] C = zeroNones(new None[A.length][B.length]);
+                farEach(A.length, B.length, A[0].length, (i, l, j) -> {
+                    None inx = A[i][j], iny = B[l][j], out = C[i][l];
+                    out.setValue(out.getValue() + inx.getValue() * iny.getValue());
+                });
+                return C;
+            }
+
+            public void gradient() {
+                None[][] A = getInput(0), B = getInput(1);
+                None[][] C = (None[][]) getOutput();
+                farEach(A.length, B.length, A[0].length, (i, l, j) -> {
+                    None inx = A[i][j], iny = B[l][j], out = C[i][l];
+                    inx.setGrad(out.getGrad() * iny.getValue());
+                    iny.setGrad(out.getGrad() * inx.getValue());
+                });
+            }
+
+        };
+    }
+
     public Tensor shape(Tensor... input) {
         return new TensorFunction("Shape", input) {
 
@@ -525,6 +551,23 @@ public class TensorFlow extends Shape {
                     b[i] = div(exp(a), sum(expx(new Tensor(A))));
                 });
                 return B;
+            }
+
+            public void gradient() { }
+
+        };
+    }
+
+    public Tensor selfAttention(Tensor... input) {
+        return new TensorFunction("Softmax", input) {
+
+            public Object compute() {
+                Tensor[][] A = getInput(0);
+                Tensor[][][] B = getInput(1);
+                Tensor C0 = matmul(new Tensor(A), new Tensor(B[0]));
+                Tensor C1 = matmul(new Tensor(A), new Tensor(B[1]));
+                Tensor C2 = matmul(new Tensor(A), new Tensor(B[2]));
+                return matmul(prod(matmulTran(C0, C1), new TensorConst(8)), C2);
             }
 
             public void gradient() { }
