@@ -1,5 +1,7 @@
 package com.deep.framework.graph;
 
+import com.deep.framework.lang.util.BeanUtil;
+
 import java.util.Arrays;
 import java.util.stream.Stream;
 
@@ -19,6 +21,7 @@ public class TensorOparetor extends Tensor {
 
     public <M> M getInput(int i) {
         Tensor input = getInput()[i];
+        if (BeanUtil.isFunction(input)) return TensorFlux.getOutput(input.getFunction());
         return (M) input.getOutput();
     }
 

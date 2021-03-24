@@ -471,19 +471,28 @@ public class TensorFlow extends Shape {
     }
 
     public Tensor conv(Tensor<None[][]>... input) {
-        return new TensorFunction("Conv", input) {
+        return new TensorOparetor("Conv", input) {
 
-            public Object compute() {
-                Tensor[][] A = getInput(0), B = getInput(1);
+            public None[][] compute() {
+                None[][] A = getInput(0), B = getInput(1);
                 int height = B.length - A.length + 1, width = B[0].length - A[0].length + 1;
-                Tensor[][] C = zeroTensors(new Tensor[height][width]);
-                forEach(height, width, A.length, A[0].length, (h, w, m, n) -> {
-                    C[h][w] = add(C[h][w], mul(B[h + m][w + n], A[m][n]));
+                None[][] C = zeroNones(new None[height][width]);
+                farEach(height, width, A.length, A[0].length, (h, w, m, n) -> {
+                    None inx = A[m][n], iny = B[h + m][w + n], out = C[h][w];
+                    out.setValue(out.getValue() + inx.getValue() * iny.getValue());
                 });
                 return C;
             }
 
-            public void gradient() { }
+            public void gradient() {
+                None[][] A = getInput(0), B = getInput(1);
+                None[][] C = (None[][]) getOutput();
+                farEach(C.length, C[0].length, A.length, A[0].length, (h, w, m, n) -> {
+                    None inx = A[m][n], iny = B[h + m][w + n], out = C[h][w];
+                    inx.setGrad(out.getGrad() * iny.getValue());
+                    iny.setValue(out.getGrad() * inx.getValue());
+                });
+            }
 
         };
     }
