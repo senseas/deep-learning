@@ -567,7 +567,7 @@ public class TensorFlow extends Shape {
                 Tensor C0 = matmul(new Tensor(A), new Tensor(B[0]));
                 Tensor C1 = matmul(new Tensor(A), new Tensor(B[1]));
                 Tensor C2 = matmul(new Tensor(A), new Tensor(B[2]));
-                return matmul(prod(matmulTran(C0, C1), new TensorConst(8)), C2);
+                return matmul(softmax(prod(matmulTran(C0, C1), new TensorConst(8))), C2);
             }
 
             public void gradient() { }
