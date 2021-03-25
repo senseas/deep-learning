@@ -2,9 +2,11 @@ package com.deep.framework;
 
 import com.alibaba.fastjson.JSONObject;
 import com.deep.framework.framework.Executor;
+import com.deep.framework.graph.None;
 import com.deep.framework.graph.Tensor;
 import com.deep.framework.graph.TensorFlow;
 import com.deep.framework.lang.Shape;
+import com.deep.framework.lang.function.Fill;
 import com.deep.framework.lang.util.ImageUtil;
 import com.deep.framework.lang.util.MnistUtil;
 import com.deep.framework.lang.util.ModelUtil;
@@ -55,7 +57,7 @@ public class DenseNetTest extends Shape {
                 Object inSet = inputSet[i], labSet = labelSet[i];
                 executor.run(inSet, labSet);
                 ModelUtil.save(executor, MnistUtil.BASE_PATH.concat(i + "LetNet.obj"));
-                Double[][][] data = Shape.reshape(labSet, new Double[3][140][140]);
+                Double[][][] data = Shape.reshape(tensor63.getOutput(), new Double[3][140][140], (Fill<None>) (None a) ->(double) a.getValue());
                 ImageUtil.rgb2img(data, i + "_");
                 log(squarex.getOutput());
             });
