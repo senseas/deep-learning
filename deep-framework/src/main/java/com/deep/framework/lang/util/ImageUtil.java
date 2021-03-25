@@ -15,9 +15,9 @@ public class ImageUtil {
     static String BASE_PATH = "E:/";
     static String OUTPUT_DIR = "E:/img/";
     static String[] TRIAN_SET_32 = new String[]{
-        "D:/GitHub/deep-learning/deep-framework/src/main/resources/DataSet/a-140.jpg",
-        "D:/GitHub/deep-learning/deep-framework/src/main/resources/DataSet/b-140.jpg",
-        "D:/GitHub/deep-learning/deep-framework/src/main/resources/DataSet/k-140.jpg"
+        "D:/Workspaces/deep-learning/deep-framework/src/main/resources/DataSet/a-140.jpg",
+        "D:/Workspaces/deep-learning/deep-framework/src/main/resources/DataSet/b-140.jpg",
+        "D:/Workspaces/deep-learning/deep-framework/src/main/resources/DataSet/k-140.jpg"
     };
 
     public static void main(String[] args) {

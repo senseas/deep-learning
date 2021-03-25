@@ -2,7 +2,6 @@ package com.deep.framework;
 
 import com.alibaba.fastjson.JSONObject;
 import com.deep.framework.framework.Executor;
-import com.deep.framework.graph.None;
 import com.deep.framework.graph.Tensor;
 import com.deep.framework.graph.TensorFlow;
 import com.deep.framework.lang.Shape;
@@ -24,43 +23,38 @@ public class DenseNetTest extends Shape {
         Tensor input = new Tensor(new int[]{3, 140, 140});
         Tensor label = new Tensor(new int[]{3, 140, 140});
 
-        Tensor tensor11 = tf.convx(new Tensor("weight", new int[]{10, 5, 5}), input);//6*24
-        Tensor tensor12 = tf.relux(tensor11);//6*24
-        Tensor tensor13 = tf.maxpoolx(tensor12);//6*12
+        Tensor tensor11 = tf.convx(new Tensor("weight", new int[]{10, 5, 5}), input);//10*136*136
+        Tensor tensor12 = tf.relux(tensor11);//10*136*136
+        Tensor tensor13 = tf.maxpoolx(tensor12);//10*68*68
 
-        Tensor tensor21 = tf.convx(new Tensor("weight", new int[]{16, 5, 5}), tensor13);//16*8
-        Tensor tensor22 = tf.relux(tensor21);//16*8
-        Tensor tensor23 = tf.maxpoolx(tensor22);//16*4
+        Tensor tensor21 = tf.convx(new Tensor("weight", new int[]{16, 5, 5}), tensor13);//16*64*64
+        Tensor tensor22 = tf.relux(tensor21);//16*64*64
+        Tensor tensor23 = tf.maxpoolx(tensor22);//16*32*32
 
-        Tensor tensor31 = tf.convx(new Tensor("weight", new int[]{32, 4, 4}), tensor23);//32*1
-        Tensor tensor30 = tf.shape(tensor31, new Tensor(new int[]{32, 1}));
-        Tensor tensor32 = tf.matmul(new Tensor("weight", new int[]{86, 32}), tensor30);//86*1
-        Tensor tensor33 = tf.addx(tensor32, new Tensor("bias", new int[]{86, 1}));//86*1
-        Tensor tensor34 = tf.relux(tensor33);//86*1
+        Tensor tensor31 = tf.convx(new Tensor("weight", new int[]{32, 5, 5}), tensor23);//32*28*28
+        Tensor tensor32 = tf.relux(tensor31);//32*28*28
+        Tensor tensor33 = tf.maxpoolx(tensor32);//32*14*14
 
-        Tensor tensor41 = tf.matmul(new Tensor("weight", new int[]{32, 86}), tensor34);//32*86
-        Tensor tensor42 = tf.addx(tensor41, new Tensor("bias", new int[]{32, 1}));
-        Tensor tensor43 = tf.relux(tensor42);
+        Tensor tensor41 = tf.demaxpoolx(tensor33);//32*28*28
+        Tensor tensor42 = tf.relux(tensor41);//32*28*28
+        Tensor tensor43 = tf.deconvx(new Tensor("weight", new int[]{16, 5, 5}), tensor42);//16*32*32
 
-        Tensor tensor51 = tf.matmul(new Tensor("weight", new int[]{10, 32}), tensor43);//32*86
-        Tensor tensor52 = tf.addx(tensor51, new Tensor("bias", new int[]{10, 1}));//10
-        Tensor tensor53 = tf.sigmoidx(tensor52);//10
+        Tensor tensor51 = tf.demaxpoolx(tensor43);//16*64*64
+        Tensor tensor52 = tf.relux(tensor51);//16*64*64
+        Tensor tensor53 = tf.deconvx(new Tensor("weight", new int[]{10, 5, 5}), tensor52);//10*68*68
 
-        Tensor softmax = tf.softmax(tensor53);
-        Tensor<None> crossx = tf.softmaxCrossx(label, softmax);
+        Tensor tensor61 = tf.demaxpoolx(tensor53);//10*136*136
+        Tensor tensor62 = tf.relux(tensor61);//10*136*136
+        Tensor tensor63 = tf.deconvx(new Tensor("weight", new int[]{3, 5, 5}), tensor62);//3*140*140
+        Tensor squarex = tf.squarex(label, tensor63);
 
-        Executor executor = new Executor(crossx, input, label);
-        forEach(20, x -> {
-            forEach(60000, i -> {
+        Executor executor = new Executor(squarex, input, label);
+        forEach(600, x -> {
+            forEach(3, i -> {
+                log.info("---------{}------------", i);
                 Object inSet = inputSet[i], labSet = labelSet[i];
                 executor.run(inSet, labSet);
-                if (i % 500 == 0) {
-                    log.info("---------{}------------", i);
-                    ModelUtil.save(executor, MnistUtil.BASE_PATH.concat(i + "LetNet.obj"));
-                    log(Shape.reshape(labSet, new Double[10]));
-                    log(Shape.reshape(softmax.getOutput(), new None[10]));
-                    log(crossx.getOutput());
-                }
+                ModelUtil.save(executor, MnistUtil.BASE_PATH.concat(i + "LetNet.obj"));
             });
         });
     }
