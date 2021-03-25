@@ -51,10 +51,13 @@ public class DenseNetTest extends Shape {
         Executor executor = new Executor(squarex, input, label);
         forEach(600, x -> {
             forEach(3, i -> {
-                log.info("---------{}------------", i);
+                log.info("---------{}:{}------------", x, i);
                 Object inSet = inputSet[i], labSet = labelSet[i];
                 executor.run(inSet, labSet);
                 ModelUtil.save(executor, MnistUtil.BASE_PATH.concat(i + "LetNet.obj"));
+                Double[][][] data = Shape.reshape(labSet, new Double[3][140][140]);
+                ImageUtil.rgb2img(data, i + "_");
+                log(squarex.getOutput());
             });
         });
     }

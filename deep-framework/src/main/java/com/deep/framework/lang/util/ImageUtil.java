@@ -12,12 +12,12 @@ import java.io.IOException;
  **/
 public class ImageUtil {
 
-    static String BASE_PATH = "E:/";
-    static String OUTPUT_DIR = "E:/img/";
+    static String BASE_PATH = "D:/";
+    static String OUTPUT_DIR = "D:/img/";
     static String[] TRIAN_SET_32 = new String[]{
-        "D:/Workspaces/deep-learning/deep-framework/src/main/resources/DataSet/a-140.jpg",
-        "D:/Workspaces/deep-learning/deep-framework/src/main/resources/DataSet/b-140.jpg",
-        "D:/Workspaces/deep-learning/deep-framework/src/main/resources/DataSet/k-140.jpg"
+            "D:/Workspaces/deep-learning/deep-framework/src/main/resources/DataSet/a-140.jpg",
+            "D:/Workspaces/deep-learning/deep-framework/src/main/resources/DataSet/b-140.jpg",
+            "D:/Workspaces/deep-learning/deep-framework/src/main/resources/DataSet/k-140.jpg"
     };
 
     public static void main(String[] args) {
@@ -157,6 +157,28 @@ public class ImageUtil {
             }
             ImageIO.write(image, "JPEG", new File(OUTPUT_DIR + name));
 
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void rgb2img(Double[][][] input, String name) {
+        try {
+            int width = input[0].length;
+            int height = input[0][0].length;
+            BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+            File file = new File(OUTPUT_DIR);
+            if (file.exists()) file.delete();
+            file.mkdirs();
+            for (int y = 0; y < height; y++) {
+                for (int x = 0; x < width; x++) {
+                    int r = ((int) (input[0][y][x] * 255)) << 16;
+                    int g = ((int) (input[1][y][x] * 255)) << 8;
+                    int b = ((int) (input[2][y][x] * 255));
+                    image.setRGB(x, y, r + g + b);
+                }
+            }
+            ImageIO.write(image, "JPG", new File(OUTPUT_DIR + name + ".jpg"));
         } catch (IOException e) {
             e.printStackTrace();
         }

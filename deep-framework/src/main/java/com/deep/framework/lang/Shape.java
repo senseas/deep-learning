@@ -2,6 +2,7 @@ package com.deep.framework.lang;
 
 import com.deep.framework.graph.None;
 import com.deep.framework.graph.Tensor;
+import com.deep.framework.lang.function.Fill;
 import org.apache.commons.math3.random.RandomDataGenerator;
 
 import java.lang.reflect.Array;
@@ -41,6 +42,13 @@ public class Shape extends ForEach {
         Queue link = new LinkedList();
         forEach(A, a -> link.add(a));
         forEach(B, (b, i) -> b[i] = link.poll());
+        return (M) B;
+    }
+
+    public static <M> M reshape(Object A, Object B, Fill fill) {
+        Queue link = new LinkedList();
+        forEach(A, a -> link.add(a));
+        forEach(B, (b, i) -> b[i] = fill.apply(link.poll()));
         return (M) B;
     }
 
