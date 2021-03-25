@@ -550,7 +550,7 @@ public class TensorFlow extends Shape {
                 int height = B[0].length - A[0].length + 1, width = B[0][0].length - A[0][0].length + 1;
                 Tensor[] C = zeroTensors(new Tensor[A.length], new int[]{height, width});
                 forEach(B.length, A.length, (i, l) -> {
-                    C[l] = addx(C[l], conv(new Tensor(A[l]), new Tensor(B[i])));
+                    C[l] = addx(C[l], deconv(new Tensor(A[l]), new Tensor(B[i])));
                 });
                 return C;
             }
@@ -620,7 +620,7 @@ public class TensorFlow extends Shape {
                 Tensor[][][] A = getInput(0);
                 Tensor[] B = new Tensor[A.length];
                 forEach(A.length, i -> {
-                    B[i] = maxpool(new Tensor(A[i]));
+                    B[i] = demaxpool(new Tensor(A[i]));
                 });
                 return B;
             }
