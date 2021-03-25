@@ -547,7 +547,7 @@ public class TensorFlow extends Shape {
 
             public Object compute() {
                 Tensor[][][] A = getInput(0), B = getInput(1);
-                int height = B[0].length - A[0].length + 1, width = B[0][0].length - A[0][0].length + 1;
+                int height = B[0].length + A[0].length - 1, width = B[0][0].length + A[0][0].length - 1;
                 Tensor[] C = zeroTensors(new Tensor[A.length], new int[]{height, width});
                 forEach(B.length, A.length, (i, l) -> {
                     C[l] = addx(C[l], deconv(new Tensor(A[l]), new Tensor(B[i])));
