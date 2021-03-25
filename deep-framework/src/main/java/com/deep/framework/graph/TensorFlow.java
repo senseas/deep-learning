@@ -256,7 +256,7 @@ public class TensorFlow extends Shape {
             public Object compute() {
                 None[][] A = getInput(0), B = getInput(1);
                 None[][] C = zeroNones(new None[A.length][B[0].length]);
-                farEach(A.length, B[0].length, A[0].length, (i, l, j) -> {
+                forEach(A.length, B[0].length, A[0].length, (i, l, j) -> {
                     None inx = A[i][j], iny = B[j][l], out = C[i][l];
                     out.setValue(out.getValue() + inx.getValue() * iny.getValue());
                 });
@@ -266,7 +266,7 @@ public class TensorFlow extends Shape {
             public void gradient() {
                 None[][] A = getInput(0), B = getInput(1);
                 None[][] C = (None[][]) getOutput();
-                farEach(A.length, B[0].length, A[0].length, (i, l, j) -> {
+                forEach(A.length, B[0].length, A[0].length, (i, l, j) -> {
                     None inx = A[i][j], iny = B[j][l], out = C[i][l];
                     inx.setGrad(out.getGrad() * iny.getValue());
                     iny.setGrad(out.getGrad() * inx.getValue());
@@ -282,7 +282,7 @@ public class TensorFlow extends Shape {
             public Object compute() {
                 None[][] A = getInput(0), B = getInput(1);
                 None[][] C = zeroNones(new None[A.length][B.length]);
-                farEach(A.length, B.length, A[0].length, (i, l, j) -> {
+                forEach(A.length, B.length, A[0].length, (i, l, j) -> {
                     None inx = A[i][j], iny = B[l][j], out = C[i][l];
                     out.setValue(out.getValue() + inx.getValue() * iny.getValue());
                 });
@@ -292,7 +292,7 @@ public class TensorFlow extends Shape {
             public void gradient() {
                 None[][] A = getInput(0), B = getInput(1);
                 None[][] C = (None[][]) getOutput();
-                farEach(A.length, B.length, A[0].length, (i, l, j) -> {
+                forEach(A.length, B.length, A[0].length, (i, l, j) -> {
                     None inx = A[i][j], iny = B[l][j], out = C[i][l];
                     inx.setGrad(out.getGrad() * iny.getValue());
                     iny.setGrad(out.getGrad() * inx.getValue());
@@ -477,7 +477,7 @@ public class TensorFlow extends Shape {
                 None[][] A = getInput(0), B = getInput(1);
                 int height = B.length - A.length + 1, width = B[0].length - A[0].length + 1;
                 None[][] C = zeroNones(new None[height][width]);
-                farEach(height, width, A.length, A[0].length, (h, w, m, n) -> {
+                forEach(height, width, A.length, A[0].length, (h, w, m, n) -> {
                     None inx = A[m][n], iny = B[h + m][w + n], out = C[h][w];
                     out.setValue(out.getValue() + inx.getValue() * iny.getValue());
                 });
@@ -487,7 +487,7 @@ public class TensorFlow extends Shape {
             public void gradient() {
                 None[][] A = getInput(0), B = getInput(1);
                 None[][] C = (None[][]) getOutput();
-                farEach(C.length, C[0].length, A.length, A[0].length, (h, w, m, n) -> {
+                forEach(C.length, C[0].length, A.length, A[0].length, (h, w, m, n) -> {
                     None inx = A[m][n], iny = B[h + m][w + n], out = C[h][w];
                     inx.setGrad(out.getGrad() * iny.getValue());
                     iny.setValue(out.getGrad() * inx.getValue());
@@ -499,6 +499,51 @@ public class TensorFlow extends Shape {
 
     public Tensor convx(Tensor... input) {
         return new TensorFunction("Convx", input) {
+
+            public Object compute() {
+                Tensor[][][] A = getInput(0), B = getInput(1);
+                int height = B[0].length - A[0].length + 1, width = B[0][0].length - A[0][0].length + 1;
+                Tensor[] C = zeroTensors(new Tensor[A.length], new int[]{height, width});
+                forEach(B.length, A.length, (i, l) -> {
+                    C[l] = addx(C[l], conv(new Tensor(A[l]), new Tensor(B[i])));
+                });
+                return C;
+            }
+
+            public void gradient() { }
+
+        };
+    }
+
+    public Tensor deconv(Tensor<None[][]>... input) {
+        return new TensorOparetor("Deconv", input) {
+
+            public None[][] compute() {
+                None[][] A = getInput(0), B = getInput(1);
+                int height = B.length + A.length - 1, width = B[0].length + A[0].length - 1;
+                None[][] C = zeroNones(new None[height][width]);
+                forEach(B.length, B[0].length, A.length, A[0].length, (h, w, m, n) -> {
+                    None inx = A[m][n], iny = B[h][w], out = C[h + m][w + n];
+                    out.setValue(out.getValue() + inx.getValue() * iny.getValue());
+                });
+                return C;
+            }
+
+            public void gradient() {
+                None[][] A = getInput(0), B = getInput(1);
+                None[][] C = (None[][]) getOutput();
+                forEach(B.length, B[0].length, A.length, A[0].length, (h, w, m, n) -> {
+                    None inx = A[m][n], iny = B[h][w], out = C[h + m][w + n];
+                    inx.setGrad(out.getGrad() * iny.getValue());
+                    iny.setValue(out.getGrad() * inx.getValue());
+                });
+            }
+
+        };
+    }
+
+    public Tensor deconvx(Tensor... input) {
+        return new TensorFunction("Deconvx", input) {
 
             public Object compute() {
                 Tensor[][][] A = getInput(0), B = getInput(1);
@@ -535,6 +580,42 @@ public class TensorFlow extends Shape {
 
     public Tensor maxpoolx(Tensor input) {
         return new TensorFunction("Maxpoolx", input) {
+
+            public Object compute() {
+                Tensor[][][] A = getInput(0);
+                Tensor[] B = new Tensor[A.length];
+                forEach(A.length, i -> {
+                    B[i] = maxpool(new Tensor(A[i]));
+                });
+                return B;
+            }
+
+            public void gradient() { }
+
+        };
+    }
+
+    public Tensor demaxpool(Tensor input) {
+        return new TensorFunction("Demaxpool", input) {
+
+            public Tensor[][] compute() {
+                Tensor[][] A = getInput(0);
+                int height = A.length * 2, width = A[0].length * 2;
+                Tensor[][] B = zeroTensors(new Tensor[height][width]);
+                forEach(height, width, (y, x) -> {
+                    System.out.println(y / 2 + ":" + x / 2);
+                    B[y][x] = max(B[y][x], A[y / 2][x / 2]);
+                });
+                return B;
+            }
+
+            public void gradient() { }
+
+        };
+    }
+
+    public Tensor demaxpoolx(Tensor input) {
+        return new TensorFunction("Demaxpoolx", input) {
 
             public Object compute() {
                 Tensor[][][] A = getInput(0);

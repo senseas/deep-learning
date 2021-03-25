@@ -54,7 +54,7 @@ public class AppTest {
     }
 
     @Test
-    public void cnnTest() {
+    public void convTest() {
         TensorFlow tf = new TensorFlow();
         Tensor tensor = tf.conv(new Tensor(new int[]{5, 5}), new Tensor(new int[]{140, 140}));
         Executor executor = new Executor(tensor);
@@ -62,9 +62,25 @@ public class AppTest {
     }
 
     @Test
-    public void cnnxTest() {
+    public void convxTest() {
         TensorFlow tf = new TensorFlow();
         Tensor tensor = tf.convx(new Tensor(new int[]{10, 5, 5}), new Tensor(new int[]{3, 140, 140}));
+        Executor executor = new Executor(tensor);
+        executor.run();
+    }
+
+    @Test
+    public void deconvTest() {
+        TensorFlow tf = new TensorFlow();
+        Tensor tensor = tf.deconv(new Tensor(new int[]{5, 5}), new Tensor(new int[]{140, 140}));
+        Executor executor = new Executor(tensor);
+        executor.run();
+    }
+
+    @Test
+    public void demaxpoolTest() {
+        TensorFlow tf = new TensorFlow();
+        Tensor tensor = tf.demaxpool(new Tensor(new int[]{140, 140}));
         Executor executor = new Executor(tensor);
         executor.run();
     }
