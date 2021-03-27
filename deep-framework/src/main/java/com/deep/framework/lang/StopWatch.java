@@ -1,4 +1,4 @@
-package com.deep.framework.lang.util;
+package com.deep.framework.lang;
 
 import java.io.Serializable;
 import java.text.NumberFormat;

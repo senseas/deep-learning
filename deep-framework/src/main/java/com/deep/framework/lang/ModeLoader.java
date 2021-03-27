@@ -1,8 +1,8 @@
-package com.deep.framework.lang.util;
+package com.deep.framework.lang;
 
 import java.io.*;
 
-public class ModelUtil {
+public class ModeLoader {
 
     public static void save(Object obj, String src) {
         try (ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(src))) {

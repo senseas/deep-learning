@@ -1,19 +1,23 @@
-package com.deep.framework.lang.util;
+package com.deep.framework.lang;
 
-import javax.imageio.ImageIO;
-import java.awt.image.BufferedImage;
+import com.deep.framework.lang.util.ImageUtil;
+
 import java.io.BufferedInputStream;
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.stream.IntStream;
 
-public class MnistUtil {
-    public static final String BASE_PATH =System.getProperty("user.dir").concat("/src/main/resources/DataSet/");
+public class DataLoader {
+    public static final String BASE_PATH = System.getProperty("user.dir").concat("/src/main/resources/DataSet/");
     public static final String TRAIN_IMAGES_FILE = BASE_PATH.concat("train-images-idx3-ubyte");
     public static final String TRAIN_LABELS_FILE = BASE_PATH.concat("train-labels-idx1-ubyte");
     public static final String TEST_IMAGES_FILE = "data/mnist/t10k-images.idx3-ubyte";
     public static final String TEST_LABELS_FILE = "data/mnist/t10k-labels.idx1-ubyte";
+    public static final String[] TRIAN_IMAGES_140 = new String[]{
+        BASE_PATH.concat("a-140.jpg"),
+        BASE_PATH.concat("b-140.jpg"),
+        BASE_PATH.concat("k-140.jpg"),
+    };
 
     /**
      * change bytes into a hex string.
@@ -39,7 +43,7 @@ public class MnistUtil {
      * @param fileName the file of 'train' or 'test' about image
      * @return one row show a `picture`
      */
-    public static double[][][][] getImages(String fileName) {
+    public static double[][][][] getMnistImages(String fileName) {
         double[][][][] images = null;
         try (BufferedInputStream bin = new BufferedInputStream(new FileInputStream(fileName))) {
             byte[] bytes = new byte[4];
@@ -58,7 +62,7 @@ public class MnistUtil {
                     double[][] image = new double[height][width];
                     for (int i = 0; i < height; i++) {
                         for (int l = 0; l < width; l++) {
-                            image[i][l] = bin.read()/255d;                      // 逐一读取像素值
+                            image[i][l] = bin.read() / 255d;                      // 逐一读取像素值
                         }
                     }
                     images[x][0] = image;
@@ -76,7 +80,7 @@ public class MnistUtil {
      * @param fileName the file of 'train' or 'test' about label
      * @return
      */
-    public static double[][][] getLabels(String fileName) {
+    public static double[][][] getMnistLabels(String fileName) {
         double[][][] labes = null;
         try (BufferedInputStream bin = new BufferedInputStream(new FileInputStream(fileName))) {
             byte[] bytes = new byte[4];
@@ -99,32 +103,21 @@ public class MnistUtil {
         return labes;
     }
 
-    public static void drawGrayPicture(double[][] pixels, String fileName) {
-        try {
-            int width = pixels.length, height = pixels[0].length;
-            BufferedImage bufferedImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
-            for (int i = 0; i < width; i++) {
-                for (int l = 0; l < height; l++) {
-                    int pixel = 255 - (int) (pixels[i][l]*255d);
-                    int value = pixel + (pixel << 8) + (pixel << 16);
-                    bufferedImage.setRGB(l, i, value);
-                }
-            }
-            ImageIO.write(bufferedImage, "JPEG", new File(fileName));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+    public static double[][][][] getImageData() {
+        double[][][][] input = new double[TRIAN_IMAGES_140.length][][][];
+        IntStream.range(0,TRIAN_IMAGES_140.length).forEach(i->{
+            input[i] = ImageUtil.image2RGB(TRIAN_IMAGES_140[i]);
+        });
+        return input;
     }
-
 
     public static void main(String[] args) {
         System.out.println(ClassLoader.class.getResource(""));
-        double[][][][] images = getImages(TRAIN_IMAGES_FILE);
+        double[][][][] images = getMnistImages(TRAIN_IMAGES_FILE);
         IntStream.range(0, 2).forEach(i -> {
             String fileName = BASE_PATH.concat(String.valueOf(i)).concat(".JPEG");
-            drawGrayPicture(images[i][0], fileName);
+            ImageUtil.write(images[i][0], fileName);
         });
-        double[][][] labels = getLabels(TRAIN_LABELS_FILE);
-        System.out.println(labels);
     }
+
 }

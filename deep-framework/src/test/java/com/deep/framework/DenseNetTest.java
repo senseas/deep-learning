@@ -7,9 +7,9 @@ import com.deep.framework.graph.Tensor;
 import com.deep.framework.graph.TensorFlow;
 import com.deep.framework.lang.Shape;
 import com.deep.framework.lang.function.Fill;
+import com.deep.framework.lang.DataLoader;
 import com.deep.framework.lang.util.ImageUtil;
-import com.deep.framework.lang.util.MnistUtil;
-import com.deep.framework.lang.util.ModelUtil;
+import com.deep.framework.lang.ModeLoader;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Test;
 
@@ -18,8 +18,8 @@ public class DenseNetTest extends Shape {
 
     @Test
     public void DenseNetTest() {
-        double[][][][] inputSet = ImageUtil.loadImageData();
-        double[][][][] labelSet = ImageUtil.loadImageData();
+        double[][][][] inputSet = DataLoader.getImageData();
+        double[][][][] labelSet = DataLoader.getImageData();
 
         TensorFlow tf = new TensorFlow();
         Tensor input = new Tensor(new int[]{3, 140, 140});
@@ -57,9 +57,9 @@ public class DenseNetTest extends Shape {
                 log.info("---------{}:{}------------", x, i);
                 Object inSet = inputSet[i], labSet = labelSet[i];
                 executor.run(inSet, labSet);
-                ModelUtil.save(executor, MnistUtil.BASE_PATH.concat(i + "LetNet.obj"));
+                ModeLoader.save(executor, DataLoader.BASE_PATH.concat(i + "LetNet.obj"));
                 Double[][][] data = Shape.reshape(tensor63.getOutput(), new Double[3][140][140], (Fill<None>) (None a) -> (double) a.getValue());
-                ImageUtil.rgb2img(data, i + "_");
+                ImageUtil.rgb2Image(data, "D:/img/".concat(i + ".jpg"));
                 log(squarex.getOutput());
             });
         });
