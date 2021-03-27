@@ -603,7 +603,7 @@ public class TensorFlow extends Shape {
                 int height = A.length * 2, width = A[0].length * 2;
                 Tensor[][] B = zeroTensors(new Tensor[height][width]);
                 forEach(height, width, (y, x) -> {
-                    B[y][x] = max(B[y][x], A[y / 2][x / 2]);
+                    B[y][x] = A[y / 2][x / 2];
                 });
                 return B;
             }

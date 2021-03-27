@@ -50,14 +50,15 @@ public class DenseNetTest extends Shape {
         Tensor tensor63 = tf.deconvx(new Tensor("weight", new int[]{3, 5, 5}), tensor62);//3*140*140
         Tensor squarex = tf.squarex(label, tensor63);
 
+        Executor.rate = 0.03;
         Executor executor = new Executor(squarex, input, label);
         forEach(600, x -> {
-            forEach(3, i -> {
+            forEach(labelSet.length, i -> {
                 log.info("---------{}:{}------------", x, i);
                 Object inSet = inputSet[i], labSet = labelSet[i];
                 executor.run(inSet, labSet);
                 ModelUtil.save(executor, MnistUtil.BASE_PATH.concat(i + "LetNet.obj"));
-                Double[][][] data = Shape.reshape(tensor63.getOutput(), new Double[3][140][140], (Fill<None>) (None a) ->(double) a.getValue());
+                Double[][][] data = Shape.reshape(tensor63.getOutput(), new Double[3][140][140], (Fill<None>) (None a) -> (double) a.getValue());
                 ImageUtil.rgb2img(data, i + "_");
                 log(squarex.getOutput());
             });
