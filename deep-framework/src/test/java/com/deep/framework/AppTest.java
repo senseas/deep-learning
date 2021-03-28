@@ -56,7 +56,7 @@ public class AppTest {
     @Test
     public void convTest() {
         TensorFlow tf = new TensorFlow();
-        Tensor tensor = tf.conv(new Tensor(new int[]{5, 5}), new Tensor(new int[]{140, 140}));
+        Tensor tensor = tf.conv(new int[]{1, 1}, 0, new Tensor(new int[]{5, 5}), new Tensor(new int[]{140, 140}));
         Executor executor = new Executor(tensor);
         executor.run();
     }
@@ -64,7 +64,7 @@ public class AppTest {
     @Test
     public void convxTest() {
         TensorFlow tf = new TensorFlow();
-        Tensor tensor = tf.convx(new Tensor(new int[]{10, 5, 5}), new Tensor(new int[]{3, 140, 140}));
+        Tensor tensor = tf.convx(new int[]{1, 1}, 0, new Tensor(new int[]{10, 5, 5}), new Tensor(new int[]{3, 140, 140}));
         Executor executor = new Executor(tensor);
         executor.run();
     }
@@ -72,7 +72,7 @@ public class AppTest {
     @Test
     public void deconvTest() {
         TensorFlow tf = new TensorFlow();
-        Tensor tensor = tf.deconv(new Tensor(new int[]{5, 5}), new Tensor(new int[]{140, 140}));
+        Tensor tensor = tf.deconv(new int[]{1, 1}, 0, new Tensor(new int[]{5, 5}), new Tensor(new int[]{140, 140}));
         Executor executor = new Executor(tensor);
         executor.run();
     }

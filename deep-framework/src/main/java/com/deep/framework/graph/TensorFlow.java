@@ -470,25 +470,29 @@ public class TensorFlow extends Shape {
         };
     }
 
-    public Tensor conv(Tensor<None[][]>... input) {
+    public Tensor conv(int[] stride, int padding, Tensor<None[][]>... input) {
+
         return new TensorOparetor("Conv", input) {
 
             public None[][] compute() {
-                None[][] A = getInput(0), B = getInput(1);
-                int height = B.length - A.length + 1, width = B[0].length - A[0].length + 1;
+                None[][] A = getInput(0), B = padding(getInput(1), padding);
+                int heights = stride[0], widths = stride[1];
+                int height = (B.length - A.length + 2 * padding) / heights + 1;
+                int width = (B[0].length - A[0].length + 2 * padding) / widths + 1;
                 None[][] C = zeroNones(new None[height][width]);
                 forEach(height, width, A.length, A[0].length, (h, w, m, n) -> {
-                    None inx = A[m][n], iny = B[h + m][w + n], out = C[h][w];
+                    None inx = A[m][n], iny = B[h + m * heights][w + n * widths], out = C[h][w];
                     out.setValue(out.getValue() + inx.getValue() * iny.getValue());
                 });
                 return C;
             }
 
             public void gradient() {
-                None[][] A = getInput(0), B = getInput(1);
+                None[][] A = getInput(0), B = padding(getInput(1), padding);
                 None[][] C = (None[][]) getOutput();
+                int heights = stride[0], widths = stride[1];
                 forEach(C.length, C[0].length, A.length, A[0].length, (h, w, m, n) -> {
-                    None inx = A[m][n], iny = B[h + m][w + n], out = C[h][w];
+                    None inx = A[m][n], iny = B[h + m * heights][w + n * widths], out = C[h][w];
                     inx.setGrad(out.getGrad() * iny.getValue());
                     iny.setValue(out.getGrad() * inx.getValue());
                 });
@@ -497,15 +501,18 @@ public class TensorFlow extends Shape {
         };
     }
 
-    public Tensor convx(Tensor... input) {
+    public Tensor convx(int[] stride, int padding, Tensor... input) {
+
         return new TensorFunction("Convx", input) {
 
             public Object compute() {
                 Tensor[][][] A = getInput(0), B = getInput(1);
-                int height = B[0].length - A[0].length + 1, width = B[0][0].length - A[0][0].length + 1;
+                int heighs = stride[0], widths = stride[1];
+                int height = (B[0].length - A[0].length + 2 * padding) / heighs + 1;
+                int width = (B[0][0].length - A[0][0].length + 2 * padding) / widths + 1;
                 Tensor[] C = zeroTensors(new Tensor[A.length], new int[]{height, width});
                 forEach(B.length, A.length, (i, l) -> {
-                    C[l] = addx(C[l], conv(new Tensor(A[l]), new Tensor(B[i])));
+                    C[l] = addx(C[l], conv(stride, padding, new Tensor(A[l]), new Tensor(B[i])));
                 });
                 return C;
             }
@@ -515,15 +522,17 @@ public class TensorFlow extends Shape {
         };
     }
 
-    public Tensor deconv(Tensor<None[][]>... input) {
+    public Tensor deconv(int[] stride, int padding, Tensor<None[][]>... input) {
         return new TensorOparetor("Deconv", input) {
 
             public None[][] compute() {
                 None[][] A = getInput(0), B = getInput(1);
-                int height = B.length + A.length - 1, width = B[0].length + A[0].length - 1;
+                int heighs = stride[0], widths = stride[1];
+                int height = (B.length + A.length - 2 * padding) * heighs - 1;
+                int width = (B[0].length + A[0].length - 2 * padding) * widths - 1;
                 None[][] C = zeroNones(new None[height][width]);
                 forEach(B.length, B[0].length, A.length, A[0].length, (h, w, m, n) -> {
-                    None inx = A[m][n], iny = B[h][w], out = C[h + m][w + n];
+                    None inx = A[m][n], iny = B[h][w], out = C[h + m * heighs][w + n * widths];
                     out.setValue(out.getValue() + inx.getValue() * iny.getValue());
                 });
                 return C;
@@ -532,8 +541,9 @@ public class TensorFlow extends Shape {
             public void gradient() {
                 None[][] A = getInput(0), B = getInput(1);
                 None[][] C = (None[][]) getOutput();
+                int heighs = stride[0], widths = stride[1];
                 forEach(B.length, B[0].length, A.length, A[0].length, (h, w, m, n) -> {
-                    None inx = A[m][n], iny = B[h][w], out = C[h + m][w + n];
+                    None inx = A[m][n], iny = B[h][w], out = C[h + m * heighs][w + n * widths];
                     inx.setGrad(out.getGrad() * iny.getValue());
                     iny.setValue(out.getGrad() * inx.getValue());
                 });
@@ -542,15 +552,17 @@ public class TensorFlow extends Shape {
         };
     }
 
-    public Tensor deconvx(Tensor... input) {
+    public Tensor deconvx(int[] stride, int padding, Tensor... input) {
         return new TensorFunction("Deconvx", input) {
 
             public Object compute() {
                 Tensor[][][] A = getInput(0), B = getInput(1);
-                int height = B[0].length + A[0].length - 1, width = B[0][0].length + A[0][0].length - 1;
+                int heighs = stride[0], widths = stride[1];
+                int height = (B[0].length + A[0].length - 2 * padding) * heighs - 1;
+                int width = (B[0][0].length + A[0][0].length - 2 * padding) * widths - 1;
                 Tensor[] C = zeroTensors(new Tensor[A.length], new int[]{height, width});
                 forEach(B.length, A.length, (i, l) -> {
-                    C[l] = addx(C[l], deconv(new Tensor(A[l]), new Tensor(B[i])));
+                    C[l] = addx(C[l], deconv(stride, padding, new Tensor(A[l]), new Tensor(B[i])));
                 });
                 return C;
             }
