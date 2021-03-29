@@ -5,11 +5,11 @@ import com.deep.framework.framework.Executor;
 import com.deep.framework.graph.None;
 import com.deep.framework.graph.Tensor;
 import com.deep.framework.graph.TensorFlow;
+import com.deep.framework.lang.DataLoader;
+import com.deep.framework.lang.ModeLoader;
 import com.deep.framework.lang.Shape;
 import com.deep.framework.lang.function.Fill;
-import com.deep.framework.lang.DataLoader;
 import com.deep.framework.lang.util.ImageUtil;
-import com.deep.framework.lang.ModeLoader;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Test;
 
@@ -63,6 +63,43 @@ public class DenseNetTest extends Shape {
                 log(squarex.getOutput());
             });
         });
+    }
+
+    @Test
+    public void TrainTest() {
+        double[][][][] inputSet = DataLoader.getImageData();
+        double[][][][] labelSet = DataLoader.getImageData();
+
+        Executor executor = ModeLoader.load(DataLoader.BASE_PATH.concat("LetNet.obj"));
+        Executor.rate = 0.3;
+        Tensor squarex = executor.getTensor();
+        Tensor tensor63 = squarex.getInput()[1];
+        forEach(600, x -> {
+            forEach(labelSet.length, i -> {
+                log.info("---------{}:{}------------", x, i);
+                Object inSet = inputSet[i], labSet = labelSet[i];
+                executor.run(inSet, labSet);
+                ModeLoader.save(executor, DataLoader.BASE_PATH.concat(i + "LetNet.obj"));
+                Double[][][] data = Shape.reshape(tensor63.getOutput(), new Double[3][140][140], (Fill<None>) (None a) -> (double) a.getValue());
+                ImageUtil.rgb2Image(data, "D:/img/".concat(i + ".jpg"));
+                log(squarex.getOutput());
+            });
+        });
+    }
+
+    @Test
+    public void EvalTest() {
+        double[][][] inputSet = ImageUtil.image2RGB(DataLoader.BASE_PATH.concat("d.jpg"));
+        double[][][] labelSet = ImageUtil.image2RGB(DataLoader.BASE_PATH.concat("d.jpg"));
+
+        Executor executor = ModeLoader.load(DataLoader.BASE_PATH.concat("LetNet.obj"));
+        Tensor squarex = executor.getTensor();
+        Tensor tensor63 = squarex.getInput()[1];
+        Object inSet = inputSet, labSet = labelSet;
+        executor.forward(inSet, labSet);
+        Double[][][] data = Shape.reshape(tensor63.getOutput(), new Double[3][140][140], (Fill<None>) (None a) -> (double) a.getValue());
+        ImageUtil.rgb2Image(data, "D:/img/x.jpg");
+        log(squarex.getOutput());
     }
 
     public void log(Object obj) {
