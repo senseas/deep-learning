@@ -80,7 +80,7 @@ public class AppTest {
     @Test
     public void demaxpoolTest() {
         TensorFlow tf = new TensorFlow();
-        Tensor tensor = tf.demaxpool(new Tensor(new int[]{140, 140}));
+        Tensor tensor = tf.demaxpool(2, new int[]{2, 2}, 0, new Tensor(new int[]{140, 140}));
         Executor executor = new Executor(tensor);
         executor.run();
     }

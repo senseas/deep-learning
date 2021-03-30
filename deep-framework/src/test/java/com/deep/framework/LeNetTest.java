@@ -33,11 +33,11 @@ public class LeNetTest extends Shape {
 
         Tensor tensor11 = tf.convx(new int[]{1, 1}, 0, new Tensor("weight", new int[]{10, 5, 5}), input);//6*24
         Tensor tensor12 = tf.relux(tensor11);//6*24
-        Tensor tensor13 = tf.maxpoolx(new int[]{1, 1}, 0, tensor12);//6*12
+        Tensor tensor13 = tf.maxpoolx(2, new int[]{2, 2}, 0, tensor12);//6*12
 
         Tensor tensor21 = tf.convx(new int[]{1, 1}, 0, new Tensor("weight", new int[]{16, 5, 5}), tensor13);//16*8
         Tensor tensor22 = tf.relux(tensor21);//16*8
-        Tensor tensor23 = tf.maxpoolx(new int[]{1, 1}, 0, tensor22);//16*4
+        Tensor tensor23 = tf.maxpoolx(2, new int[]{2, 2}, 0, tensor22);//16*4
 
         Tensor tensor31 = tf.convx(new int[]{1, 1}, 0, new Tensor("weight", new int[]{32, 4, 4}), tensor23);//32*1
         Tensor tensor30 = tf.shape(tensor31, new Tensor(new int[]{32, 1}));
@@ -55,7 +55,7 @@ public class LeNetTest extends Shape {
 
         Tensor softmax = tf.softmax(tensor53);
         Tensor<None> crossx = tf.softmaxCrossx(label, softmax);
-
+        Executor.rate = 0.03;
         Executor executor = new Executor(crossx, input, label);
         forEach(20, x -> {
             forEach(60000, i -> {
