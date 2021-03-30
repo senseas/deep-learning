@@ -572,32 +572,41 @@ public class TensorFlow extends Shape {
         };
     }
 
-    public Tensor maxpool(Tensor input) {
-        return new TensorFunction("Maxpool", input) {
+    public Tensor maxpool(int[] stride, int padding, Tensor input) {
+        return new TensorOparetor("Maxpool", input) {
 
-            public Tensor[][] compute() {
-                Tensor[][] A = getInput(0);
-                int height = (int) Math.ceil(A.length / 2.0), width = (int) Math.ceil(A[0].length / 2.0);
-                Tensor[][] B = zeroTensors(new Tensor[height][width]);
+            public None[][] compute() {
+                None[][] A = padding(getInput(0), padding);
+                int heighs = stride[0], widths = stride[1];
+                int height = (int) Math.ceil(A.length / (double) heighs), width = (int) Math.ceil(A[0].length / (double) widths);
+                None[][] B = zeroNones(new None[height][width]);
                 forEach(A.length, A[0].length, (y, x) -> {
-                    B[y / 2][x / 2] = max(B[y / 2][x / 2], A[y][x]);
+                    None inx = A[y][x], out = B[y / heighs][x / widths];
+                    out.setValue(Math.max(out.getValue(), inx.getValue()));
                 });
                 return B;
             }
 
-            public void gradient() { }
+            public void gradient() {
+                None[][] A = padding(getInput(0), padding), B = (None[][]) getOutput();
+                int heighs = stride[0], widths = stride[1];
+                forEach(A.length, A[0].length, (y, x) -> {
+                    None inx = A[y][x], out = B[y / heighs][x / widths];
+                    inx.setGrad(inx.getValue() == out.getValue() ? out.getGrad() : 0d);
+                });
+            }
 
         };
     }
 
-    public Tensor maxpoolx(Tensor input) {
+    public Tensor maxpoolx(int[] stride, int padding, Tensor input) {
         return new TensorFunction("Maxpoolx", input) {
 
             public Object compute() {
                 Tensor[][][] A = getInput(0);
                 Tensor[] B = new Tensor[A.length];
                 forEach(A.length, i -> {
-                    B[i] = maxpool(new Tensor(A[i]));
+                    B[i] = maxpool(stride, padding, new Tensor(A[i]));
                 });
                 return B;
             }

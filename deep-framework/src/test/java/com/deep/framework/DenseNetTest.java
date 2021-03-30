@@ -27,15 +27,15 @@ public class DenseNetTest extends Shape {
 
         Tensor tensor11 = tf.convx(new int[]{1, 1}, 0, new Tensor("weight", new int[]{10, 5, 5}), input);//10*136*136
         Tensor tensor12 = tf.relux(tensor11);//10*136*136
-        Tensor tensor13 = tf.maxpoolx(tensor12);//10*68*68
+        Tensor tensor13 = tf.maxpoolx(new int[]{1, 1}, 0, tensor12);//10*68*68
 
         Tensor tensor21 = tf.convx(new int[]{1, 1}, 0, new Tensor("weight", new int[]{16, 5, 5}), tensor13);//16*64*64
         Tensor tensor22 = tf.relux(tensor21);//16*64*64
-        Tensor tensor23 = tf.maxpoolx(tensor22);//16*32*32
+        Tensor tensor23 = tf.maxpoolx(new int[]{1, 1}, 0, tensor22);//16*32*32
 
         Tensor tensor31 = tf.convx(new int[]{1, 1}, 0, new Tensor("weight", new int[]{32, 5, 5}), tensor23);//32*28*28
         Tensor tensor32 = tf.relux(tensor31);//32*28*28
-        Tensor tensor33 = tf.maxpoolx(tensor32);//32*14*14
+        Tensor tensor33 = tf.maxpoolx(new int[]{1, 1}, 0, tensor32);//32*14*14
 
         Tensor tensor41 = tf.demaxpoolx(tensor33);//32*28*28
         Tensor tensor42 = tf.relux(tensor41);//32*28*28
