@@ -493,7 +493,7 @@ public class TensorFlow extends Shape {
                 forEach(C.length, C[0].length, A.length, A[0].length, (h, w, m, n) -> {
                     None inx = A[m][n], iny = B[h * heights + m][w * widths + n], out = C[h][w];
                     inx.setGrad(out.getGrad() * iny.getValue());
-                    iny.setValue(out.getGrad() * inx.getValue());
+                    iny.setGrad(out.getGrad() * inx.getValue());
                 });
             }
 
@@ -542,7 +542,7 @@ public class TensorFlow extends Shape {
                 forEach(B.length, B[0].length, A.length, A[0].length, (h, w, m, n) -> {
                     None inx = A[m][n], iny = B[h][w], out = C[h * heighs + m][w * widths + n];
                     inx.setGrad(out.getGrad() * iny.getValue());
-                    iny.setValue(out.getGrad() * inx.getValue());
+                    iny.setGrad(out.getGrad() * inx.getValue());
                 });
             }
 
@@ -621,7 +621,8 @@ public class TensorFlow extends Shape {
                 int height = (A.length - 1) * heighs + kernelSize - 2 * padding, width = (A[0].length - 1) * widths + kernelSize - 2 * padding;
                 None[][] B = zeroNones(new None[height][width]);
                 forEach(A.length, A[0].length, kernelSize, kernelSize, (y, x, m, n) -> {
-                    B[y * heighs + m][x * widths + n].setValue(A[y][x].getValue());
+                    None out = B[y * heighs + m][x * widths + n];
+                    out.setValue(out.getValue() + A[y][x].getValue());
                 });
                 return B;
             }
