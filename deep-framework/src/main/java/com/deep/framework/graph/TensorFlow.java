@@ -526,7 +526,7 @@ public class TensorFlow extends Shape {
             public None[][] compute() {
                 None[][] A = getInput(0), B = getInput(1);
                 int heighs = stride[0], widths = stride[1];
-                int height = (B.length + A.length - 2 * padding) * heighs - 1, width = (B[0].length + A[0].length - 2 * padding) * widths - 1;
+                int height = (B.length - 1) * heighs + A.length - 2 * padding, width = (B[0].length - 1) * widths + A[0].length - 2 * padding;
                 None[][] C = zeroNones(new None[height][width]);
                 forEach(B.length, B[0].length, A.length, A[0].length, (h, w, m, n) -> {
                     None inx = A[m][n], iny = B[h][w], out = C[h * heighs + m][w * widths + n];
@@ -555,7 +555,7 @@ public class TensorFlow extends Shape {
             public Object compute() {
                 Tensor[][][] A = getInput(0), B = getInput(1);
                 int heighs = stride[0], widths = stride[1];
-                int height = (B[0].length + A[0].length - 2 * padding) * heighs - 1, width = (B[0][0].length + A[0][0].length - 2 * padding) * widths - 1;
+                int height = (B[0].length - 1) * heighs + A[0].length - 2 * padding, width = (B[0][0].length - 1) * widths + A[0][0].length - 2 * padding;
                 Tensor[] C = zeroTensors(new Tensor[A.length], new int[]{height, width});
                 forEach(B.length, A.length, (i, l) -> {
                     C[l] = addx(C[l], deconv(stride, padding, new Tensor(A[l]), new Tensor(B[i])));
@@ -618,7 +618,7 @@ public class TensorFlow extends Shape {
             public None[][] compute() {
                 None[][] A = getInput(0);
                 int heighs = stride[0], widths = stride[1];
-                int height = (A.length + kernelSize - 2 * padding) * heighs - 1, width = (A[0].length + kernelSize - 2 * padding) * widths - 1;
+                int height = (A.length - 1) * heighs + kernelSize - 2 * padding, width = (A[0].length - 1) * widths + kernelSize - 2 * padding;
                 None[][] B = zeroNones(new None[height][width]);
                 forEach(A.length, A[0].length, kernelSize, kernelSize, (y, x, m, n) -> {
                     B[y * heighs + m][x * widths + n].setValue(A[y][x].getValue());
