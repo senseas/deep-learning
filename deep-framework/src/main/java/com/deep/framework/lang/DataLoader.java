@@ -16,6 +16,12 @@ public class DataLoader {
     public static final String[] TRIAN_IMAGES_140 = new String[]{
         BASE_PATH.concat("a-140.jpg"),
         BASE_PATH.concat("b-140.jpg"),
+        BASE_PATH.concat("c-140.jpg"),
+        BASE_PATH.concat("d-140.jpg"),
+        BASE_PATH.concat("e-140.jpg"),
+        BASE_PATH.concat("f-140.jpg"),
+        BASE_PATH.concat("g-140.jpg"),
+        BASE_PATH.concat("h-140.jpg"),
         BASE_PATH.concat("k-140.jpg"),
     };
 

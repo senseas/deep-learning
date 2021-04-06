@@ -621,8 +621,8 @@ public class TensorFlow extends Shape {
                 int height = (A.length - 1) * heighs + kernelSize - 2 * padding, width = (A[0].length - 1) * widths + kernelSize - 2 * padding;
                 None[][] B = zeroNones(new None[height][width]);
                 forEach(A.length, A[0].length, kernelSize, kernelSize, (y, x, m, n) -> {
-                    None out = B[y * heighs + m][x * widths + n];
-                    out.setValue(out.getValue() + A[y][x].getValue());
+                    None inx = A[y][x], out = B[y * heighs + m][x * widths + n];
+                    out.setValue(out.getValue() + inx.getValue());
                 });
                 return B;
             }
@@ -632,7 +632,8 @@ public class TensorFlow extends Shape {
                 int heighs = stride[0], widths = stride[1];
                 None[][] B = (None[][]) getOutput();
                 forEach(A.length, A[0].length, kernelSize, kernelSize, (y, x, m, n) -> {
-                    A[y][x].setGrad(B[y * heighs + m][x * widths + n].getGrad());
+                    None inx = A[y][x], out = B[y * heighs + m][x * widths + n];
+                    inx.setGrad(out.getGrad());
                 });
             }
 
