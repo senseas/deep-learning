@@ -29,7 +29,7 @@ public class TensorFunction extends Tensor {
     }
 
     public void forward() {
-        for (Tensor o : getInput()) o.forward();
+        for (Tensor o : getInput()) TensorFlux.computer(o);
         TensorFlux.forward(this);
     }
 
