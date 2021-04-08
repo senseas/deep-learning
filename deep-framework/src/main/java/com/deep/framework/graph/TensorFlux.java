@@ -44,7 +44,7 @@ public class TensorFlux extends Shape {
     }
 
     public static void computer(Tensor tensor) {
-        if (BeanUtil.isNone(tensor)) {
+        if (BeanUtil.isNone(tensor) && !(tensor instanceof TensorConst)) {
             farEach(tensor.getOutput(), o -> {
                 None out = (None) o;
                 out.setGrad(null);
@@ -60,10 +60,10 @@ public class TensorFlux extends Shape {
     }
 
     public static void reducer(Tensor tensor) {
-        if (BeanUtil.isNone(tensor)) {
+        if (BeanUtil.isNone(tensor) && !(tensor instanceof TensorConst)) {
             farEach(tensor.getOutput(), o -> {
                 None none = (None) o;
-                if (!(tensor instanceof TensorConst) && !none.isReduce()) {
+                if (!none.isReduce()) {
                     none.setReduce(true);
                     double value = none.getValue() - Executor.rate * none.getGrad();
                     none.setValue(value);

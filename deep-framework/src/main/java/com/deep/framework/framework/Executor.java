@@ -42,6 +42,11 @@ public class Executor<E> implements Serializable {
         tensor.forward();
     }
 
+    public void backward() {
+        tensor.backward();
+        tensor.reduce();
+    }
+
     public void setInput(Object o) {
         Func2<None, Double> func = (m, n) -> m.setValue(n);
         ForEach.farEach(input.getOutput(), o, func);
