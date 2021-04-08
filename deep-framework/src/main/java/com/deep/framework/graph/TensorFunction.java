@@ -40,7 +40,7 @@ public class TensorFunction extends Tensor {
 
     public void reduce() {
         TensorFlux.reduce(this);
-        for (Tensor o : getInput()) o.reduce();
+        for (Tensor o : getInput()) TensorFlux.reducer(o);
     }
 
 }
