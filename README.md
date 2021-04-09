@@ -1,2 +1,0 @@
-# deep-learning
-AI,ML
