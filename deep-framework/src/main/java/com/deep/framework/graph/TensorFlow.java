@@ -574,7 +574,7 @@ public class TensorFlow extends Shape {
             public None[][] compute() {
                 None[][] A = padding(getInput(0), padding);
                 int heighs = stride[0], widths = stride[1];
-                int height = (A.length - kernelSize + 2 * padding) / heighs + 1, width = (A[0].length - kernelSize + 2 * padding) / widths + 1;
+                int height = (A.length - kernelSize) / heighs + 1, width = (A[0].length - kernelSize) / widths + 1;
                 None[][] B = zeroNones(new None[height][width]);
                 forEach(height, width, kernelSize, kernelSize, (y, x, m, n) -> {
                     None inx = A[y * heighs + m][x * widths + n], out = B[y][x];
