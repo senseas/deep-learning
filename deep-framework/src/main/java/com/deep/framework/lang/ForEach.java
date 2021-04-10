@@ -2,6 +2,7 @@ package com.deep.framework.lang;
 
 import com.deep.framework.graph.None;
 import com.deep.framework.graph.Tensor;
+import com.deep.framework.graph.TensorConst;
 import com.deep.framework.lang.function.*;
 import com.deep.framework.lang.util.BeanUtil;
 
@@ -174,13 +175,18 @@ public class ForEach implements Serializable {
         if (padding == 0) return a;
         int height = a.length, width = a[0].length;
         None[][] nones = new None[height + 2 * padding][width + 2 * padding];
-        farEach(padding, padding, (i, l) -> {
-            nones[i][l] = new None(0d);
-            nones[height + i][width + l] = new None(0d);
+
+        farEach(padding, nones[0].length, (m, n) -> {
+            nones[m][n] = new None(0d);
+            nones[m + padding + height][n] = new None(0d);
         });
-        farEach(height, width, (i, l) -> {
-            nones[i + padding][l + padding] = a[i][l];
+
+        farEach(nones.length, padding, (m, n) -> {
+            nones[m][n] = new None(0d);
+            nones[m][n + padding + width] = new None(0d);
         });
+
+        farEach(height, width, (i, l) -> nones[i + padding][l + padding] = a[i][l]);
         return nones;
     }
 

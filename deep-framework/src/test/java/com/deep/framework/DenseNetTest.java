@@ -38,16 +38,16 @@ public class DenseNetTest extends Shape {
         Tensor tensor33 = tf.maxpoolx(2, new int[]{2, 2}, 0, tensor32);//32*14*14
 
         Tensor tensor41 = tf.demaxpoolx(2, new int[]{2, 2}, 0, tensor33);//32*28*28
-        Tensor tensor42 = tf.deconvx(new int[]{1, 1}, 0, new Tensor("weight", new int[]{16, 5, 5}), tensor41);//16*32*32
-        Tensor tensor43 = tf.relux(tensor42);//32*28*28
+        Tensor tensor42 = tf.convx(new int[]{1, 1}, 4, new Tensor("weight", new int[]{16, 5, 5}), tensor41);//16*32*32
+        Tensor tensor43 = tf.relux(tensor42);//16*32*32
 
         Tensor tensor51 = tf.demaxpoolx(2, new int[]{2, 2}, 0, tensor43);//16*64*64
-        Tensor tensor52 = tf.deconvx(new int[]{1, 1}, 0, new Tensor("weight", new int[]{10, 5, 5}), tensor51);//10*68*68
-        Tensor tensor53 = tf.relux(tensor52);//16*64*64
+        Tensor tensor52 = tf.convx(new int[]{1, 1}, 4, new Tensor("weight", new int[]{10, 5, 5}), tensor51);//10*68*68
+        Tensor tensor53 = tf.relux(tensor52);//10*64*64
 
         Tensor tensor61 = tf.demaxpoolx(2, new int[]{2, 2}, 0, tensor53);//10*136*136
-        Tensor tensor62 = tf.deconvx(new int[]{1, 1}, 0, new Tensor("weight", new int[]{3, 5, 5}), tensor61);//3*140*140
-        Tensor tensor63 = tf.relux(tensor62);//10*136*136
+        Tensor tensor62 = tf.convx(new int[]{1, 1}, 4, new Tensor("weight", new int[]{3, 5, 5}), tensor61);//3*140*140
+        Tensor tensor63 = tf.relux(tensor62);//3*140*140
         Tensor squarex = tf.squarex(label, tensor63);
 
         Executor.rate = 0.003;
