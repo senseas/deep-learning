@@ -190,6 +190,25 @@ public class ForEach implements Serializable {
         return nones;
     }
 
+    public static Tensor[][][] paddingTensor(Tensor[][][] a, int padding) {
+        if (padding == 0) return a;
+        int height = a[0].length, width = a[0][0].length;
+        Tensor[][][] tensors = new Tensor[a.length][height + 2 * padding][width + 2 * padding];
+
+        farEach(a.length, padding, tensors[0][0].length, (i, m, n) -> {
+            tensors[i][m][n] = new Tensor(0d);
+            tensors[i][m + padding + height][n] = new Tensor(0d);
+        });
+
+        farEach(a.length, tensors[0].length, padding, (i, m, n) -> {
+            tensors[i][m][n] = new Tensor(0d);
+            tensors[i][m][n + padding + width] = new Tensor(0d);
+        });
+
+        farEach(a.length, height, width, (j, i, l) -> tensors[j][i + padding][l + padding] = a[j][i][l]);
+        return tensors;
+    }
+
 }
 
 
