@@ -8,14 +8,24 @@ import java.io.Serializable;
 @Data
 public class Tensor<N> implements Serializable {
 
-    public Tensor(double input) {
+    public Tensor(double value) {
         this.name = "None";
-        this.output = (N) new None(input);
+        this.output = (N) new None(value);
+    }
+
+    public Tensor(double value, boolean isGrad) {
+        this.name = "None";
+        this.output = (N) new None(value, isGrad);
     }
 
     public Tensor(int[] shape) {
         this.name = "None";
         this.output = Shape.random(shape);
+    }
+
+    public Tensor(int[] shape, double value, boolean isGrad) {
+        this.name = "None";
+        this.output = Shape.fill(shape, value, isGrad);
     }
 
     public Tensor(String name, int[] shape) {
