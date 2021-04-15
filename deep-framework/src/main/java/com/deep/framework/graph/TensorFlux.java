@@ -63,7 +63,7 @@ public class TensorFlux extends Shape {
         if (BeanUtil.isNone(tensor) && !(tensor instanceof TensorConst)) {
             farEach(tensor.getOutput(), o -> {
                 None none = (None) o;
-                if (none.isGrad() && !none.isReduce()) {
+                if (none.isEngrad() && !none.isReduce()) {
                     none.setReduce(true);
                     double value = none.getValue() - Executor.rate * none.getGrad();
                     none.setValue(value);

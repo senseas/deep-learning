@@ -9,12 +9,12 @@ public class None implements Serializable {
 
     public None(double value) {
         this.value = value;
-        this.isGrad = true;
+        this.engrad = true;
     }
 
     public None(double value, boolean isGrad) {
         this.value = value;
-        this.isGrad = isGrad;
+        this.engrad = isGrad;
     }
 
     public void setGrad(Double grad) {
@@ -33,11 +33,9 @@ public class None implements Serializable {
         }
     }
 
-    public boolean isGrad() { return isGrad; }
-
     private double value;
     private Double grad;
-    private boolean isGrad;
+    private boolean engrad;
     private transient boolean reduce;
-    
+
 }
