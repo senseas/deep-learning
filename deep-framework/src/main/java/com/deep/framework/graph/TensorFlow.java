@@ -454,18 +454,20 @@ public class TensorFlow extends Shape {
     }
 
     public Tensor sum(Tensor<None> input) {
-        return new TensorFunction("Sum", input) {
+        return new TensorOparetor("Sum", input) {
 
-            public Tensor compute() {
+            public None compute() {
                 Object A = getInput(0);
-                Tensor[] B = {new TensorConst(0d)};
-                forEach(A, a -> {
-                    B[0] = add((Tensor) a, B[0]);
-                });
-                return B[0];
+                None B = new None(0d);
+                forEach(A, a -> B.setValue(B.getValue() + ((None) a).getValue()));
+                return B;
             }
 
-            public void gradient() { }
+            public void gradient() {
+                Object A = getInput(0);
+                None B = (None) getOutput();
+                forEach(A, a -> ((None) a).setGrad(B.getGrad()));
+            }
 
         };
     }
@@ -684,6 +686,24 @@ public class TensorFlow extends Shape {
                 Tensor C1 = matmul(new Tensor(A), new Tensor(B[1]));
                 Tensor C2 = matmul(new Tensor(A), new Tensor(B[2]));
                 return matmul(softmax(prod(matmulTran(C0, C1), new TensorConst(8))), C2);
+            }
+
+            public void gradient() { }
+
+        };
+    }
+
+    public Tensor batchNorm(Tensor... input) {
+        return new TensorFunction("BatchNorm", input) {
+
+            public Object compute() {
+                Object[] A = getInput(0), B = zeroTensors(A);
+                Tensor C = mul(new TensorConst(1d / A.length), sum(new Tensor(A)));
+                Tensor[] D = {new TensorConst(0)};
+                forEach(A, a -> D[0] = add(D[0], pow(minus((Tensor) a, C), new TensorConst(2))));
+                Tensor E = pow(add(mul(new TensorConst(1d / A.length), D[0]), new TensorConst(Math.E)), new TensorConst(0.5));
+                forEach(A, B, (a, b, i) -> b[i] = add(mul(new Tensor(0.9), div(minus(a, C), E)), new Tensor(0.9)));
+                return B;
             }
 
             public void gradient() { }

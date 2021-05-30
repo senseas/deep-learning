@@ -85,4 +85,12 @@ public class AppTest {
         executor.run();
     }
 
+    @Test
+    public void batchNormTest() {
+        TensorFlow tf = new TensorFlow();
+        Tensor tensor = tf.batchNorm(new Tensor(new int[]{2, 2}));
+        Executor executor = new Executor(tensor);
+        executor.run();
+    }
+
 }

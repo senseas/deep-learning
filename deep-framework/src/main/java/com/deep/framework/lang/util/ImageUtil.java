@@ -22,9 +22,9 @@ public class ImageUtil {
             for (int y = 0; y < height; y++) {
                 for (int x = 0; x < width; x++) {
                     int pixel = image.getRGB(x, y);
-                    R[y][x] = ((pixel & 0xff0000) >> 16) / 255d;
-                    G[y][x] = ((pixel & 0xff00) >> 8) / 255d;
-                    B[y][x] = (pixel & 0xff) / 255d;
+                    R[y][x] = (((pixel & 0xff0000) >> 16)-127.5) / 128d;
+                    G[y][x] = (((pixel & 0xff00) >> 8)-127.5) / 128d;
+                    B[y][x] = ((pixel & 0xff)-127.5) / 128d;
                 }
             }
             return new double[][][]{R, G, B};
@@ -40,9 +40,9 @@ public class ImageUtil {
             BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
             for (int y = 0; y < height; y++) {
                 for (int x = 0; x < width; x++) {
-                    int r = ((int) (pixels[0][y][x] * 255d)) << 16;
-                    int g = ((int) (pixels[1][y][x] * 255d)) << 8;
-                    int b = ((int) (pixels[2][y][x] * 255d));
+                    int r = ((int) (pixels[0][y][x] * 128d-127.5)) << 16;
+                    int g = ((int) (pixels[1][y][x] * 128d-127.5)) << 8;
+                    int b = ((int) (pixels[2][y][x] * 128d-127.5));
                     image.setRGB(x, y, r + g + b);
                 }
             }

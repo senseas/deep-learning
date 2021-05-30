@@ -65,7 +65,9 @@ public class TensorFlux extends Shape {
                 None none = (None) o;
                 if (none.isEngrad() && !none.isReduce()) {
                     none.setReduce(true);
-                    double value = none.getValue() - Executor.rate * none.getGrad();
+                    double valu = Math.abs(none.getValue()) + 0.0000001, grad = Math.abs(none.getGrad()) + 0.0000001;
+                    double rate = Math.min(valu, grad) / Math.max(valu, grad) * Executor.rate;
+                    double value = none.getValue() - rate * none.getGrad();
                     none.setValue(value);
                 }
             });
