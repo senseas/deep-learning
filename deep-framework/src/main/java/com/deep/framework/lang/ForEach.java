@@ -144,14 +144,14 @@ public class ForEach implements Serializable {
         }
     }
 
-    public static void forEach(Object a, Object b, For2 func) {
+    public static void farEach(Object a, Object b, For2 func) {
         if (BeanUtil.isTensor(a)) {
-            forEach(Array.getLength(a), i -> {
+            farEach(Array.getLength(a), i -> {
                 Object m = Array.get(a, i), n = Array.get(b, i);
                 if (BeanUtil.isNotTensor(m)) {
-                    func.apply((Tensor) m, (Tensor[]) b, i);
+                    func.apply(m, (Object[])b, i);
                 } else {
-                    forEach(m, n, func);
+                    farEach(m, n, func);
                 }
             });
         }
