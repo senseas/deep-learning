@@ -17,103 +17,6 @@ import org.junit.Test;
 public class DenseNetTest extends Shape {
 
     @Test
-    public void DenseNetTest5() {
-        double[][][][] inputSet = DataLoader.getImageData();
-        double[][][][] labelSet = DataLoader.getImageData();
-
-        TensorFlow tf = new TensorFlow();
-        Tensor input = new Tensor(new int[]{3, 140, 140});
-        Tensor label = new Tensor(new int[]{3, 140, 140});
-
-        Tensor tensor11 = tf.convx(new int[]{1, 1}, 0, new Tensor("weight", new int[]{32, 5, 5}), input);//10*136*136
-        Tensor tensor12 = tf.relux(tensor11);//10*136*136
-        Tensor tensor13 = tf.maxpoolx(2, new int[]{2, 2}, 0, tensor12);//10*68*68
-
-        Tensor tensor21 = tf.convx(new int[]{1, 1}, 0, new Tensor("weight", new int[]{25, 5, 5}), tensor13);//16*64*64
-        Tensor tensor22 = tf.relux(tensor21);//16*64*64
-        Tensor tensor23 = tf.maxpoolx(2, new int[]{2, 2}, 0, tensor22);//16*32*32
-
-        Tensor tensor31 = tf.convx(new int[]{1, 1}, 0, new Tensor("weight", new int[]{20, 5, 5}), tensor23);//32*28*28
-        Tensor tensor32 = tf.relux(tensor31);//32*28*28
-        Tensor tensor33 = tf.maxpoolx(2, new int[]{2, 2}, 0, tensor32);//32*14*14
-
-        Tensor tensor41 = tf.demaxpoolx(2, new int[]{2, 2}, 0, tensor33);//32*28*28
-        Tensor tensor42 = tf.convx(new int[]{1, 1}, 4, new Tensor("weight", new int[]{20, 5, 5}), tensor41);//16*32*32
-        Tensor tensor43 = tf.relux(tensor42);//16*32*32
-
-        Tensor tensor51 = tf.demaxpoolx(2, new int[]{2, 2}, 0, tensor43);//16*64*64
-        Tensor tensor52 = tf.convx(new int[]{1, 1}, 4, new Tensor("weight", new int[]{25, 5, 5}), tensor51);//10*68*68
-        Tensor tensor53 = tf.relux(tensor52);//10*64*64
-
-        Tensor tensor61 = tf.demaxpoolx(2, new int[]{2, 2}, 0, tensor53);//10*136*136
-        Tensor tensor62 = tf.convx(new int[]{1, 1}, 4, new Tensor("weight", new int[]{3, 5, 5}), tensor61);//3*140*140
-        Tensor squarex = tf.squarex(label, tensor62);
-
-        Executor.rate=0.003;
-        Executor executor = new Executor(squarex, input, label);
-        forEach(600, x -> {
-            forEach(labelSet.length, i -> {
-                log.info("---------{}:{}------------", x, i);
-                Object inSet = inputSet[i], labSet = labelSet[i];
-                executor.forward(inSet, labSet);
-                log(squarex.getOutput());
-                ImageUtil.rgb2Image(Shape.reshape(tensor62.getOutput(), new Double[3][140][140], (Fill<None>) (None a) -> (double) a.getValue()), "D:/img/".concat(i + ".jpg"));
-                executor.backward();
-                ModeLoader.save(executor, DataLoader.BASE_PATH.concat(i + "LetNet.obj"));
-            });
-        });
-    }
-
-    @Test
-    public void DenseNetTest5Relux() {
-        double[][][][] inputSet = DataLoader.getImageData();
-        double[][][][] labelSet = DataLoader.getImageData();
-
-        TensorFlow tf = new TensorFlow();
-        Tensor input = new Tensor(new int[]{3, 140, 140});
-        Tensor label = new Tensor(new int[]{3, 140, 140});
-
-        Tensor tensor11 = tf.convx(new int[]{1, 1}, 0, new Tensor("weight", new int[]{10, 5, 5}), input);//10*136*136
-        Tensor tensor12 = tf.relux(tensor11);//10*136*136
-        Tensor tensor13 = tf.maxpoolx(2, new int[]{2, 2}, 0, tensor12);//10*68*68
-
-        Tensor tensor21 = tf.convx(new int[]{1, 1}, 0, new Tensor("weight", new int[]{16, 5, 5}), tensor13);//16*64*64
-        Tensor tensor22 = tf.relux(tensor21);//16*64*64
-        Tensor tensor23 = tf.maxpoolx(2, new int[]{2, 2}, 0, tensor22);//16*32*32
-
-        Tensor tensor31 = tf.convx(new int[]{1, 1}, 0, new Tensor("weight", new int[]{32, 5, 5}), tensor23);//32*28*28
-        Tensor tensor32 = tf.relux(tensor31);//32*28*28
-        Tensor tensor33 = tf.maxpoolx(2, new int[]{2, 2}, 0, tensor32);//32*14*14
-
-        Tensor tensor41 = tf.demaxpoolx(2, new int[]{2, 2}, 0, tensor33);//32*28*28
-        Tensor tensor42 = tf.relux(tensor41);//32*28*28
-        Tensor tensor43 = tf.deconvx(new int[]{1, 1}, 0, new Tensor("weight", new int[]{16, 5, 5}), tensor42);//16*32*32
-
-        Tensor tensor51 = tf.demaxpoolx(2, new int[]{2, 2}, 0, tensor43);//16*64*64
-        Tensor tensor52 = tf.relux(tensor51);//16*64*64
-        Tensor tensor53 = tf.deconvx(new int[]{1, 1}, 0, new Tensor("weight", new int[]{10, 5, 5}), tensor52);//10*68*68
-
-        Tensor tensor61 = tf.demaxpoolx(2, new int[]{2, 2}, 0, tensor53);//10*136*136
-        Tensor tensor62 = tf.relux(tensor61);//10*136*136
-        Tensor tensor63 = tf.deconvx(new int[]{1, 1}, 0, new Tensor("weight", new int[]{3, 5, 5}), tensor62);//3*140*140
-        Tensor squarex = tf.squarex(label, tensor63);
-
-        Executor.rate = 0.03;
-        Executor executor = new Executor(squarex, input, label);
-        forEach(600, x -> {
-            forEach(labelSet.length, i -> {
-                log.info("---------{}:{}------------", x, i);
-                Object inSet = inputSet[i], labSet = labelSet[i];
-                executor.run(inSet, labSet);
-                ModeLoader.save(executor, DataLoader.BASE_PATH.concat(i + "LetNet.obj"));
-                Double[][][] data = Shape.reshape(tensor63.getOutput(), new Double[3][140][140], (Fill<None>) (None a) -> (double) a.getValue());
-                ImageUtil.rgb2Image(data, "D:/img/".concat(i + ".jpg"));
-                log(squarex.getOutput());
-            });
-        });
-    }
-
-    @Test
     public void DenseNetTest3() {
         double[][][][] inputSet = DataLoader.getImageData();
         double[][][][] labelSet = DataLoader.getImageData();
@@ -155,23 +58,20 @@ public class DenseNetTest extends Shape {
         Tensor tensor64 = tf.relux(tensor63);//10*140*140
         Tensor squarex = tf.squarex(label, tensor64);
 
-        Executor.rate = 0.0003;
+        Executor.rate = 0.003;
         Executor executor = new Executor(squarex, input, label);
-        forEach(600, x -> {
-            forEach(labelSet.length, i -> {
-                log.info("---------{}:{}------------", x, i);
-                Object inSet = inputSet[i], labSet = labelSet[i];
-                executor.run(inSet, labSet);
-                ModeLoader.save(executor, DataLoader.BASE_PATH.concat(i + "LetNet.obj"));
-                Double[][][] data = Shape.reshape(tensor64.getOutput(), new Double[3][140][140], (Fill<None>) (None a) -> (double) a.getValue());
-                ImageUtil.rgb2Image(data, "D:/img/".concat(i + ".jpg"));
-                log(squarex.getOutput());
-            });
+        forEach(600, labelSet.length, (x, i) -> {
+            log.info("epoch = {{},{}}", x, i);
+            Object inSet = inputSet[i], labSet = labelSet[i];
+            executor.run(inSet, labSet);
+            ModeLoader.save(executor, DataLoader.BASE_PATH.concat(i + "LetNet.obj"));
+            img(tensor64, i);
+            log(squarex.getOutput());
         });
     }
 
     @Test
-    public void DenseNetTest3Relux() {
+    public void DenseNetTest5() {
         double[][][][] inputSet = DataLoader.getImageData();
         double[][][][] labelSet = DataLoader.getImageData();
 
@@ -179,43 +79,41 @@ public class DenseNetTest extends Shape {
         Tensor input = new Tensor(new int[]{3, 140, 140});
         Tensor label = new Tensor(new int[]{3, 140, 140});
 
-        Tensor tensor11 = tf.convx(new int[]{1, 1}, 0, new Tensor("weight", new int[]{10, 3, 3}), input);//10*138*138
-        Tensor tensor12 = tf.relux(tensor11);//10*138*138
-        Tensor tensor13 = tf.maxpoolx(2, new int[]{2, 2}, 0, tensor12);//10*69*69
+        Tensor tensor11 = tf.convx(new int[]{1, 1}, 2, new Tensor("weight", new int[]{16, 5, 5}), input);//16*140*140
+        Tensor tensor12 = tf.relux(tensor11);//16*140*140
+        Tensor tensor13 = tf.maxpoolx(2, new int[]{2, 2}, 0, tensor12);//16*140*140
 
-        Tensor tensor21 = tf.convx(new int[]{1, 1}, 0, new Tensor("weight", new int[]{16, 3, 3}), tensor13);//16*67*67
-        Tensor tensor22 = tf.relux(tensor21);//16*67*67
-        Tensor tensor23 = tf.maxpoolx(3, new int[]{2, 2}, 0, tensor22);//16*33*33
+        Tensor tensor21 = tf.convx(new int[]{1, 1}, 2, new Tensor("weight", new int[]{32, 5, 5}), tensor13);//32*70*70
+        Tensor tensor22 = tf.relux(tensor21);//32*70*70
+        Tensor tensor23 = tf.maxpoolx(2, new int[]{2, 2}, 0, tensor22);//32*35*35
 
-        Tensor tensor31 = tf.convx(new int[]{1, 1}, 0, new Tensor("weight", new int[]{32, 3, 3}), tensor23);//32*31*31
-        Tensor tensor32 = tf.relux(tensor31);//32*31*31
-        Tensor tensor33 = tf.maxpoolx(2, new int[]{2, 2}, 0, tensor32);//32*15*15
+        Tensor tensor31 = tf.convx(new int[]{1, 1}, 2, new Tensor("weight", new int[]{64, 5, 5}), tensor23);//64*35*35
+        Tensor tensor32 = tf.relux(tensor31);//64*35*35
+        Tensor tensor33 = tf.convx(new int[]{1, 1}, 2, new Tensor("weight", new int[]{64, 5, 5}), tensor32);//64*35*35
+        Tensor tensor34 = tf.relux(tensor33);//64*35*35
 
-        Tensor tensor41 = tf.demaxpoolx(3, new int[]{2, 2}, 0, tensor33);//32*31*31
-        Tensor tensor42 = tf.relux(tensor41);//16*33*33
-        Tensor tensor43 = tf.deconvx(new int[]{1, 1}, 0, new Tensor("weight", new int[]{16, 3, 3}), tensor42);//16*33*33
+        Tensor tensor41 = tf.demaxpoolx(2, new int[]{2, 2}, 0, tensor34);//64*70*70
+        Tensor tensor42 = tf.convx(new int[]{1, 1}, 2, new Tensor("weight", new int[]{32, 5, 5}), tensor41);//32*70*70
+        Tensor tensor43 = tf.relux(tensor42);//32*70*70
 
-        Tensor tensor51 = tf.demaxpoolx(3, new int[]{2, 2}, 0, tensor43);//16*67*67
-        Tensor tensor52 = tf.relux(tensor51);//16*69*69
-        Tensor tensor53 = tf.deconvx(new int[]{1, 1}, 0, new Tensor("weight", new int[]{10, 3, 3}), tensor52);//10*69*69
+        Tensor tensor51 = tf.demaxpoolx(2, new int[]{2, 2}, 0, tensor43);//32*140*140
+        Tensor tensor52 = tf.convx(new int[]{1, 1}, 2, new Tensor("weight", new int[]{16, 5, 5}), tensor51);//16*140*140
+        Tensor tensor53 = tf.relux(tensor52);//16*140*140
 
-        Tensor tensor61 = tf.demaxpoolx(2, new int[]{2, 2}, 0, tensor53);//10*138*138
-        Tensor tensor62 = tf.relux(tensor61);//10*140*140
-        Tensor tensor63 = tf.deconvx(new int[]{1, 1}, 0, new Tensor("weight", new int[]{3, 3, 3}), tensor62);//3*140*140
+        Tensor tensor61 = tf.convx(new int[]{1, 1}, 2, new Tensor("weight", new int[]{8, 5, 5}), tensor53);//3*140*140
+        Tensor tensor62 = tf.relux(tensor61);//16*140*140
+        Tensor tensor63 = tf.convx(new int[]{1, 1}, 2, new Tensor("weight", new int[]{3, 5, 5}), tensor62);//3*140*140
         Tensor squarex = tf.squarex(label, tensor63);
 
-        Executor.rate = 0.03;
+        Executor.rate = 0.003;
         Executor executor = new Executor(squarex, input, label);
-        forEach(600, x -> {
-            forEach(labelSet.length, i -> {
-                log.info("---------{}:{}------------", x, i);
-                Object inSet = inputSet[i], labSet = labelSet[i];
-                executor.run(inSet, labSet);
-                ModeLoader.save(executor, DataLoader.BASE_PATH.concat(i + "LetNet.obj"));
-                Double[][][] data = Shape.reshape(tensor63.getOutput(), new Double[3][140][140], (Fill<None>) (None a) -> (double) a.getValue());
-                ImageUtil.rgb2Image(data, "D:/img/".concat(i + ".jpg"));
-                log(squarex.getOutput());
-            });
+        forEach(600, labelSet.length, (x, i) -> {
+            log.info("epoch = {{},{}}", x, i);
+            Object inSet = inputSet[i], labSet = labelSet[i];
+            executor.run(inSet, labSet);
+            ModeLoader.save(executor, DataLoader.BASE_PATH.concat(i + "LetNet.obj"));
+            img(tensor63, i);
+            log(squarex.getOutput());
         });
     }
 
@@ -225,19 +123,16 @@ public class DenseNetTest extends Shape {
         double[][][][] labelSet = DataLoader.getImageData();
 
         Executor executor = ModeLoader.load(DataLoader.BASE_PATH.concat("LetNet.obj"));
-        Executor.rate = 0.3;
+        Executor.rate = 0.003;
         Tensor squarex = executor.getTensor();
-        Tensor tensor63 = squarex.getInput()[1];
-        forEach(600, x -> {
-            forEach(labelSet.length, i -> {
-                log.info("---------{}:{}------------", x, i);
-                Object inSet = inputSet[i], labSet = labelSet[i];
-                executor.run(inSet, labSet);
-                ModeLoader.save(executor, DataLoader.BASE_PATH.concat(i + "LetNet.obj"));
-                Double[][][] data = Shape.reshape(tensor63.getOutput(), new Double[3][140][140], (Fill<None>) (None a) -> (double) a.getValue());
-                ImageUtil.rgb2Image(data, "D:/img/".concat(i + ".jpg"));
-                log(squarex.getOutput());
-            });
+        Tensor output = squarex.getInput()[1];
+        forEach(600, labelSet.length, (x, i) -> {
+            log.info("epoch = {{},{}}", x, i);
+            Object inSet = inputSet[i], labSet = labelSet[i];
+            executor.run(inSet, labSet);
+            ModeLoader.save(executor, DataLoader.BASE_PATH.concat(i + "LetNet.obj"));
+            img(output, i);
+            log(squarex.getOutput());
         });
     }
 
@@ -248,15 +143,21 @@ public class DenseNetTest extends Shape {
 
         Executor executor = ModeLoader.load(DataLoader.BASE_PATH.concat("LetNet.obj"));
         Tensor squarex = executor.getTensor();
-        Tensor tensor63 = squarex.getInput()[1];
+        Tensor output = squarex.getInput()[1];
         Object inSet = inputSet, labSet = labelSet;
         executor.forward(inSet, labSet);
-        Double[][][] data = Shape.reshape(tensor63.getOutput(), new Double[3][140][140], (Fill<None>) (None a) -> (double) a.getValue());
-        ImageUtil.rgb2Image(data, "D:/img/x.jpg");
+        img(output, 0);
         log(squarex.getOutput());
+    }
+
+    public void img(Tensor tensor, int i) {
+        Fill<None> fun = None::getValue;
+        Double[][][] data = Shape.reshape(tensor.getOutput(), new Double[3][140][140], fun);
+        ImageUtil.rgb2Image(data, "D:/img/".concat(i + ".jpg"));
     }
 
     public void log(Object obj) {
         log.info(JSONObject.toJSONString(obj));
     }
+
 }
