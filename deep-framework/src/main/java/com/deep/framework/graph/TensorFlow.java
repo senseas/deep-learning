@@ -462,14 +462,14 @@ public class TensorFlow extends Shape {
             public None compute() {
                 Object A = getInput(0);
                 None B = new None(0d);
-                forEach(A, a -> B.setValue(B.getValue() + ((None) a).getValue()));
+                farEach(A, a -> B.setValue(B.getValue() + ((None) a).getValue()));
                 return B;
             }
 
             public void gradient() {
                 Object A = getInput(0);
                 None B = (None) getOutput();
-                forEach(A, a -> ((None) a).setGrad(B.getGrad()));
+                farEach(A, a -> ((None) a).setGrad(B.getGrad()));
             }
 
         };
