@@ -247,7 +247,6 @@ public class TensorFlow extends Shape {
                 double valx = inx.getValue(), valy = iny.getValue();
                 double grad = out.getGrad();
                 inx.setGrad(valx > valy ? grad : 0);
-                iny.setGrad(valx < valy ? grad : 0);
             }
 
         };
