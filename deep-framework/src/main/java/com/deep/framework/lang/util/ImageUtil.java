@@ -4,6 +4,7 @@ import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 
 /**
  * @description:
@@ -14,7 +15,8 @@ public class ImageUtil {
 
     public static double[][][] image2RGB(String src) {
         try {
-            BufferedImage image = ImageIO.read(new File(src));
+            InputStream input = FileUtil.readResourceAsStream(src);
+            BufferedImage image = ImageIO.read(input);
             int width = image.getWidth(), height = image.getHeight();
             double[][] R = new double[height][width];
             double[][] G = new double[height][width];
@@ -22,9 +24,9 @@ public class ImageUtil {
             for (int y = 0; y < height; y++) {
                 for (int x = 0; x < width; x++) {
                     int pixel = image.getRGB(x, y);
-                    R[y][x] = (((pixel & 0xff0000) >> 16)-127.5) / 128d;
-                    G[y][x] = (((pixel & 0xff00) >> 8)-127.5) / 128d;
-                    B[y][x] = ((pixel & 0xff)-127.5) / 128d;
+                    R[y][x] = (((pixel & 0xff0000) >> 16) - 127.5) / 128d;
+                    G[y][x] = (((pixel & 0xff00) >> 8) - 127.5) / 128d;
+                    B[y][x] = ((pixel & 0xff) - 127.5) / 128d;
                 }
             }
             return new double[][][]{R, G, B};
@@ -40,9 +42,9 @@ public class ImageUtil {
             BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
             for (int y = 0; y < height; y++) {
                 for (int x = 0; x < width; x++) {
-                    int r = ((int) (pixels[0][y][x] * 128d-127.5)) << 16;
-                    int g = ((int) (pixels[1][y][x] * 128d-127.5)) << 8;
-                    int b = ((int) (pixels[2][y][x] * 128d-127.5));
+                    int r = ((int) (pixels[0][y][x] * 128d - 127.5)) << 16;
+                    int g = ((int) (pixels[1][y][x] * 128d - 127.5)) << 8;
+                    int b = ((int) (pixels[2][y][x] * 128d - 127.5));
                     image.setRGB(x, y, r + g + b);
                 }
             }

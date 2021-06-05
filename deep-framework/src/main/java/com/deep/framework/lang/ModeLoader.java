@@ -4,7 +4,8 @@ import java.io.*;
 
 public class ModeLoader {
 
-    public static void save(Object obj, String src) {
+    public static void save(Object obj, String name) {
+        String src = DataLoader.MODEL_PATH.concat(name);
         try (ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(src))) {
             out.writeObject(obj);
         } catch (Exception e) {
@@ -12,7 +13,8 @@ public class ModeLoader {
         }
     }
 
-    public static <E> E load(String src) {
+    public static <E> E load(String name) {
+        String src = DataLoader.MODEL_PATH.concat(name);
         try (ObjectInputStream in = new ObjectInputStream(new FileInputStream(new File(src)))) {
             Object o = in.readObject();
             return (E) o;

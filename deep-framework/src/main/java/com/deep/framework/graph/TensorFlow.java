@@ -1,6 +1,8 @@
 package com.deep.framework.graph;
 
 import com.deep.framework.lang.Shape;
+import com.deep.framework.lang.function.For2;
+import com.deep.framework.lang.function.For3;
 import com.deep.framework.lang.function.Func1;
 import com.deep.framework.lang.function.Func2;
 
@@ -31,7 +33,7 @@ public class TensorFlow extends Shape {
 
             public Object compute() {
                 Object A = getInput(0), B = getInput(1), C = shape(Tensor.class, A);
-                forEach(A, B, C, (a, b, c, i) -> {
+                forEach(A, B, C, (For3<Tensor>) (a, b, c, i) -> {
                     c[i] = add(a, b);
                 });
                 return C;
@@ -137,7 +139,7 @@ public class TensorFlow extends Shape {
 
             public Object compute() {
                 Object A = getInput(0), B = shape(Tensor.class, A);
-                forEach(A, B, (a, b, i) -> {
+                forEach(A, B, (For2<Tensor>) (a, b, i) -> {
                     b[i] = exp(a);
                 });
                 return B;
@@ -206,17 +208,24 @@ public class TensorFlow extends Shape {
     }
 
     public Tensor relux(Tensor input) {
-        return new TensorFunction("Relux", input) {
+        return new TensorOparetor("Relux", input) {
 
             public Object compute() {
-                Object A = getInput(0), B = shape(Tensor.class, A);
-                forEach(A, B, (a, b, i) -> {
-                    b[i] = relu(a);
+                Object A = getInput(0), B = zeroNones(A);
+                forEach(A, B, (For2<None>) (a, b, i) -> {
+                    double value = a.getValue();
+                    b[i] = new None(value > 0 ? value : 0.1 * value);
                 });
                 return B;
             }
 
-            public void gradient() { }
+            public void gradient() {
+                Object A = getInput(0), B = getOutput();
+                forEach(A, B, (For2<None>) (a, b, i) -> {
+                    double grad = b[i].getGrad();
+                    b[i].setGrad(a.getValue() > 0 ? grad : 0.1 * grad);
+                });
+            }
 
         };
     }
@@ -314,7 +323,7 @@ public class TensorFlow extends Shape {
             public Object compute() {
                 Object A = getInput(0), C = shape(Tensor.class, A);
                 Tensor b = getInput(1);
-                forEach(A, C, (a, c, i) -> {
+                forEach(A, C, (For2<Tensor>) (a, c, i) -> {
                     c[i] = mul(a, b);
                 });
                 return C;
@@ -343,7 +352,7 @@ public class TensorFlow extends Shape {
 
             public Object compute() {
                 Object A = getInput(0), B = shape(Tensor.class, A);
-                forEach(A, B, (a, b, i) -> {
+                forEach(A, B, (For2<Tensor>) (a, b, i) -> {
                     b[i] = sigmoid(a);
                 });
                 return B;
@@ -656,7 +665,7 @@ public class TensorFlow extends Shape {
             public Object compute() {
                 Object[] A = getInput(0);
                 Object B = shape(Tensor.class, A);
-                forEach(A, B, (a, b, i) -> {
+                forEach(A, B, (For2<Tensor>) (a, b, i) -> {
                     b[i] = div(exp(a), sum(expx(new Tensor(A))));
                 });
                 return B;
@@ -693,7 +702,7 @@ public class TensorFlow extends Shape {
                 Tensor[] D = {new TensorConst(0)};
                 forEach(A, a -> D[0] = add(D[0], pow(minus((Tensor) a, C), new TensorConst(2))));
                 Tensor E = pow(add(mul(new TensorConst(1d / A.length), D[0]), new TensorConst(Math.E)), new TensorConst(0.5));
-                forEach(A, B, (a, b, i) -> b[i] = add(mul(new Tensor(0.9), div(minus(a, C), E)), new Tensor(0.9)));
+                forEach(A, B, (For2<Tensor>) (a, b, i) -> b[i] = add(mul(new Tensor(0.9), div(minus(a, C), E)), new Tensor(0.9)));
                 return B;
             }
 

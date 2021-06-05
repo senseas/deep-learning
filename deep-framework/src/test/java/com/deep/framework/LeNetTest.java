@@ -24,8 +24,8 @@ public class LeNetTest extends Shape {
     @Test
     public void LeNetTest() {
 
-        double[][][][] inputSet = DataLoader.getMnistImages(DataLoader.TRAIN_IMAGES_FILE);
-        double[][][] labelSet = DataLoader.getMnistLabels(DataLoader.TRAIN_LABELS_FILE);
+        double[][][][] inputSet = DataLoader.getMnistImages();
+        double[][][] labelSet = DataLoader.getMnistLabels();
 
         TensorFlow tf = new TensorFlow();
         Tensor input = new Tensor(new int[]{1, 28, 28});
@@ -63,7 +63,7 @@ public class LeNetTest extends Shape {
                 executor.run(inSet, labSet);
                 if (i % 500 == 0) {
                     log.info("---------{}------------", i);
-                    ModeLoader.save(executor, DataLoader.BASE_PATH.concat(i + "LetNet.obj"));
+                    ModeLoader.save(executor, i + "LetNet.obj");
                     log(Shape.reshape(labSet, new Double[10]));
                     log(Shape.reshape(softmax.getOutput(), new None[10]));
                     log(crossx.getOutput());
@@ -74,10 +74,10 @@ public class LeNetTest extends Shape {
 
     @Test
     public void TrainTest() {
-        double[][][][] inputSet = DataLoader.getMnistImages(DataLoader.TRAIN_IMAGES_FILE);
-        double[][][] labelSet = DataLoader.getMnistLabels(DataLoader.TRAIN_LABELS_FILE);
+        double[][][][] inputSet = DataLoader.getMnistImages();
+        double[][][] labelSet = DataLoader.getMnistLabels();
 
-        Executor executor = ModeLoader.load(DataLoader.BASE_PATH.concat("LetNet.obj"));
+        Executor executor = ModeLoader.load("LetNet.obj");
         Tensor<None> crossx = executor.getTensor();
         Tensor softmax = crossx.getInput()[1];
         forEach(20, x -> {
@@ -86,7 +86,7 @@ public class LeNetTest extends Shape {
                 executor.run(inSet, labSet);
                 if (i % 500 == 0) {
                     log.info("---------{}------------", i);
-                    ModeLoader.save(executor, DataLoader.BASE_PATH.concat(i + "LetNet.obj"));
+                    ModeLoader.save(executor, i + "LetNet.obj");
                     log(Shape.reshape(labSet, new Double[10]));
                     log(Shape.reshape(softmax.getOutput(), new None[10]));
                     log(crossx.getOutput());
@@ -97,10 +97,10 @@ public class LeNetTest extends Shape {
 
     @Test
     public void EvalTest() {
-        double[][][][] inputSet = DataLoader.getMnistImages(DataLoader.TRAIN_IMAGES_FILE);
-        double[][][] labelSet = DataLoader.getMnistLabels(DataLoader.TRAIN_LABELS_FILE);
+        double[][][][] inputSet = DataLoader.getMnistImages();
+        double[][][] labelSet = DataLoader.getMnistLabels();
 
-        Executor executor = ModeLoader.load(DataLoader.BASE_PATH.concat("LetNet.obj"));
+        Executor executor = ModeLoader.load("LetNet.obj");
         Tensor<None> crossx = executor.getTensor();
         Tensor softmax = crossx.getInput()[1];
         List list = new ArrayList();
@@ -125,8 +125,8 @@ public class LeNetTest extends Shape {
     @Test
     public void ImgTest() {
         int index = 12500;
-        double[][][][] images = DataLoader.getMnistImages(DataLoader.TRAIN_IMAGES_FILE);
-        String fileName = DataLoader.BASE_PATH.concat(String.valueOf(index)).concat(".JPEG");
+        double[][][][] images = DataLoader.getMnistImages();
+        String fileName = DataLoader.IMG_PATH.concat(String.valueOf(index)).concat(".JPEG");
         ImageUtil.write(images[index][0], fileName);
     }
 

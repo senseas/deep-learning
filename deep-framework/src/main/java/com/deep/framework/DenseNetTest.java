@@ -11,13 +11,15 @@ import com.deep.framework.lang.Shape;
 import com.deep.framework.lang.function.Fill;
 import com.deep.framework.lang.util.ImageUtil;
 import lombok.extern.slf4j.Slf4j;
-import org.junit.Test;
 
 @Slf4j
 public class DenseNetTest extends Shape {
 
-    @Test
-    public void DenseNetTest3() {
+    public static void main(String[] args) {
+        DenseNetTest3();
+    }
+
+    public static void DenseNetTest3() {
         double[][][][] inputSet = DataLoader.getImageData();
         double[][][][] labelSet = DataLoader.getImageData();
 
@@ -70,8 +72,7 @@ public class DenseNetTest extends Shape {
         });
     }
 
-    @Test
-    public void DenseNetTest5() {
+    public static void DenseNetTest5() {
         double[][][][] inputSet = DataLoader.getImageData();
         double[][][][] labelSet = DataLoader.getImageData();
 
@@ -117,8 +118,7 @@ public class DenseNetTest extends Shape {
         });
     }
 
-    @Test
-    public void TrainTest() {
+    public static void TrainTest() {
         double[][][][] inputSet = DataLoader.getImageData();
         double[][][][] labelSet = DataLoader.getImageData();
 
@@ -136,8 +136,7 @@ public class DenseNetTest extends Shape {
         });
     }
 
-    @Test
-    public void EvalTest() {
+    public static void EvalTest() {
         double[][][] inputSet = ImageUtil.image2RGB("d-140.jpg");
         double[][][] labelSet = ImageUtil.image2RGB("d-140.jpg");
 
@@ -150,13 +149,13 @@ public class DenseNetTest extends Shape {
         log(squarex.getOutput());
     }
 
-    public void img(Tensor tensor, int i) {
+    public static void img(Tensor tensor, int i) {
         Fill<None> fun = None::getValue;
         Double[][][] data = Shape.reshape(tensor.getOutput(), new Double[3][140][140], fun);
         ImageUtil.rgb2Image(data, DataLoader.IMG_PATH.concat(i + ".jpg"));
     }
 
-    public void log(Object obj) {
+    public static void log(Object obj) {
         log.info(JSONObject.toJSONString(obj));
     }
 

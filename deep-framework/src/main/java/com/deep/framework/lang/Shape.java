@@ -36,7 +36,7 @@ public class Shape extends ForEach {
     }
 
     public static <E> E zeroNones(Object a) {
-        return (E) fill(a, o -> new None(0d));
+        return (E) fill(a, shape(None.class, a), o -> new None(0d));
     }
 
     public static Object shape(Class clas, Object a) {

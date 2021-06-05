@@ -149,7 +149,7 @@ public class ForEach implements Serializable {
             farEach(Array.getLength(a), i -> {
                 Object m = Array.get(a, i), n = Array.get(b, i);
                 if (BeanUtil.isNotTensor(m)) {
-                    func.apply((Tensor) m, (Tensor[]) b, i);
+                    func.apply(m, (Object[]) b, i);
                 } else {
                     forEach(m, n, func);
                 }
@@ -162,7 +162,7 @@ public class ForEach implements Serializable {
             forEach(Array.getLength(a), i -> {
                 Object m = Array.get(a, i), n = Array.get(b, i), o = Array.get(c, i);
                 if (BeanUtil.isNotTensor(m)) {
-                    func.apply((Tensor) m, (Tensor) n, (Tensor[]) c, i);
+                    func.apply(m, n, (Object[]) c, i);
                 } else {
                     forEach(m, n, o, func);
                 }
@@ -209,5 +209,3 @@ public class ForEach implements Serializable {
     }
 
 }
-
-
