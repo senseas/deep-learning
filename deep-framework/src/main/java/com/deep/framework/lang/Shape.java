@@ -3,7 +3,7 @@ package com.deep.framework.lang;
 import com.deep.framework.graph.None;
 import com.deep.framework.graph.Tensor;
 import com.deep.framework.graph.TensorConst;
-import com.deep.framework.lang.function.Fill;
+import com.deep.framework.lang.function.Func;
 import org.apache.commons.math3.random.RandomDataGenerator;
 
 import java.lang.reflect.Array;
@@ -27,16 +27,16 @@ public class Shape extends ForEach {
         return (E) fill(a, shape(Tensor.class, a), o -> new Tensor(0d));
     }
 
-    public static <E> E fill(int[] x, double value, boolean isGrad) {
-        return (E) fill(Array.newInstance(None.class, x), o -> new None(value, isGrad));
-    }
-
     public static <E> E zeroTensors(Object a, int b[]) {
         return (E) fill(a, o -> new TensorConst(b, 0d));
     }
 
     public static <E> E zeroNones(Object a) {
         return (E) fill(a, shape(None.class, a), o -> new None(0d));
+    }
+
+    public static <E> E fill(int[] x, double value, boolean isGrad) {
+        return (E) fill(Array.newInstance(None.class, x), o -> new None(value, isGrad));
     }
 
     public static Object shape(Class clas, Object a) {
@@ -50,7 +50,7 @@ public class Shape extends ForEach {
         return (M) B;
     }
 
-    public static <M> M reshape(Object A, Object B, Fill fill) {
+    public static <M> M reshape(Object A, Object B, Func fill) {
         Queue link = new LinkedList();
         forEach(A, a -> link.add(a));
         forEach(B, (b, i) -> b[i] = fill.apply(link.poll()));

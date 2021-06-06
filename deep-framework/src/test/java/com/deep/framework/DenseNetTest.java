@@ -8,7 +8,7 @@ import com.deep.framework.graph.TensorFlow;
 import com.deep.framework.lang.DataLoader;
 import com.deep.framework.lang.ModeLoader;
 import com.deep.framework.lang.Shape;
-import com.deep.framework.lang.function.Fill;
+import com.deep.framework.lang.function.Func;
 import com.deep.framework.lang.util.ImageUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Test;
@@ -151,7 +151,7 @@ public class DenseNetTest extends Shape {
     }
 
     public void img(Tensor tensor, int i) {
-        Fill<None> fun = None::getValue;
+        Func<None> fun = None::getValue;
         Double[][][] data = Shape.reshape(tensor.getOutput(), new Double[3][140][140], fun);
         ImageUtil.rgb2Image(data, DataLoader.IMG_PATH.concat(i + ".jpg"));
     }

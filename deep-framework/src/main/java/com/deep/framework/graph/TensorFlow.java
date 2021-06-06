@@ -32,7 +32,7 @@ public class TensorFlow extends Shape {
         return new TensorFunction("Addx", input) {
 
             public Object compute() {
-                Object A = getInput(0), B = getInput(1), C = shape(Tensor.class, A);
+                Object A = getInput(0), B = getInput(1), C = zeroTensors(A);
                 forEach(A, B, C, (For3<Tensor>) (a, b, c, i) -> {
                     c[i] = add(a, b);
                 });
@@ -138,7 +138,7 @@ public class TensorFlow extends Shape {
         return new TensorFunction("Expx", input) {
 
             public Object compute() {
-                Object A = getInput(0), B = shape(Tensor.class, A);
+                Object A = getInput(0), B = zeroTensors(A);
                 forEach(A, B, (For2<Tensor>) (a, b, i) -> {
                     b[i] = exp(a);
                 });
@@ -307,7 +307,7 @@ public class TensorFlow extends Shape {
 
             public Object compute() {
                 Object A = getInput(0), B = getInput(1);
-                Object C = shape(Tensor.class, B);
+                Object C = zeroTensors(B);
                 reshape(A, C);
                 return C;
             }
@@ -321,7 +321,7 @@ public class TensorFlow extends Shape {
         return new TensorFunction("Prod", input) {
 
             public Object compute() {
-                Object A = getInput(0), C = shape(Tensor.class, A);
+                Object A = getInput(0), C = zeroTensors(A);
                 Tensor b = getInput(1);
                 forEach(A, C, (For2<Tensor>) (a, c, i) -> {
                     c[i] = mul(a, b);
@@ -351,7 +351,7 @@ public class TensorFlow extends Shape {
         return new TensorFunction("Sigmoidx", input) {
 
             public Object compute() {
-                Object A = getInput(0), B = shape(Tensor.class, A);
+                Object A = getInput(0), B = zeroTensors(A);
                 forEach(A, B, (For2<Tensor>) (a, b, i) -> {
                     b[i] = sigmoid(a);
                 });
@@ -663,8 +663,7 @@ public class TensorFlow extends Shape {
         return new TensorFunction("Softmax", input) {
 
             public Object compute() {
-                Object[] A = getInput(0);
-                Object B = shape(Tensor.class, A);
+                Object[] A = getInput(0), B = zeroTensors(A);
                 forEach(A, B, (For2<Tensor>) (a, b, i) -> {
                     b[i] = div(exp(a), sum(expx(new Tensor(A))));
                 });

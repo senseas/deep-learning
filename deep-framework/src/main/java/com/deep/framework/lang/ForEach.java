@@ -43,7 +43,7 @@ public class ForEach implements Serializable {
         farEach(a, i -> farEach(b, l -> farEach(c, m -> farEach(e, n -> r.apply(i, l, m, n)))));
     }
 
-    public static Object fill(Object a, Fill func) {
+    public static Object fill(Object a, Func func) {
         if (BeanUtil.isTensor(a)) {
             forEach(Array.getLength(a), i -> {
                 Object m = Array.get(a, i);
@@ -57,7 +57,7 @@ public class ForEach implements Serializable {
         return a;
     }
 
-    public static Object fill(Object a, Object b, Fill func) {
+    public static Object fill(Object a, Object b, Func func) {
         if (BeanUtil.isTensor(a)) {
             farEach(Array.getLength(a), i -> {
                 Object m = Array.get(a, i), n = Array.get(b, i);

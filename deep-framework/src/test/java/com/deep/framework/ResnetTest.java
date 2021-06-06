@@ -8,7 +8,7 @@ import com.deep.framework.graph.TensorFlow;
 import com.deep.framework.lang.DataLoader;
 import com.deep.framework.lang.ModeLoader;
 import com.deep.framework.lang.Shape;
-import com.deep.framework.lang.function.Fill;
+import com.deep.framework.lang.function.Func;
 import com.deep.framework.lang.util.ImageUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Test;
@@ -62,7 +62,7 @@ public class ResnetTest extends Shape {
                 Object inSet = inputSet[i], labSet = labelSet[i];
                 executor.run(inSet, labSet);
                 ModeLoader.save(executor, DataLoader.BASE_PATH.concat(i + "LetNet.obj"));
-                Double[][][] data = Shape.reshape(tensor74.getOutput(), new Double[3][140][140], (Fill<None>) (None a) -> (double) a.getValue());
+                Double[][][] data = Shape.reshape(tensor74.getOutput(), new Double[3][140][140], (Func<None>) (None a) -> (double) a.getValue());
                 ImageUtil.rgb2Image(data, "D:/img/".concat(i + ".jpg"));
                 log(squarex.getOutput());
             });
