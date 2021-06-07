@@ -16,10 +16,10 @@ public class TensorFunction extends Tensor {
         return TensorFlux.getTensor(input.getOutput());
     }
 
-    public Object getOutput() {
-        if (Objects.nonNull(output)) return output;
+    public <M> M getOutput() {
+        if (Objects.nonNull(output)) return (M) output;
         if (Objects.nonNull(getFunction())) output = TensorFlux.getOutput(function);
-        return output;
+        return (M) output;
     }
 
     public Object getFunction() {

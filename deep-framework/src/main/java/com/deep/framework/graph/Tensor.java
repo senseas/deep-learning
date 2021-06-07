@@ -6,16 +6,16 @@ import lombok.Data;
 import java.io.Serializable;
 
 @Data
-public class Tensor<N> implements Serializable {
+public class Tensor implements Serializable {
 
     public Tensor(double value) {
         this.name = "None";
-        this.output = (N) new None(value);
+        this.output = new None(value);
     }
 
     public Tensor(double value, boolean isGrad) {
         this.name = "None";
-        this.output = (N) new None(value, isGrad);
+        this.output = new None(value, isGrad);
     }
 
     public Tensor(int[] shape) {
@@ -35,7 +35,7 @@ public class Tensor<N> implements Serializable {
 
     public Tensor(None input) {
         this.name = "None";
-        this.output = (N) input;
+        this.output = input;
     }
 
     public Tensor(String name, Tensor... input) {
@@ -45,7 +45,7 @@ public class Tensor<N> implements Serializable {
 
     public <M> Tensor(M[] m) {
         this.name = "Function";
-        this.function = (N) m;
+        this.function = m;
     }
 
     public <M> M compute() { return null; }
@@ -58,8 +58,10 @@ public class Tensor<N> implements Serializable {
 
     public void reduce() { }
 
+    public <M> M getOutput() { return (M) output; }
+
     private String name = "Tensor::";
     private Tensor[] input;
-    protected transient N function;
-    protected N output;
+    protected transient Object function;
+    protected Object output;
 }

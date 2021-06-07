@@ -22,11 +22,11 @@ public class TensorOparetor extends Tensor {
     public <M> M getInput(int i) {
         Tensor input = getInput()[i];
         if (BeanUtil.isFunction(input)) return TensorFlux.getOutput(input.getFunction());
-        return (M) input.getOutput();
+        return input.getOutput();
     }
 
-    public Object getOutput() {
-        return output;
+    public <M> M getOutput() {
+        return (M) output;
     }
 
     public void forward() {
