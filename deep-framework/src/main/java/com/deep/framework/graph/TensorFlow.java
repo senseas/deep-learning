@@ -10,7 +10,7 @@ import java.util.stream.IntStream;
 
 public class TensorFlow extends Shape {
 
-    public Tensor add(Tensor<None>... input) {
+    public Tensor add(Tensor... input) {
         return new TensorOparetor("Add", input) {
 
             public None compute() {
@@ -44,7 +44,7 @@ public class TensorFlow extends Shape {
         };
     }
 
-    public Tensor minus(Tensor<None>... input) {
+    public Tensor minus(Tensor... input) {
         return new TensorOparetor("Minus", input) {
 
             public None compute() {
@@ -75,7 +75,7 @@ public class TensorFlow extends Shape {
         };
     }
 
-    public Tensor mul(Tensor<None>... input) {
+    public Tensor mul(Tensor... input) {
         return new TensorOparetor("Mul", input) {
 
             public None compute() {
@@ -95,7 +95,7 @@ public class TensorFlow extends Shape {
         };
     }
 
-    public Tensor div(Tensor<None>... input) {
+    public Tensor div(Tensor... input) {
         return new TensorOparetor("Div", input) {
 
             public None compute() {
@@ -115,7 +115,7 @@ public class TensorFlow extends Shape {
         };
     }
 
-    public Tensor exp(Tensor<None>... input) {
+    public Tensor exp(Tensor... input) {
         return new TensorOparetor("Exp", input) {
 
             public None compute() {
@@ -150,7 +150,7 @@ public class TensorFlow extends Shape {
         };
     }
 
-    public Tensor pow(Tensor<None>... input) {
+    public Tensor pow(Tensor... input) {
         return new TensorOparetor("Pow", input) {
 
             public None compute() {
@@ -169,7 +169,7 @@ public class TensorFlow extends Shape {
         };
     }
 
-    public Tensor log(Tensor<None>... input) {
+    public Tensor log(Tensor... input) {
         return new TensorOparetor("Log", input) {
 
             public None compute() {
@@ -188,7 +188,7 @@ public class TensorFlow extends Shape {
         };
     }
 
-    public Tensor relu(Tensor<None> input) {
+    public Tensor relu(Tensor input) {
         return new TensorOparetor("Relu", input) {
 
             public None compute() {
@@ -230,7 +230,7 @@ public class TensorFlow extends Shape {
         };
     }
 
-    public Tensor max(Tensor<None>... input) {
+    public Tensor max(Tensor... input) {
         return new TensorOparetor("Max", input) {
 
             public None compute() {
@@ -250,7 +250,7 @@ public class TensorFlow extends Shape {
         };
     }
 
-    public Tensor matmul(Tensor<Tensor[][]>... input) {
+    public Tensor matmul(Tensor... input) {
         return new TensorOparetor("Matmul", input) {
 
             public Object compute() {
@@ -276,7 +276,7 @@ public class TensorFlow extends Shape {
         };
     }
 
-    public Tensor matmulTran(Tensor<Tensor[][]>... input) {
+    public Tensor matmulTran(Tensor... input) {
         return new TensorOparetor("MatmulTran", input) {
 
             public Object compute() {
@@ -334,7 +334,7 @@ public class TensorFlow extends Shape {
         };
     }
 
-    public Tensor sigmoid(Tensor<Tensor> input) {
+    public Tensor sigmoid(Tensor input) {
         return new TensorFunction("Sigmoid", input) {
 
             public Tensor compute() {
@@ -347,7 +347,7 @@ public class TensorFlow extends Shape {
         };
     }
 
-    public Tensor sigmoidx(Tensor<None> input) {
+    public Tensor sigmoidx(Tensor input) {
         return new TensorFunction("Sigmoidx", input) {
 
             public Object compute() {
@@ -363,7 +363,7 @@ public class TensorFlow extends Shape {
         };
     }
 
-    public Tensor square(Tensor<None>... input) {
+    public Tensor square(Tensor... input) {
         return new TensorFunction("Square", input) {
 
             public Tensor compute() {
@@ -376,7 +376,7 @@ public class TensorFlow extends Shape {
         };
     }
 
-    public Tensor squarex(Tensor<None>... input) {
+    public Tensor squarex(Tensor... input) {
         return new TensorFunction("Squarex", input) {
 
             public Tensor compute() {
@@ -393,7 +393,7 @@ public class TensorFlow extends Shape {
         };
     }
 
-    public Tensor softmaxCross(Tensor<None>... input) {
+    public Tensor softmaxCross(Tensor... input) {
         return new TensorFunction("SoftmaxCross", input) {
 
             public Tensor compute() {
@@ -406,7 +406,7 @@ public class TensorFlow extends Shape {
         };
     }
 
-    public Tensor softmaxCrossx(Tensor<None>... input) {
+    public Tensor softmaxCrossx(Tensor... input) {
         return new TensorFunction("SoftmaxCrossx", input) {
 
             public Tensor compute() {
@@ -423,7 +423,7 @@ public class TensorFlow extends Shape {
         };
     }
 
-    public Tensor sigmoidCross(Tensor<None>... input) {
+    public Tensor sigmoidCross(Tensor... input) {
         return new TensorFunction("SigmoidCross", input) {
 
             public Tensor compute() {
@@ -436,7 +436,7 @@ public class TensorFlow extends Shape {
         };
     }
 
-    public Tensor sigmoidCrossx(Tensor<None>... input) {
+    public Tensor sigmoidCrossx(Tensor... input) {
         return new TensorFunction("SigmoidCrossx", input) {
 
             public Tensor compute() {
@@ -453,7 +453,7 @@ public class TensorFlow extends Shape {
         };
     }
 
-    public Tensor sum(Tensor<None> input) {
+    public Tensor sum(Tensor input) {
         return new TensorOparetor("Sum", input) {
 
             public None compute() {
@@ -472,8 +472,7 @@ public class TensorFlow extends Shape {
         };
     }
 
-    public Tensor conv(int[] stride, int padding, Tensor<None[][]>... input) {
-
+    public Tensor conv(int[] stride, int padding, Tensor... input) {
         return new TensorOparetor("Conv", input) {
 
             public None[][] compute() {
@@ -503,7 +502,6 @@ public class TensorFlow extends Shape {
     }
 
     public Tensor convx(int[] stride, int padding, Tensor... input) {
-
         return new TensorFunction("Convx", input) {
 
             public Object compute() {
@@ -522,7 +520,7 @@ public class TensorFlow extends Shape {
         };
     }
 
-    public Tensor deconv(int[] stride, int padding, Tensor<None[][]>... input) {
+    public Tensor deconv(int[] stride, int padding, Tensor... input) {
         return new TensorOparetor("Deconv", input) {
 
             public None[][] compute() {
