@@ -54,7 +54,7 @@ public class LeNetTest extends Shape {
         Tensor tensor53 = tf.sigmoidx(tensor52);//10
 
         Tensor softmax = tf.softmax(tensor53);
-        Tensor<None> crossx = tf.softmaxCrossx(label, softmax);
+        Tensor crossx = tf.softmaxCrossx(label, softmax);
         Executor.rate = 0.03;
         Executor executor = new Executor(crossx, input, label);
         forEach(20, x -> {
@@ -78,7 +78,7 @@ public class LeNetTest extends Shape {
         double[][][] labelSet = DataLoader.getMnistLabels();
 
         Executor executor = ModeLoader.load("LetNet.obj");
-        Tensor<None> crossx = executor.getTensor();
+        Tensor crossx = executor.getTensor();
         Tensor softmax = crossx.getInput()[1];
         forEach(20, x -> {
             forEach(60000, i -> {
@@ -101,7 +101,7 @@ public class LeNetTest extends Shape {
         double[][][] labelSet = DataLoader.getMnistLabels();
 
         Executor executor = ModeLoader.load("LetNet.obj");
-        Tensor<None> crossx = executor.getTensor();
+        Tensor crossx = executor.getTensor();
         Tensor softmax = crossx.getInput()[1];
         List list = new ArrayList();
         forEach(60000, i -> {
