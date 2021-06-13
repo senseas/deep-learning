@@ -24,7 +24,7 @@ public class Shape extends ForEach {
     }
 
     public static <E> E zeroTensors(Object a) {
-        return (E) fill(a, shape(Tensor.class, a), o -> new Tensor(0d));
+        return (E) fill(a, shape(Tensor.class, a), o -> new TensorConst(0d));
     }
 
     public static <E> E zeroTensors(Object a, int b[]) {
@@ -32,7 +32,7 @@ public class Shape extends ForEach {
     }
 
     public static <E> E zeroNones(Object a) {
-        return (E) fill(a, shape(None.class, a), o -> new None(0d));
+        return (E) fill(a, shape(None.class, a), o -> new None(0d, false));
     }
 
     public static <E> E fill(int[] x, double value, boolean isGrad) {
