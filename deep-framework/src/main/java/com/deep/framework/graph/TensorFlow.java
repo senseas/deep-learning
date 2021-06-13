@@ -223,7 +223,7 @@ public class TensorFlow extends Shape {
                 Object A = getInput(0), B = getOutput();
                 forEach(A, B, (For2<None>) (a, b, i) -> {
                     double grad = b[i].getGrad();
-                    b[i].setGrad(a.getValue() > 0 ? grad : 0.1 * grad);
+                    a.setGrad(a.getValue() > 0 ? grad : 0.1 * grad);
                 });
             }
 
