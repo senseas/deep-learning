@@ -1,11 +1,16 @@
 package com.deep.framework.graph;
 
-import com.deep.framework.lang.Shape;
-import com.deep.framework.lang.function.*;
+import com.deep.framework.lang.function.For2;
+import com.deep.framework.lang.function.Func1;
+import com.deep.framework.lang.function.Func2;
+import com.deep.framework.lang.function.Func3;
 
+import java.io.Serializable;
 import java.util.stream.IntStream;
 
-public class TensorFlow extends Shape {
+import static com.deep.framework.lang.Shape.*;
+
+public class TensorFlow implements Serializable {
 
     public Tensor add(Tensor... input) {
         return new TensorOparetor("Add", input) {

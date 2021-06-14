@@ -1,13 +1,15 @@
 package com.deep.framework.graph;
 
 import com.deep.framework.framework.Executor;
-import com.deep.framework.lang.Shape;
 import com.deep.framework.lang.function.Func2;
 import com.deep.framework.lang.util.BeanUtil;
 
+import java.io.Serializable;
 import java.util.Objects;
 
-public class TensorFlux extends Shape {
+import static com.deep.framework.lang.Shape.*;
+
+public class TensorFlux implements Serializable {
 
     public static void forward(Tensor tensor) {
         farEach(tensor.getFunction(), o -> {
