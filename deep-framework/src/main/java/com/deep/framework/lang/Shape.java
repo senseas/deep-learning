@@ -66,6 +66,15 @@ public class Shape extends ForEach {
         return list.stream().mapToInt(Integer::intValue).toArray();
     }
 
+    public static int size(Object arr) {
+        int size = 1;
+        while (Objects.nonNull(arr) && arr.getClass().isArray()) {
+            size *= Array.getLength(arr);
+            arr = Array.get(arr, 0);
+        }
+        return size;
+    }
+
 }
 
 

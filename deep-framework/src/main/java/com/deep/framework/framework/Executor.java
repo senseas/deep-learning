@@ -2,11 +2,12 @@ package com.deep.framework.framework;
 
 import com.deep.framework.graph.None;
 import com.deep.framework.graph.Tensor;
-import com.deep.framework.lang.ForEach;
-import com.deep.framework.lang.function.Func2;
+import com.deep.framework.lang.function.Func21;
 import lombok.Data;
 
 import java.io.Serializable;
+
+import static com.deep.framework.lang.ForEach.farEach;
 
 @Data
 public class Executor<E> implements Serializable {
@@ -48,13 +49,13 @@ public class Executor<E> implements Serializable {
     }
 
     public void setInput(Object o) {
-        Func2<None, Double> func = (m, n) -> m.setValue(n);
-        ForEach.farEach(input.getOutput(), o, func);
+        Func21<None, Double> func = (m, n) -> m.setValue(n);
+        farEach(input.getOutput(), o, func);
     }
 
     public void setLabel(Object o) {
-        Func2<None, Double> func = (m, n) -> m.setValue(n);
-        ForEach.farEach(label.getOutput(), o, func);
+        Func21<None, Double> func = (None m, Double n) -> m.setValue(n);
+        farEach(label.getOutput(), o, func);
     }
 
 }

@@ -1,10 +1,7 @@
 package com.deep.framework.graph;
 
 import com.deep.framework.lang.Shape;
-import com.deep.framework.lang.function.For2;
-import com.deep.framework.lang.function.For3;
-import com.deep.framework.lang.function.Func1;
-import com.deep.framework.lang.function.Func2;
+import com.deep.framework.lang.function.*;
 
 import java.util.stream.IntStream;
 
@@ -29,17 +26,23 @@ public class TensorFlow extends Shape {
     }
 
     public Tensor addx(Tensor... input) {
-        return new TensorFunction("Addx", input) {
+        return new TensorOparetor("Addx", input) {
 
             public Object compute() {
-                Object A = getInput(0), B = getInput(1), C = zeroTensors(A);
-                forEach(A, B, C, (For3<Tensor>) (a, b, c, i) -> {
-                    c[i] = add(a, b);
+                Object A = getInput(0), B = getInput(1), C = zeroNones(A);
+                farEach(A, B, C, (Func3<None>) (a, b, c) -> {
+                    c.setValue(c.getValue() + a.getValue() + b.getValue());
                 });
                 return C;
             }
 
-            public void gradient() { }
+            public void gradient() {
+                Object A = getInput(0), B = getInput(1), C = getOutput();
+                farEach(A, B, C, (Func3<None>) (a, b, c) -> {
+                    a.setGrad(c.getGrad());
+                    b.setGrad(c.getGrad());
+                });
+            }
 
         };
     }
@@ -212,17 +215,17 @@ public class TensorFlow extends Shape {
 
             public Object compute() {
                 Object A = getInput(0), B = zeroNones(A);
-                forEach(A, B, (For2<None>) (a, b, i) -> {
+                farEach(A, B, (Func2<None>) (a, b) -> {
                     double value = a.getValue();
-                    b[i] = new None(value > 0 ? value : 0.1 * value);
+                    b.setValue(value > 0 ? value : 0.1 * value);
                 });
                 return B;
             }
 
             public void gradient() {
                 Object A = getInput(0), B = getOutput();
-                forEach(A, B, (For2<None>) (a, b, i) -> {
-                    double grad = b[i].getGrad();
+                farEach(A, B, (Func2<None>) (a, b) -> {
+                    double grad = b.getGrad();
                     a.setGrad(a.getValue() > 0 ? grad : 0.1 * grad);
                 });
             }
@@ -382,10 +385,10 @@ public class TensorFlow extends Shape {
             public Tensor compute() {
                 Object A = getInput(0), B = getInput(1);
                 Tensor[] C = {new TensorConst(0d)};
-                forEach(A, B, (Func2<Tensor, Tensor>) (a, b) -> {
+                forEach(A, B, (Func2<Tensor>) (a, b) -> {
                     C[0] = add(C[0], square(a, b));
                 });
-                return C[0];
+                return div(C[0], new TensorConst(size(A)));
             }
 
             public void gradient() { }
@@ -412,7 +415,7 @@ public class TensorFlow extends Shape {
             public Tensor compute() {
                 Object A = getInput(0), B = getInput(1);
                 Tensor[] C = {new TensorConst(0d)};
-                forEach(A, B, (Func2<Tensor, Tensor>) (a, b) -> {
+                forEach(A, B, (Func2<Tensor>) (a, b) -> {
                     C[0] = add(C[0], softmaxCross(a, b));
                 });
                 return C[0];
@@ -442,7 +445,7 @@ public class TensorFlow extends Shape {
             public Tensor compute() {
                 Object A = getInput(0), B = getInput(1);
                 Tensor[] C = {new TensorConst(0d)};
-                forEach(A, B, (Func2<Tensor, Tensor>) (a, b) -> {
+                forEach(A, B, (Func2<Tensor>) (a, b) -> {
                     C[0] = add(C[0], sigmoidCross(a, b));
                 });
                 return C[0];
@@ -459,14 +462,14 @@ public class TensorFlow extends Shape {
             public None compute() {
                 Object A = getInput(0);
                 None B = new None(0d);
-                forEach(A, (Func1<None>) a -> B.setValue(B.getValue() + a.getValue()));
+                farEach(A, (Func1<None>) a -> B.setValue(B.getValue() + a.getValue()));
                 return B;
             }
 
             public void gradient() {
                 Object A = getInput(0);
                 None B = getOutput();
-                forEach(A, (Func1<None>) a -> a.setGrad(B.getGrad()));
+                farEach(A, (Func1<None>) a -> a.setGrad(B.getGrad()));
             }
 
         };
@@ -480,7 +483,7 @@ public class TensorFlow extends Shape {
                 int heights = stride[0], widths = stride[1];
                 int height = (B.length - A.length) / heights + 1, width = (B[0].length - A[0].length) / widths + 1;
                 None[][] C = zeroNones(new None[height][width]);
-                forEach(height, width, A.length, A[0].length, (h, w, m, n) -> {
+                farEach(height, width, A.length, A[0].length, (h, w, m, n) -> {
                     None inx = A[m][n], iny = B[h * heights + m][w * widths + n], out = C[h][w];
                     out.setValue(out.getValue() + inx.getValue() * iny.getValue());
                 });
@@ -491,7 +494,7 @@ public class TensorFlow extends Shape {
                 None[][] A = getInput(0), B = padding(getInput(1), padding);
                 None[][] C = getOutput();
                 int heights = stride[0], widths = stride[1];
-                forEach(C.length, C[0].length, A.length, A[0].length, (h, w, m, n) -> {
+                farEach(C.length, C[0].length, A.length, A[0].length, (h, w, m, n) -> {
                     None inx = A[m][n], iny = B[h * heights + m][w * widths + n], out = C[h][w];
                     inx.setGrad(out.getGrad() * iny.getValue());
                     iny.setGrad(out.getGrad() * inx.getValue());
@@ -509,7 +512,7 @@ public class TensorFlow extends Shape {
                 int heighs = stride[0], widths = stride[1];
                 int height = (B[0].length - A[0].length + 2 * padding) / heighs + 1, width = (B[0][0].length - A[0][0].length + 2 * padding) / widths + 1;
                 Tensor[] C = zeroTensors(new Tensor[A.length], new int[]{height, width});
-                forEach(B.length, A.length, (i, l) -> {
+                farEach(B.length, A.length, (i, l) -> {
                     C[l] = addx(C[l], conv(stride, padding, new Tensor(A[l]), new Tensor(B[i])));
                 });
                 return C;

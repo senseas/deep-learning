@@ -131,6 +131,36 @@ public class ForEach implements Serializable {
         }
     }
 
+    public static void farEach(Object a, Object b, Func21 func) {
+        if (BeanUtil.isTensor(a)) {
+            farEach(Array.getLength(a), i -> {
+                Object m = Array.get(a, i), n = Array.get(b, i);
+                if (BeanUtil.isNotTensor(m)) {
+                    func.apply(m, n);
+                } else {
+                    farEach(m, n, func);
+                }
+            });
+        } else {
+            func.apply(a, b);
+        }
+    }
+
+    public static void farEach(Object a, Object b, Object c, Func3 func) {
+        if (BeanUtil.isTensor(a)) {
+            farEach(Array.getLength(a), i -> {
+                Object m = Array.get(a, i), n = Array.get(b, i), o = Array.get(c, i);
+                if (BeanUtil.isNotTensor(m)) {
+                    func.apply(m, n, o);
+                } else {
+                    farEach(m, n, o, func);
+                }
+            });
+        } else {
+            func.apply(a, b, c);
+        }
+    }
+
     public static void forEach(Object a, For1 func) {
         if (BeanUtil.isTensor(a)) {
             forEach(Array.getLength(a), i -> {
@@ -146,12 +176,25 @@ public class ForEach implements Serializable {
 
     public static void forEach(Object a, Object b, For2 func) {
         if (BeanUtil.isTensor(a)) {
-            farEach(Array.getLength(a), i -> {
+            forEach(Array.getLength(a), i -> {
                 Object m = Array.get(a, i), n = Array.get(b, i);
                 if (BeanUtil.isNotTensor(m)) {
                     func.apply(m, (Object[]) b, i);
                 } else {
                     forEach(m, n, func);
+                }
+            });
+        }
+    }
+
+    public static void farEach(Object a, Object b, For2 func) {
+        if (BeanUtil.isTensor(a)) {
+            farEach(Array.getLength(a), i -> {
+                Object m = Array.get(a, i), n = Array.get(b, i);
+                if (BeanUtil.isNotTensor(m)) {
+                    func.apply(m, (Object[]) b, i);
+                } else {
+                    farEach(m, n, func);
                 }
             });
         }
