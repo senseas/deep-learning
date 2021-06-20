@@ -9,7 +9,7 @@ public class TensorOparetor extends Tensor {
 
     public TensorOparetor(String name, Tensor... input) {
         super(name, input);
-        if (Arrays.asList("Add").contains(name)) {
+        if (Arrays.asList("Add", "Addx").contains(name)) {
             Stream<Tensor> stream = Stream.of();
             for (Tensor o : input) {
                 Stream<Tensor> children = o.getName().equals(getName()) ? Arrays.stream(o.getInput()) : Stream.of(o);
@@ -23,6 +23,11 @@ public class TensorOparetor extends Tensor {
         Tensor input = getInput()[i];
         if (BeanUtil.isFunction(input)) return TensorFlux.getOutput(input.getFunction());
         return input.getOutput();
+    }
+
+    public Stream inputStream() {
+        return Arrays.stream(getInput()).parallel().map(input -> BeanUtil.isFunction(input) ?
+                TensorFlux.getOutput(input.getFunction()) : input.getOutput());
     }
 
     public <M> M getOutput() {

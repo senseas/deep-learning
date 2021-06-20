@@ -3,10 +3,8 @@ package com.deep.framework.graph;
 import com.deep.framework.lang.function.For2;
 import com.deep.framework.lang.function.Func1;
 import com.deep.framework.lang.function.Func2;
-import com.deep.framework.lang.function.Func3;
 
 import java.io.Serializable;
-import java.util.stream.IntStream;
 
 import static com.deep.framework.lang.Shape.*;
 
@@ -16,15 +14,13 @@ public class TensorFlow implements Serializable {
         return new TensorOparetor("Add", input) {
 
             public None compute() {
-                IntStream intStream = IntStream.range(0, getInput().length).parallel();
-                double value = intStream.mapToDouble(i -> ((None) getInput(i)).getValue()).sum();
+                double value = inputStream().mapToDouble(a -> ((None) a).getValue()).sum();
                 return new None(value);
             }
 
             public void gradient() {
                 None out = getOutput();
-                IntStream intStream = IntStream.range(0, getInput().length).parallel();
-                intStream.forEach(i -> ((None) getInput(i)).setGrad(out.getGrad()));
+                inputStream().forEach(a -> ((None) a).setGrad(out.getGrad()));
             }
 
         };
@@ -34,18 +30,17 @@ public class TensorFlow implements Serializable {
         return new TensorOparetor("Addx", input) {
 
             public Object compute() {
-                Object A = getInput(0), B = getInput(1), C = zeroNones(A);
-                farEach(A, B, C, (Func3<None>) (a, b, c) -> {
-                    c.setValue(c.getValue() + a.getValue() + b.getValue());
+                Object B = zeroNones(getInput(0));
+                inputStream().forEach(A -> {
+                    farEach(A, B, (Func2<None>) (a, b) -> b.setValue(b.getValue() + a.getValue()));
                 });
-                return C;
+                return B;
             }
 
             public void gradient() {
-                Object A = getInput(0), B = getInput(1), C = getOutput();
-                farEach(A, B, C, (Func3<None>) (a, b, c) -> {
-                    a.setGrad(c.getGrad());
-                    b.setGrad(c.getGrad());
+                Object B = getOutput();
+                inputStream().forEach(A -> {
+                    farEach(A, B, (Func2<None>) (a, b) -> a.setGrad(b.getGrad()));
                 });
             }
 
@@ -393,7 +388,7 @@ public class TensorFlow implements Serializable {
                 forEach(A, B, (Func2<Tensor>) (a, b) -> {
                     C[0] = add(C[0], square(a, b));
                 });
-                return div(C[0], new TensorConst(size(A)));
+                return C[0];
             }
 
             public void gradient() { }
