@@ -37,8 +37,7 @@ public class TensorFlux implements Serializable {
         Object nones = tensor.compute(), outs = tensor.getOutput();
         if (Objects.nonNull(outs)) {
             farEach(nones, outs, (Func2<None>) (none, out) -> {
-                out.setGrad(null);
-                out.setReduce(false);
+                out.reset();
                 out.setValue(none.getValue());
             });
         } else {
@@ -50,8 +49,7 @@ public class TensorFlux implements Serializable {
         if (BeanUtil.isNone(tensor)) {
             farEach(tensor.getOutput(), o -> {
                 None out = (None) o;
-                out.setGrad(null);
-                out.setReduce(false);
+                out.reset();
             });
         } else {
             tensor.forward();
@@ -66,7 +64,7 @@ public class TensorFlux implements Serializable {
         if (BeanUtil.isNone(tensor)) {
             farEach(tensor.getOutput(), o -> {
                 None none = (None) o;
-                if (none.isEngrad() && !none.isReduce()) {
+                if (none.isGradre() && !none.isReduce()) {
                     none.setReduce(true);
                     double valu = Math.abs(none.getValue() + EX), grad = Math.abs(none.getGrad() + EX);
                     double rate = Math.min(valu / grad, grad / valu) * Executor.rate;

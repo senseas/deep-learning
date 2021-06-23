@@ -9,33 +9,30 @@ public class None implements Serializable {
 
     public None(double value) {
         this.value = value;
-        this.engrad = true;
+        this.gradre = true;
     }
 
     public None(double value, boolean isGrad) {
         this.value = value;
-        this.engrad = isGrad;
+        this.gradre = isGrad;
     }
 
-    public void setGrad(Double grad) {
-        if (this.grad != null && grad != null) {
+    public void setGrad(double grad) {
+        if (this.gradef) {
             this.grad = this.grad + grad;
         } else {
             this.grad = grad;
+            this.gradef = true;
         }
     }
 
-    public Double getGrad() {
-        if (this.grad != null) {
-            return grad;
-        } else {
-            return 1d;
-        }
+    public void reset() {
+        this.reduce = false;
+        this.gradef = false;
+        this.grad = 1d;
     }
 
-    private double value;
-    private Double grad;
-    private boolean engrad;
-    private transient boolean reduce;
+    private double value, grad = 1d;
+    private transient boolean gradre, gradef, reduce;
 
 }
