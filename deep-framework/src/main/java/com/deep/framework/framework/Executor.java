@@ -45,6 +45,9 @@ public class Executor<E> implements Serializable {
 
     public void backward() {
         tensor.backward();
+    }
+
+    public void reduce() {
         tensor.reduce();
     }
 

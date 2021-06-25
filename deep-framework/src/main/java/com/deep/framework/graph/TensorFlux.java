@@ -66,8 +66,8 @@ public class TensorFlux implements Serializable {
                 None none = (None) o;
                 if (none.isGradre() && !none.isReduce()) {
                     none.setReduce(true);
-                    double valu = Math.abs(none.getValue() + EX), grad = Math.abs(none.getGrad() + EX);
-                    double rate = Math.min(valu / grad, grad / valu) * Executor.rate;
+                    double valu = Math.abs(none.getValue()), grad = Math.abs(none.getGrad());
+                    double rate = Math.min(valu / (grad + EX), grad / (valu + EX)) * Executor.rate;
                     double value = none.getValue() - rate * none.getGrad();
                     none.setValue(value);
                 }
