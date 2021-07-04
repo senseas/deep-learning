@@ -57,7 +57,7 @@ public class TensorExecutor<E> implements Serializable {
     }
 
     public void setLabel(Object o) {
-        Func21<None, Double> func = (None m, Double n) -> m.setValue(n);
+        Func21<None, Double> func = (m, n) -> m.setValue(n);
         farEach(label.getOutput(), o, func);
     }
 

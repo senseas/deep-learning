@@ -2,7 +2,6 @@ package com.deep.framework.framework;
 
 import com.deep.framework.graph.None;
 import com.deep.framework.graph.Tensor;
-import com.deep.framework.lang.function.Func2;
 import com.deep.framework.lang.util.BeanUtil;
 
 import java.io.Serializable;
@@ -14,22 +13,19 @@ public class TensorFlux implements Serializable {
     static final double EX = 0.0000000001;
 
     public static void forward(Tensor tensor) {
-        farEach(tensor.getFunction(), o -> {
-            Tensor a = (Tensor) o;
+        farEach(tensor.getFunction(), (Tensor a) -> {
             a.forward();
         });
     }
 
     public static void backward(Tensor tensor) {
-        farEach(tensor.getFunction(), o -> {
-            Tensor a = (Tensor) o;
+        farEach(tensor.getFunction(), (Tensor a) -> {
             a.backward();
         });
     }
 
     public static void reduce(Tensor tensor) {
-        farEach(tensor.getFunction(), o -> {
-            Tensor a = (Tensor) o;
+        farEach(tensor.getFunction(), (Tensor a) -> {
             a.reduce();
         });
     }
@@ -37,7 +33,7 @@ public class TensorFlux implements Serializable {
     public static void compute(Tensor tensor) {
         Object nones = tensor.compute(), outs = tensor.getOutput();
         if (Objects.nonNull(outs)) {
-            farEach(nones, outs, (Func2<None>) (none, out) -> {
+            farEach(nones, outs, (None none, None out) -> {
                 out.reset();
                 out.setValue(none.getValue());
             });
@@ -48,8 +44,7 @@ public class TensorFlux implements Serializable {
 
     public static void computer(Tensor tensor) {
         if (BeanUtil.isNone(tensor)) {
-            farEach(tensor.getOutput(), o -> {
-                None out = (None) o;
+            farEach(tensor.getOutput(), (None out) -> {
                 out.reset();
             });
         } else {
@@ -63,8 +58,7 @@ public class TensorFlux implements Serializable {
 
     public static void reducer(Tensor tensor) {
         if (BeanUtil.isNone(tensor)) {
-            farEach(tensor.getOutput(), o -> {
-                None none = (None) o;
+            farEach(tensor.getOutput(), (None none) -> {
                 if (none.isGradre() && !none.isReduce()) {
                     none.setReduce(true);
                     double valu = Math.abs(none.getValue()), grad = Math.abs(none.getGrad());

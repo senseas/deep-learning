@@ -1,9 +1,6 @@
 package com.deep.framework.framework;
 
 import com.deep.framework.graph.*;
-import com.deep.framework.lang.function.For2;
-import com.deep.framework.lang.function.Func1;
-import com.deep.framework.lang.function.Func2;
 
 import java.io.Serializable;
 
@@ -33,7 +30,7 @@ public class TensorFlow implements Serializable {
             public Object compute() {
                 Object B = zeroNones(getInput(0));
                 inputStream().forEach(A -> {
-                    farEach(A, B, (Func2<None>) (a, b) -> b.setValue(b.getValue() + a.getValue()));
+                    farEach(A, B, (None a, None b) -> b.setValue(b.getValue() + a.getValue()));
                 });
                 return B;
             }
@@ -41,7 +38,7 @@ public class TensorFlow implements Serializable {
             public void gradient() {
                 Object B = getOutput();
                 inputStream().forEach(A -> {
-                    farEach(A, B, (Func2<None>) (a, b) -> a.setGrad(b.getGrad()));
+                    farEach(A, B, (None a, None b) -> a.setGrad(b.getGrad()));
                 });
             }
 
@@ -143,7 +140,7 @@ public class TensorFlow implements Serializable {
 
             public Object compute() {
                 Object A = getInput(0), B = zeroTensors(A);
-                forEach(A, B, (For2<Tensor>) (a, b, i) -> {
+                forEach(A, B, (Tensor a, Tensor[] b, int i) -> {
                     b[i] = exp(a);
                 });
                 return B;
@@ -216,7 +213,7 @@ public class TensorFlow implements Serializable {
 
             public Object compute() {
                 Object A = getInput(0), B = zeroNones(A);
-                farEach(A, B, (Func2<None>) (a, b) -> {
+                farEach(A, B, (None a, None b) -> {
                     double value = a.getValue();
                     b.setValue(value > 0 ? value : 0.1 * value);
                 });
@@ -225,7 +222,7 @@ public class TensorFlow implements Serializable {
 
             public void gradient() {
                 Object A = getInput(0), B = getOutput();
-                farEach(A, B, (Func2<None>) (a, b) -> {
+                farEach(A, B, (None a, None b) -> {
                     double grad = b.getGrad();
                     a.setGrad(a.getValue() > 0 ? grad : 0.1 * grad);
                 });
@@ -327,7 +324,7 @@ public class TensorFlow implements Serializable {
             public Object compute() {
                 Object A = getInput(0), C = zeroTensors(A);
                 Tensor b = getInput(1);
-                forEach(A, C, (For2<Tensor>) (a, c, i) -> {
+                forEach(A, C, (Tensor a, Tensor[] c, int i) -> {
                     c[i] = mul(a, b);
                 });
                 return C;
@@ -356,7 +353,7 @@ public class TensorFlow implements Serializable {
 
             public Object compute() {
                 Object A = getInput(0), B = zeroTensors(A);
-                forEach(A, B, (For2<Tensor>) (a, b, i) -> {
+                forEach(A, B, (Tensor a, Tensor[] b, int i) -> {
                     b[i] = sigmoid(a);
                 });
                 return B;
@@ -386,7 +383,7 @@ public class TensorFlow implements Serializable {
             public Tensor compute() {
                 Object A = getInput(0), B = getInput(1);
                 Tensor[] C = {new TensorConst(0d)};
-                forEach(A, B, (Func2<Tensor>) (a, b) -> {
+                forEach(A, B, (Tensor a, Tensor b) -> {
                     C[0] = add(C[0], square(a, b));
                 });
                 return C[0];
@@ -416,7 +413,7 @@ public class TensorFlow implements Serializable {
             public Tensor compute() {
                 Object A = getInput(0), B = getInput(1);
                 Tensor[] C = {new TensorConst(0d)};
-                forEach(A, B, (Func2<Tensor>) (a, b) -> {
+                forEach(A, B, (Tensor a, Tensor b) -> {
                     C[0] = add(C[0], softmaxCross(a, b));
                 });
                 return C[0];
@@ -446,7 +443,7 @@ public class TensorFlow implements Serializable {
             public Tensor compute() {
                 Object A = getInput(0), B = getInput(1);
                 Tensor[] C = {new TensorConst(0d)};
-                forEach(A, B, (Func2<Tensor>) (a, b) -> {
+                forEach(A, B, (Tensor a, Tensor b) -> {
                     C[0] = add(C[0], sigmoidCross(a, b));
                 });
                 return C[0];
@@ -463,14 +460,14 @@ public class TensorFlow implements Serializable {
             public None compute() {
                 Object A = getInput(0);
                 None B = new None(0d);
-                farEach(A, (Func1<None>) a -> B.setValue(B.getValue() + a.getValue()));
+                farEach(A, (None a) -> B.setValue(B.getValue() + a.getValue()));
                 return B;
             }
 
             public void gradient() {
                 Object A = getInput(0);
                 None B = getOutput();
-                farEach(A, (Func1<None>) a -> a.setGrad(B.getGrad()));
+                farEach(A, (None a) -> a.setGrad(B.getGrad()));
             }
 
         };
@@ -484,7 +481,7 @@ public class TensorFlow implements Serializable {
                 int heights = stride[0], widths = stride[1];
                 int height = (B.length - A.length) / heights + 1, width = (B[0].length - A[0].length) / widths + 1;
                 None[][] C = zeroNones(new None[height][width]);
-                farEach(height, width, A.length, A[0].length, (h, w, m, n) -> {
+                forEach(height, width, A.length, A[0].length, (h, w, m, n) -> {
                     None inx = A[m][n], iny = B[h * heights + m][w * widths + n], out = C[h][w];
                     out.setValue(out.getValue() + inx.getValue() * iny.getValue());
                 });
@@ -495,7 +492,7 @@ public class TensorFlow implements Serializable {
                 None[][] A = getInput(0), B = padding(getInput(1), padding);
                 None[][] C = getOutput();
                 int heights = stride[0], widths = stride[1];
-                farEach(C.length, C[0].length, A.length, A[0].length, (h, w, m, n) -> {
+                forEach(C.length, C[0].length, A.length, A[0].length, (h, w, m, n) -> {
                     None inx = A[m][n], iny = B[h * heights + m][w * widths + n], out = C[h][w];
                     inx.setGrad(out.getGrad() * iny.getValue());
                     iny.setGrad(out.getGrad() * inx.getValue());
@@ -513,7 +510,7 @@ public class TensorFlow implements Serializable {
                 int heighs = stride[0], widths = stride[1];
                 int height = (B[0].length - A[0].length + 2 * padding) / heighs + 1, width = (B[0][0].length - A[0][0].length + 2 * padding) / widths + 1;
                 Tensor[] C = zeroTensors(new Tensor[A.length], new int[]{height, width});
-                farEach(B.length, A.length, (i, l) -> {
+                forEach(B.length, A.length, (i, l) -> {
                     C[l] = addx(C[l], conv(stride, padding, new Tensor(A[l]), new Tensor(B[i])));
                 });
                 return C;
@@ -666,7 +663,7 @@ public class TensorFlow implements Serializable {
 
             public Object compute() {
                 Object[] A = getInput(0), B = zeroTensors(A);
-                forEach(A, B, (For2<Tensor>) (a, b, i) -> {
+                forEach(A, B, (Tensor a, Tensor[] b, int i) -> {
                     b[i] = div(exp(a), sum(expx(new Tensor(A))));
                 });
                 return B;
@@ -703,7 +700,7 @@ public class TensorFlow implements Serializable {
                 Tensor[] D = {new TensorConst(0)};
                 forEach(A, a -> D[0] = add(D[0], pow(minus((Tensor) a, C), new TensorConst(2))));
                 Tensor E = pow(add(mul(new TensorConst(1d / A.length), D[0]), new TensorConst(Math.E)), new TensorConst(0.5));
-                forEach(A, B, (For2<Tensor>) (a, b, i) -> b[i] = add(mul(new Tensor(0.9), div(minus(a, C), E)), new Tensor(0.9)));
+                forEach(A, B, (Tensor a, Tensor[] b, int i) -> b[i] = add(mul(new Tensor(0.9), div(minus(a, C), E)), new Tensor(0.9)));
                 return B;
             }
 
