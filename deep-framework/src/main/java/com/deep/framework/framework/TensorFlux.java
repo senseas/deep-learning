@@ -1,6 +1,7 @@
-package com.deep.framework.graph;
+package com.deep.framework.framework;
 
-import com.deep.framework.framework.Executor;
+import com.deep.framework.graph.None;
+import com.deep.framework.graph.Tensor;
 import com.deep.framework.lang.function.Func2;
 import com.deep.framework.lang.util.BeanUtil;
 
@@ -67,7 +68,7 @@ public class TensorFlux implements Serializable {
                 if (none.isGradre() && !none.isReduce()) {
                     none.setReduce(true);
                     double valu = Math.abs(none.getValue()), grad = Math.abs(none.getGrad());
-                    double rate = Math.min(valu / (grad + EX), grad / (valu + EX)) * Executor.rate;
+                    double rate = Math.min(valu / (grad + EX), grad / (valu + EX)) * TensorExecutor.rate;
                     double value = none.getValue() - rate * none.getGrad();
                     none.setValue(value);
                 }

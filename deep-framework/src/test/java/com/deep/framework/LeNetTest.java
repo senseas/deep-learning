@@ -1,10 +1,10 @@
 package com.deep.framework;
 
 import com.alibaba.fastjson.JSONObject;
-import com.deep.framework.framework.Executor;
+import com.deep.framework.framework.TensorExecutor;
 import com.deep.framework.graph.None;
 import com.deep.framework.graph.Tensor;
-import com.deep.framework.graph.TensorFlow;
+import com.deep.framework.framework.TensorFlow;
 import com.deep.framework.lang.DataLoader;
 import com.deep.framework.lang.ModeLoader;
 import com.deep.framework.lang.Shape;
@@ -55,8 +55,8 @@ public class LeNetTest extends Shape {
 
         Tensor softmax = tf.softmax(tensor53);
         Tensor crossx = tf.softmaxCrossx(label, softmax);
-        Executor.rate = 0.03;
-        Executor executor = new Executor(crossx, input, label);
+        TensorExecutor.rate = 0.03;
+        TensorExecutor executor = new TensorExecutor(crossx, input, label);
         forEach(20, x -> {
             forEach(60000, i -> {
                 Object inSet = inputSet[i], labSet = labelSet[i];
@@ -77,7 +77,7 @@ public class LeNetTest extends Shape {
         double[][][][] inputSet = DataLoader.getMnistImages();
         double[][][] labelSet = DataLoader.getMnistLabels();
 
-        Executor executor = ModeLoader.load("LetNet.obj");
+        TensorExecutor executor = ModeLoader.load("LetNet.obj");
         Tensor crossx = executor.getTensor();
         Tensor softmax = crossx.getInput()[1];
         forEach(20, x -> {
@@ -100,7 +100,7 @@ public class LeNetTest extends Shape {
         double[][][][] inputSet = DataLoader.getMnistImages();
         double[][][] labelSet = DataLoader.getMnistLabels();
 
-        Executor executor = ModeLoader.load("LetNet.obj");
+        TensorExecutor executor = ModeLoader.load("LetNet.obj");
         Tensor crossx = executor.getTensor();
         Tensor softmax = crossx.getInput()[1];
         List list = new ArrayList();

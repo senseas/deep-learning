@@ -1,10 +1,10 @@
 package com.deep.framework;
 
 import com.alibaba.fastjson.JSONObject;
-import com.deep.framework.framework.Executor;
+import com.deep.framework.framework.TensorExecutor;
 import com.deep.framework.graph.None;
 import com.deep.framework.graph.Tensor;
-import com.deep.framework.graph.TensorFlow;
+import com.deep.framework.framework.TensorFlow;
 import com.deep.framework.lang.Shape;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Test;
@@ -51,7 +51,7 @@ public class NNTest extends Shape {
         Tensor tensor33 = tf.sigmoidx(tensor32);
         Tensor tensor34 = tf.squarex(label, tensor33);
 
-        Executor executor = new Executor(tensor34, input, label);
+        TensorExecutor executor = new TensorExecutor(tensor34, input, label);
         forEach(100000000, i -> {
             int l = (int) (Math.random() * labelSet.length);
             Object inSet = inputSet[l], labSet = labelSet[l];

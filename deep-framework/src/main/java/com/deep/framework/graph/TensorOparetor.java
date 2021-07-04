@@ -1,5 +1,6 @@
 package com.deep.framework.graph;
 
+import com.deep.framework.framework.TensorFlux;
 import com.deep.framework.lang.util.BeanUtil;
 
 import java.util.Arrays;

@@ -1,10 +1,10 @@
 package com.deep.framework;
 
 import com.alibaba.fastjson.JSONObject;
-import com.deep.framework.framework.Executor;
+import com.deep.framework.framework.TensorExecutor;
 import com.deep.framework.graph.None;
 import com.deep.framework.graph.Tensor;
-import com.deep.framework.graph.TensorFlow;
+import com.deep.framework.framework.TensorFlow;
 import com.deep.framework.lang.DataLoader;
 import com.deep.framework.lang.ModeLoader;
 import com.deep.framework.lang.Shape;
@@ -54,8 +54,8 @@ public class ResnetTest extends Shape {
 
         Tensor squarex = tf.squarex(label, tensor74);
 
-        Executor.rate = 0.03;
-        Executor executor = new Executor(squarex, input, label);
+        TensorExecutor.rate = 0.03;
+        TensorExecutor executor = new TensorExecutor(squarex, input, label);
         forEach(600, x -> {
             forEach(labelSet.length, i -> {
                 log.info("---------{}:{}------------", x, i);

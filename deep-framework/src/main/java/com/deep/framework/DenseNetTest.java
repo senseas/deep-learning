@@ -1,10 +1,10 @@
 package com.deep.framework;
 
 import com.alibaba.fastjson.JSONObject;
-import com.deep.framework.framework.Executor;
+import com.deep.framework.framework.TensorExecutor;
 import com.deep.framework.graph.None;
 import com.deep.framework.graph.Tensor;
-import com.deep.framework.graph.TensorFlow;
+import com.deep.framework.framework.TensorFlow;
 import com.deep.framework.lang.DataLoader;
 import com.deep.framework.lang.ModeLoader;
 import com.deep.framework.lang.Shape;
@@ -60,8 +60,8 @@ public class DenseNetTest extends Shape {
         Tensor tensor64 = tf.relux(tensor63);//10*140*140
         Tensor squarex = tf.squarex(label, tensor64);
 
-        Executor.rate = 0.0003;
-        Executor executor = new Executor(squarex, input, label);
+        TensorExecutor.rate = 0.0003;
+        TensorExecutor executor = new TensorExecutor(squarex, input, label);
         forEach(600, labelSet.length, (x, i) -> {
             log.info("epoch = {{},{}}", x, i);
             Object inSet = inputSet[i], labSet = labelSet[i];
@@ -106,8 +106,8 @@ public class DenseNetTest extends Shape {
         Tensor tensor63 = tf.convx(new int[]{1, 1}, 2, new Tensor("weight", new int[]{3, 5, 5}), tensor62);//3*140*140
         Tensor squarex = tf.squarex(label, tensor63);
 
-        Executor.rate = 0.003;
-        Executor executor = new Executor(squarex, input, label);
+        TensorExecutor.rate = 0.003;
+        TensorExecutor executor = new TensorExecutor(squarex, input, label);
         forEach(600, labelSet.length, (x, i) -> {
             log.info("epoch = {{},{}}", x, i);
             Object inSet = inputSet[i], labSet = labelSet[i];
@@ -122,8 +122,8 @@ public class DenseNetTest extends Shape {
         double[][][][] inputSet = DataLoader.getImageData();
         double[][][][] labelSet = DataLoader.getImageData();
 
-        Executor executor = ModeLoader.load("8LetNet.obj");
-        Executor.rate = 0.003;
+        TensorExecutor executor = ModeLoader.load("8LetNet.obj");
+        TensorExecutor.rate = 0.003;
         Tensor squarex = executor.getTensor();
         Tensor output = squarex.getInput()[1];
         forEach(600, labelSet.length, (x, i) -> {
@@ -140,7 +140,7 @@ public class DenseNetTest extends Shape {
         double[][][] inputSet = ImageUtil.image2RGB("d-140.jpg");
         double[][][] labelSet = ImageUtil.image2RGB("d-140.jpg");
 
-        Executor executor = ModeLoader.load("LetNet.obj");
+        TensorExecutor executor = ModeLoader.load("LetNet.obj");
         Tensor squarex = executor.getTensor();
         Tensor output = squarex.getInput()[1];
         Object inSet = inputSet, labSet = labelSet;

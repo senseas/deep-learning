@@ -1,5 +1,6 @@
-package com.deep.framework.graph;
+package com.deep.framework.framework;
 
+import com.deep.framework.graph.*;
 import com.deep.framework.lang.function.For2;
 import com.deep.framework.lang.function.Func1;
 import com.deep.framework.lang.function.Func2;
