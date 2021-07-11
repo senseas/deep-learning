@@ -8,7 +8,7 @@ public class TensorUtil {
 
     public static void zeros(Tensor o, int... shape) {
         o.shape = shape;
-        o.data = new float[Arrays.stream(shape).reduce((a, b) -> a * b).getAsInt()];
+        o.output = new float[Arrays.stream(shape).reduce((a, b) -> a * b).getAsInt()];
     }
 
     public static float[] random(int... shape) {

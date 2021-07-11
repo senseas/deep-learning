@@ -15,7 +15,7 @@ public class TensorExecutor {
 
     public TensorExecutor() {
         context = CLContext.create();
-        try (InputStream stream = new FileInputStream( "D:\\GitHub\\deep-learning\\deep-framework\\src\\test\\java\\com\\deep\\framework\\lang\\kernel.cl")) {
+        try (InputStream stream = new FileInputStream("D:\\GitHub\\deep-learning\\deep-framework\\src\\test\\java\\com\\deep\\framework\\lang\\kernel.cl")) {
             queue = context.getMaxFlopsDevice(CLDevice.Type.GPU).createCommandQueue();
             CLProgram program = context.createProgram(stream).build();
             kernels = program.createCLKernels();
@@ -24,9 +24,10 @@ public class TensorExecutor {
         }
     }
 
-    public TensorContext createContext(String name) {
-        CLKernel clKernel = kernels.get(name);
-        return new TensorContext(context, queue, clKernel);
+    public TensorContext createContext(Tensor tensor) {
+        CLKernel compute = kernels.get(tensor.name);
+        CLKernel gradient = kernels.get(tensor.name.concat("Gradient"));
+        return new TensorContext(tensor, context, queue, compute, gradient);
     }
 
     public CLCommandQueue getQueue() { return queue; }
