@@ -675,7 +675,7 @@ public class TensorFlow implements Serializable {
     }
 
     public Tensor selfAttention(Tensor... input) {
-        return new TensorFunction("Softmax", input) {
+        return new TensorFunction("SelfAttention", input) {
 
             public Object compute() {
                 Tensor[][] A = getInput(0);
