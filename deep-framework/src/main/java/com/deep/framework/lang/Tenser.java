@@ -3,6 +3,7 @@ package com.deep.framework.lang;
 import com.deep.framework.graph.None;
 
 import java.util.Arrays;
+import java.util.stream.IntStream;
 
 import static com.deep.framework.lang.Shape.randomx;
 import static java.util.stream.IntStream.range;
@@ -15,15 +16,15 @@ public class Tenser<T> {
 
     public Tenser(T[] data, int[] shape) {
         this.length = shape[0];
-        this.data = data;
         this.shape = shape;
+        this.data = data;
         this.start = 0;
     }
 
     private Tenser(T[] data, int[] shape, int start) {
         this.length = shape[0];
-        this.data = data;
         this.shape = shape;
+        this.data = data;
         this.start = start;
     }
 
@@ -62,12 +63,29 @@ public class Tenser<T> {
     }
 
     public static void main(String[] args) {
-        Tenser<None> tenser = new Tenser(new int[]{3, 2, 3});
-        None o = tenser.get(0, 0, 2);
-        Tenser<None>x =tenser.get(0, 0);
-        None o1 = x.get(2);
-        tenser.set(new None[]{new None(0d), new None(1d), new None(2d)}, 1, 0, 2);
-        System.out.println(o);
+        Tenser<None> tenser = new Tenser(new int[]{300, 200, 300});
+        long s = System.currentTimeMillis();
+        IntStream.range(0, 300).forEach(l -> {
+            IntStream.range(0, 200).forEach(m -> {
+                IntStream.range(0, 300).forEach(n -> {
+                    tenser.get(l, m, n);
+                });
+            });
+        });
+        System.out.println((System.currentTimeMillis() - s) / 1000d);
+        double[] data = new double[300 * 200 * 300];
+        s = System.currentTimeMillis();
+        IntStream.range(0, 300).forEach(l -> {
+            int x = l * 200 * 300;
+            IntStream.range(0, 200).forEach(m -> {
+                int y = m * 300;
+                IntStream.range(0, 300).forEach(n -> {
+                    double v = data[x + y + n];
+                });
+            });
+        });
+        System.out.println((System.currentTimeMillis() - s) / 1000d);
+        tenser.set(new None[]{new None(0d), new None(0d), new None(0d)}, 1, 0);
     }
 
 }
