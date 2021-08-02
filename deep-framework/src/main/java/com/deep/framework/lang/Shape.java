@@ -8,6 +8,7 @@ import org.apache.commons.math3.random.RandomDataGenerator;
 
 import java.lang.reflect.Array;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.IntStream;
 
 public class Shape extends ForEach {
@@ -64,6 +65,24 @@ public class Shape extends ForEach {
             arr = Array.get(arr, 0);
         }
         return list.stream().mapToInt(Integer::intValue).toArray();
+    }
+
+    public static float[] linesValue(Object arr) {
+        float[] list = new float[size(arr)];
+        AtomicInteger index = new AtomicInteger();
+        forEach(arr, (None a) -> {
+            list[index.getAndIncrement()] = (float) a.getValue();
+        });
+        return list;
+    }
+
+    public static float[] linesGrad(Object arr) {
+        float[] list = new float[size(arr)];
+        AtomicInteger index = new AtomicInteger();
+        forEach(arr, (None a) -> {
+            list[index.getAndIncrement()] = (float)a.getGrad();
+        });
+        return list;
     }
 
     public static int size(Object arr) {

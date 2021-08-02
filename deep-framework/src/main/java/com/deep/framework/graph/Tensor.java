@@ -1,5 +1,6 @@
 package com.deep.framework.graph;
 
+import com.deep.framework.framework.TensorContext;
 import com.deep.framework.lang.Shape;
 import lombok.Data;
 
@@ -64,4 +65,5 @@ public class Tensor implements Serializable {
     private Tensor[] input;
     protected transient Object function;
     protected Object output;
+    protected TensorContext context;
 }

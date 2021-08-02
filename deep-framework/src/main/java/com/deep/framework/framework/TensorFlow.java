@@ -1,6 +1,7 @@
 package com.deep.framework.framework;
 
 import com.deep.framework.graph.*;
+import com.deep.framework.lang.Block;
 
 import java.io.Serializable;
 
@@ -257,6 +258,8 @@ public class TensorFlow implements Serializable {
             public Object compute() {
                 None[][] A = getInput(0), B = getInput(1);
                 None[][] C = zeroNones(new None[A.length][B[0].length]);
+                /*context.setBlock(A.length, B[0].length);
+                context.compute(A, B, C, A.length, B[0].length, A[0].length);*/
                 forEach(A.length, B[0].length, A[0].length, (i, l, j) -> {
                     None inx = A[i][j], iny = B[j][l], out = C[i][l];
                     out.setValue(out.getValue() + inx.getValue() * iny.getValue());
@@ -267,6 +270,8 @@ public class TensorFlow implements Serializable {
             public void gradient() {
                 None[][] A = getInput(0), B = getInput(1);
                 None[][] C = getOutput();
+                /*context.setBlock(A.length, B[0].length);
+                context.gradient(A, B, C, A.length, B[0].length, B[0].length);*/
                 forEach(A.length, B[0].length, A[0].length, (i, l, j) -> {
                     None inx = A[i][j], iny = B[j][l], out = C[i][l];
                     inx.setGrad(out.getGrad() * iny.getValue());
