@@ -55,7 +55,7 @@ public class TensorContext {
 
         compute.setArgs(Arrays.stream(c).map(a -> {
 
-            if (bufferList.size() < tensor.getInput().length + 1) {
+            if (bufferList.size() <= tensor.getInput().length) {
 
                 CLBuffer buffer = getBuffer(linesValue(a));
 
