@@ -4,10 +4,7 @@ import com.deep.framework.graph.None;
 import com.deep.framework.graph.Tensor;
 import com.deep.framework.lang.Block;
 import com.jogamp.common.nio.Buffers;
-import com.jogamp.opencl.CLBuffer;
-import com.jogamp.opencl.CLCommandQueue;
-import com.jogamp.opencl.CLContext;
-import com.jogamp.opencl.CLKernel;
+import com.jogamp.opencl.*;
 
 import java.nio.Buffer;
 import java.nio.FloatBuffer;
@@ -49,11 +46,11 @@ public class TensorContext {
         this.gradient = gradient;
     }
 
-    private void setComputeArgs(final Object... c) {
+    private void setComputeArgs(final Object... params) {
 
         bufferList = new ArrayList();
 
-        compute.setArgs(Arrays.stream(c).map(a -> {
+        compute.setArgs(Arrays.stream(params).map(a -> {
 
             if (bufferList.size() <= tensor.getInput().length) {
 
@@ -64,6 +61,7 @@ public class TensorContext {
                 bufferList.add(buffer);
 
                 return buffer;
+
             }
 
             return a;
@@ -73,11 +71,13 @@ public class TensorContext {
     }
 
 
-    public void compute(final Object... c) {
+    public void compute(final Object... params) {
 
-        setComputeArgs(c);
+        setComputeArgs(params);
 
         queue.put2DRangeKernel(compute, 0, 0, block.x, block.y, 0, 0);
+
+        Object output = params[tensor.getInput().length];
 
         CLBuffer clBuffer = bufferList.get(tensor.getInput().length);
 
@@ -87,72 +87,69 @@ public class TensorContext {
 
         AtomicInteger index = new AtomicInteger();
 
-        Object output = c[tensor.getInput().length];
-
         forEach(output, (None a) -> a.setValue(buffer.get(index.getAndIncrement())));
 
     }
 
-    private void setGradientArgs(final Object... c) {
+    private void setGradientArgs(final Object... params) {
 
         bufferList = new ArrayList();
 
-        Object[] input = Arrays.copyOfRange(c, 0, tensor.getInput().length);
+        Arrays.stream(params).forEach(a -> {
 
-        for (Object a : input) {
+            if (bufferList.size() < tensor.getInput().length) {
 
-            CLBuffer buffer = getBuffer(linesValue(a));
+                CLBuffer buffer = getBuffer(linesValue(a));
 
-            queue.putWriteBuffer(buffer, true);
+                queue.putWriteBuffer(buffer, true);
 
-            gradient.putArg(buffer);
+                gradient.putArg(buffer);
 
-        }
+                bufferList.add(buffer);
 
-        for (Object a : input) {
+            } else if (bufferList.size() == tensor.getInput().length) {
 
-            CLBuffer buffer = getBuffer(linesGrad(a));
+                IntStream.range(0, tensor.getInput().length).forEach(i -> {
 
-            queue.putWriteBuffer(buffer, true);
+                    CLBuffer buffer = getBuffer(linesGrad(params[i]));
 
-            gradient.putArg(buffer);
+                    queue.putWriteBuffer(buffer, true);
 
-            bufferList.add(buffer);
+                    gradient.putArg(buffer);
 
-        }
+                    bufferList.add(buffer);
 
-        Object output = c[tensor.getInput().length];
+                });
 
-        CLBuffer buffer = getBuffer(linesGrad(output));
+                CLBuffer buffer = getBuffer(linesGrad(a));
 
-        queue.putWriteBuffer(buffer, true);
+                queue.putWriteBuffer(buffer, true);
 
-        gradient.putArg(buffer);
+                gradient.putArg(buffer);
 
+            } else {
 
-        Object[] params = Arrays.copyOfRange(c, tensor.getInput().length + 1, c.length);
+                setObjectConvert(gradient, a);
 
-        for (Object a : params) {
+            }
 
-            gradient.putArg((int) a);
-
-        }
+        });
 
         gradient.rewind();
 
     }
 
-    public void gradient(final Object... c) {
+    public void gradient(final Object... params) {
 
-        setGradientArgs(c);
+        setGradientArgs(params);
 
         queue.put2DRangeKernel(gradient, 0, 0, block.x, block.y, 0, 0);
 
         IntStream.range(0, tensor.getInput().length).forEach(i -> {
 
-            Object input = c[i];
+            Object input = params[i];
 
-            CLBuffer clBuffer = bufferList.get(i);
+            CLBuffer clBuffer = bufferList.get(i + tensor.getInput().length);
 
             queue.putReadBuffer(clBuffer, true);
 
@@ -183,5 +180,21 @@ public class TensorContext {
         if (x.length == 2) this.block = new Block(x[0], x[1]);
         if (x.length == 3) this.block = new Block(x[0], x[1], x[2]);
         return this;
+    }
+
+    public void setObjectConvert(CLKernel kernel, final Object value) {
+        if (value instanceof CLMemory) {
+            kernel.putArg((CLMemory) value);
+        } else if (value instanceof Short) {
+            kernel.putArg((Short) value);
+        } else if (value instanceof Integer) {
+            kernel.putArg((Integer) value);
+        } else if (value instanceof Long) {
+            kernel.putArg((Long) value);
+        } else if (value instanceof Float) {
+            kernel.putArg((Float) value);
+        } else if (value instanceof Double) {
+            kernel.putArg((Double) value);
+        }
     }
 }
