@@ -31,7 +31,6 @@ public class TensorFlux implements Serializable {
     }
 
     public static void compute(Tensor tensor) {
-        tensor.setContext(TensorGpuExecutor.New().createContext(tensor));
         Object nones = tensor.compute(), outs = tensor.getOutput();
         if (Objects.nonNull(outs)) {
             farEach(nones, outs, (None none, None out) -> {

@@ -1,10 +1,12 @@
 package com.deep.framework.graph;
 
 import com.deep.framework.framework.TensorContext;
+import com.deep.framework.framework.TensorGpuExecutor;
 import com.deep.framework.lang.Shape;
 import lombok.Data;
 
 import java.io.Serializable;
+import java.util.Objects;
 
 @Data
 public class Tensor implements Serializable {
@@ -65,5 +67,10 @@ public class Tensor implements Serializable {
     private Tensor[] input;
     protected transient Object function;
     protected Object output;
-    protected TensorContext context;
+    private TensorContext context;
+
+    public TensorContext getContext() {
+        if (Objects.nonNull(context)) return context;
+        return context = TensorGpuExecutor.New().createContext(this);
+    }
 }

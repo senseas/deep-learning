@@ -1,8 +1,6 @@
 package com.deep.framework.graph;
 
-import com.deep.framework.framework.TensorContext;
 import com.deep.framework.framework.TensorFlux;
-import com.deep.framework.framework.TensorGpuExecutor;
 import com.deep.framework.lang.util.BeanUtil;
 
 import java.util.Objects;
@@ -28,7 +26,6 @@ public class TensorFunction extends Tensor {
     public Object getFunction() {
         if (Objects.nonNull(function)) return function;
         output = null;
-        setContext(TensorGpuExecutor.New().createContext(this));
         return function = compute();
     }
 
