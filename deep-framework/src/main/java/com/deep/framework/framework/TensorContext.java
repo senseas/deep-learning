@@ -95,33 +95,33 @@ public class TensorContext {
 
         bufferList = new ArrayList();
 
-        Arrays.stream(params).forEach(a -> {
+        IntStream.range(0, tensor.getInput().length).forEach(i -> {
 
-            if (bufferList.size() < tensor.getInput().length) {
+            CLBuffer buffer = getBuffer(linesValue(params[i]));
 
-                CLBuffer buffer = getBuffer(linesValue(a));
+            queue.putWriteBuffer(buffer, true);
 
-                queue.putWriteBuffer(buffer, true);
+            gradient.putArg(buffer);
 
-                gradient.putArg(buffer);
+        });
 
-                bufferList.add(buffer);
+        IntStream.range(0, tensor.getInput().length).forEach(i -> {
 
-            } else if (bufferList.size() == tensor.getInput().length) {
+            CLBuffer buffer = getBuffer(linesGrad(params[i]));
 
-                IntStream.range(0, tensor.getInput().length).forEach(i -> {
+            queue.putWriteBuffer(buffer, true);
 
-                    CLBuffer buffer = getBuffer(linesGrad(params[i]));
+            gradient.putArg(buffer);
 
-                    queue.putWriteBuffer(buffer, true);
+            bufferList.add(buffer);
 
-                    gradient.putArg(buffer);
+        });
 
-                    bufferList.add(buffer);
+        IntStream.range(tensor.getInput().length, params.length).forEach(i -> {
 
-                });
+            if (i == tensor.getInput().length) {
 
-                CLBuffer buffer = getBuffer(linesGrad(a));
+                CLBuffer buffer = getBuffer(linesGrad(params[i]));
 
                 queue.putWriteBuffer(buffer, true);
 
@@ -129,7 +129,7 @@ public class TensorContext {
 
             } else {
 
-                setObjectConvert(gradient, a);
+                setObjectConvert(gradient, params[i]);
 
             }
 
@@ -149,7 +149,7 @@ public class TensorContext {
 
             Object input = params[i];
 
-            CLBuffer clBuffer = bufferList.get(i + tensor.getInput().length);
+            CLBuffer clBuffer = bufferList.get(i);
 
             queue.putReadBuffer(clBuffer, true);
 
