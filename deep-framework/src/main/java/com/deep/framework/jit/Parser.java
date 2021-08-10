@@ -4,6 +4,10 @@ import com.deep.framework.jit.lexer.BlockLexer;
 import com.deep.framework.jit.lexer.Lexer;
 import com.deep.framework.jit.lexer.StringLexer;
 import com.deep.framework.jit.lexer.TokenType;
+import com.deep.framework.jit.statement.BlockStatement;
+import com.deep.framework.jit.statement.ImportStatement;
+import com.deep.framework.jit.statement.PackageStatement;
+import com.deep.framework.jit.statement.Statement;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -11,8 +15,9 @@ import java.util.Objects;
 import java.util.stream.Stream;
 
 public class Parser {
-    Lexer lexer = new BlockLexer(null);
-    List<Object> list = new ArrayList<>();
+    public Lexer lexer = new BlockLexer(null);
+    public List<Object> list = new ArrayList<>();
+    public static List<Statement> statementList = new ArrayList();
 
     public void add(String a) {
         if (!a.isEmpty()) {
@@ -41,18 +46,32 @@ public class Parser {
             } else if (Character.isWhitespace(b.charAt(0))) {
                 add(a);
                 return "";
-            } else if (Objects.nonNull(TokenType.getType(a.concat(b)))) {
+            } else if (!a.isEmpty() &&
+                Character.isJavaIdentifierPart(a.charAt(a.length() - 1)) &&
+                Character.isJavaIdentifierPart(b.charAt(0))) {
                 return a.concat(b);
-            } else if (Objects.nonNull(TokenType.getType(a))) {
-                add(a);
-                return b;
-            } else if (Objects.nonNull(TokenType.getType(b))) {
-                add(a);
-                return b;
+            } else if (TokenType.startsWith(a.concat(b))) {
+                return a.concat(b);
             } else {
-                return a.concat(b);
+                add(a);
+                return b;
             }
         });
+    }
+
+    public static void parser(Statement parent, TokenType end, List<Object> lexers) {
+        while (!lexers.isEmpty()) {
+            Object o = lexers.get(0);
+            if (o.equals(end)) return;
+            lexers.remove(0);
+            new ArrayList<Statement>() {{
+                add(new PackageStatement());
+                add(new ImportStatement());
+                add(new BlockStatement());
+            }}.forEach(statement -> {
+                statement.parser(parent, o, lexers);
+            });
+        }
     }
 
 }

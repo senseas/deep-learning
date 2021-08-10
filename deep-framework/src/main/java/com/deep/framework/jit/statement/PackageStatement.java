@@ -6,24 +6,21 @@ import lombok.Data;
 
 import java.util.List;
 
-import static com.deep.framework.jit.lexer.TokenType.RBRACE;
-
 @Data
-public class BlockStatement implements Statement {
+public class PackageStatement implements Statement {
     public String name;
 
-    public void parser(Statement parent, Object obj, List<Object> list) {
-        if (obj.equals(TokenType.LBRACE)) {
-            parent.statements.add(this);
+    public void parser(Statement parent,Object obj,List<Object> list) {
+        if (obj.equals(TokenType.PACKAGE)) {
+            Parser.statementList.add(this);
             StringBuilder buffer = new StringBuilder();
             while (!list.isEmpty()) {
                 Object o = list.get(0);
                 list.remove(0);
-                if (o.equals(RBRACE)) {
+                if (o.equals(TokenType.SEMI)) {
                     name = buffer.toString();
                     return;
                 } else {
-                    Parser.parser(this, RBRACE, list);
                     buffer.append(o);
                 }
             }

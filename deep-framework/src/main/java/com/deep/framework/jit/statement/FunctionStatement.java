@@ -12,7 +12,7 @@ public class FunctionStatement implements Statement {
     public String returnValue;
     public List<String> modifier;
     public Lexer argument;
-    public Lexer body;
+    public BlockStatement block;
 
     public FunctionStatement() {
         this.modifier = new ArrayList<>();

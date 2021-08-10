@@ -10,7 +10,6 @@ public class ParenLexer implements Lexer {
 
     public ParenLexer(Lexer lexer) {
         this.lexer = lexer;
-
     }
 
     public String getEnd() {
