@@ -18,7 +18,7 @@ public class None implements Serializable {
     }
 
     public void setGrad(double grad) {
-        this.grad = this.grad + grad;
+        this.grad += grad;
     }
 
     public void reset() {
