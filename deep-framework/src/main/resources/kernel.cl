@@ -1,15 +1,16 @@
 #pragma OPENCL EXTENSION cl_intel_printf : enable
+#pragma OPENCL EXTENSION cl_khr_fp64: enable
 // let C = A * B
 // M : number of rows in A
 // N : number of rows in B (also number of columns in A)
 // P : number of columns in B
 kernel void Matmul(
-  global const float *A, global const float *B,
-  global float *C, int M, int N, int H) {
+  global const double *A, global const double *B,
+  global double *C, int M, int N, int H) {
 
   int x = get_global_id(0), y = get_global_id(1), s = x * H;
 
-  float sum = 0;
+  double sum = 0;
 
   for (int i = 0; i < H; i++) {
 
@@ -26,19 +27,19 @@ kernel void Matmul(
 // N : number of rows in B (also number of columns in A)
 // P : number of columns in B
 kernel void MatmulGradient(
-  global const float *A, global const float *B,
-  global float *DA, global float *DB,
-  global float *DC, int M, int N, int H) {
+  global const double *A, global const double *B,
+  global double *DA, global double *DB,
+  global double *DC, int M, int N, int H) {
 
   int x = get_global_id(0), y = get_global_id(1), s = x * H;
 
-  float grad = DC[x * N + y];
+  double grad = DC[x * N + y];
 
   for (int i = 0; i < H; i++) {
 
-    DA[s + i] = grad * B[y + i * N];
+    DA[s + i] += grad * B[y + i * N];
 
-    DB[y + i * N] = grad * A[s + i];
+    DB[y + i * N] += grad * A[s + i];
 
   }
 

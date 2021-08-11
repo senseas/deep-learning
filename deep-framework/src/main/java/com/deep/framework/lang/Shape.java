@@ -67,20 +67,20 @@ public class Shape extends ForEach {
         return list.stream().mapToInt(Integer::intValue).toArray();
     }
 
-    public static float[] linesValue(Object arr) {
-        float[] list = new float[size(arr)];
+    public static double[] linesValue(Object arr) {
+        double[] list = new double[size(arr)];
         AtomicInteger index = new AtomicInteger();
         forEach(arr, (None a) -> {
-            list[index.getAndIncrement()] = (float) a.getValue();
+            list[index.getAndIncrement()] = a.getValue();
         });
         return list;
     }
 
-    public static float[] linesGrad(Object arr) {
-        float[] list = new float[size(arr)];
+    public static double[] linesGrad(Object arr) {
+        double[] list = new double[size(arr)];
         AtomicInteger index = new AtomicInteger();
         forEach(arr, (None a) -> {
-            list[index.getAndIncrement()] = (float)a.getGrad();
+            list[index.getAndIncrement()] = a.getGrad();
         });
         return list;
     }

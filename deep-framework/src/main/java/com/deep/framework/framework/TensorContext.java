@@ -7,7 +7,7 @@ import com.jogamp.common.nio.Buffers;
 import com.jogamp.opencl.*;
 
 import java.nio.Buffer;
-import java.nio.FloatBuffer;
+import java.nio.DoubleBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -83,11 +83,13 @@ public class TensorContext {
 
         queue.putReadBuffer(clBuffer, true);
 
-        FloatBuffer buffer = (FloatBuffer) clBuffer.getBuffer();
+        DoubleBuffer buffer = (DoubleBuffer) clBuffer.getBuffer();
 
         AtomicInteger index = new AtomicInteger();
 
         forEach(output, (None a) -> a.setValue(buffer.get(index.getAndIncrement())));
+
+        bufferList.forEach(CLBuffer::release);
 
     }
 
@@ -153,7 +155,7 @@ public class TensorContext {
 
             queue.putReadBuffer(clBuffer, true);
 
-            FloatBuffer buffer = (FloatBuffer) clBuffer.getBuffer();
+            DoubleBuffer buffer = (DoubleBuffer) clBuffer.getBuffer();
 
             AtomicInteger index = new AtomicInteger();
 
@@ -161,11 +163,13 @@ public class TensorContext {
 
         });
 
+        bufferList.forEach(CLBuffer::release);
+
     }
 
-    public <T> CLBuffer getBuffer(float[] arr) {
+    public <T> CLBuffer getBuffer(double[] arr) {
 
-        Buffer directBuffer = Buffers.newDirectFloatBuffer(arr);
+        Buffer directBuffer = Buffers.newDirectDoubleBuffer(arr);
 
         CLBuffer<Buffer> buffer = context.createBuffer(directBuffer, READ_WRITE);
 

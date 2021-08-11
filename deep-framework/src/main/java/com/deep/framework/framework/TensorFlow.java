@@ -5,6 +5,7 @@ import com.deep.framework.lang.Block;
 
 import java.io.Serializable;
 
+import static com.deep.framework.lang.ForEach.forEach;
 import static com.deep.framework.lang.Shape.*;
 
 public class TensorFlow implements Serializable {
@@ -269,7 +270,7 @@ public class TensorFlow implements Serializable {
                 None[][] C = getOutput();
 
                 getContext().setBlock(A.length, B[0].length);
-                getContext().gradient(A, B, C, A.length, B[0].length, B[0].length);
+                getContext().gradient(A, B, C, A.length, B[0].length, A[0].length);
             }
 
         };
