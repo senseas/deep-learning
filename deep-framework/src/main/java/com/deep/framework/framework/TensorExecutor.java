@@ -33,8 +33,7 @@ public class TensorExecutor<E> implements Serializable {
 
     public void run() {
         tensor.forward();
-        farEach(tensor.getOutput(), (None none) -> none.setGrad(1d));
-        tensor.backward();
+        this.backward();
         tensor.reduce();
     }
 
@@ -45,6 +44,7 @@ public class TensorExecutor<E> implements Serializable {
     }
 
     public void backward() {
+        farEach(tensor.getOutput(), (None none) -> none.setGrad(1d));
         tensor.backward();
     }
 
