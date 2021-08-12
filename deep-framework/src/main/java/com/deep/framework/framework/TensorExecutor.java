@@ -8,6 +8,7 @@ import lombok.Data;
 import java.io.Serializable;
 
 import static com.deep.framework.lang.ForEach.farEach;
+import static com.deep.framework.lang.ForEach.forEach;
 
 @Data
 public class TensorExecutor<E> implements Serializable {
@@ -33,7 +34,7 @@ public class TensorExecutor<E> implements Serializable {
 
     public void run() {
         tensor.forward();
-        tensor.backward();
+        this.backward();
         tensor.reduce();
     }
 
@@ -44,6 +45,7 @@ public class TensorExecutor<E> implements Serializable {
     }
 
     public void backward() {
+        forEach(tensor.getOutput(), (None a) -> a.setGrad(1d));
         tensor.backward();
     }
 

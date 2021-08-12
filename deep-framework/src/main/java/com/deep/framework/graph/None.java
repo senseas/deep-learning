@@ -18,21 +18,15 @@ public class None implements Serializable {
     }
 
     public void setGrad(double grad) {
-        if (this.gradef) {
-            this.grad = this.grad + grad;
-        } else {
-            this.grad = grad;
-            this.gradef = true;
-        }
+        this.grad += grad;
     }
 
     public void reset() {
         this.reduce = false;
-        this.gradef = false;
-        this.grad = 1d;
+        this.grad = 0d;
     }
 
-    private double value, grad = 1d;
-    private transient boolean gradre, gradef, reduce;
+    private double value, grad = 0d;
+    private transient boolean gradre, reduce;
 
 }
