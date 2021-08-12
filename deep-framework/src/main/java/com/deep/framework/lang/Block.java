@@ -1,6 +1,8 @@
 package com.deep.framework.lang;
 
-public class Block {
+import java.io.Serializable;
+
+public class Block implements Serializable {
 
     public final int x, y, z;
 

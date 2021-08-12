@@ -6,6 +6,7 @@ import com.deep.framework.lang.Block;
 import com.jogamp.common.nio.Buffers;
 import com.jogamp.opencl.*;
 
+import java.io.Serializable;
 import java.nio.Buffer;
 import java.nio.DoubleBuffer;
 import java.util.ArrayList;
@@ -19,7 +20,7 @@ import static com.deep.framework.lang.Shape.linesGrad;
 import static com.deep.framework.lang.Shape.linesValue;
 import static com.jogamp.opencl.CLMemory.Mem.READ_WRITE;
 
-public class TensorContext {
+public class TensorContext implements Serializable {
 
     private final Tensor tensor;
 
