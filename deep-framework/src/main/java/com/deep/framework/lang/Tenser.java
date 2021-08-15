@@ -1,7 +1,5 @@
 package com.deep.framework.lang;
 
-import com.deep.framework.graph.None;
-
 import java.util.Arrays;
 import java.util.stream.IntStream;
 
@@ -63,9 +61,9 @@ public class Tenser<T> {
     }
 
     public static void main(String[] args) {
-        Tenser<None> tenser = new Tenser(new int[]{300, 200, 300});
+        Tenser<Double> tenser = new Tenser(new Double[800 * 200 * 300], new int[]{800, 200, 300});
         long s = System.currentTimeMillis();
-        IntStream.range(0, 300).forEach(l -> {
+        IntStream.range(0, 800).forEach(l -> {
             IntStream.range(0, 200).forEach(m -> {
                 IntStream.range(0, 300).forEach(n -> {
                     tenser.get(l, m, n);
@@ -73,19 +71,30 @@ public class Tenser<T> {
             });
         });
         System.out.println((System.currentTimeMillis() - s) / 1000d);
-        double[] data = new double[300 * 200 * 300];
+
+        double[][][] data1 = new double[800][200][300];
         s = System.currentTimeMillis();
-        IntStream.range(0, 300).forEach(l -> {
-            int x = l * 200 * 300;
+        IntStream.range(0, 800).forEach(l -> {
             IntStream.range(0, 200).forEach(m -> {
-                int y = m * 300;
                 IntStream.range(0, 300).forEach(n -> {
-                    double v = data[x + y + n];
+                    double v = data1[l][m][n];
                 });
             });
         });
         System.out.println((System.currentTimeMillis() - s) / 1000d);
-        tenser.set(new None[]{new None(0d), new None(0d), new None(0d)}, 1, 0);
+
+        double[] data2 = new double[800 * 200 * 300];
+        s = System.currentTimeMillis();
+        IntStream.range(0, 800).forEach(l -> {
+            int x = l * 200 * 300;
+            IntStream.range(0, 200).forEach(m -> {
+                int y = m * 300;
+                IntStream.range(0, 300).forEach(n -> {
+                    double v = data2[x + y + n];
+                });
+            });
+        });
+        System.out.println((System.currentTimeMillis() - s) / 1000d);
     }
 
 }
