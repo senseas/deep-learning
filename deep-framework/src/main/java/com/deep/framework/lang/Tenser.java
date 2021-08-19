@@ -4,60 +4,74 @@ import java.util.Arrays;
 import java.util.stream.IntStream;
 
 import static com.deep.framework.lang.Shape.randomx;
-import static java.util.stream.IntStream.range;
 
 public class Tenser<T> {
 
     private final T[] data;
-    private final int[] shape;
-    private final int length, start;
+    private final int[] shape, lengths;
+    private final int start;
 
     public Tenser(T[] data, int[] shape) {
-        this.length = shape[0];
         this.shape = shape;
         this.data = data;
+        this.lengths = getLength(shape);
         this.start = 0;
     }
 
     private Tenser(T[] data, int[] shape, int start) {
-        this.length = shape[0];
         this.shape = shape;
         this.data = data;
+        this.lengths = getLength(shape);
         this.start = start;
     }
 
     public Tenser(int[] shape) {
-        this.length = shape[0];
         this.shape = shape;
         this.data = randomx(shape);
+        this.lengths = getLength(shape);
         this.start = 0;
     }
 
     public <E> E get(int... index) {
         int start = getIndex(index);
-        if (index.length == this.shape.length) return (E) this.data[start];
-        return (E) new Tenser(this.data, getNext(index), start);
+        if (index.length == this.shape.length) {
+            return (E) this.data[start];
+        } else {
+            return (E) new Tenser(this.data, getNext(index), start);
+        }
     }
 
     public void set(T[] data, int... index) {
         int start = getIndex(index);
-        int end = start + reduce(getNext(index), 1, 0);
-        range(start, end).forEach(i -> this.data[i] = data[i - start]);
+        if (index.length == this.shape.length) {
+            this.data[start] = data[0];
+        } else {
+            int end = index.length * lengths[0];
+            for (int i = start; i < end; i++) {
+                this.data[i] = data[i - start];
+            }
+        }
     }
 
     private int getIndex(int[] index) {
-        range(0, index.length).forEach(i -> {
-            if (index[i] >= this.shape[i]) throw new IndexOutOfBoundsException(String.valueOf(index[i]));
-        });
-        return this.start + range(0, index.length).map(i -> reduce(this.shape, index[i], i + 1)).sum();
+        int next = this.start, length = index.length;
+        for (int i = 0; i < length - 1; i++) {
+            next += index[i] * lengths[i];
+        }
+        return next += index[length - 1];
+    }
+
+    public static int[] getLength(int[] shape) {
+        int[] length = new int[shape.length - 1];
+        for (int i = length.length, next = 1; 0 < i; i--) {
+            next *= shape[i];
+            length[i - 1] = next;
+        }
+        return length;
     }
 
     private int[] getNext(int[] index) {
         return Arrays.copyOfRange(this.shape, index.length, this.shape.length);
-    }
-
-    private int reduce(int[] s, int i, int form) {
-        return Arrays.stream(s, form, s.length).reduce(i, (a, b) -> a * b);
     }
 
     public static void main(String[] args) {
