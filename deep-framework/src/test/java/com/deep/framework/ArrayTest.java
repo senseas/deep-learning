@@ -4,7 +4,9 @@ import com.deep.framework.lang.Tenser;
 import org.junit.Test;
 
 import java.util.Arrays;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.IntConsumer;
+import java.util.stream.IntStream;
 
 public class ArrayTest {
 
@@ -74,7 +76,53 @@ public class ArrayTest {
 
     @Test
     public void tenserTest() {
-        Tenser<Double> array = new Tenser(new int[]{3, 2, 3});
-        Tenser a = array.get(2, 0);
+        Tenser<Double> tenser = new Tenser(new Double[3 * 2 * 3], new int[]{3, 2, 3});
+        long s = System.currentTimeMillis();
+        AtomicReference<Double> cc = new AtomicReference<>(0d);
+        IntStream.range(0, 3).forEach(l -> {
+            IntStream.range(0, 2).forEach(m -> {
+                IntStream.range(0, 3).forEach(n -> {
+                    cc.set(cc.get() + 1);
+                    tenser.set(cc.get(), l, m, n);
+                });
+            });
+        });
+
+        Tenser tensers = tenser.get(2, 1);
+        tenser.set(new Double[]{1d, 1d, 1d}, 2, 1);
+
+        IntStream.range(0, 3).forEach(l -> {
+            IntStream.range(0, 2).forEach(m -> {
+                IntStream.range(0, 3).forEach(n -> {
+                    Object o = tenser.get(l, m, n);
+                    System.out.println(o);
+                });
+            });
+        });
+        System.out.println((System.currentTimeMillis() - s) / 1000d);
+
+        double[][][] data1 = new double[800][200][300];
+        s = System.currentTimeMillis();
+        IntStream.range(0, 800).forEach(l -> {
+            IntStream.range(0, 200).forEach(m -> {
+                IntStream.range(0, 300).forEach(n -> {
+                    double v = data1[l][m][n];
+                });
+            });
+        });
+        System.out.println((System.currentTimeMillis() - s) / 1000d);
+
+        double[] data2 = new double[800 * 200 * 300];
+        s = System.currentTimeMillis();
+        IntStream.range(0, 800).forEach(l -> {
+            int x = l * 200 * 300;
+            IntStream.range(0, 200).forEach(m -> {
+                int y = m * 300;
+                IntStream.range(0, 300).forEach(n -> {
+                    double v = data2[x + y + n];
+                });
+            });
+        });
+        System.out.println((System.currentTimeMillis() - s) / 1000d);
     }
 }

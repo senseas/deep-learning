@@ -1,7 +1,6 @@
 package com.deep.framework.lang;
 
 import java.util.Arrays;
-import java.util.stream.IntStream;
 
 import static com.deep.framework.lang.Shape.randomx;
 
@@ -14,26 +13,26 @@ public class Tenser<T> {
     public Tenser(T[] data, int[] shape) {
         this.shape = shape;
         this.data = data;
-        this.lengths = getLength(shape);
         this.start = 0;
+        this.lengths = getLength(shape);
     }
 
     private Tenser(T[] data, int[] shape, int start) {
         this.shape = shape;
         this.data = data;
-        this.lengths = getLength(shape);
         this.start = start;
+        this.lengths = getLength(shape);
     }
 
     public Tenser(int[] shape) {
         this.shape = shape;
         this.data = randomx(shape);
-        this.lengths = getLength(shape);
         this.start = 0;
+        this.lengths = getLength(shape);
     }
 
     public <E> E get(int... index) {
-        int start = getIndex(index);
+        int start = start(index);
         if (index.length == this.shape.length) {
             return (E) this.data[start];
         } else {
@@ -42,23 +41,36 @@ public class Tenser<T> {
     }
 
     public void set(T[] data, int... index) {
-        int start = getIndex(index);
+        int start = start(index);
         if (index.length == this.shape.length) {
             this.data[start] = data[0];
         } else {
-            int end = index.length * lengths[0];
-            for (int i = start; i < end; i++) {
-                this.data[i] = data[i - start];
+            int end = end(index);
+            for (int i = start; i <= end; i++) {
+                this.data[i - 1] = data[i - start];
             }
         }
     }
 
-    private int getIndex(int[] index) {
+    public void set(T data, int... index) {
+        int start = start(index);
+        this.data[start] = data;
+    }
+
+    private int start(int[] index) {
         int next = this.start, length = index.length;
         for (int i = 0; i < length - 1; i++) {
             next += index[i] * lengths[i];
         }
         return next += index[length - 1];
+    }
+
+    private int end(int[] index) {
+        int next = this.start, length = index.length;
+        for (int i = 0; i < length; i++) {
+            next += index[i] * lengths[i];
+        }
+        return next;
     }
 
     public static int[] getLength(int[] shape) {
@@ -72,43 +84,6 @@ public class Tenser<T> {
 
     private int[] getNext(int[] index) {
         return Arrays.copyOfRange(this.shape, index.length, this.shape.length);
-    }
-
-    public static void main(String[] args) {
-        Tenser<Double> tenser = new Tenser(new Double[800 * 200 * 300], new int[]{800, 200, 300});
-        long s = System.currentTimeMillis();
-        IntStream.range(0, 800).forEach(l -> {
-            IntStream.range(0, 200).forEach(m -> {
-                IntStream.range(0, 300).forEach(n -> {
-                    tenser.get(l, m, n);
-                });
-            });
-        });
-        System.out.println((System.currentTimeMillis() - s) / 1000d);
-
-        double[][][] data1 = new double[800][200][300];
-        s = System.currentTimeMillis();
-        IntStream.range(0, 800).forEach(l -> {
-            IntStream.range(0, 200).forEach(m -> {
-                IntStream.range(0, 300).forEach(n -> {
-                    double v = data1[l][m][n];
-                });
-            });
-        });
-        System.out.println((System.currentTimeMillis() - s) / 1000d);
-
-        double[] data2 = new double[800 * 200 * 300];
-        s = System.currentTimeMillis();
-        IntStream.range(0, 800).forEach(l -> {
-            int x = l * 200 * 300;
-            IntStream.range(0, 200).forEach(m -> {
-                int y = m * 300;
-                IntStream.range(0, 300).forEach(n -> {
-                    double v = data2[x + y + n];
-                });
-            });
-        });
-        System.out.println((System.currentTimeMillis() - s) / 1000d);
     }
 
 }
