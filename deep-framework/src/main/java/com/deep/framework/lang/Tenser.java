@@ -58,11 +58,11 @@ public class Tenser<T> {
     }
 
     private int start(int[] index) {
-        int next = this.start, length = index.length;
-        for (int i = 0; i < length - 1; i++) {
+        int next = this.start, length = index.length - 1;
+        for (int i = 0; i < length; i++) {
             next += index[i] * lengths[i];
         }
-        return next += index[length - 1];
+        return next + index[length];
     }
 
     private int end(int[] index) {
@@ -74,10 +74,10 @@ public class Tenser<T> {
     }
 
     public static int[] getLength(int[] shape) {
+        int next = 1;
         int[] length = new int[shape.length - 1];
-        for (int i = length.length, next = 1; 0 < i; i--) {
-            next *= shape[i];
-            length[i - 1] = next;
+        for (int i = length.length; 0 < i; i--) {
+            length[i - 1] = next *= shape[i];
         }
         return length;
     }
