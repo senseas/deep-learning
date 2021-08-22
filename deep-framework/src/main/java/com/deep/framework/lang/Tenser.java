@@ -68,7 +68,7 @@ public class Tenser<T> {
         return next;
     }
 
-     int[] getLength() {
+    private int[] getLength() {
         int next = 1;
         int[] length = new int[shape.length - 1];
         for (int i = length.length; 0 < i; i--) {
