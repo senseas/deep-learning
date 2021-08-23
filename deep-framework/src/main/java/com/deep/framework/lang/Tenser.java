@@ -14,21 +14,21 @@ public class Tenser<T> {
         this.shape = shape;
         this.data = data;
         this.start = 0;
-        this.lengths = getLength();
+        this.lengths = next();
     }
 
     private Tenser(T[] data, int[] shape, int start) {
         this.shape = shape;
         this.data = data;
         this.start = start;
-        this.lengths = getLength();
+        this.lengths = next();
     }
 
     public Tenser(int[] shape) {
         this.shape = shape;
         this.data = randomx(shape);
         this.start = 0;
-        this.lengths = getLength();
+        this.lengths = next();
     }
 
     public <E> E get(int... index) {
@@ -42,8 +42,8 @@ public class Tenser<T> {
 
     public void set(T[] data, int... index) {
         int start = start(index), end = end(index);
-        for (int i = start - 1; i < end; i++) {
-            this.data[i] = data[i - start + 1];
+        for (int i = start; i < end; i++) {
+            this.data[i] = data[i - start];
         }
     }
 
@@ -57,24 +57,28 @@ public class Tenser<T> {
         for (int i = 0; i < length; i++) {
             next += index[i] * lengths[i];
         }
-        return next + index[length];
+        return next + index[length] * lengths[length];
     }
 
     private int end(int[] index) {
-        int next = this.start, length = index.length;
+        int next = this.start, length = index.length - 1;
         for (int i = 0; i < length; i++) {
             next += index[i] * lengths[i];
+        }
+        return next + (index[length] + 1) * lengths[length];
+    }
+
+    private int[] next() {
+        int[] next = new int[shape.length];
+        Arrays.fill(next, 1);
+        for (int i = next.length - 1; 0 < i; i--) {
+            next[i - 1] = next[i] * shape[i];
         }
         return next;
     }
 
-    private int[] getLength() {
-        int next = 1;
-        int[] length = new int[shape.length - 1];
-        for (int i = length.length; 0 < i; i--) {
-            length[i - 1] = next *= shape[i];
-        }
-        return length;
+    public int shape(int i) {
+        return shape[i];
     }
 
     private int[] getNext(int[] index) {
