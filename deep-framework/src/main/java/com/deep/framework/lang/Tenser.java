@@ -7,28 +7,28 @@ import static com.deep.framework.lang.Shape.randomx;
 public class Tenser<T> {
 
     private final T[] data;
-    private final int[] shape, lengths;
+    private final int[] shape, nexts;
     private final int start;
 
     public Tenser(T[] data, int[] shape) {
         this.shape = shape;
         this.data = data;
         this.start = 0;
-        this.lengths = next();
+        this.nexts = next();
     }
 
     private Tenser(T[] data, int[] shape, int start) {
         this.shape = shape;
         this.data = data;
         this.start = start;
-        this.lengths = next();
+        this.nexts = next();
     }
 
     public Tenser(int[] shape) {
         this.shape = shape;
         this.data = randomx(shape);
         this.start = 0;
-        this.lengths = next();
+        this.nexts = next();
     }
 
     public <E> E get(int... index) {
@@ -55,17 +55,17 @@ public class Tenser<T> {
     private int start(int[] index) {
         int next = this.start, length = index.length - 1;
         for (int i = 0; i < length; i++) {
-            next += index[i] * lengths[i];
+            next += index[i] * nexts[i];
         }
-        return next + index[length] * lengths[length];
+        return next + index[length] * nexts[length];
     }
 
     private int end(int[] index) {
         int next = this.start, length = index.length - 1;
         for (int i = 0; i < length; i++) {
-            next += index[i] * lengths[i];
+            next += index[i] * nexts[i];
         }
-        return next + (index[length] + 1) * lengths[length];
+        return next + (index[length] + 1) * nexts[length];
     }
 
     private int[] next() {
