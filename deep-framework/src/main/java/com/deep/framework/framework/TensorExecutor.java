@@ -2,6 +2,7 @@ package com.deep.framework.framework;
 
 import com.deep.framework.graph.None;
 import com.deep.framework.graph.Tensor;
+import com.deep.framework.lang.Tensers;
 import com.deep.framework.lang.function.Func21;
 import lombok.Data;
 
@@ -54,12 +55,12 @@ public class TensorExecutor<E> implements Serializable {
 
     public void setInput(Object o) {
         Func21<None, Double> func = (m, n) -> m.setValue(n);
-        farEach(input.getOutput(), o, func);
+        farEach(input.getOutput(), Tensers.tenser(o), func);
     }
 
     public void setLabel(Object o) {
         Func21<None, Double> func = (m, n) -> m.setValue(n);
-        farEach(label.getOutput(), o, func);
+        farEach(label.getOutput(), Tensers.tenser(o), func);
     }
 
 }

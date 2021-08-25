@@ -101,6 +101,21 @@ public class ForEach implements Serializable {
         }
     }
 
+    public static <M> void farrEach(Object a, Func1<M> func) {
+        if (BeanUtil.isArray(a)) {
+            farEach(Array.getLength(a), i -> {
+                Object m = Array.get(a, i);
+                if (BeanUtil.isNotArray(m)) {
+                    func.apply((M) m);
+                } else {
+                    farrEach(m, func);
+                }
+            });
+        } else {
+            func.apply((M) a);
+        }
+    }
+
     public static <M> void forEach(Object a, Object b, Func2<M> func) {
         if (BeanUtil.isTensor(a)) {
             forEach(Tensers.getLength(a), i -> {
@@ -166,7 +181,7 @@ public class ForEach implements Serializable {
             forEach(Tensers.getLength(a), i -> {
                 Object m = Tensers.get(a, i);
                 if (BeanUtil.isNotTensor(m)) {
-                    func.apply((M[]) a, i);
+                    func.apply((Tenser<M>) a, i);
                 } else {
                     forEach(m, func);
                 }
@@ -179,7 +194,7 @@ public class ForEach implements Serializable {
             forEach(Tensers.getLength(a), i -> {
                 Object m = Tensers.get(a, i), n = Tensers.get(b, i);
                 if (BeanUtil.isNotTensor(m)) {
-                    func.apply((M) m, (M[]) b, i);
+                    func.apply((M) m, (Tenser<M>) b, i);
                 } else {
                     forEach(m, n, func);
                 }
@@ -192,7 +207,7 @@ public class ForEach implements Serializable {
             farEach(Tensers.getLength(a), i -> {
                 Object m = Tensers.get(a, i), n = Tensers.get(b, i);
                 if (BeanUtil.isNotTensor(m)) {
-                    func.apply((M) m, (M[]) b, i);
+                    func.apply((M) m, (Tenser<M>) b, i);
                 } else {
                     farEach(m, n, func);
                 }
@@ -205,7 +220,7 @@ public class ForEach implements Serializable {
             forEach(Tensers.getLength(a), i -> {
                 Object m = Tensers.get(a, i), n = Tensers.get(b, i), o = Tensers.get(c, i);
                 if (BeanUtil.isNotTensor(m)) {
-                    func.apply((M) m, (M) n, (M[]) c, i);
+                    func.apply((M) m, (M) n, (Tenser<M>) c, i);
                 } else {
                     forEach(m, n, o, func);
                 }

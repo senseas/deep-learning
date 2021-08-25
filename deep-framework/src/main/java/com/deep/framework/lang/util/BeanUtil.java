@@ -29,6 +29,16 @@ public class BeanUtil {
         return !(o instanceof Tenser);
     }
 
+    public static boolean isArray(Object o) {
+        if (Objects.isNull(o)) return false;
+        return o.getClass().isArray();
+    }
+
+    public static boolean isNotArray(Object o) {
+        if (Objects.isNull(o)) return false;
+        return !(o.getClass().isArray());
+    }
+
     public static boolean isNone(Tensor o) {
         return o.getName().startsWith("None");
     }
