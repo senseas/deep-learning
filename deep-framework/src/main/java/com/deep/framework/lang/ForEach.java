@@ -45,10 +45,10 @@ public class ForEach implements Serializable {
 
     public static Object fill(Object a, Func func) {
         if (BeanUtil.isTensor(a)) {
-            forEach(Array.getLength(a), i -> {
-                Object m = Array.get(a, i);
+            forEach(Tensers.getLength(a), i -> {
+                Object m = Tensers.get(a, i);
                 if (BeanUtil.isNotTensor(m)) {
-                    Array.set(a, i, func.apply(m));
+                    Tensers.set(a, func.apply(m), i);
                 } else {
                     fill(m, func);
                 }
@@ -59,10 +59,10 @@ public class ForEach implements Serializable {
 
     public static Object fill(Object a, Object b, Func func) {
         if (BeanUtil.isTensor(a)) {
-            farEach(Array.getLength(a), i -> {
-                Object m = Array.get(a, i), n = Array.get(b, i);
+            farEach(Tensers.getLength(a), i -> {
+                Object m = Tensers.get(a, i), n = Tensers.get(b, i);
                 if (BeanUtil.isNotTensor(m)) {
-                    Array.set(b, i, func.apply(m));
+                    Tensers.set(b, func.apply(m), i);
                 } else {
                     fill(m, n, func);
                 }
@@ -73,8 +73,8 @@ public class ForEach implements Serializable {
 
     public static <M> void forEach(Object a, Func1<M> func) {
         if (BeanUtil.isTensor(a)) {
-            forEach(Array.getLength(a), i -> {
-                Object m = Array.get(a, i);
+            forEach(Tensers.getLength(a), i -> {
+                Object m = Tensers.get(a, i);
                 if (BeanUtil.isNotTensor(m)) {
                     func.apply((M) m);
                 } else {
@@ -88,8 +88,8 @@ public class ForEach implements Serializable {
 
     public static <M> void farEach(Object a, Func1<M> func) {
         if (BeanUtil.isTensor(a)) {
-            farEach(Array.getLength(a), i -> {
-                Object m = Array.get(a, i);
+            farEach(Tensers.getLength(a), i -> {
+                Object m = Tensers.get(a, i);
                 if (BeanUtil.isNotTensor(m)) {
                     func.apply((M) m);
                 } else {
@@ -103,8 +103,8 @@ public class ForEach implements Serializable {
 
     public static <M> void forEach(Object a, Object b, Func2<M> func) {
         if (BeanUtil.isTensor(a)) {
-            forEach(Array.getLength(a), i -> {
-                Object m = Array.get(a, i), n = Array.get(b, i);
+            forEach(Tensers.getLength(a), i -> {
+                Object m = Tensers.get(a, i), n = Tensers.get(b, i);
                 if (BeanUtil.isNotTensor(m)) {
                     func.apply((M) m, (M) n);
                 } else {
@@ -118,8 +118,8 @@ public class ForEach implements Serializable {
 
     public static <M> void farEach(Object a, Object b, Func2<M> func) {
         if (BeanUtil.isTensor(a)) {
-            farEach(Array.getLength(a), i -> {
-                Object m = Array.get(a, i), n = Array.get(b, i);
+            farEach(Tensers.getLength(a), i -> {
+                Object m = Tensers.get(a, i), n = Tensers.get(b, i);
                 if (BeanUtil.isNotTensor(m)) {
                     func.apply((M) m, (M) n);
                 } else {
@@ -133,8 +133,8 @@ public class ForEach implements Serializable {
 
     public static void farEach(Object a, Object b, Func21 func) {
         if (BeanUtil.isTensor(a)) {
-            farEach(Array.getLength(a), i -> {
-                Object m = Array.get(a, i), n = Array.get(b, i);
+            farEach(Tensers.getLength(a), i -> {
+                Object m = Tensers.get(a, i), n = Tensers.get(b, i);
                 if (BeanUtil.isNotTensor(m)) {
                     func.apply(m, n);
                 } else {
@@ -148,8 +148,8 @@ public class ForEach implements Serializable {
 
     public static <M> void farEach(Object a, Object b, Object c, Func3<M> func) {
         if (BeanUtil.isTensor(a)) {
-            farEach(Array.getLength(a), i -> {
-                Object m = Array.get(a, i), n = Array.get(b, i), o = Array.get(c, i);
+            farEach(Tensers.getLength(a), i -> {
+                Object m = Tensers.get(a, i), n = Tensers.get(b, i), o = Tensers.get(c, i);
                 if (BeanUtil.isNotTensor(m)) {
                     func.apply((M) m, (M) n, (M) o);
                 } else {
@@ -163,8 +163,8 @@ public class ForEach implements Serializable {
 
     public static <M> void forEach(Object a, For1<M> func) {
         if (BeanUtil.isTensor(a)) {
-            forEach(Array.getLength(a), i -> {
-                Object m = Array.get(a, i);
+            forEach(Tensers.getLength(a), i -> {
+                Object m = Tensers.get(a, i);
                 if (BeanUtil.isNotTensor(m)) {
                     func.apply((M[]) a, i);
                 } else {
@@ -176,8 +176,8 @@ public class ForEach implements Serializable {
 
     public static <M> void forEach(Object a, Object b, For2<M> func) {
         if (BeanUtil.isTensor(a)) {
-            forEach(Array.getLength(a), i -> {
-                Object m = Array.get(a, i), n = Array.get(b, i);
+            forEach(Tensers.getLength(a), i -> {
+                Object m = Tensers.get(a, i), n = Tensers.get(b, i);
                 if (BeanUtil.isNotTensor(m)) {
                     func.apply((M) m, (M[]) b, i);
                 } else {
@@ -189,8 +189,8 @@ public class ForEach implements Serializable {
 
     public static <M> void farEach(Object a, Object b, For2<M> func) {
         if (BeanUtil.isTensor(a)) {
-            farEach(Array.getLength(a), i -> {
-                Object m = Array.get(a, i), n = Array.get(b, i);
+            farEach(Tensers.getLength(a), i -> {
+                Object m = Tensers.get(a, i), n = Tensers.get(b, i);
                 if (BeanUtil.isNotTensor(m)) {
                     func.apply((M) m, (M[]) b, i);
                 } else {
@@ -202,8 +202,8 @@ public class ForEach implements Serializable {
 
     public static <M> void forEach(Object a, Object b, Object c, For3<M> func) {
         if (BeanUtil.isTensor(a)) {
-            forEach(Array.getLength(a), i -> {
-                Object m = Array.get(a, i), n = Array.get(b, i), o = Array.get(c, i);
+            forEach(Tensers.getLength(a), i -> {
+                Object m = Tensers.get(a, i), n = Tensers.get(b, i), o = Tensers.get(c, i);
                 if (BeanUtil.isNotTensor(m)) {
                     func.apply((M) m, (M) n, (M[]) c, i);
                 } else {
@@ -213,22 +213,23 @@ public class ForEach implements Serializable {
         }
     }
 
-    public static None[][] padding(None[][] a, int padding) {
+    public static Tenser<None> padding(Tenser<None> a, int padding) {
         if (padding == 0) return a;
-        int height = a.length, width = a[0].length;
-        None[][] nones = new None[height + 2 * padding][width + 2 * padding];
+        int height = a.shape(0), width = a.shape(1);
+        int hx = height + 2 * padding, wx = width + 2 * padding;
+        Tenser nones = new Tenser(new None[hx * wx], new int[]{hx, wx});
 
-        farEach(padding, nones[0].length, (m, n) -> {
-            nones[m][n] = new None(0d, false);
-            nones[m + padding + height][n] = new None(0d, false);
+        farEach(padding, wx, (m, n) -> {
+            nones.set(new None(0d, false), m, n);
+            nones.set(new None(0d, false), m + padding + height, n);
         });
 
-        farEach(nones.length, padding, (m, n) -> {
-            nones[m][n] = new None(0d, false);
-            nones[m][n + padding + width] = new None(0d, false);
+        farEach(hx, padding, (m, n) -> {
+            nones.set(new None(0d, false), m, n);
+            nones.set(new None(0d, false), m, n + padding + width);
         });
 
-        farEach(height, width, (i, l) -> nones[i + padding][l + padding] = a[i][l]);
+        farEach(height, width, (i, l) -> nones.set(a.get(i, l), l + padding, i + padding));
         return nones;
     }
 

@@ -1,6 +1,7 @@
 package com.deep.framework.framework;
 
 import com.deep.framework.graph.*;
+import com.deep.framework.lang.Tenser;
 
 import java.io.Serializable;
 
@@ -256,20 +257,23 @@ public class TensorFlow implements Serializable {
         return new TensorOparetor("Matmul", input) {
 
             public Object compute() {
-                None[][] A = getInput(0), B = getInput(1);
-                None[][] C = zeroNones(new None[A.length][B[0].length]);
-
-                getContext().setBlock(A.length, B[0].length);
-                getContext().compute(A, B, C, A.length, B[0].length, A[0].length);
+                Tenser<None> A = getInput(0), B = getInput(1);
+                Tenser<None> C = zeroNones(new int[]{A.shape(0), B.shape(1)});
+                forEach(A.shape(0), B.shape(1), A.shape(1), (i, l, j) -> {
+                    None inx = A.get(i, j), iny = B.get(j, l), out = C.get(i, l);
+                    out.setValue(out.getValue() + inx.getValue() * iny.getValue());
+                });
                 return C;
             }
 
             public void gradient() {
-                None[][] A = getInput(0), B = getInput(1);
-                None[][] C = getOutput();
-
-                getContext().setBlock(A.length, B[0].length);
-                getContext().gradient(A, B, C, A.length, B[0].length, A[0].length);
+                Tenser<None> A = getInput(0), B = getInput(1);
+                Tenser<None> C = getOutput();
+                forEach(A.shape(0), B.shape(1), A.shape(1), (i, l, j) -> {
+                    None inx = A.get(i, j), iny = B.get(j, l), out = C.get(i, l);
+                    inx.setGrad(out.getGrad() * iny.getValue());
+                    iny.setGrad(out.getGrad() * inx.getValue());
+                });
             }
 
         };
@@ -474,24 +478,25 @@ public class TensorFlow implements Serializable {
     public Tensor conv(int[] stride, int padding, Tensor... input) {
         return new TensorOparetor("Conv", input) {
 
-            public None[][] compute() {
-                None[][] A = getInput(0), B = padding(getInput(1), padding);
+            public Tenser compute() {
+                Tenser<None> A = getInput(0), B = padding(getInput(1), padding);
                 int heights = stride[0], widths = stride[1];
-                int height = (B.length - A.length) / heights + 1, width = (B[0].length - A[0].length) / widths + 1;
-                None[][] C = zeroNones(new None[height][width]);
-                forEach(height, width, A.length, A[0].length, (h, w, m, n) -> {
-                    None inx = A[m][n], iny = B[h * heights + m][w * widths + n], out = C[h][w];
+                int height = (B.shape(0) - A.shape(0)) / heights + 1;
+                int width = (B.shape(1) - A.shape(1)) / widths + 1;
+                Tenser<None> C = zeroNones(new int[]{height, width});
+                forEach(height, width, A.shape(0), A.shape(1), (h, w, m, n) -> {
+                    None inx = A.get(m, n), iny = B.get(h * heights + m, w * widths + n), out = C.get(h, w);
                     out.setValue(out.getValue() + inx.getValue() * iny.getValue());
                 });
                 return C;
             }
 
             public void gradient() {
-                None[][] A = getInput(0), B = padding(getInput(1), padding);
-                None[][] C = getOutput();
+                Tenser<None> A = getInput(0), B = padding(getInput(1), padding);
+                Tenser<None> C = getOutput();
                 int heights = stride[0], widths = stride[1];
-                forEach(C.length, C[0].length, A.length, A[0].length, (h, w, m, n) -> {
-                    None inx = A[m][n], iny = B[h * heights + m][w * widths + n], out = C[h][w];
+                forEach(C.shape(0), C.shape(1), A.shape(0), A.shape(1), (h, w, m, n) -> {
+                    None inx = A.get(m, n), iny = B.get(h * heights + m, w * widths + n), out = C.get(h, w);
                     inx.setGrad(out.getGrad() * iny.getValue());
                     iny.setGrad(out.getGrad() * inx.getValue());
                 });
@@ -504,12 +509,13 @@ public class TensorFlow implements Serializable {
         return new TensorFunction("Convx", input) {
 
             public Object compute() {
-                Tensor[][][] A = getInput(0), B = getInput(1);
+                Tenser A = getInput(0), B = getInput(1);
                 int heighs = stride[0], widths = stride[1];
-                int height = (B[0].length - A[0].length + 2 * padding) / heighs + 1, width = (B[0][0].length - A[0][0].length + 2 * padding) / widths + 1;
-                Tensor[] C = zeroTensors(new Tensor[A.length], new int[]{height, width});
-                forEach(B.length, A.length, (i, l) -> {
-                    C[l] = addx(C[l], conv(stride, padding, new Tensor(A[l]), new Tensor(B[i])));
+                int height = (B.shape(1) - A.shape(1) + 2 * padding) / heighs + 1;
+                int width = (B.shape(2) - A.shape(2) + 2 * padding) / widths + 1;
+                Tenser<Tensor> C = zeroTensors(new int[]{A.shape(0)}, new int[]{height, width});
+                forEach(B.shape(0), A.shape(0), (i, l) -> {
+                    C.set(addx(C.get(l), conv(stride, padding, new Tensor(A.get(l)), new Tensor(B.get(i)))), l);
                 });
                 return C;
             }
@@ -525,7 +531,8 @@ public class TensorFlow implements Serializable {
             public None[][] compute() {
                 None[][] A = getInput(0), B = getInput(1);
                 int heighs = stride[0], widths = stride[1];
-                int height = (B.length - 1) * heighs + A.length - 2 * padding, width = (B[0].length - 1) * widths + A[0].length - 2 * padding;
+                int height = (B.length - 1) * heighs + A.length - 2 * padding;
+                int width = (B[0].length - 1) * widths + A[0].length - 2 * padding;
                 None[][] C = zeroNones(new None[height][width]);
                 forEach(B.length, B[0].length, A.length, A[0].length, (h, w, m, n) -> {
                     None inx = A[m][n], iny = B[h][w], out = C[h * heighs + m][w * widths + n];
@@ -552,12 +559,13 @@ public class TensorFlow implements Serializable {
         return new TensorFunction("Deconvx", input) {
 
             public Object compute() {
-                Tensor[][][] A = getInput(0), B = getInput(1);
+                Tenser A = getInput(0), B = getInput(1);
                 int heighs = stride[0], widths = stride[1];
-                int height = (B[0].length - 1) * heighs + A[0].length - 2 * padding, width = (B[0][0].length - 1) * widths + A[0][0].length - 2 * padding;
-                Tensor[] C = zeroTensors(new Tensor[A.length], new int[]{height, width});
-                forEach(B.length, A.length, (i, l) -> {
-                    C[l] = addx(C[l], deconv(stride, padding, new Tensor(A[l]), new Tensor(B[i])));
+                int height = (B.shape(1) - 1) * heighs + A.shape(1) - 2 * padding;
+                int width = (B.shape(2) - 1) * widths + A.shape(2) - 2 * padding;
+                Tenser<Tensor> C = zeroTensors(new int[]{A.shape(0)}, new int[]{height, width});
+                forEach(B.shape(0), A.shape(0), (i, l) -> {
+                    C.set(addx(C.get(l), deconv(stride, padding, new Tensor(A.get(l)), new Tensor(B.get(i)))),l);
                 });
                 return C;
             }
@@ -570,23 +578,23 @@ public class TensorFlow implements Serializable {
     public Tensor maxpool(int kernelSize, int[] stride, int padding, Tensor input) {
         return new TensorOparetor("Maxpool", input) {
 
-            public None[][] compute() {
-                None[][] A = padding(getInput(0), padding);
+            public Tenser compute() {
+                Tenser<None> A = padding(getInput(0), padding);
                 int heighs = stride[0], widths = stride[1];
-                int height = (A.length - kernelSize) / heighs + 1, width = (A[0].length - kernelSize) / widths + 1;
-                None[][] B = zeroNones(new None[height][width]);
+                int height = (A.shape(0) - kernelSize) / heighs + 1, width = (A.shape(1) - kernelSize) / widths + 1;
+                Tenser<None> B = zeroNones(new None[height][width]);
                 forEach(height, width, kernelSize, kernelSize, (y, x, m, n) -> {
-                    None inx = A[y * heighs + m][x * widths + n], out = B[y][x];
+                    None inx = A.get(y * heighs + m, x * widths + n), out = B.get(y, x);
                     out.setValue(Math.max(out.getValue(), inx.getValue()));
                 });
                 return B;
             }
 
             public void gradient() {
-                None[][] A = padding(getInput(0), padding), B = getOutput();
+                Tenser<None> A = padding(getInput(0), padding), B = getOutput();
                 int heighs = stride[0], widths = stride[1];
-                forEach(B.length, B[0].length, kernelSize, kernelSize, (y, x, m, n) -> {
-                    None inx = A[y * heighs + m][x * widths + n], out = B[y][x];
+                forEach(B.shape(0), B.shape(1), kernelSize, kernelSize, (y, x, m, n) -> {
+                    None inx = A.get(y * heighs + m, x * widths + n), out = B.get(y, x);
                     inx.setGrad(inx.getValue() == out.getValue() ? out.getGrad() : 0d);
                 });
             }

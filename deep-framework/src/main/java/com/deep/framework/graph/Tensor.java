@@ -3,6 +3,7 @@ package com.deep.framework.graph;
 import com.deep.framework.framework.TensorContext;
 import com.deep.framework.framework.TensorGpuExecutor;
 import com.deep.framework.lang.Shape;
+import com.deep.framework.lang.Tenser;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -23,17 +24,17 @@ public class Tensor implements Serializable {
 
     public Tensor(int[] shape) {
         this.name = "None";
-        this.output = Shape.random(shape);
+        this.output = new Tenser(shape);
     }
 
     public Tensor(int[] shape, double value, boolean isGrad) {
         this.name = "None";
-        this.output = Shape.fill(shape, value, isGrad);
+        this.output = new Tenser(Shape.fill(shape, value, isGrad), shape);
     }
 
     public Tensor(String name, int[] shape) {
         this.name = "None::".concat(name);
-        this.output = Shape.random(shape);
+        this.output = new Tenser(shape);
     }
 
     public Tensor(None input) {
@@ -46,7 +47,7 @@ public class Tensor implements Serializable {
         this.input = input;
     }
 
-    public <M> Tensor(M[] m) {
+    public <M> Tensor(M m) {
         this.name = "Function";
         this.function = m;
     }

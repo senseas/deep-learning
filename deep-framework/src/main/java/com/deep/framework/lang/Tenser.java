@@ -81,6 +81,8 @@ public class Tenser<T> {
         return shape[i];
     }
 
+    public int getLength() { return shape[0]; }
+
     private int[] getNext(int[] index) {
         return Arrays.copyOfRange(this.shape, index.length, this.shape.length);
     }
