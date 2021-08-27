@@ -101,19 +101,6 @@ public class ForEach implements Serializable {
         }
     }
 
-    public static <M> void farrEach(Object a, For<M> func) {
-        if (BeanUtil.isArray(a)) {
-            farEach(Array.getLength(a), i -> {
-                Object m = Array.get(a, i);
-                if (BeanUtil.isNotArray(m)) {
-                    func.apply(a, i);
-                } else {
-                    farrEach(m, func);
-                }
-            });
-        }
-    }
-
     public static <M> void forEach(Object a, Object b, Func2<M> func) {
         if (BeanUtil.isTensor(a)) {
             forEach(Tensers.getLength(a), i -> {
@@ -226,6 +213,19 @@ public class ForEach implements Serializable {
         }
     }
 
+    public static <M> void farrEach(Object a, For<M> func) {
+        if (BeanUtil.isArray(a)) {
+            forEach(Array.getLength(a), i -> {
+                Object m = Array.get(a, i);
+                if (BeanUtil.isNotArray(m)) {
+                    func.apply((M)a, i);
+                } else {
+                    farrEach(m, func);
+                }
+            });
+        }
+    }
+
     public static Tenser<None> padding(Tenser<None> a, int padding) {
         if (padding == 0) return a;
         int height = a.shape(0), width = a.shape(1);
@@ -244,7 +244,7 @@ public class ForEach implements Serializable {
 
         farEach(height, width, (i, l) -> {
             Object data = a.get(i, l);
-            nones.set(data, l + padding, i + padding);
+            nones.set(data, i + padding, l + padding);
         });
         return nones;
     }

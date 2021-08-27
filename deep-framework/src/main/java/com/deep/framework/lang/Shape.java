@@ -113,6 +113,15 @@ public class Shape extends ForEach {
         return size;
     }
 
+    public static Class getArrayDeepClass(Object arr) {
+        while (Objects.nonNull(arr) && arr.getClass().isArray()) arr = Array.get(arr, 0);
+        return arr.getClass();
+    }
+
+    public static Class getTenserDeepClass(Tenser o) {
+        return o.data.getClass().getComponentType();
+    }
+
     public static int size(int[] arr) {
         int size = 1;
         for (int a : arr) {
@@ -121,5 +130,3 @@ public class Shape extends ForEach {
         return size;
     }
 }
-
-

@@ -24,20 +24,17 @@ public class Tensers {
     }
 
     public static Tenser tenser(Object o) {
-        Double[] list = new Double[size(o)];
+        int[] shape = shapes(o);
         AtomicInteger index = new AtomicInteger();
-        farrEach(o, (a, i) -> {
-            list[index.getAndIncrement()] = (Double) Array.get(a, i);
-        });
-        return new Tenser(list, shapes(o));
+        Object array = Array.newInstance(getArrayDeepClass(o), size(shape));
+        farrEach(o, (a, i) -> Array.set(array, index.getAndIncrement(), Array.get(a, i)));
+        return new Tenser((Object[]) array, shape);
     }
 
     public static <T> T array(Tenser o) {
-        Object array = Array.newInstance(Object.class, o.shape);
         AtomicInteger index = new AtomicInteger();
-        farrEach(array, (a, i) -> {
-            Array.set(a, i, o.data[index.getAndIncrement()]);
-        });
+        Object array = Array.newInstance(getTenserDeepClass(o), o.shape);
+        farrEach(array, (a, i) -> Array.set(a, i, o.data[index.getAndIncrement()]));
         return (T) array;
     }
 

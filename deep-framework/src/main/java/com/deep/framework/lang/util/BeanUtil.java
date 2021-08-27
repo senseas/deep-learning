@@ -20,7 +20,7 @@ public class BeanUtil {
     }
 
     public static boolean isTensor(Object o) {
-        if (Objects.isNull(o)) return true;
+        if (Objects.isNull(o)) return false;
         return o instanceof Tenser;
     }
 
@@ -30,7 +30,7 @@ public class BeanUtil {
     }
 
     public static boolean isArray(Object o) {
-        if (Objects.isNull(o)) return true;
+        if (Objects.isNull(o)) return false;
         return o.getClass().isArray();
     }
 
