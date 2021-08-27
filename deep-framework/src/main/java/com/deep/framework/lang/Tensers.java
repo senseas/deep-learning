@@ -1,10 +1,10 @@
 package com.deep.framework.lang;
 
+import java.lang.reflect.Array;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static com.deep.framework.lang.ForEach.farrEach;
-import static com.deep.framework.lang.Shape.arrayShapes;
-import static com.deep.framework.lang.Shape.size;
+import static com.deep.framework.lang.Shape.*;
 
 public class Tensers {
 
@@ -26,10 +26,19 @@ public class Tensers {
     public static Tenser tenser(Object o) {
         Double[] list = new Double[size(o)];
         AtomicInteger index = new AtomicInteger();
-        farrEach(o, (Double a) -> {
-            list[index.getAndIncrement()] = a;
+        farrEach(o, (a, i) -> {
+            list[index.getAndIncrement()] = (Double) Array.get(a, i);
         });
-        return new Tenser(list, arrayShapes(o));
+        return new Tenser(list, shapes(o));
+    }
+
+    public static <T> T array(Tenser o) {
+        Object array = Array.newInstance(Object.class, o.shape);
+        AtomicInteger index = new AtomicInteger();
+        farrEach(array, (a, i) -> {
+            Array.set(a, i, o.data[index.getAndIncrement()]);
+        });
+        return (T) array;
     }
 
 }

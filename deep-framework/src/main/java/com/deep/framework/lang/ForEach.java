@@ -101,18 +101,16 @@ public class ForEach implements Serializable {
         }
     }
 
-    public static <M> void farrEach(Object a, Func1<M> func) {
+    public static <M> void farrEach(Object a, For<M> func) {
         if (BeanUtil.isArray(a)) {
             farEach(Array.getLength(a), i -> {
                 Object m = Array.get(a, i);
                 if (BeanUtil.isNotArray(m)) {
-                    func.apply((M) m);
+                    func.apply(a, i);
                 } else {
                     farrEach(m, func);
                 }
             });
-        } else {
-            func.apply((M) a);
         }
     }
 
@@ -244,7 +242,10 @@ public class ForEach implements Serializable {
             nones.set(new None(0d, false), m, n + padding + width);
         });
 
-        farEach(height, width, (i, l) -> nones.set(a.get(i, l), l + padding, i + padding));
+        farEach(height, width, (i, l) -> {
+            Object data = a.get(i, l);
+            nones.set(data, l + padding, i + padding);
+        });
         return nones;
     }
 

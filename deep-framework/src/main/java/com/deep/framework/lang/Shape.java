@@ -36,11 +36,9 @@ public class Shape extends ForEach {
         return (E) fill(shape(None.class, a), o -> new None(0d, false));
     }
 
-    public static <E> E fill(int[] shape, double value, boolean isGrad) {
+    public static None[] fill(int[] shape, double value, boolean isGrad) {
         int length = size(shape);
-        None[] data = (None[]) Array.newInstance(None.class, new int[]{length});
-        IntStream.range(0, length).forEach(i -> data[i] = new None(value, isGrad));
-        return (E) data;
+        return IntStream.range(0, length).mapToObj(i -> new None(value, isGrad)).toArray(None[]::new);
     }
 
     public static Object shape(Class clas, Object o) {
@@ -74,18 +72,16 @@ public class Shape extends ForEach {
 
     public static int[] shapes(Object arr) {
         List<Integer> list = new ArrayList();
-        while (Objects.nonNull(arr) && arr instanceof Tenser) {
-            list.add(Tensers.getLength(arr));
-            arr = Tensers.get(arr, 0);
-        }
-        return list.stream().mapToInt(Integer::intValue).toArray();
-    }
-
-    public static int[] arrayShapes(Object arr) {
-        List<Integer> list = new ArrayList();
-        while (Objects.nonNull(arr) && arr.getClass().isArray()) {
-            list.add(Array.getLength(arr));
-            arr = Array.get(arr, 0);
+        if (arr instanceof Tenser) {
+            while (Objects.nonNull(arr) && arr instanceof Tenser) {
+                list.add(Tensers.getLength(arr));
+                arr = Tensers.get(arr, 0);
+            }
+        } else if (arr.getClass().isArray()) {
+            while (Objects.nonNull(arr) && arr.getClass().isArray()) {
+                list.add(Array.getLength(arr));
+                arr = Array.get(arr, 0);
+            }
         }
         return list.stream().mapToInt(Integer::intValue).toArray();
     }

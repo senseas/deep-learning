@@ -653,9 +653,9 @@ public class TensorFlow implements Serializable {
 
             public Object compute() {
                 Tenser A = getInput(0);
-                Tensor[] B = new Tensor[A.shape(0)];
+                Tenser B = zeroTensors(new int[]{A.shape(0)});
                 forEach(A.shape(0), i -> {
-                    B[i] = demaxpool(kernelSize, stride, padding, new Tensor(A.get(i)));
+                    B.set(demaxpool(kernelSize, stride, padding, new Tensor(A.get(i))), i);
                 });
                 return B;
             }

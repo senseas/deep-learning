@@ -1,13 +1,16 @@
 package com.deep.framework.lang;
 
+import java.lang.reflect.Array;
 import java.util.Arrays;
 
 import static com.deep.framework.lang.Shape.randomx;
+import static com.deep.framework.lang.Shape.size;
 
 public class Tenser<T> {
 
-    private final T[] data;
-    private final int[] shape, nexts;
+    public final T[] data;
+    public final int[] shape;
+    private final int[] nexts;
     private final int start;
 
     public Tenser(T[] data, int[] shape) {
@@ -27,6 +30,13 @@ public class Tenser<T> {
     public Tenser(int[] shape) {
         this.shape = shape;
         this.data = randomx(shape);
+        this.start = 0;
+        this.nexts = next();
+    }
+
+    public Tenser(Class clas, int[] shape) {
+        this.shape = shape;
+        this.data = (T[]) Array.newInstance(clas, size(shape));
         this.start = 0;
         this.nexts = next();
     }
@@ -77,9 +87,7 @@ public class Tenser<T> {
         return next;
     }
 
-    public int shape(int i) {
-        return shape[i];
-    }
+    public int shape(int i) { return shape[i]; }
 
     public int getLength() { return shape[0]; }
 
