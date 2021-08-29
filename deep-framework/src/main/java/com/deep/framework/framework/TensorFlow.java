@@ -528,25 +528,25 @@ public class TensorFlow implements Serializable {
     public Tensor deconv(int[] stride, int padding, Tensor... input) {
         return new TensorOparetor("Deconv", input) {
 
-            public None[][] compute() {
-                None[][] A = getInput(0), B = getInput(1);
+            public Tenser<None> compute() {
+                Tenser<None> A = getInput(0), B = getInput(1);
                 int heighs = stride[0], widths = stride[1];
-                int height = (B.length - 1) * heighs + A.length - 2 * padding;
-                int width = (B[0].length - 1) * widths + A[0].length - 2 * padding;
-                None[][] C = zeroNones(new None[height][width]);
-                forEach(B.length, B[0].length, A.length, A[0].length, (h, w, m, n) -> {
-                    None inx = A[m][n], iny = B[h][w], out = C[h * heighs + m][w * widths + n];
+                int height = (B.shape(0) - 1) * heighs + A.shape(0) - 2 * padding;
+                int width = (B.shape(1) - 1) * widths + A.shape(1) - 2 * padding;
+                Tenser<None> C = zeroNones(new int[]{height, width});
+                forEach(B.shape(0), B.shape(1), A.shape(0), A.shape(1), (h, w, m, n) -> {
+                    None inx = A.get(m, n), iny = B.get(h, w), out = C.get(h * heighs + m, w * widths + n);
                     out.setValue(out.getValue() + inx.getValue() * iny.getValue());
                 });
                 return C;
             }
 
             public void gradient() {
-                None[][] A = getInput(0), B = getInput(1);
-                None[][] C = getOutput();
+                Tenser<None> A = getInput(0), B = getInput(1);
+                Tenser<None> C = getOutput();
                 int heighs = stride[0], widths = stride[1];
-                forEach(B.length, B[0].length, A.length, A[0].length, (h, w, m, n) -> {
-                    None inx = A[m][n], iny = B[h][w], out = C[h * heighs + m][w * widths + n];
+                forEach(B.shape(0), B.shape(1), A.shape(0), A.shape(1), (h, w, m, n) -> {
+                    None inx = A.get(m, n), iny = B.get(h, w), out = C.get(h * heighs + m, w * widths + n);
                     inx.setGrad(out.getGrad() * iny.getValue());
                     iny.setGrad(out.getGrad() * inx.getValue());
                 });
@@ -685,11 +685,11 @@ public class TensorFlow implements Serializable {
         return new TensorFunction("SelfAttention", input) {
 
             public Object compute() {
-                Tensor[][] A = getInput(0);
-                Tensor[][][] B = getInput(1);
-                Tensor C0 = matmul(new Tensor(A), new Tensor(B[0]));
-                Tensor C1 = matmul(new Tensor(A), new Tensor(B[1]));
-                Tensor C2 = matmul(new Tensor(A), new Tensor(B[2]));
+                Tenser A = getInput(0);
+                Tenser B = getInput(1);
+                Tensor C0 = matmul(new Tensor(A), new Tensor(B.get(0)));
+                Tensor C1 = matmul(new Tensor(A), new Tensor(B.get(1)));
+                Tensor C2 = matmul(new Tensor(A), new Tensor(B.get(2)));
                 return matmul(softmax(prod(matmulTran(C0, C1), new TensorConst(8))), C2);
             }
 
@@ -702,11 +702,11 @@ public class TensorFlow implements Serializable {
         return new TensorFunction("BatchNorm", input) {
 
             public Object compute() {
-                Object[] A = getInput(0), B = zeroTensors(A);
-                Tensor C = mul(new TensorConst(1d / A.length), sum(new Tensor(A)));
+                Tenser A = getInput(0), B = zeroTensors(A);
+                Tensor C = mul(new TensorConst(1d / A.shape(0)), sum(new Tensor(A)));
                 Tensor[] D = {new TensorConst(0)};
                 forEach(A, a -> D[0] = add(D[0], pow(minus((Tensor) a, C), new TensorConst(2))));
-                Tensor E = pow(add(mul(new TensorConst(1d / A.length), D[0]), new TensorConst(Math.E)), new TensorConst(0.5));
+                Tensor E = pow(add(mul(new TensorConst(1d / A.shape(0)), D[0]), new TensorConst(Math.E)), new TensorConst(0.5));
                 forEach(A, B, (Tensor a, Tenser<Tensor> b, int i) -> b.set(add(mul(new Tensor(0.9), div(minus(a, C), E)), new Tensor(0.9)), i));
                 return B;
             }

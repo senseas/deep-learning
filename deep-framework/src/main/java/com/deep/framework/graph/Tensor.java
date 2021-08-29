@@ -64,14 +64,14 @@ public class Tensor implements Serializable {
 
     public <M> M getOutput() { return (M) output; }
 
+    public TensorContext getContext() {
+        if (Objects.nonNull(context)) return context;
+        return context = TensorGpuExecutor.New().createContext(this);
+    }
+
     private String name = "Tensor::";
     private Tensor[] input;
     protected transient Object function;
     protected Object output;
     private TensorContext context;
-
-    public TensorContext getContext() {
-        if (Objects.nonNull(context)) return context;
-        return context = TensorGpuExecutor.New().createContext(this);
-    }
 }
