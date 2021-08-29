@@ -283,20 +283,20 @@ public class TensorFlow implements Serializable {
         return new TensorOparetor("MatmulTran", input) {
 
             public Object compute() {
-                None[][] A = getInput(0), B = getInput(1);
-                None[][] C = zeroNones(new None[A.length][B.length]);
-                forEach(A.length, B.length, A[0].length, (i, l, j) -> {
-                    None inx = A[i][j], iny = B[l][j], out = C[i][l];
+                Tenser<None> A = getInput(0), B = getInput(1);
+                Tenser<None> C = zeroNones(new None[A.shape(0)][B.shape(0)]);
+                forEach(A.shape(0), B.shape(0), A.shape(1), (i, l, j) -> {
+                    None inx = A.get(i, j), iny = B.get(l, j), out = C.get(i, l);
                     out.setValue(out.getValue() + inx.getValue() * iny.getValue());
                 });
                 return C;
             }
 
             public void gradient() {
-                None[][] A = getInput(0), B = getInput(1);
-                None[][] C = getOutput();
-                forEach(A.length, B.length, A[0].length, (i, l, j) -> {
-                    None inx = A[i][j], iny = B[l][j], out = C[i][l];
+                Tenser<None> A = getInput(0), B = getInput(1);
+                Tenser<None> C = getOutput();
+                forEach(A.shape(0), B.shape(0), A.shape(1), (i, l, j) -> {
+                    None inx = A.get(i, j), iny = B.get(l, j), out = C.get(i, l);
                     inx.setGrad(out.getGrad() * iny.getValue());
                     iny.setGrad(out.getGrad() * inx.getValue());
                 });
