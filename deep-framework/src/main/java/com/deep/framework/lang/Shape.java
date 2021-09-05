@@ -15,7 +15,7 @@ public class Shape extends ForEach {
 
     public static <E> E random(int[] shape) {
         RandomDataGenerator random = new RandomDataGenerator();
-        return (E) fill(Array.newInstance(None.class, shape), o -> new None(random.nextGaussian(0, 0.1)));
+        return (E) fillxx(Array.newInstance(None.class, shape), o -> new None(random.nextGaussian(0, 0.1)));
     }
 
     public static <E> E randomx(int... shape) {
@@ -36,22 +36,19 @@ public class Shape extends ForEach {
         return (E) fill(shape(None.class, a), o -> new None(0d, false));
     }
 
-    public static None[] fill(int[] shape, double value, boolean isGrad) {
-        int length = size(shape);
-        return IntStream.range(0, length).mapToObj(i -> new None(value, isGrad)).toArray(None[]::new);
+    public static <E> E fill(int[] x, double value, boolean isGrad) {
+        return (E) fill(shape(None.class, x), o -> new None(value, isGrad));
     }
 
     public static Object shape(Class clas, Object o) {
         if (o instanceof Tenser) {
             int[] shape = shapes(o);
-            int length = size(shape);
-            Object data = Array.newInstance(clas, new int[]{length});
-            return new Tenser((Object[]) data, shape);
+            Object data = Array.newInstance(clas, shape);
+            return new Tenser(data, shape);
         } else if (o instanceof int[]) {
             int[] shape = (int[]) o;
-            int length = size(shape);
-            Object data = Array.newInstance(clas, new int[]{length});
-            return new Tenser((Object[]) data, shape);
+            Object data = Array.newInstance(clas, shape);
+            return new Tenser(data, shape);
         }
         return null;
     }

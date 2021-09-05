@@ -1,6 +1,7 @@
 package com.deep.framework;
 
 import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.deep.framework.framework.TensorExecutor;
 import com.deep.framework.graph.None;
 import com.deep.framework.graph.Tensor;
@@ -55,19 +56,19 @@ public class LeNetTest extends Shape {
 
         Tensor softmax = tf.softmax(tensor53);
         Tensor crossx = tf.softmaxCrossx(label, softmax);
-        TensorExecutor.rate = 0.03;
+        TensorExecutor.rate = 0.001;
         TensorExecutor executor = new TensorExecutor(crossx, input, label);
         forEach(20, x -> {
             forEach(60000, i -> {
-                Object inSet = inputSet[i], labSet = labelSet[i];
-                executor.run(inSet, labSet);
-                if (i % 500 == 0) {
-                    log.info("---------{}------------", i);
-                    ModeLoader.save(executor, i + "LetNet.obj");
-                    log(Shape.reshape(labSet, new Double[10]));
-                    log(Shape.reshape(softmax.getOutput(), new None[10]));
-                    log(crossx.getOutput());
-                }
+                Object inSet = inputSet[1], labSet = labelSet[1];
+                executor.forward(inSet, labSet);
+//                log.info("---------{aaaaaaaaaaaaaaa}------------");
+//                log.info(JSONObject.toJSONString(crossx, SerializerFeature.DisableCircularReferenceDetect));
+                executor.backward();
+//                log.info("---------{bbbbbbbbbbbbbbbb}------------");
+//                log.info(JSONObject.toJSONString(crossx, SerializerFeature.DisableCircularReferenceDetect));
+                log(crossx.getOutput());
+                executor.reduce();
             });
         });
     }

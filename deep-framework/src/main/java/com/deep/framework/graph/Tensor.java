@@ -29,7 +29,7 @@ public class Tensor implements Serializable {
 
     public Tensor(int[] shape, double value, boolean isGrad) {
         this.name = "None";
-        this.output = new Tenser(Shape.fill(shape, value, isGrad), shape);
+        this.output = Shape.fill(shape, value, isGrad);
     }
 
     public Tensor(String name, int[] shape) {
@@ -64,14 +64,8 @@ public class Tensor implements Serializable {
 
     public <M> M getOutput() { return (M) output; }
 
-    public TensorContext getContext() {
-        if (Objects.nonNull(context)) return context;
-        return context = TensorGpuExecutor.New().createContext(this);
-    }
-
     private String name = "Tensor::";
     private Tensor[] input;
     protected transient Object function;
     protected Object output;
-    private TensorContext context;
 }

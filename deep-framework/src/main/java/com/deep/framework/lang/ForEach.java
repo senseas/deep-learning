@@ -12,7 +12,7 @@ import java.util.stream.IntStream;
 public class ForEach implements Serializable {
 
     public static void farEach(int a, Range1 r) {
-        IntStream.range(0, a).parallel().forEach(i -> r.apply(i));
+        IntStream.range(0, a).forEach(i -> r.apply(i));
     }
 
     public static void forEach(int a, Range1 r) {
@@ -51,6 +51,20 @@ public class ForEach implements Serializable {
                     Tensers.set(a, func.apply(m), i);
                 } else {
                     fill(m, func);
+                }
+            });
+        }
+        return a;
+    }
+
+    public static Object fillxx(Object a, Func func) {
+        if (BeanUtil.isArray(a)) {
+            forEach(Array.getLength(a), i -> {
+                Object m = Array.get(a, i);
+                if (BeanUtil.isNotArray(m)) {
+                    Array.set(a, i, func.apply(m));
+                } else {
+                    fillxx(m, func);
                 }
             });
         }

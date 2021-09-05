@@ -27,7 +27,7 @@ public class TensorOparetor extends Tensor {
     }
 
     public Stream inputStream() {
-        return Arrays.stream(getInput()).parallel().map(input -> BeanUtil.isFunction(input) ?
+        return Arrays.stream(getInput()).map(input -> BeanUtil.isFunction(input) ?
                 TensorFlux.getOutput(input.getFunction()) : input.getOutput());
     }
 

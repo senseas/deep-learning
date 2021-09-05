@@ -3,93 +3,49 @@ package com.deep.framework.lang;
 import java.lang.reflect.Array;
 import java.util.Arrays;
 
-import static com.deep.framework.lang.Shape.randomx;
-import static com.deep.framework.lang.Shape.size;
+import static com.deep.framework.lang.Shape.*;
 
 public class Tenser<T> {
 
-    public final T[] data;
+    public final Object data;
     public final int[] shape;
-    private final int[] nexts;
-    private final int start;
 
-    public Tenser(T[] data, int[] shape) {
+    public Tenser(T data, int[] shape) {
         this.shape = shape;
         this.data = data;
-        this.start = 0;
-        this.nexts = next();
-    }
-
-    private Tenser(T[] data, int[] shape, int start) {
-        this.shape = shape;
-        this.data = data;
-        this.start = start;
-        this.nexts = next();
     }
 
     public Tenser(int[] shape) {
         this.shape = shape;
-        this.data = randomx(shape);
-        this.start = 0;
-        this.nexts = next();
+        this.data = random(shape);
     }
 
     public Tenser(Class clas, int[] shape) {
         this.shape = shape;
-        this.data = (T[]) Array.newInstance(clas, size(shape));
-        this.start = 0;
-        this.nexts = next();
+        this.data = Array.newInstance(clas, shape);
     }
 
     public <E> E get(int... index) {
-        int start = start(index);
+        Object data = this.data;
+        for (int i : index) data = Array.get(data, i);
         if (index.length == this.shape.length) {
-            return (E) this.data[start];
+            return (E) data;
         } else {
-            return (E) new Tenser(this.data, getNext(index), start);
+            return (E) new Tenser(data, getNext(index));
         }
     }
 
-    public void set(T[] data, int... index) {
-        int start = start(index), end = end(index);
-        for (int i = start; i < end; i++) {
-            this.data[i] = data[i - start];
+    public void set(Object data, int... index) {
+        Object d = this.data;
+        for (int i = 0; i < index.length - 1; i++) {
+            d = Array.get(d, i);
         }
+        Array.set(d, index[index.length - 1], data);
     }
 
-    public void set(T data, int... index) {
-        int start = start(index);
-        this.data[start] = data;
-    }
+    public int shape(int i) {return shape[i];}
 
-    private int start(int[] index) {
-        int next = this.start, length = index.length - 1;
-        for (int i = 0; i < length; i++) {
-            next += index[i] * nexts[i];
-        }
-        return next + index[length] * nexts[length];
-    }
-
-    private int end(int[] index) {
-        int next = this.start, length = index.length - 1;
-        for (int i = 0; i < length; i++) {
-            next += index[i] * nexts[i];
-        }
-        return next + (index[length] + 1) * nexts[length];
-    }
-
-    private int[] next() {
-        int[] next = new int[shape.length];
-        Arrays.fill(next, 1);
-        for (int i = next.length - 1; 0 < i; i--) {
-            next[i - 1] = next[i] * shape[i];
-        }
-        return next;
-    }
-
-    public int shape(int i) { return shape[i]; }
-
-    public int getLength() { return shape[0]; }
+    public int getLength() {return Array.getLength(data);}
 
     private int[] getNext(int[] index) {
         return Arrays.copyOfRange(this.shape, index.length, this.shape.length);
