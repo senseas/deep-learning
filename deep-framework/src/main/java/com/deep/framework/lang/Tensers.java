@@ -3,7 +3,7 @@ package com.deep.framework.lang;
 import java.lang.reflect.Array;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static com.deep.framework.lang.ForEach.farrEach;
+import static com.deep.framework.lang.ForEach.arrayEach;
 import static com.deep.framework.lang.Shape.*;
 
 public class Tensers {
@@ -27,14 +27,14 @@ public class Tensers {
         int[] shape = shapes(o);
         AtomicInteger index = new AtomicInteger();
         Object array = Array.newInstance(getArrayDeepClass(o), size(shape));
-        farrEach(o, (a, i) -> Array.set(array, index.getAndIncrement(), Array.get(a, i)));
+        arrayEach(o, (a, i) -> Array.set(array, index.getAndIncrement(), Array.get(a, i)));
         return new Tenser((Object[]) array, shape);
     }
 
     public static <T> T array(Tenser o) {
         AtomicInteger index = new AtomicInteger();
         Object array = Array.newInstance(getTenserDeepClass(o), o.shape);
-        farrEach(array, (a, i) -> Array.set(a, i, o.data[index.getAndIncrement()]));
+        arrayEach(array, (a, i) -> Array.set(a, i, o.data[index.getAndIncrement()]));
         return (T) array;
     }
 

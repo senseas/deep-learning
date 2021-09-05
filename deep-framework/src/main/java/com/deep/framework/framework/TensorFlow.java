@@ -670,9 +670,8 @@ public class TensorFlow implements Serializable {
 
             public Object compute() {
                 Tenser A = getInput(0), B = zeroTensors(A);
-                Tensor sum = sum(expx(new Tensor(A)));
                 forEach(A, B, (Tensor a, Tenser<Tensor> b, int i) -> {
-                    b.set(div(exp(a), sum), i);
+                    b.set(div(exp(a), sum(expx(new Tensor(A)))), i);
                 });
                 return B;
             }
