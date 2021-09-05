@@ -2,12 +2,12 @@ package com.deep.framework.graph;
 
 import com.deep.framework.framework.TensorContext;
 import com.deep.framework.framework.TensorGpuExecutor;
-import com.deep.framework.lang.Shape;
-import com.deep.framework.lang.Tenser;
 import lombok.Data;
 
 import java.io.Serializable;
 import java.util.Objects;
+
+import static com.deep.framework.lang.Shape.*;
 
 @Data
 public class Tensor implements Serializable {
@@ -24,17 +24,17 @@ public class Tensor implements Serializable {
 
     public Tensor(int[] shape) {
         this.name = "None";
-        this.output = new Tenser(shape);
-    }
-
-    public Tensor(int[] shape, double value, boolean isGrad) {
-        this.name = "None";
-        this.output = new Tenser(Shape.fill(shape, value, isGrad), shape);
+        this.output = randomNones(shape);
     }
 
     public Tensor(String name, int[] shape) {
         this.name = "None::".concat(name);
-        this.output = new Tenser(shape);
+        this.output = randomNones(shape);
+    }
+
+    public Tensor(int[] shape, double value, boolean isGrad) {
+        this.name = "None";
+        this.output = fillNones(shape, value, isGrad);
     }
 
     public Tensor(None input) {

@@ -3,7 +3,6 @@ package com.deep.framework.lang;
 import java.lang.reflect.Array;
 import java.util.Arrays;
 
-import static com.deep.framework.lang.Shape.randomx;
 import static com.deep.framework.lang.Shape.size;
 
 public class Tenser<T> {
@@ -24,13 +23,6 @@ public class Tenser<T> {
         this.shape = shape;
         this.data = data;
         this.start = start;
-        this.nexts = next();
-    }
-
-    public Tenser(int[] shape) {
-        this.shape = shape;
-        this.data = randomx(shape);
-        this.start = 0;
         this.nexts = next();
     }
 
