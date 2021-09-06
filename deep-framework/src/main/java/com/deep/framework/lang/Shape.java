@@ -41,14 +41,10 @@ public class Shape extends ForEach {
     public static Object shape(Class clas, Object o) {
         if (o instanceof Tenser) {
             int[] shape = shapes(o);
-            int length = size(shape);
-            Object data = Array.newInstance(clas, new int[]{length});
-            return new Tenser((Object[]) data, shape);
+            return new Tenser(clas, shape);
         } else if (o instanceof int[]) {
             int[] shape = (int[]) o;
-            int length = size(shape);
-            Object data = Array.newInstance(clas, new int[]{length});
-            return new Tenser((Object[]) data, shape);
+            return new Tenser(clas, shape);
         }
         return null;
     }
