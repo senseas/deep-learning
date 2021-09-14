@@ -32,7 +32,7 @@ public class TensorFlow implements Serializable {
             public Object compute() {
                 Object B = zeroNones(getInput(0));
                 inputStream().forEach(A -> {
-                    farEach(A, B, (None a, None b) -> b.setValue(b.getValue() + a.getValue()));
+                    forEach(A, B, (None a, None b) -> b.setValue(b.getValue() + a.getValue()));
                 });
                 return B;
             }
@@ -40,7 +40,7 @@ public class TensorFlow implements Serializable {
             public void gradient() {
                 Object B = getOutput();
                 inputStream().forEach(A -> {
-                    farEach(A, B, (None a, None b) -> a.setGrad(b.getGrad()));
+                    forEach(A, B, (None a, None b) -> a.setGrad(b.getGrad()));
                 });
             }
 
@@ -215,7 +215,7 @@ public class TensorFlow implements Serializable {
 
             public Object compute() {
                 Object A = getInput(0), B = zeroNones(A);
-                farEach(A, B, (None a, None b) -> {
+                forEach(A, B, (None a, None b) -> {
                     double value = a.getValue();
                     b.setValue(value > 0 ? value : 0.1 * value);
                 });
@@ -224,7 +224,7 @@ public class TensorFlow implements Serializable {
 
             public void gradient() {
                 Object A = getInput(0), B = getOutput();
-                farEach(A, B, (None a, None b) -> {
+                forEach(A, B, (None a, None b) -> {
                     double grad = b.getGrad();
                     a.setGrad(a.getValue() > 0 ? grad : 0.1 * grad);
                 });
@@ -462,14 +462,14 @@ public class TensorFlow implements Serializable {
             public None compute() {
                 Object A = getInput(0);
                 None B = new None(0d);
-                farEach(A, (None a) -> B.setValue(B.getValue() + a.getValue()));
+                forEach(A, (None a) -> B.setValue(B.getValue() + a.getValue()));
                 return B;
             }
 
             public void gradient() {
                 Object A = getInput(0);
                 None B = getOutput();
-                farEach(A, (None a) -> a.setGrad(B.getGrad()));
+                forEach(A, (None a) -> a.setGrad(B.getGrad()));
             }
 
         };

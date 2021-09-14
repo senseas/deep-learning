@@ -3,12 +3,12 @@ package com.deep.framework.framework;
 import com.deep.framework.graph.None;
 import com.deep.framework.graph.Tensor;
 import com.deep.framework.lang.Tensers;
-import com.deep.framework.lang.function.Func21;
+import com.deep.framework.lang.function.Func2;
 import lombok.Data;
 
 import java.io.Serializable;
 
-import static com.deep.framework.lang.ForEach.farEach;
+import static com.deep.framework.lang.ForEach.forEach;
 
 @Data
 public class TensorExecutor<E> implements Serializable {
@@ -45,7 +45,7 @@ public class TensorExecutor<E> implements Serializable {
     }
 
     public void backward() {
-        farEach(tensor.getOutput(), (None none) -> none.setGrad(1d));
+        forEach(tensor.getOutput(), (None none) -> none.setGrad(1d));
         tensor.backward();
     }
 
@@ -54,13 +54,13 @@ public class TensorExecutor<E> implements Serializable {
     }
 
     public void setInput(Object o) {
-        Func21<None, Double> func = (m, n) -> m.setValue(n);
-        farEach(input.getOutput(), Tensers.tenser(o), func);
+        Func2<None, Double> func = (m, n) -> m.setValue(n);
+        forEach(input.getOutput(), Tensers.tenser(o), func);
     }
 
     public void setLabel(Object o) {
-        Func21<None, Double> func = (m, n) -> m.setValue(n);
-        farEach(label.getOutput(), Tensers.tenser(o), func);
+        Func2<None, Double> func = (m, n) -> m.setValue(n);
+        forEach(label.getOutput(), Tensers.tenser(o), func);
     }
 
 }
