@@ -54,6 +54,9 @@ public class TensorFlux implements Serializable {
 
     public static void gradient(Tensor tensor) {
         tensor.gradient();
+        forEach(tensor.getOutput(), (None out) -> {
+            out.reset();
+        });
     }
 
     public static void reducer(Tensor tensor) {
