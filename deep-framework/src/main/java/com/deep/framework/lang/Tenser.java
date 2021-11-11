@@ -43,7 +43,7 @@ public class Tenser<T> {
     }
 
     public void set(T[] data, int... index) {
-        int start = start(index), end = end(index);
+        int start = start(index), end = end(start, index);
         for (int i = start; i < end; i++) {
             this.data[i] = data[i - start];
         }
@@ -62,12 +62,9 @@ public class Tenser<T> {
         return next + index[length] * nexts[length];
     }
 
-    private int end(int[] index) {
-        int next = this.start, length = index.length - 1;
-        for (int i = 0; i < length; i++) {
-            next += index[i] * nexts[i];
-        }
-        return next + (index[length] + 1) * nexts[length];
+    private int end(int start, int[] index) {
+        int length = index.length - 1;
+        return start + index[length] * nexts[length];
     }
 
     private int[] next() {
