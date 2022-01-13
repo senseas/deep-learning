@@ -12,6 +12,36 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class Shape extends ForEach {
 
+    public static <E> E randomd(int[] shape) {
+        RandomDataGenerator random = new RandomDataGenerator();
+        double[] arr = new double[size(shape)];
+        forEach(arr.length, i -> arr[i] = random.nextGaussian(0, 0.1));
+        return (E) arr;
+    }
+
+    public static <E> E zeros(int[] shape) {
+        double[] arr = new double[size(shape)];
+        return (E) arr;
+    }
+
+    public static <E> E values(int[] shape, double value) {
+        double[] arr = new double[size(shape)];
+        Arrays.fill(arr, value);
+        return (E) arr;
+    }
+
+    public static <E> E booleans(int[] shape) {
+        return (E) new boolean[size(shape)];
+    }
+
+    public static <E> E fillNones(Tensor tensor) {
+        int[] shape = tensor.getShape();
+        None[] nones = new None[size(shape)];
+        Tenser tenser = new Tenser(nones, shape);
+        forEach(nones.length, i -> nones[i] = new None(tensor, i));
+        return (E) tenser;
+    }
+
     public static <E> E random(int[] shape) {
         RandomDataGenerator random = new RandomDataGenerator();
         return (E) fill(Array.newInstance(None.class, shape), o -> new None(random.nextGaussian(0, 0.1)));
@@ -59,7 +89,9 @@ public class Shape extends ForEach {
     public static <M> M reshape(Object A, Object B, Func fill) {
         Queue link = new LinkedList();
         forEach(A, a -> link.add(a));
-        forEach(B, (b, i) -> b.set(fill.apply(link.poll()), i));
+        forEach(B, (b, i) -> {
+            b.set(fill.apply(link.poll()), i);
+        });
         return (M) B;
     }
 

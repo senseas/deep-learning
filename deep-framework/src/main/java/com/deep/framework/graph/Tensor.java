@@ -2,6 +2,8 @@ package com.deep.framework.graph;
 
 import com.deep.framework.framework.TensorContext;
 import com.deep.framework.framework.TensorGpuExecutor;
+import com.deep.framework.lang.Tenser;
+import com.deep.framework.lang.util.BeanUtil;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -14,27 +16,48 @@ public class Tensor implements Serializable {
 
     public Tensor(double value) {
         this.name = "None";
-        this.output = new None(value);
+        this.value = value;
+        this.grad = 0d;
+        this.output = new None(this);
+        this.gradre = true;
     }
 
-    public Tensor(double value, boolean isGrad) {
+    public Tensor(double value, boolean gradre) {
         this.name = "None";
-        this.output = new None(value, isGrad);
+        this.value = value;
+        this.grad = 0d;
+        this.output = new None(this);
+        this.gradre = gradre;
     }
 
     public Tensor(int[] shape) {
         this.name = "None";
-        this.output = randomNones(shape);
+        this.shape = shape;
+        this.value = randomd(shape);
+        this.grad = zeros(shape);
+        this.reduce = booleans(shape);
+        this.output = fillNones(this);
+        this.gradre = true;
     }
 
     public Tensor(String name, int[] shape) {
         this.name = "None::".concat(name);
-        this.output = randomNones(shape);
+        this.shape = shape;
+        this.value = randomd(shape);
+        this.grad = zeros(shape);
+        this.reduce = booleans(shape);
+        this.output = fillNones(this);
+        this.gradre = true;
     }
 
-    public Tensor(int[] shape, double value, boolean isGrad) {
+    public Tensor(int[] shape, double value, boolean gradre) {
         this.name = "None";
-        this.output = fillNones(shape, value, isGrad);
+        this.shape = shape;
+        this.value = values(shape, value);
+        this.grad = zeros(shape);
+        this.reduce = booleans(shape);
+        this.output = fillNones(this);
+        this.gradre = gradre;
     }
 
     public Tensor(None input) {
@@ -50,6 +73,23 @@ public class Tensor implements Serializable {
     public <M> Tensor(M m) {
         this.name = "Function";
         this.function = m;
+    }
+
+    public void zerosOutput(Object o) {
+        if (Objects.nonNull(output)) return;
+        else if (BeanUtil.isTensor(o)) {
+            Tenser tenser = (Tenser) o;
+            this.shape = tenser.shape;
+            this.value = zeros(shape);
+            this.grad = zeros(shape);
+            this.reduce = booleans(shape);
+            this.output = fillNones(this);
+        } else {
+            this.value = 0d;
+            this.grad = 0d;
+            this.reduce = false;
+            this.output = new None(this);
+        }
     }
 
     public <M> M compute() { return null; }
@@ -70,8 +110,10 @@ public class Tensor implements Serializable {
     }
 
     private String name = "Tensor::";
+    protected int[] shape;
     private Tensor[] input;
-    protected transient Object function;
-    protected Object output;
+    protected Object output, value, grad;
+    protected transient Object function, reduce;
+    private transient boolean gradre;
     private TensorContext context;
 }

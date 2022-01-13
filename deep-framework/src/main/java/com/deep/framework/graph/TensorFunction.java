@@ -32,6 +32,7 @@ public class TensorFunction extends Tensor {
     public void forward() {
         for (Tensor o : getInput()) TensorFlux.computer(o);
         TensorFlux.forward(this);
+        if (Objects.isNull(output)) TensorFlux.binding(this);
     }
 
     public void backward() {
