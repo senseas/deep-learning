@@ -23,7 +23,6 @@ public class ForEach implements Serializable {
         forEach(a, i -> forEach(b, l -> forEach(c, m -> r.apply(i, l, m))));
     }
 
-
     public static void forEach(int a, int b, int c, int e, Range4 r) {
         forEach(a, i -> forEach(b, l -> forEach(c, m -> forEach(e, n -> r.apply(i, l, m, n)))));
     }
