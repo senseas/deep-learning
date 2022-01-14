@@ -100,11 +100,11 @@ public class None implements Serializable {
         }
     }
 
-    public void setGrad(boolean gradre) {
+    public void setGradre(boolean gradre) {
         if (Objects.isNull(tensor)) {
             this.gradre = gradre;
         } else {
-            tensor.setGrad(gradre);
+            tensor.setGradre(gradre);
         }
     }
 
