@@ -18,8 +18,6 @@ public class TensorFunction extends Tensor {
     }
 
     public <M> M getOutput() {
-        if (Objects.nonNull(output)) return (M) output;
-        if (Objects.nonNull(getFunction())) output = TensorFlux.getOutput(function);
         return (M) output;
     }
 

@@ -89,7 +89,7 @@ public class Shape extends ForEach {
     public static <M> M reshape(Object A, Object B, Func fill) {
         Queue link = new LinkedList();
         forEach(A, a -> link.add(a));
-        forEach(B, (b, i) -> b.set(fill.apply(link.poll()), i));
+        arrayEach(B, (b, i) -> Array.set(b, i, fill.apply(link.poll())));
         return (M) B;
     }
 
