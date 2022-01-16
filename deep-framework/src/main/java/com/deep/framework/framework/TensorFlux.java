@@ -5,6 +5,7 @@ import com.deep.framework.graph.Tensor;
 import com.deep.framework.lang.util.BeanUtil;
 
 import java.io.Serializable;
+import java.util.Objects;
 
 import static com.deep.framework.lang.Shape.*;
 
@@ -15,9 +16,11 @@ public class TensorFlux implements Serializable {
         forEach(tensor.getFunction(), (Tensor a) -> {
             a.forward();
         });
+        forwards(tensor);
     }
 
     public static void backward(Tensor tensor) {
+        backwards(tensor);
         forEach(tensor.getFunction(), (Tensor a) -> {
             a.backward();
         });
@@ -33,19 +36,18 @@ public class TensorFlux implements Serializable {
         Object nones = tensor.compute();
         tensor.zerosOutput(nones);
         forEach(nones, tensor.getOutput(), (None none, None out) -> {
-            out.reset();
             out.setValue(none.getValue());
+            out.reset();
         });
     }
 
     public static void computer(Tensor tensor) {
-        if (BeanUtil.isNone(tensor)) {
+        if (Objects.nonNull(tensor.getOutput())) {
             forEach(tensor.getOutput(), (None out) -> {
                 out.reset();
             });
-        } else {
-            tensor.forward();
         }
+        tensor.forward();
     }
 
     public static void gradient(Tensor tensor) {
@@ -71,13 +73,19 @@ public class TensorFlux implements Serializable {
         }
     }
 
-    public static void binding(Tensor tensor) {
+    private static void forwards(Tensor tensor) {
         Object outs = getOutput(tensor.getFunction());
         tensor.zerosOutput(outs);
         forEach(tensor.getOutput(), outs, (None none, None out) -> {
             none.setValue(out.getValue());
-            out.setTensor(none.getTensor());
-            out.setIdx(none.getIdx());
+            out.reset();
+        });
+    }
+
+    private static void backwards(Tensor tensor) {
+        Object outs = getOutput(tensor.getFunction());
+        forEach(tensor.getOutput(), outs, (None none, None out) -> {
+            out.setGrad(none.getGrad());
         });
     }
 
