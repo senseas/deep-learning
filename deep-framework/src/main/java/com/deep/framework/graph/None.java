@@ -54,7 +54,7 @@ public class None implements Serializable {
 
     public double getGrad() {
         if (Objects.isNull(tensor)) {
-            return this.getGrad();
+            return this.grad;
         } else if (Objects.isNull(tensor.getShape())) {
             return (double) tensor.getGrad();
         } else {
@@ -74,7 +74,7 @@ public class None implements Serializable {
 
     public boolean isReduce() {
         if (Objects.isNull(tensor)) {
-            return reduce;
+            return this.reduce;
         } else if (Objects.isNull(tensor.getShape())) {
             return (boolean) tensor.getReduce();
         } else {
@@ -94,7 +94,7 @@ public class None implements Serializable {
 
     public boolean getGradre() {
         if (Objects.isNull(tensor)) {
-            return gradre;
+            return this.gradre;
         } else {
             return tensor.isGradre();
         }
