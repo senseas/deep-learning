@@ -9,42 +9,30 @@ import org.apache.commons.math3.random.RandomDataGenerator;
 import java.lang.reflect.Array;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.IntStream;
 
 public class Shape extends ForEach {
 
-    public static <E> E randomd(int[] shape) {
+    public static <E> E random(int[] shape) {
         RandomDataGenerator random = new RandomDataGenerator();
-        double[] arr = new double[size(shape)];
-        forEach(arr.length, i -> arr[i] = random.nextGaussian(0, 0.1));
-        return (E) arr;
-    }
-
-    public static <E> E zeros(int[] shape) {
-        double[] arr = new double[size(shape)];
-        return (E) arr;
+        return (E) IntStream.range(0, size(shape)).parallel().mapToDouble(i -> random.nextGaussian(0, 0.1)).toArray();
     }
 
     public static <E> E values(int[] shape, double value) {
-        double[] arr = new double[size(shape)];
-        Arrays.fill(arr, value);
-        return (E) arr;
-    }
-
-    public static <E> E booleans(int[] shape) {
-        return (E) new boolean[size(shape)];
+        return (E) IntStream.range(0, size(shape)).parallel().mapToDouble(i -> value).toArray();
     }
 
     public static <E> E fillNones(Tensor tensor) {
-        int[] shape = tensor.getShape();
-        None[] nones = new None[size(shape)];
-        Tenser tenser = new Tenser(nones, shape);
-        forEach(nones.length, i -> nones[i] = new None(tensor, i));
-        return (E) tenser;
+        None[] nones = IntStream.range(0, size(tensor.getShape())).parallel().mapToObj(i -> new None(tensor, i)).toArray(None[]::new);
+        return (E) new Tenser(nones, tensor.getShape());
     }
 
-    public static <E> E random(int[] shape) {
-        RandomDataGenerator random = new RandomDataGenerator();
-        return (E) fill(Array.newInstance(None.class, shape), o -> new None(random.nextGaussian(0, 0.1)));
+    public static double[] zeros(int[] shape) {
+        return new double[size(shape)];
+    }
+
+    public static boolean[] booleans(int[] shape) {
+        return new boolean[size(shape)];
     }
 
     public static <E> E zeroTensors(Object a) {
@@ -55,17 +43,8 @@ public class Shape extends ForEach {
         return (E) fill(shape(Tensor.class, a), o -> new TensorConst(b, 0d));
     }
 
-    public static <E> E randomNones(int... shape) {
-        RandomDataGenerator random = new RandomDataGenerator();
-        return (E) fill(shape(None.class, shape), o -> new None(random.nextGaussian(0, 0.1)));
-    }
-
     public static <E> E zeroNones(Object a) {
         return (E) fill(shape(None.class, a), o -> new None(0d, false));
-    }
-
-    public static <E> E fillNones(int[] shape, double value, boolean isGrad) {
-        return (E) fill(shape(None.class, shape), o -> new None(value, isGrad));
     }
 
     public static Object shape(Class clas, Object o) {

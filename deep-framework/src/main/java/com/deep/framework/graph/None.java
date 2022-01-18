@@ -3,7 +3,6 @@ package com.deep.framework.graph;
 import lombok.Data;
 
 import java.io.Serializable;
-import java.lang.reflect.Array;
 import java.util.Objects;
 
 @Data

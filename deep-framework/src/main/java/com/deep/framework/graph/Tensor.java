@@ -33,7 +33,7 @@ public class Tensor implements Serializable {
     public Tensor(int[] shape) {
         this.name = "None";
         this.shape = shape;
-        this.value = randomd(shape);
+        this.value = random(shape);
         this.grad = zeros(shape);
         this.reduce = booleans(shape);
         this.output = fillNones(this);
@@ -43,7 +43,7 @@ public class Tensor implements Serializable {
     public Tensor(String name, int[] shape) {
         this.name = "None::".concat(name);
         this.shape = shape;
-        this.value = randomd(shape);
+        this.value = random(shape);
         this.grad = zeros(shape);
         this.reduce = booleans(shape);
         this.output = fillNones(this);
