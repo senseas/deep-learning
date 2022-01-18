@@ -10,7 +10,7 @@ import java.util.Objects;
 import static com.deep.framework.lang.Shape.*;
 
 public class TensorFlux implements Serializable {
-    static final double EX = 0.0003;
+    static final double EX = 0.0000000001;
 
     public static void forward(Tensor tensor) {
         forEach(tensor.getFunction(), (Tensor a) -> {
@@ -58,9 +58,9 @@ public class TensorFlux implements Serializable {
     }
 
     public static void reducer(Tensor tensor) {
-        if (BeanUtil.isNone(tensor)) {
+        if (tensor.isGradre()) {
             forEach(tensor.getOutput(), (None none) -> {
-                if (none.getGradre() && !none.isReduce()) {
+                if (!none.isReduce()) {
                     none.setReduce(true);
                     double valu = Math.abs(none.getValue()), grad = Math.abs(none.getGrad());
                     double rate = Math.min(valu / (grad + EX), grad / (valu + EX)) * TensorExecutor.rate;
