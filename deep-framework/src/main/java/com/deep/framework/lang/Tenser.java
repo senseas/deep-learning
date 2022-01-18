@@ -1,11 +1,12 @@
 package com.deep.framework.lang;
 
+import java.io.Serializable;
 import java.lang.reflect.Array;
 import java.util.Arrays;
 
 import static com.deep.framework.lang.Shape.size;
 
-public class Tenser<T> {
+public class Tenser<T> implements Serializable {
 
     public final T[] data;
     public final int[] shape;
