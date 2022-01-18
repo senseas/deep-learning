@@ -37,10 +37,10 @@ public class TensorExecutor<E> implements Serializable {
         StopWatch stopWatch = new StopWatch();
         stopWatch.start();
         tensor.forward();
-        stopWatch.stop();
-        System.out.println(stopWatch.prettyPrint());
         this.backward();
         tensor.reduce();
+        stopWatch.stop();
+        System.out.println(stopWatch.prettyPrint());
     }
 
     public void forward(E input, E label) {
