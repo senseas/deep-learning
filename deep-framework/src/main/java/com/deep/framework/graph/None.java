@@ -36,8 +36,7 @@ public class None implements Serializable {
         } else if (Objects.isNull(tensor.getShape())) {
             return (double) tensor.getValue();
         } else {
-            double[] arr = (double[]) tensor.getValue();
-            return arr[idx];
+            return ((double[]) tensor.getValue())[idx];
         }
     }
 
@@ -47,8 +46,7 @@ public class None implements Serializable {
         } else if (Objects.isNull(tensor.getShape())) {
             tensor.setValue(value);
         } else {
-            double[] arr = (double[]) tensor.getValue();
-            arr[idx] = value;
+            ((double[]) tensor.getValue())[idx] = value;
         }
     }
 
@@ -58,8 +56,7 @@ public class None implements Serializable {
         } else if (Objects.isNull(tensor.getShape())) {
             return (double) tensor.getGrad();
         } else {
-            double[] arr = (double[]) tensor.getGrad();
-            return arr[idx];
+            return ((double[]) tensor.getGrad())[idx];
         }
     }
 
@@ -69,8 +66,7 @@ public class None implements Serializable {
         } else if (Objects.isNull(tensor.getShape())) {
             tensor.setGrad((double) tensor.getGrad() + grad);
         } else {
-            double[] arr = (double[]) tensor.getGrad();
-            arr[idx] += grad;
+            ((double[]) tensor.getGrad())[idx] += grad;
         }
     }
 
@@ -80,8 +76,7 @@ public class None implements Serializable {
         } else if (Objects.isNull(tensor.getShape())) {
             return (boolean) tensor.getReduce();
         } else {
-            boolean[] arr = (boolean[]) tensor.getReduce();
-            return arr[idx];
+            return ((boolean[]) tensor.getReduce())[idx];
         }
     }
 
@@ -91,8 +86,7 @@ public class None implements Serializable {
         } else if (Objects.isNull(tensor.getShape())) {
             tensor.setReduce(reduce);
         } else {
-            boolean[] arr = (boolean[]) tensor.getReduce();
-            arr[idx] = reduce;
+            ((boolean[]) tensor.getReduce())[idx] = reduce;
         }
     }
 
@@ -104,10 +98,8 @@ public class None implements Serializable {
             tensor.setReduce(false);
             tensor.setGrad(0d);
         } else {
-            boolean[] reduce = (boolean[]) tensor.getReduce();
-            reduce[idx] = false;
-            double[] grad = (double[]) tensor.getGrad();
-            grad[idx] = 0d;
+            ((boolean[]) tensor.getReduce())[idx] = false;
+            ((double[]) tensor.getGrad())[idx] = 0d;
         }
     }
 
