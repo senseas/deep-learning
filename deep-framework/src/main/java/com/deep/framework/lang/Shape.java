@@ -27,12 +27,12 @@ public class Shape extends ForEach {
         return (E) new Tenser(nones, tensor.getShape());
     }
 
-    public static double[] zeros(int[] shape) {
-        return new double[size(shape)];
+    public static <E> E zeros(int[] shape) {
+        return (E) new double[size(shape)];
     }
 
-    public static boolean[] booleans(int[] shape) {
-        return new boolean[size(shape)];
+    public static <E> E booleans(int[] shape) {
+        return (E) new boolean[size(shape)];
     }
 
     public static <E> E zeroTensors(Object a) {
