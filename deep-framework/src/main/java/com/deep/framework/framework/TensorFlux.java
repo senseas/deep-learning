@@ -78,7 +78,7 @@ public class TensorFlux implements Serializable {
         tensor.zerosOutput(outs);
         forEach(tensor.getOutput(), outs, (None none, None out) -> {
             none.setValue(out.getValue());
-            out.reset();
+            none.reset();
         });
     }
 

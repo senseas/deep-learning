@@ -50,10 +50,7 @@ public class TensorExecutor<E> implements Serializable {
     }
 
     public void backward() {
-        forEach(tensor.getOutput(), (None none) -> {
-            none.reset();
-            none.setGrad(1d);
-        });
+        forEach(tensor.getOutput(), (None none) -> none.setGrad(1d));
         tensor.backward();
     }
 
