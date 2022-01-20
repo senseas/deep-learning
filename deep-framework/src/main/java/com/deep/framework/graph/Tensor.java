@@ -75,9 +75,21 @@ public class Tensor implements Serializable {
         this.function = m;
     }
 
+    public <M> M compute() { return null; }
+
+    public void gradient() { }
+
+    public void forward() { }
+
+    public void backward() { }
+
+    public void reduce() { }
+
+    public <M> M getOutput() { return (M) output; }
+
     public void zerosOutput(Object o) {
         if (Objects.nonNull(output)) return;
-        else if (BeanUtil.isTensor(o)) {
+        if (BeanUtil.isTensor(o)) {
             Tenser tenser = (Tenser) o;
             this.shape = tenser.shape;
             this.value = zeros(shape);
@@ -91,18 +103,6 @@ public class Tensor implements Serializable {
             this.output = new None(this);
         }
     }
-
-    public <M> M compute() { return null; }
-
-    public void gradient() { }
-
-    public void forward() { }
-
-    public void backward() { }
-
-    public void reduce() { }
-
-    public <M> M getOutput() { return (M) output; }
 
     public TensorContext getContext() {
         if (Objects.nonNull(context)) return context;

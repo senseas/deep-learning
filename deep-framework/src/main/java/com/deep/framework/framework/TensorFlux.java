@@ -35,7 +35,7 @@ public class TensorFlux implements Serializable {
     public static void compute(Tensor tensor) {
         Object nones = tensor.compute();
         tensor.zerosOutput(nones);
-        forEach(nones, tensor.getOutput(), (None none, None out) -> {
+        forEach(tensor.getOutput(), nones, (None out, None none) -> {
             out.setValue(none.getValue());
             out.reset();
         });
@@ -74,18 +74,18 @@ public class TensorFlux implements Serializable {
     }
 
     private static void forwards(Tensor tensor) {
-        Object outs = getOutput(tensor.getFunction());
-        tensor.zerosOutput(outs);
-        forEach(tensor.getOutput(), outs, (None none, None out) -> {
-            none.setValue(out.getValue());
-            none.reset();
+        Object nones = getOutput(tensor.getFunction());
+        tensor.zerosOutput(nones);
+        forEach(tensor.getOutput(), nones, (None out, None none) -> {
+            out.setValue(none.getValue());
+            out.reset();
         });
     }
 
     private static void backwards(Tensor tensor) {
-        Object outs = getOutput(tensor.getFunction());
-        forEach(tensor.getOutput(), outs, (None none, None out) -> {
-            out.setGrad(none.getGrad());
+        Object nones = getOutput(tensor.getFunction());
+        forEach(tensor.getOutput(), nones, (None out, None none) -> {
+            none.setGrad(out.getGrad());
         });
     }
 
