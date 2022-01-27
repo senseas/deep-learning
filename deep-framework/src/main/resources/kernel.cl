@@ -10,6 +10,8 @@ kernel void Matmul(
 
   int x = get_global_id(0), y = get_global_id(1), s = x * H;
 
+  //printf("%i %i\n",x,y);
+
   double sum = 0;
 
   for (int i = 0; i < H; i++) {

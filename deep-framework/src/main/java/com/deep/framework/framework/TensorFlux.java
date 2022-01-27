@@ -34,11 +34,13 @@ public class TensorFlux implements Serializable {
 
     public static void compute(Tensor tensor) {
         Object nones = tensor.compute();
-        tensor.zerosOutput(nones);
-        forEach(tensor.getOutput(), nones, (None out, None none) -> {
-            out.setValue(none.getValue());
-            out.reset();
-        });
+        if (!Objects.equals(nones, tensor.getOutput())) {
+            tensor.zerosOutput(nones);
+            forEach(tensor.getOutput(), nones, (None out, None none) -> {
+                out.setValue(none.getValue());
+                out.reset();
+            });
+        }
     }
 
     public static void computer(Tensor tensor) {
