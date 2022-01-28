@@ -34,13 +34,9 @@ public class TensorExecutor<E> implements Serializable {
     }
 
     public void run() {
-        StopWatch stopWatch = new StopWatch();
-        stopWatch.start();
         tensor.forward();
         this.backward();
         tensor.reduce();
-        stopWatch.stop();
-        System.out.println(stopWatch.prettyPrint());
     }
 
     public void forward(E input, E label) {
