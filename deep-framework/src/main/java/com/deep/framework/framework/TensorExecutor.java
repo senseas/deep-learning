@@ -2,7 +2,6 @@ package com.deep.framework.framework;
 
 import com.deep.framework.graph.None;
 import com.deep.framework.graph.Tensor;
-import com.deep.framework.lang.StopWatch;
 import com.deep.framework.lang.Tensers;
 import com.deep.framework.lang.function.Func2;
 import lombok.Data;
@@ -34,13 +33,9 @@ public class TensorExecutor<E> implements Serializable {
     }
 
     public void run() {
-        StopWatch stopWatch = new StopWatch();
-        stopWatch.start();
         tensor.forward();
         this.backward();
         tensor.reduce();
-        stopWatch.stop();
-        System.out.println(stopWatch.prettyPrint());
     }
 
     public void forward(E input, E label) {
