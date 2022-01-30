@@ -97,7 +97,7 @@ public class TensorContext implements Serializable {
 
         Arrays.stream(tensor.getInput()).forEach(o -> {
 
-            CLBuffer buffer = o.getContext().getGradBuffer((double[]) o.getGrad());
+            CLBuffer buffer = o.getContext().getGradBuffer();
 
             queue.putWriteBuffer(buffer, true);
 
@@ -161,7 +161,7 @@ public class TensorContext implements Serializable {
 
     }
 
-    public CLBuffer<DoubleBuffer> getGradBuffer(double... data) {
+    public CLBuffer<DoubleBuffer> getGradBuffer() {
 
         if (Objects.nonNull(gradBuffer)) return gradBuffer;
 
