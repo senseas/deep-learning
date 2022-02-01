@@ -94,7 +94,6 @@ public class TensorContext implements Serializable {
 
         });
 
-
         Arrays.stream(tensor.getInput()).forEach(o -> {
 
             CLBuffer buffer = o.getContext().getGradBuffer();
