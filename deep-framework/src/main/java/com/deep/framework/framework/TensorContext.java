@@ -1,8 +1,8 @@
 package com.deep.framework.framework;
 
 import com.deep.framework.graph.Tensor;
-import com.deep.framework.lang.Block;
 import com.jogamp.common.nio.Buffers;
+import com.jogamp.common.nio.PointerBuffer;
 import com.jogamp.opencl.*;
 
 import java.io.Serializable;
@@ -10,6 +10,7 @@ import java.nio.Buffer;
 import java.nio.DoubleBuffer;
 import java.util.Arrays;
 import java.util.Objects;
+import java.util.stream.IntStream;
 
 import static com.jogamp.opencl.CLMemory.Mem.READ_WRITE;
 
@@ -25,7 +26,7 @@ public class TensorContext implements Serializable {
 
     private CLBuffer<DoubleBuffer> valueBuffer, gradBuffer;
 
-    private Block block;
+    private PointerBuffer rang;
 
     public TensorContext(Tensor tensor, CLContext context, CLCommandQueue queue, CLKernel compute, CLKernel gradient) {
 
@@ -68,7 +69,7 @@ public class TensorContext implements Serializable {
 
         setComputeArgs(params);
 
-        queue.put2DRangeKernel(compute, 0, 0, block.x, block.y, 0, 0);
+        queue.putNDRangeKernel(gradient, rang.elementSize(), null, rang, null, null);
 
         queue.putReadBuffer(getValueBuffer(), true);
 
@@ -93,7 +94,6 @@ public class TensorContext implements Serializable {
             gradient.putArg(buffer);
 
         });
-
 
         Arrays.stream(tensor.getInput()).forEach(o -> {
 
@@ -121,7 +121,7 @@ public class TensorContext implements Serializable {
 
         setGradientArgs(params);
 
-        queue.put2DRangeKernel(gradient, 0, 0, block.x, block.y, 0, 0);
+        queue.putNDRangeKernel(gradient, rang.capacity(), null, rang, null, null);
 
         Arrays.stream(tensor.getInput()).forEach(o -> {
 
@@ -189,14 +189,9 @@ public class TensorContext implements Serializable {
 
     }
 
-    public TensorContext setBlock(int... x) {
-        if (x.length == 1) {
-            this.block = new Block(x[0]);
-        } else if (x.length == 2) {
-            this.block = new Block(x[0], x[1]);
-        } else if (x.length == 3) {
-            this.block = new Block(x[0], x[1], x[2]);
-        }
+    public TensorContext setRang(int... x) {
+        rang = PointerBuffer.allocate(x.length);
+        IntStream.range(0, x.length).forEach(i -> rang.put(Long.valueOf(i)));
         return this;
     }
 

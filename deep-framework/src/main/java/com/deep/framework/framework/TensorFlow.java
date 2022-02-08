@@ -259,14 +259,14 @@ public class TensorFlow implements Serializable {
             public Object compute() {
                 Tenser<None> A = getInput(0), B = getInput(1);
                 Tenser<None> C = setOutput(new int[]{A.shape(0), B.shape(1)});
-                getContext().setBlock(A.shape(0), B.shape(1));
-                getContext().compute(A.shape(0), B.shape(1), A.shape(1));
+                getContext().setRang(A.shape(0), B.shape(1));
+                getContext().compute(A.shape(0), B.shape (1), A.shape(1));
                 return C;
             }
 
             public void gradient() {
                 Tenser<None> A = getInput(0), B = getInput(1);
-                getContext().setBlock(A.shape(0), B.shape(1));
+                getContext().setRang(A.shape(0), B.shape(1));
                 getContext().gradient(A.shape(0), B.shape(1), A.shape(1));
             }
 
