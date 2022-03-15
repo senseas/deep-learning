@@ -6,9 +6,9 @@ import com.deep.framework.lang.util.BeanUtil;
 import java.util.Arrays;
 import java.util.stream.Stream;
 
-public class TensorOparetor extends Tensor {
+public class TensorOperator extends Tensor {
 
-    public TensorOparetor(String name, Tensor... input) {
+    public TensorOperator(String name, Tensor... input) {
         super(name, input);
         if (Arrays.asList("Add", "Addx").contains(name)) {
             Stream<Tensor> stream = Stream.of();

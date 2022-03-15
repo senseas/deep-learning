@@ -1,7 +1,7 @@
 package com.deep.framework.lang.util;
 
 import com.deep.framework.graph.Tensor;
-import com.deep.framework.graph.TensorOparetor;
+import com.deep.framework.graph.TensorOperator;
 import org.apache.commons.math3.random.RandomDataGenerator;
 
 import java.util.Objects;
@@ -11,11 +11,11 @@ public class BeanUtil {
     static RandomDataGenerator random = new RandomDataGenerator();
 
     public static boolean isOperation(Tensor tensor) {
-        return tensor instanceof TensorOparetor;
+        return tensor instanceof TensorOperator;
     }
 
     public static boolean isNotOperation(Tensor tensor) {
-        return !(tensor instanceof TensorOparetor);
+        return !(tensor instanceof TensorOperator);
     }
 
     public static boolean isTensor(Object o) {
