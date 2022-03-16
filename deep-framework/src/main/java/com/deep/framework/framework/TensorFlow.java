@@ -51,28 +51,35 @@ public class TensorFlow implements Serializable {
         return new TensorOparetor("Minus", input) {
 
             public None compute() {
-                if (input.length == 1) {
-                    None inx = getInput(0);
-                    double valx = inx.getValue();
-                    return new None(-valx);
-                } else {
-                    None inx = getInput(0), iny = getInput(1);
-                    double valx = inx.getValue(), valy = iny.getValue();
-                    return new None(valx - valy);
-                }
+                None inx = getInput(0), iny = getInput(1);
+                double valx = inx.getValue(), valy = iny.getValue();
+                return new None(valx - valy);
             }
 
             public void gradient() {
-                if (input.length == 1) {
-                    None inx = getInput(0), out = getOutput();
-                    double grad = out.getGrad();
-                    inx.setGrad(-grad);
-                } else {
-                    None inx = getInput(0), iny = getInput(1), out = getOutput();
-                    double grad = out.getGrad();
-                    inx.setGrad(grad);
-                    iny.setGrad(-grad);
-                }
+                None inx = getInput(0), iny = getInput(1), out = getOutput();
+                double grad = out.getGrad();
+                inx.setGrad(grad);
+                iny.setGrad(-grad);
+            }
+
+        };
+    }
+
+
+    public Tensor minus(Tensor input) {
+        return new TensorOparetor("Minus", input) {
+
+            public None compute() {
+                None inx = getInput(0);
+                double valx = inx.getValue();
+                return new None(-valx);
+            }
+
+            public void gradient() {
+                None inx = getInput(0), out = getOutput();
+                double grad = out.getGrad();
+                inx.setGrad(-grad);
             }
 
         };
