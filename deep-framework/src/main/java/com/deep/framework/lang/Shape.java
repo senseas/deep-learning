@@ -27,7 +27,7 @@ public class Shape extends ForEach {
         return (E) fill(shape(Tensor.class, a), o -> new TensorConst(0d));
     }
 
-    public static <E> E zeroTensors(Object a, int b[]) {
+    public static <E> E zeroTensors(Object a, int[] b) {
         return (E) fill(a, o -> new TensorConst(b, 0d));
     }
 

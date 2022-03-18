@@ -81,7 +81,7 @@ public class TensorFlux implements Serializable {
             return (E) fill(c, shape(None.class, c), b -> b);
         } else {
             Tensor o = (Tensor) a;
-            return (E) o.getOutput();
+            return o.getOutput();
         }
     }
 
