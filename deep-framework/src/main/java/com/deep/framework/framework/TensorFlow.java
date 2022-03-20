@@ -265,19 +265,26 @@ public class TensorFlow implements Serializable {
 
             public Object compute() {
                 Tenser<None> A = getInput(0), B = getInput(1);
-                Tenser<None> C = setOutput(new int[]{A.shape(0), B.shape(1)});
-                getContext().setRang(A.shape(0), B.shape(1));
-                getContext().compute(A.shape(0), B.shape (1), A.shape(1));
+                Tenser<None> C = zeroNones(new int[]{A.shape(0), B.shape(1)});
+                forEach(A.shape(0), B.shape(1), A.shape(1), (i, l, j) -> {
+                    None inx = A.get(i, j), iny = B.get(j, l), out = C.get(i, l);
+                    out.setValue(out.getValue() + inx.getValue() * iny.getValue());
+                });
                 return C;
             }
 
             public void gradient() {
                 Tenser<None> A = getInput(0), B = getInput(1);
-                getContext().setRang(A.shape(0), B.shape(1));
-                getContext().gradient(A.shape(0), B.shape(1), A.shape(1));
+                Tenser<None> C = getOutput();
+                forEach(A.shape(0), B.shape(1), A.shape(1), (i, l, j) -> {
+                    None inx = A.get(i, j), iny = B.get(j, l), out = C.get(i, l);
+                    inx.setGrad(out.getGrad() * iny.getValue());
+                    iny.setGrad(out.getGrad() * inx.getValue());
+                });
             }
 
         };
+
     }
 
     public Tensor matmulTran(Tensor... input) {

@@ -2,6 +2,7 @@ package com.deep.framework.framework;
 
 import com.deep.framework.graph.None;
 import com.deep.framework.graph.Tensor;
+import com.deep.framework.lang.Tenser;
 import com.deep.framework.lang.util.BeanUtil;
 
 import java.io.Serializable;
@@ -34,13 +35,11 @@ public class TensorFlux implements Serializable {
 
     public static void compute(Tensor tensor) {
         Object nones = tensor.compute();
-        if (!Objects.equals(nones, tensor.getOutput())) {
-            tensor.zerosOutput(nones);
-            forEach(tensor.getOutput(), nones, (None out, None none) -> {
-                out.setValue(none.getValue());
-                out.reset();
-            });
-        }
+        zerosOutput(tensor, nones);
+        forEach(tensor.getOutput(), nones, (None out, None none) -> {
+            out.setValue(none.getValue());
+            out.reset();
+        });
     }
 
     public static void computer(Tensor tensor) {
@@ -77,7 +76,7 @@ public class TensorFlux implements Serializable {
 
     private static void forwards(Tensor tensor) {
         Object nones = getOutput(tensor.getFunction());
-        tensor.zerosOutput(nones);
+        zerosOutput(tensor, nones);
         forEach(tensor.getOutput(), nones, (None out, None none) -> {
             out.setValue(none.getValue());
             out.reset();
@@ -89,6 +88,24 @@ public class TensorFlux implements Serializable {
         forEach(tensor.getOutput(), nones, (None out, None none) -> {
             none.setGrad(out.getGrad());
         });
+    }
+
+    public static void zerosOutput(Tensor tensor, Object o) {
+        if (Objects.isNull((tensor.getOutput()))) {
+            if (BeanUtil.isTensor(o)) {
+                int[] shape = ((Tenser) o).shape;
+                tensor.setShape(shape);
+                tensor.setValue(zeros(shape));
+                tensor.setGrad(zeros(shape));
+                tensor.setReduce(booleans(shape));
+                tensor.setOutput(fillNones(tensor));
+            } else {
+                tensor.setValue(0d);
+                tensor.setGrad(0d);
+                tensor.setReduce(false);
+                tensor.setOutput(new None(tensor));
+            }
+        }
     }
 
     public static <E> E getOutput(Object a) {

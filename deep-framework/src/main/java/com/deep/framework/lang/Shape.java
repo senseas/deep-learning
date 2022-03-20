@@ -15,15 +15,15 @@ public class Shape extends ForEach {
 
     public static <E> E random(int[] shape) {
         RandomDataGenerator random = new RandomDataGenerator();
-        return (E) IntStream.range(0, size(shape)).parallel().mapToDouble(i -> random.nextGaussian(0, 0.1)).toArray();
+        return (E) IntStream.range(0, size(shape)).mapToDouble(i -> random.nextGaussian(0, 0.1)).toArray();
     }
 
     public static <E> E values(int[] shape, double value) {
-        return (E) IntStream.range(0, size(shape)).parallel().mapToDouble(i -> value).toArray();
+        return (E) IntStream.range(0, size(shape)).mapToDouble(i -> value).toArray();
     }
 
     public static <E> E fillNones(Tensor tensor) {
-        None[] nones = IntStream.range(0, size(tensor.getShape())).parallel().mapToObj(i -> new None(tensor, i)).toArray(None[]::new);
+        None[] nones = IntStream.range(0, size(tensor.getShape())).mapToObj(i -> new None(tensor, i)).toArray(None[]::new);
         return (E) new Tenser(nones, tensor.getShape());
     }
 

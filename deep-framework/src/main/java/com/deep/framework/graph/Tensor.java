@@ -88,51 +88,6 @@ public class Tensor implements Serializable {
 
     public <M> M getOutput() { return (M) output; }
 
-    public void zerosOutput(Object o) {
-        if (Objects.nonNull(output)) return;
-        if (BeanUtil.isTensor(o)) {
-            Tenser tenser = (Tenser) o;
-            this.shape = tenser.shape;
-            this.value = zeros(shape);
-            this.grad = zeros(shape);
-            this.reduce = booleans(shape);
-            this.output = fillNones(this);
-        } else {
-            this.value = 0d;
-            this.grad = 0d;
-            this.reduce = false;
-            this.output = new None(this);
-        }
-    }
-
-    public <M> M setOutput(int... shape) {
-        if (shape.length == 0) {
-            if (Objects.nonNull(output)) {
-                this.value = 0d;
-                this.grad = 0d;
-                this.reduce = false;
-            } else {
-                this.value = 0d;
-                this.grad = 0d;
-                this.reduce = false;
-                this.output = new None(this);
-            }
-        } else {
-            if (Objects.nonNull(output)) {
-                Arrays.fill((double[]) this.value, 0);
-                Arrays.fill((double[]) this.grad, 0);
-                Arrays.fill((boolean[]) this.reduce, false);
-            } else {
-                this.shape = shape;
-                this.value = zeros(shape);
-                this.grad = zeros(shape);
-                this.reduce = booleans(shape);
-                this.output = fillNones(this);
-            }
-        }
-        return (M) output;
-    }
-
     public TensorContext getContext() {
         if (Objects.nonNull(context)) return context;
         return context = TensorGpuExecutor.New().createContext(this);
