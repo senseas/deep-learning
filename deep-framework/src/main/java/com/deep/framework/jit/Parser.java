@@ -4,20 +4,24 @@ import com.deep.framework.jit.lexer.BlockLexer;
 import com.deep.framework.jit.lexer.Lexer;
 import com.deep.framework.jit.lexer.StringLexer;
 import com.deep.framework.jit.lexer.TokenType;
-import com.deep.framework.jit.statement.BlockStatement;
-import com.deep.framework.jit.statement.ImportStatement;
-import com.deep.framework.jit.statement.PackageStatement;
-import com.deep.framework.jit.statement.Statement;
+import com.deep.framework.jit.statement.*;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Stream;
+
+import static javax.lang.model.SourceVersion.isIdentifier;
 
 public class Parser {
     public Lexer lexer = new BlockLexer(null);
     public List<Object> list = new ArrayList<>();
     public static List<Statement> statementList = new ArrayList();
+    static Map<TokenType, Statement> statements = new HashMap<TokenType, Statement>() {{
+        put(TokenType.PACKAGE, new PackageStatement());
+        put(TokenType.IMPORT, new ImportStatement());
+        put(TokenType.AT, new AnnotationStatement());
+        put(TokenType.CLASS, new ClassStatement());
+        put(TokenType.LBRACE, new BlockStatement());
+    }};
 
     public void add(String a) {
         if (!a.isEmpty()) {
@@ -46,9 +50,7 @@ public class Parser {
             } else if (Character.isWhitespace(b.charAt(0))) {
                 add(a);
                 return "";
-            } else if (!a.isEmpty() &&
-                Character.isJavaIdentifierPart(a.charAt(a.length() - 1)) &&
-                Character.isJavaIdentifierPart(b.charAt(0))) {
+            } else if (!a.isEmpty() && isIdentifier(a.concat(b))){
                 return a.concat(b);
             } else if (TokenType.startsWith(a.concat(b))) {
                 return a.concat(b);
@@ -64,13 +66,12 @@ public class Parser {
             Object o = lexers.get(0);
             if (o.equals(end)) return;
             lexers.remove(0);
-            new ArrayList<Statement>() {{
-                add(new PackageStatement());
-                add(new ImportStatement());
-                add(new BlockStatement());
-            }}.forEach(statement -> {
+            if (statements.containsKey(o)) {
+                Statement statement = statements.get(o);
                 statement.parser(parent, o, lexers);
-            });
+                continue;
+            }
+
         }
     }
 

@@ -11,7 +11,7 @@ import static com.deep.framework.jit.lexer.TokenType.RBRACE;
 @Data
 public class BlockStatement implements Statement {
     public String name;
-
+    public static TokenType tokenType = TokenType.LBRACE;
     public void parser(Statement parent, Object obj, List<Object> list) {
         if (obj.equals(TokenType.LBRACE)) {
             parent.statements.add(this);

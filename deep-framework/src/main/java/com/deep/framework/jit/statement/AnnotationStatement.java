@@ -6,19 +6,25 @@ import lombok.Data;
 
 import java.util.List;
 
+import static javax.lang.model.SourceVersion.isIdentifier;
+
 @Data
-public class PackageStatement implements Statement {
+public class AnnotationStatement implements Statement {
     public String name;
-    public TokenType tokenType = TokenType.PACKAGE;
+    public TokenType tokenType = TokenType.AT;
 
     public void parser(Statement parent, Object obj, List<Object> list) {
-        if (obj.equals(TokenType.PACKAGE)) {
+        if (obj.equals(TokenType.AT)) {
             Parser.statementList.add(this);
             StringBuilder buffer = new StringBuilder();
             while (!list.isEmpty()) {
                 Object o = list.get(0);
                 list.remove(0);
-                if (o.equals(TokenType.SEMI)) {
+                if (o instanceof String) {
+                    if (isIdentifier((String) o)) {
+                        buffer.append(o);
+                    }
+                } else if (!o.equals(TokenType.LPAREN) || o.equals(TokenType.RPAREN)) {
                     name = buffer.toString();
                     return;
                 } else {
@@ -27,4 +33,5 @@ public class PackageStatement implements Statement {
             }
         }
     }
+
 }

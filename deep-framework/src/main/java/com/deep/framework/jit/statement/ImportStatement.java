@@ -9,7 +9,7 @@ import java.util.List;
 @Data
 public class ImportStatement implements Statement {
     public String name;
-
+    public TokenType tokenType = TokenType.IMPORT;
     public void parser(Statement parent,Object obj, List<Object> list) {
         if (obj.equals(TokenType.IMPORT)) {
             Parser.statementList.add(this);
