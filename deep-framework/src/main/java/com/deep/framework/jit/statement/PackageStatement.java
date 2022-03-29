@@ -4,25 +4,25 @@ import com.deep.framework.jit.Parser;
 import com.deep.framework.jit.lexer.TokenType;
 import lombok.Data;
 
+import java.util.ArrayList;
 import java.util.List;
+
+import static com.deep.framework.jit.lexer.TokenType.*;
 
 @Data
 public class PackageStatement implements Statement {
-    public String name;
-    public TokenType tokenType = TokenType.PACKAGE;
+    public List<Object> packages = new ArrayList<>();
+    public TokenType start = PACKAGE, end = SEMI;
 
     public void parser(Statement parent, Object obj, List<Object> list) {
-        if (obj.equals(TokenType.PACKAGE)) {
+        if (obj.equals(start)) {
             Parser.statementList.add(this);
-            StringBuilder buffer = new StringBuilder();
             while (!list.isEmpty()) {
-                Object o = list.get(0);
-                list.remove(0);
-                if (o.equals(TokenType.SEMI)) {
-                    name = buffer.toString();
+                Object o = list.remove(0);
+                if (o.equals(end)) {
                     return;
                 } else {
-                    buffer.append(o);
+                    packages.add(o);
                 }
             }
         }

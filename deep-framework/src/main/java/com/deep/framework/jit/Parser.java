@@ -50,7 +50,7 @@ public class Parser {
             } else if (Character.isWhitespace(b.charAt(0))) {
                 add(a);
                 return "";
-            } else if (!a.isEmpty() && isIdentifier(a.concat(b))){
+            } else if (!a.isEmpty() && isIdentifier(a.concat(b))) {
                 return a.concat(b);
             } else if (TokenType.startsWith(a.concat(b))) {
                 return a.concat(b);
@@ -65,13 +65,15 @@ public class Parser {
         while (!lexers.isEmpty()) {
             Object o = lexers.get(0);
             if (o.equals(end)) return;
-            lexers.remove(0);
             if (statements.containsKey(o)) {
                 Statement statement = statements.get(o);
                 statement.parser(parent, o, lexers);
-                continue;
+            } else {
+                lexers.remove(0);
+                ObjectStatement objectStatement = new ObjectStatement();
+                objectStatement.setObject(o);
+                Parser.statementList.add(objectStatement);
             }
-
         }
     }
 

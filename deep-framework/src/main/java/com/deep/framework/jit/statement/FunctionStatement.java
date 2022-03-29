@@ -10,11 +10,7 @@ import java.util.List;
 public class FunctionStatement implements Statement {
     public String name;
     public String returnValue;
-    public List<String> modifier;
-    public Lexer argument;
+    public List<String> modifier = new ArrayList<>();
+    public Lexer parameters;
     public BlockStatement block;
-
-    public FunctionStatement() {
-        this.modifier = new ArrayList<>();
-    }
 }

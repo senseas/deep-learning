@@ -16,7 +16,7 @@ public class ClassStatement implements Statement {
 
     public String access;
     public String name;
-    public TokenType tokenType = CLASS;
+    public TokenType start = CLASS, end = RBRACE;
 
     public void parser(Statement parent, Object obj, List<Object> lexers) {
         if (obj.equals(CLASS)) {
@@ -25,12 +25,13 @@ public class ClassStatement implements Statement {
             while (true) {
                 Object o = lexers.get(0);
                 lexers.remove(0);
-                if (o.equals(BlockStatement.tokenType)) {
+               /* if (o.equals(BlockStatement.tokenType)) {
                     name = buffer.toString();
                     block = new BlockStatement();
                     block.parser(parent, o, lexers);
                     return;
-                }else if (o.equals(RBRACE)) {
+                } else */
+                if (o.equals(RBRACE)) {
                     name = buffer.toString();
                     block = new BlockStatement();
                     block.parser(parent, o, lexers);

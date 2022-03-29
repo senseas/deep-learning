@@ -2,9 +2,10 @@
 package com.deep.framework.jit.lexer;
 
 
-import java.util.*;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicReference;
+import java.util.HashMap;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static com.deep.framework.jit.lexer.TokenKind.*;
@@ -235,3 +236,5 @@ public enum TokenType {
     }
 
 }
+
+
