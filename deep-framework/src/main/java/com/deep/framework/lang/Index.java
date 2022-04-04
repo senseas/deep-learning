@@ -315,12 +315,12 @@ public class Index {
     }
 
     @FunctionalInterface
-    public static interface IntIndex {
+    public interface IntIndex {
         int accept(int[] shape, int[] index);
     }
 
     @FunctionalInterface
-    public static interface IntLength {
+    public interface IntLength {
         int accept(int[] shape);
     }
 }

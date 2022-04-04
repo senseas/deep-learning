@@ -1,13 +1,10 @@
 package com.deep.framework.graph;
 
-import com.deep.framework.framework.TensorContext;
-import com.deep.framework.framework.TensorGpuExecutor;
 import com.deep.framework.lang.Shape;
 import com.deep.framework.lang.Tenser;
 import lombok.Data;
 
 import java.io.Serializable;
-import java.util.Objects;
 
 @Data
 public class Tensor implements Serializable {
