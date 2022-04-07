@@ -3,38 +3,37 @@ package com.deep.framework.framework;
 import com.deep.framework.graph.Tensor;
 import jcuda.Pointer;
 import jcuda.Sizeof;
-import jcuda.driver.CUdeviceptr;
 
 import java.io.Serializable;
 import java.util.Objects;
 
-import static jcuda.driver.JCudaDriver.cuMemAlloc;
-import static jcuda.driver.JCudaDriver.cuMemcpyHtoD;
+import static jcuda.jcublas.JCublas2.cublasSetVector;
+import static jcuda.runtime.JCuda.cudaMalloc;
 
 public class CudaContext implements Serializable {
 
     private final Tensor tensor;
-    private CUdeviceptr value, grad;
+    private Pointer value, grad;
 
     public CudaContext(Tensor tensor) {
         this.tensor = tensor;
     }
 
-    public CUdeviceptr getValue() {
+    public Pointer getValue() {
         if (Objects.nonNull(value)) return value;
         double[] value = (double[]) tensor.getValue();
-        CUdeviceptr deviceptr = new CUdeviceptr();
-        cuMemAlloc(deviceptr, value.length * Sizeof.DOUBLE);
-        cuMemcpyHtoD(deviceptr, Pointer.to(value), value.length * Sizeof.DOUBLE);
-        return deviceptr;
+        Pointer pointer = new Pointer();
+        cudaMalloc(pointer, value.length * Sizeof.DOUBLE);
+        cublasSetVector(value.length, Sizeof.DOUBLE, Pointer.to(value), 1, pointer, 1);
+        return pointer;
     }
 
-    public CUdeviceptr getGrad() {
+    public Pointer getGrad() {
         if (Objects.nonNull(grad)) return grad;
         double[] value = (double[]) tensor.getGrad();
-        CUdeviceptr deviceptr = new CUdeviceptr();
-        cuMemAlloc(deviceptr, value.length * Sizeof.DOUBLE);
-        cuMemcpyHtoD(deviceptr, Pointer.to(value), value.length * Sizeof.DOUBLE);
-        return deviceptr;
+        Pointer pointer = new Pointer();
+        cudaMalloc(pointer, value.length * Sizeof.DOUBLE);
+        cublasSetVector(value.length, Sizeof.DOUBLE, Pointer.to(value), 1, pointer, 1);
+        return pointer;
     }
 }

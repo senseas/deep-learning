@@ -5,11 +5,14 @@ import com.deep.framework.lang.Cublas;
 import com.deep.framework.lang.Tenser;
 
 import java.io.Serializable;
+import java.lang.reflect.Array;
+import java.util.Arrays;
 
 import static com.deep.framework.lang.ForEach.forEach;
 import static com.deep.framework.lang.Shape.*;
 
 import static com.deep.framework.framework.TensorFlux.*;
+import static com.deep.framework.lang.Shape.zeros;
 
 public class TensorFlow implements Serializable {
 
@@ -273,8 +276,7 @@ public class TensorFlow implements Serializable {
                     None inx = A.get(i, j), iny = B.get(j, l), out = C.get(i, l);
                     out.setValue(out.getValue() + inx.getValue() * iny.getValue());
                 });
-
-                Cublas.matmul(getInput()[0], getInput()[1], this);
+                Cublas.New().matmul(getInput()[0], getInput()[1], this);
                 return C;
             }
 
