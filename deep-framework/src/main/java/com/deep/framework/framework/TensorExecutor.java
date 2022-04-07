@@ -2,7 +2,6 @@ package com.deep.framework.framework;
 
 import com.deep.framework.graph.None;
 import com.deep.framework.graph.Tensor;
-import com.deep.framework.lang.StopWatch;
 import com.deep.framework.lang.Tensers;
 import com.deep.framework.lang.function.Func2;
 import lombok.Data;

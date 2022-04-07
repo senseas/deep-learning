@@ -108,6 +108,26 @@ public class TensorFlux implements Serializable {
         }
     }
 
+    public static <M> M zeroNonesx(Tensor tensor, int[] shape) {
+        if (Objects.isNull((tensor.getOutput()))) {
+            tensor.setShape(shape);
+            tensor.setValue(zeros(shape));
+            tensor.setGrad(zeros(shape));
+            tensor.setReduce(booleans(shape));
+            tensor.setOutput(fillNones(tensor));
+        }
+        return tensor.getOutput();
+    }
+
+    public static void zeroNonesx(Tensor tensor) {
+        if (Objects.isNull((tensor.getOutput()))) {
+            tensor.setValue(0d);
+            tensor.setGrad(0d);
+            tensor.setReduce(false);
+            tensor.setOutput(new None(tensor));
+        }
+    }
+
     public static <E> E getOutput(Object a) {
         if (BeanUtil.isTensor(a)) {
             Object c = fill(a, shape(Object.class, a), b -> {

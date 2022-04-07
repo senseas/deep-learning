@@ -1,7 +1,7 @@
 package com.deep.framework.graph;
 
-import com.deep.framework.framework.TensorContext;
-import com.deep.framework.framework.TensorGpuExecutor;
+import com.deep.framework.framework.CudaContext;
+import com.deep.framework.framework.CudaExecutor;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -85,9 +85,9 @@ public class Tensor implements Serializable {
 
     public <M> M getOutput() { return (M) output; }
 
-    public TensorContext getContext() {
+    public CudaContext getContext() {
         if (Objects.nonNull(context)) return context;
-        return context = TensorGpuExecutor.New().createContext(this);
+        return context = CudaExecutor.New().createContext(this);
     }
 
     private String name = "Tensor::";
@@ -96,5 +96,5 @@ public class Tensor implements Serializable {
     protected Object output, value, grad;
     protected transient Object function, reduce;
     private transient boolean gradre;
-    private transient TensorContext context;
+    private transient CudaContext context;
 }
