@@ -5,15 +5,10 @@ import com.deep.framework.lang.Cublas;
 import com.deep.framework.lang.Tenser;
 
 import java.io.Serializable;
-import java.lang.reflect.Array;
-import java.util.Arrays;
 
+import static com.deep.framework.framework.TensorFlux.zeroNonesx;
 import static com.deep.framework.lang.ForEach.forEach;
 import static com.deep.framework.lang.Shape.*;
-
-import static com.deep.framework.framework.TensorFlux.*;
-import static com.deep.framework.lang.Shape.zeros;
-
 public class TensorFlow implements Serializable {
 
     public Tensor add(Tensor... input) {
@@ -272,10 +267,6 @@ public class TensorFlow implements Serializable {
             public Object compute() {
                 Tenser<None> A = getInput(0), B = getInput(1);
                 Tenser<None> C = zeroNonesx(this, new int[]{A.shape(0), B.shape(1)});
-                forEach(A.shape(0), B.shape(1), A.shape(1), (i, l, j) -> {
-                    None inx = A.get(i, j), iny = B.get(j, l), out = C.get(i, l);
-                    out.setValue(out.getValue() + inx.getValue() * iny.getValue());
-                });
                 Cublas.New().matmul(getInput()[0], getInput()[1], this);
                 return C;
             }
@@ -283,11 +274,7 @@ public class TensorFlow implements Serializable {
             public void gradient() {
                 Tenser<None> A = getInput(0), B = getInput(1);
                 Tenser<None> C = getOutput();
-                forEach(A.shape(0), B.shape(1), A.shape(1), (i, l, j) -> {
-                    None inx = A.get(i, j), iny = B.get(j, l), out = C.get(i, l);
-                    inx.setGrad(out.getGrad() * iny.getValue());
-                    iny.setGrad(out.getGrad() * inx.getValue());
-                });
+                Cublas.New().matmulGrad(getInput()[0], getInput()[1], this);
             }
 
         };

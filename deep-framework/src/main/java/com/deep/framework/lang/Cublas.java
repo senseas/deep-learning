@@ -7,9 +7,11 @@ import jcuda.driver.CUdeviceptr;
 import jcuda.jcublas.JCublas2;
 import jcuda.jcublas.cublasHandle;
 
+import java.util.Arrays;
 import java.util.Objects;
 
 import static jcuda.jcublas.JCublas2.*;
+import static jcuda.jcublas.cublasOperation.CUBLAS_OP_N;
 import static jcuda.jcublas.cublasOperation.CUBLAS_OP_T;
 import static jcuda.runtime.JCuda.cudaFree;
 
@@ -19,7 +21,7 @@ public class Cublas {
     private static Cublas cublas;
 
     // Create a CUBLAS handle
-    public Cublas() {
+    private Cublas() {
         handle = new cublasHandle();
         cublasCreate(handle);
     }
@@ -30,23 +32,44 @@ public class Cublas {
         return cublas = new Cublas();
     }
 
+    //MK*KN
     public void matmul(Tensor A, Tensor B, Tensor C) {
-        double[] a = (double[]) A.getValue(), b = (double[]) B.getValue(), c = (double[]) C.getValue();
-
-        // Allocate memory on the device
-        // Copy the memory from the host to the device
+        // Allocate Copy the memory from the host to the device
         Pointer DA = A.getContext().getValue(), DB = B.getContext().getValue(), DC = C.getContext().getValue();
-
-        // Execute sgemm
+        //alpha, beta
         Pointer alpha = Pointer.to(new double[]{1}), beta = Pointer.to(new double[]{0});
 
-        //MK*KN
-        int M = A.getShape()[0],K = A.getShape()[1],N = B.getShape()[1];
-
-        cublasDgemm(handle, CUBLAS_OP_T, CUBLAS_OP_T, M, N, K, alpha, DA, K, DB, N, beta, DC, M);
-
+        int M = A.getShape()[0], K = A.getShape()[1], N = B.getShape()[1];
+        // Execute sgemm DC= [AD=NK * DB=KM]
+        cublasDgemm(handle, CUBLAS_OP_N, CUBLAS_OP_N, N, M, K, alpha, DB, N, DA, K, beta, DC, N);
         // Copy the result from the device to the host
-        cublasGetVector(M * N, Sizeof.DOUBLE, DC, 1, Pointer.to(c), 1);
+        cublasGetVector(M * N, Sizeof.DOUBLE, DC, 1, Pointer.to((double[]) C.getValue()), 1);
+        System.out.println(Arrays.toString((double[])C.getValue()));
+    }
+
+
+    //MK*KN
+    public void matmulGrad(Tensor A, Tensor B, Tensor C) {
+        // Allocate Copy the memory from the host to the device
+        Pointer DA = A.getContext().getValue(), DB = B.getContext().getValue();
+        // Allocate memory on the device
+        // Copy the memory from the host to the device
+        Pointer GA = A.getContext().getGrad(), GB = B.getContext().getGrad(), GC = C.getContext().getGrad();
+        //alpha, beta
+        Pointer alpha = Pointer.to(new double[]{1}), beta = Pointer.to(new double[]{0});
+
+        int M = A.getShape()[0], K = A.getShape()[1], N = B.getShape()[1];
+        //GA= KM_T[DB=KN * GC_T=NM]
+        cublasDgemm(handle, CUBLAS_OP_T, CUBLAS_OP_N, K, M, N, alpha, DB, N, GC, N, beta, GA, K);
+        // Copy the result from the device to the host
+        cublasGetVector(M * K, Sizeof.DOUBLE, GA, 1, Pointer.to((double[]) A.getGrad()), 1);
+        System.out.println(Arrays.toString((double[]) A.getGrad()));
+
+        //GB= NK_T[GC_T=NM * DA=MK]
+        cublasDgemm(handle, CUBLAS_OP_N, CUBLAS_OP_T, N, K, M, alpha, GC, N, DA, K, beta, GB, N);
+        // Copy the result from the device to the host
+        cublasGetVector(K * N, Sizeof.DOUBLE, GB, 1, Pointer.to((double[]) B.getGrad()), 1);
+        System.out.println(Arrays.toString((double[]) B.getGrad()));
     }
 
     // Clean up
