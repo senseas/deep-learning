@@ -28,7 +28,7 @@ public class TensorFlow implements Serializable {
         return new TensorOperator("Addx", input) {
 
             public Object compute() {
-                Object B = zeroNones(getInput(0));
+                Object B = createOutput(getInput(0));
                 inputStream().forEach(A -> {
                     farEach(A, B, (None a, None b) -> b.setValue(b.getValue() + a.getValue()));
                 });
@@ -218,7 +218,7 @@ public class TensorFlow implements Serializable {
         return new TensorOperator("Relux", input) {
 
             public Object compute() {
-                Object A = getInput(0), B = zeroNones(A);
+                Object A = getInput(0), B = createOutput(A);
                 farEach(A, B, (None a, None b) -> {
                     double value = a.getValue();
                     b.setValue(value > 0 ? value : 0.1 * value);
@@ -262,7 +262,7 @@ public class TensorFlow implements Serializable {
 
             public Object compute() {
                 None[][] A = getInput(0), B = getInput(1);
-                None[][] C = zeroNones(new None[A.length][B[0].length]);
+                None[][] C = createOutput(new int[]{A.length, B[0].length});
                 forEach(A.length, B[0].length, A[0].length, (i, l, j) -> {
                     None inx = A[i][j], iny = B[j][l], out = C[i][l];
                     out.setValue(out.getValue() + inx.getValue() * iny.getValue());
@@ -288,7 +288,7 @@ public class TensorFlow implements Serializable {
 
             public Object compute() {
                 None[][] A = getInput(0), B = getInput(1);
-                None[][] C = zeroNones(new None[A.length][B.length]);
+                None[][] C = createOutput(new int[]{A.length, B.length});
                 forEach(A.length, B.length, A[0].length, (i, l, j) -> {
                     None inx = A[i][j], iny = B[l][j], out = C[i][l];
                     out.setValue(out.getValue() + inx.getValue() * iny.getValue());
@@ -486,7 +486,7 @@ public class TensorFlow implements Serializable {
                 None[][] A = getInput(0), B = padding(getInput(1), padding);
                 int heights = stride[0], widths = stride[1];
                 int height = (B.length - A.length) / heights + 1, width = (B[0].length - A[0].length) / widths + 1;
-                None[][] C = zeroNones(new None[height][width]);
+                None[][] C = createOutput(new int[]{height, width});
                 forEach(height, width, A.length, A[0].length, (h, w, m, n) -> {
                     None inx = A[m][n], iny = B[h * heights + m][w * widths + n], out = C[h][w];
                     out.setValue(out.getValue() + inx.getValue() * iny.getValue());
@@ -534,7 +534,7 @@ public class TensorFlow implements Serializable {
                 None[][] A = getInput(0), B = getInput(1);
                 int heighs = stride[0], widths = stride[1];
                 int height = (B.length - 1) * heighs + A.length - 2 * padding, width = (B[0].length - 1) * widths + A[0].length - 2 * padding;
-                None[][] C = zeroNones(new None[height][width]);
+                None[][] C = createOutput(new int[]{height, width});
                 forEach(B.length, B[0].length, A.length, A[0].length, (h, w, m, n) -> {
                     None inx = A[m][n], iny = B[h][w], out = C[h * heighs + m][w * widths + n];
                     out.setValue(out.getValue() + inx.getValue() * iny.getValue());
@@ -582,7 +582,7 @@ public class TensorFlow implements Serializable {
                 None[][] A = padding(getInput(0), padding);
                 int heighs = stride[0], widths = stride[1];
                 int height = (A.length - kernelSize) / heighs + 1, width = (A[0].length - kernelSize) / widths + 1;
-                None[][] B = zeroNones(new None[height][width]);
+                None[][] B = createOutput(new int[]{height, width});
                 forEach(height, width, kernelSize, kernelSize, (y, x, m, n) -> {
                     None inx = A[y * heighs + m][x * widths + n], out = B[y][x];
                     out.setValue(Math.max(out.getValue(), inx.getValue()));
@@ -626,7 +626,7 @@ public class TensorFlow implements Serializable {
                 None[][] A = getInput(0);
                 int heighs = stride[0], widths = stride[1];
                 int height = (A.length - 1) * heighs + kernelSize - 2 * padding, width = (A[0].length - 1) * widths + kernelSize - 2 * padding;
-                None[][] B = zeroNones(new None[height][width]);
+                None[][] B = createOutput(new int[]{height, width});
                 forEach(A.length, A[0].length, kernelSize, kernelSize, (y, x, m, n) -> {
                     None inx = A[y][x], out = B[y * heighs + m][x * widths + n];
                     out.setValue(out.getValue() + inx.getValue());

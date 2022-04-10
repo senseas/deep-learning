@@ -4,7 +4,11 @@ import com.deep.framework.framework.TensorFlux;
 import com.deep.framework.lang.util.BeanUtil;
 
 import java.util.Arrays;
+import java.util.Objects;
 import java.util.stream.Stream;
+
+import static com.deep.framework.lang.ForEach.farEach;
+import static com.deep.framework.lang.Shape.zeroNones;
 
 public class TensorOperator extends Tensor {
 
@@ -33,6 +37,15 @@ public class TensorOperator extends Tensor {
 
     public <M> M getOutput() {
         return (M) output;
+    }
+
+    public <M> M createOutput(Object o) {
+        if (Objects.isNull(getOutput())) {
+            this.output = zeroNones(o);
+        } else {
+            farEach(getOutput(), (None out) -> {out.setValue(0d);out.reset();});
+        }
+        return getOutput();
     }
 
     public void forward() {
