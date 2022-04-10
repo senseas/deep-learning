@@ -45,17 +45,10 @@ public class TensorOperator extends Tensor {
             this.grad = zeros(shape);
             this.reduce = booleans(shape);
             this.output = fillNones(this);
-        }
-        return getOutput();
-    }
-
-    public <M> M createOutput(int... shape) {
-        if (Objects.isNull(getOutput())) {
-            this.shape = shape;
-            this.value = zeros(shape);
-            this.grad = zeros(shape);
-            this.reduce = booleans(shape);
-            this.output = fillNones(this);
+        } else {
+            Arrays.fill((double[]) value, 0d);
+            Arrays.fill((double[]) grad, 0d);
+            Arrays.fill((boolean[]) reduce, false);
         }
         return getOutput();
     }

@@ -6,9 +6,9 @@ import com.deep.framework.lang.Tenser;
 
 import java.io.Serializable;
 
-import static com.deep.framework.framework.TensorFlux.zeroNonesx;
 import static com.deep.framework.lang.ForEach.forEach;
 import static com.deep.framework.lang.Shape.*;
+
 public class TensorFlow implements Serializable {
 
     public Tensor add(Tensor... input) {
@@ -31,7 +31,7 @@ public class TensorFlow implements Serializable {
         return new TensorOperator("Addx", input) {
 
             public Object compute() {
-                Object B = zeroNones(getInput(0));
+                Object B = createOutput(getInput(0));
                 inputStream().forEach(A -> {
                     forEach(A, B, (None a, None b) -> b.setValue(b.getValue() + a.getValue()));
                 });
@@ -222,7 +222,7 @@ public class TensorFlow implements Serializable {
         return new TensorOperator("Relux", input) {
 
             public Object compute() {
-                Object A = getInput(0), B = zeroNones(A);
+                Object A = getInput(0), B = createOutput(A);
                 forEach(A, B, (None a, None b) -> {
                     double value = a.getValue();
                     b.setValue(value > 0 ? value : 0.1 * value);
@@ -266,7 +266,7 @@ public class TensorFlow implements Serializable {
 
             public Object compute() {
                 Tenser<None> A = getInput(0), B = getInput(1);
-                Tenser<None> C = zeroNonesx(this, new int[]{A.shape(0), B.shape(1)});
+                Tenser<None> C = createOutput(new int[]{A.shape(0), B.shape(1)});
                 Cublas.New().matmul(getInput()[0], getInput()[1], this);
                 return C;
             }
@@ -286,7 +286,7 @@ public class TensorFlow implements Serializable {
 
             public Object compute() {
                 Tenser<None> A = getInput(0), B = getInput(1);
-                Tenser<None> C = zeroNones(new None[A.shape(0)][B.shape(0)]);
+                Tenser<None> C = createOutput(new int[]{A.shape(0),B.shape(0)});
                 forEach(A.shape(0), B.shape(0), A.shape(1), (i, l, j) -> {
                     None inx = A.get(i, j), iny = B.get(l, j), out = C.get(i, l);
                     out.setValue(out.getValue() + inx.getValue() * iny.getValue());
@@ -485,7 +485,7 @@ public class TensorFlow implements Serializable {
                 int heights = stride[0], widths = stride[1];
                 int height = (B.shape(0) - A.shape(0)) / heights + 1;
                 int width = (B.shape(1) - A.shape(1)) / widths + 1;
-                Tenser<None> C = zeroNones(new int[]{height, width});
+                Tenser<None> C = createOutput(new int[]{height, width});
                 forEach(height, width, A.shape(0), A.shape(1), (h, w, m, n) -> {
                     None inx = A.get(m, n), iny = B.get(h * heights + m, w * widths + n), out = C.get(h, w);
                     out.setValue(out.getValue() + inx.getValue() * iny.getValue());
@@ -535,7 +535,7 @@ public class TensorFlow implements Serializable {
                 int heighs = stride[0], widths = stride[1];
                 int height = (B.shape(0) - 1) * heighs + A.shape(0) - 2 * padding;
                 int width = (B.shape(1) - 1) * widths + A.shape(1) - 2 * padding;
-                Tenser<None> C = zeroNones(new int[]{height, width});
+                Tenser<None> C = createOutput(new int[]{height, width});
                 forEach(B.shape(0), B.shape(1), A.shape(0), A.shape(1), (h, w, m, n) -> {
                     None inx = A.get(m, n), iny = B.get(h, w), out = C.get(h * heighs + m, w * widths + n);
                     out.setValue(out.getValue() + inx.getValue() * iny.getValue());
@@ -584,7 +584,7 @@ public class TensorFlow implements Serializable {
                 Tenser<None> A = padding(getInput(0), padding);
                 int heighs = stride[0], widths = stride[1];
                 int height = (A.shape(0) - kernelSize) / heighs + 1, width = (A.shape(1) - kernelSize) / widths + 1;
-                Tenser<None> B = zeroNones(new int[]{height, width});
+                Tenser<None> B = createOutput(new int[]{height, width});
                 forEach(height, width, kernelSize, kernelSize, (y, x, m, n) -> {
                     None inx = A.get(y * heighs + m, x * widths + n), out = B.get(y, x);
                     out.setValue(Math.max(out.getValue(), inx.getValue()));
@@ -629,7 +629,7 @@ public class TensorFlow implements Serializable {
                 int heighs = stride[0], widths = stride[1];
                 int height = (A.shape(0) - 1) * heighs + kernelSize - 2 * padding;
                 int width = (A.shape(1) - 1) * widths + kernelSize - 2 * padding;
-                Tenser<None> B = zeroNones(new int[]{height, width});
+                Tenser<None> B = createOutput(new int[]{height, width});
                 forEach(A.shape(0), A.shape(1), kernelSize, kernelSize, (y, x, m, n) -> {
                     None inx = A.get(y, x), out = B.get(y * heighs + m, x * widths + n);
                     out.setValue(out.getValue() + inx.getValue());

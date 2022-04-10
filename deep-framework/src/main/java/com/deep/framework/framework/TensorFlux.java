@@ -34,12 +34,14 @@ public class TensorFlux implements Serializable {
     }
 
     public static void compute(Tensor tensor) {
-        Object nones = tensor.compute();
-        zerosOutput(tensor, nones);
-        forEach(tensor.getOutput(), nones, (None out, None none) -> {
-            out.setValue(none.getValue());
-            out.reset();
-        });
+        Object nones = tensor.compute(), output = tensor.getOutput();
+        if (nones != output) {
+            zerosOutput(tensor, nones);
+            forEach(tensor.getOutput(), nones, (None out, None none) -> {
+                out.setValue(none.getValue());
+                out.reset();
+            });
+        }
     }
 
     public static void computer(Tensor tensor) {
@@ -105,26 +107,6 @@ public class TensorFlux implements Serializable {
                 tensor.setReduce(false);
                 tensor.setOutput(new None(tensor));
             }
-        }
-    }
-
-    public static <M> M zeroNonesx(Tensor tensor, int[] shape) {
-        if (Objects.isNull((tensor.getOutput()))) {
-            tensor.setShape(shape);
-            tensor.setValue(zeros(shape));
-            tensor.setGrad(zeros(shape));
-            tensor.setReduce(booleans(shape));
-            tensor.setOutput(fillNones(tensor));
-        }
-        return tensor.getOutput();
-    }
-
-    public static void zeroNonesx(Tensor tensor) {
-        if (Objects.isNull((tensor.getOutput()))) {
-            tensor.setValue(0d);
-            tensor.setGrad(0d);
-            tensor.setReduce(false);
-            tensor.setOutput(new None(tensor));
         }
     }
 

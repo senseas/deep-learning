@@ -77,6 +77,8 @@ public class Shape extends ForEach {
                 list.add(Tensers.getLength(arr));
                 arr = Tensers.get(arr, 0);
             }
+        } else if (arr instanceof int[]) {
+            return (int[]) arr;
         } else if (arr.getClass().isArray()) {
             while (Objects.nonNull(arr) && arr.getClass().isArray()) {
                 list.add(Array.getLength(arr));
