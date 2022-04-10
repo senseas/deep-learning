@@ -4,7 +4,10 @@ import com.deep.framework.framework.TensorFlux;
 import com.deep.framework.lang.util.BeanUtil;
 
 import java.util.Arrays;
+import java.util.Objects;
 import java.util.stream.Stream;
+
+import static com.deep.framework.lang.Shape.*;
 
 public class TensorOperator extends Tensor {
 
@@ -33,6 +36,28 @@ public class TensorOperator extends Tensor {
 
     public <M> M getOutput() {
         return (M) output;
+    }
+
+    public <M> M createOutput(Object o) {
+        if (Objects.isNull(getOutput())) {
+            this.shape = shapes(o);
+            this.value = zeros(shape);
+            this.grad = zeros(shape);
+            this.reduce = booleans(shape);
+            this.output = fillNones(this);
+        }
+        return getOutput();
+    }
+
+    public <M> M createOutput(int... shape) {
+        if (Objects.isNull(getOutput())) {
+            this.shape = shape;
+            this.value = zeros(shape);
+            this.grad = zeros(shape);
+            this.reduce = booleans(shape);
+            this.output = fillNones(this);
+        }
+        return getOutput();
     }
 
     public void forward() {

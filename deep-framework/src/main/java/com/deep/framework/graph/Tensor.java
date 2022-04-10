@@ -85,6 +85,8 @@ public class Tensor implements Serializable {
 
     public <M> M getOutput() { return (M) output; }
 
+    public int shape(int i) {return shape[i];}
+
     public CudaContext getContext() {
         if (Objects.nonNull(context)) return context;
         return context = CudaExecutor.New().createContext(this);
