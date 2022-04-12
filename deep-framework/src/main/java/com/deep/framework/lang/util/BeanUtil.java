@@ -5,6 +5,7 @@ import com.deep.framework.graph.TensorOperator;
 import com.deep.framework.lang.Tenser;
 import org.apache.commons.math3.random.RandomDataGenerator;
 
+import java.util.List;
 import java.util.Objects;
 
 public class BeanUtil {
@@ -55,6 +56,14 @@ public class BeanUtil {
         if (Double.isNaN(o)) return 0;
         if (Double.isInfinite(o)) return 0.9;
         return o;
+    }
+
+    public static String tmpl(String content, List<Double> params) {
+        String regex = "\\{var\\}";
+        for (int i = 0; i <params.size() ; i++) {
+            content = content.replaceFirst(regex,"inx[".concat(String.valueOf(i)).concat("]"));
+        }
+        return content;
     }
 
 }

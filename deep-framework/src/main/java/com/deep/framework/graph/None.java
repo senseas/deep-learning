@@ -1,8 +1,11 @@
 package com.deep.framework.graph;
 
+import com.deep.framework.lang.util.BeanUtil;
 import lombok.Data;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 @Data
@@ -102,8 +105,29 @@ public class None implements Serializable {
         }
     }
 
+    public None setParams(Object... arr) {
+        for (Object o : arr) {
+            if (o instanceof List) {
+                params.addAll((List) o);
+            } else {
+                params.add((double) o);
+            }
+        }
+        return this;
+    }
+
+    public String toString() {
+        return new StringBuilder("void func(double[] inx,double out){")
+                .append("out =")
+                .append(BeanUtil.tmpl(grads, params))
+                .append(";}")
+                .toString();
+    }
+
+    private List<Double> params = new ArrayList<>();
     private int idx;
     private transient Tensor tensor;
     private double value, grad;
     private transient boolean reduce;
+    private String grads = "1";
 }

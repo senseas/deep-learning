@@ -62,6 +62,12 @@ public class TensorFlow implements Serializable {
                 double grad = out.getGrad();
                 inx.setGrad(grad);
                 iny.setGrad(-grad);
+
+                inx.setParams(out.getParams());
+                iny.setParams(out.getParams());
+
+                inx.setGrads(out.getGrads());
+                iny.setGrads("-".concat(out.getGrads()));
             }
 
         };
@@ -101,6 +107,12 @@ public class TensorFlow implements Serializable {
                 double grad = out.getGrad();
                 inx.setGrad(grad * valy);
                 iny.setGrad(grad * valx);
+
+                inx.setParams(out.getParams(), valy);
+                iny.setParams(out.getParams(), valx);
+
+                inx.setGrads(out.getGrads().concat("*{var}"));
+                iny.setGrads(out.getGrads().concat("*{var}"));
             }
 
         };
@@ -175,6 +187,9 @@ public class TensorFlow implements Serializable {
                 double valx = inx.getValue(), valy = iny.getValue();
                 double grad = out.getGrad();
                 inx.setGrad(grad * valy * Math.pow(valx, valy - 1));
+
+                inx.setParams(out.getParams(), valy, valx, valy);
+                inx.setGrads(out.getGrads().concat("*{var}*Math.pow({var},{var}-1)"));
             }
 
         };
