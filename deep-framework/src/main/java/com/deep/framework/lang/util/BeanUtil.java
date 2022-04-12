@@ -63,7 +63,7 @@ public class BeanUtil {
         for (int i = 0; i <params.size() ; i++) {
             content = content.replaceFirst(regex,"inx[".concat(String.valueOf(i)).concat("]"));
         }
-        return content;
+        return content.replaceAll("--","");
     }
 
 }
