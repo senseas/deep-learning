@@ -17,7 +17,7 @@ import static jcuda.runtime.JCuda.cudaMalloc;
 
 public class Cudnn {
 
-    private cudnnHandle handle;
+    private final cudnnHandle handle;
     private static Cudnn cudnn;
 
     // Create a CUDNN handle
@@ -71,7 +71,7 @@ public class Cudnn {
 
         // workspace size && allocate memory
         long sizeInBytes = 0;
-        long sizeInBytesArray[] = {sizeInBytes};
+        long[] sizeInBytesArray = {sizeInBytes};
         int workspace_size = 0;
         cudnnGetConvolutionForwardWorkspaceSize(
                 handle,

@@ -117,11 +117,11 @@ public class None implements Serializable {
     }
 
     public String toString() {
-        return new StringBuilder("void func(double[] inx,double out){")
-                .append("out =")
-                .append(BeanUtil.tmpl(grads, params))
-                .append(";}")
-                .toString();
+        return new StringBuilder("__global__ void func(double[] inx,double out){")
+            .append("out =")
+            .append(BeanUtil.tmpl(grads, params))
+            .append(";}")
+            .toString();
     }
 
     private List<Double> params = new ArrayList<>();

@@ -3,6 +3,7 @@ package com.deep.framework.framework;
 import com.deep.framework.graph.Tensor;
 import jcuda.Pointer;
 import jcuda.Sizeof;
+import jcuda.driver.CUfunction;
 
 import java.io.Serializable;
 import java.util.Objects;
@@ -14,6 +15,7 @@ public class CudaContext implements Serializable {
 
     private final Tensor tensor;
     private Pointer value, grad;
+    private CUfunction function;
 
     public CudaContext(Tensor tensor) {
         this.tensor = tensor;
