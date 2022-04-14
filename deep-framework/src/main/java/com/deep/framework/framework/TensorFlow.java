@@ -317,7 +317,7 @@ public class TensorFlow implements Serializable {
                 inx.setGrad(grad * -Math.pow(1 / Math.sin(valx), 2));
 
                 inx.setParams(out.getParams(), valx);
-                inx.setGrads(out.getGrads().concat("*-Math.pow(1/Math.sin({var}), 2)"));
+                inx.setGrads(out.getGrads().concat("*-Math.pow(1/Math.sin({var}),2)"));
             }
 
         };
@@ -339,7 +339,7 @@ public class TensorFlow implements Serializable {
                 inx.setGrad(grad * Math.tan(valx) / Math.cos(valx));
 
                 inx.setParams(out.getParams(), valx, valx);
-                inx.setGrads(out.getGrads().concat("*Math.tan({var}) / Math.cos({var})"));
+                inx.setGrads(out.getGrads().concat("*Math.tan({var})/Math.cos({var})"));
             }
 
         };
