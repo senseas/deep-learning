@@ -18,17 +18,30 @@ import static jcuda.nvrtc.JNvrtc.*;
 
 @Data
 public class CudaExecutor<E> implements Serializable {
+
     private static CudaExecutor executor;
 
-
-    public CudaContext createContext(Tensor tensor) {
-        initialize();
-        return new CudaContext(tensor);
+    /**
+     * Perform a default initialization of CUDA, creating a context
+     * for the first device
+     */
+    private CudaExecutor() {
+        JCudaDriver.setExceptionsEnabled(true);
+        JNvrtc.setExceptionsEnabled(true);
+        cuInit(0);
+        CUdevice device = new CUdevice();
+        cuDeviceGet(device, 0);
+        CUcontext context = new CUcontext();
+        cuCtxCreate(context, 0, device);
     }
 
     public static CudaExecutor New() {
         if (Objects.nonNull(executor)) return executor;
         return executor = new CudaExecutor();
+    }
+
+    public CudaContext createContext(Tensor tensor) {
+        return new CudaContext(tensor);
     }
 
     public static void run(CUfunction function, Pointer parameters, Grid grid, Block block) {
@@ -41,20 +54,6 @@ public class CudaExecutor<E> implements Serializable {
             null
         );
         cuCtxSynchronize();
-    }
-
-    /**
-     * Perform a default initialization of CUDA, creating a context
-     * for the first device
-     */
-    public static void initialize() {
-        JCudaDriver.setExceptionsEnabled(true);
-        JNvrtc.setExceptionsEnabled(true);
-        cuInit(0);
-        CUdevice device = new CUdevice();
-        cuDeviceGet(device, 0);
-        CUcontext context = new CUcontext();
-        cuCtxCreate(context, 0, device);
     }
 
     /**
