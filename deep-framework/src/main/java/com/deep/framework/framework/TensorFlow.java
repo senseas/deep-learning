@@ -3,14 +3,12 @@ package com.deep.framework.framework;
 import com.deep.framework.graph.*;
 import com.deep.framework.lang.Cublas;
 import com.deep.framework.lang.Tenser;
-import com.deep.framework.lang.util.MathExt;
 
 import java.io.Serializable;
 
 import static com.deep.framework.lang.ForEach.forEach;
 import static com.deep.framework.lang.Shape.*;
-import static java.lang.Math.*;
-import static java.lang.Math.sin;
+import static java.lang.Math.atan;
 
 public class TensorFlow implements Serializable {
 
@@ -143,13 +141,13 @@ public class TensorFlow implements Serializable {
                 double valx = inx.getValue(), valy = iny.getValue();
                 double grad = out.getGrad();
                 inx.setGrad(grad / valy);
-                iny.setGrad(-grad * valx / (valy * valy));
+                iny.setGrad(-grad * valx / Math.pow(valy, 2));
 
                 inx.setParams(out.getParams(), valy);
-                iny.setParams(out.getParams(), valx, valy, valy);
+                iny.setParams(out.getParams(), valx, valy);
 
                 inx.setGrads(out.getGrads().concat("/{var}"));
-                iny.setGrads("-".concat(out.getGrads().concat("*{var}/({var}*{var})")));
+                iny.setGrads("-".concat(out.getGrads().concat("*{var}/Math.pow({var}, 2)")));
             }
 
         };
@@ -385,7 +383,7 @@ public class TensorFlow implements Serializable {
                 inx.setGrad(grad / Math.pow(1 - Math.pow(valx,2), -2));
 
                 inx.setParams(out.getParams(), valx);
-                inx.setGrads(out.getGrads().concat("/Math.pow(1-Math.pow(valx,2),-2)"));
+                inx.setGrads(out.getGrads().concat("/Math.pow(1-Math.pow({var},2),-2)"));
             }
 
         };
