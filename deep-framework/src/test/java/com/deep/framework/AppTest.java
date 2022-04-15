@@ -1,9 +1,21 @@
 package com.deep.framework;
 
+import com.deep.framework.framework.CudaExecutor;
 import com.deep.framework.framework.TensorExecutor;
-import com.deep.framework.graph.Tensor;
 import com.deep.framework.framework.TensorFlow;
+import com.deep.framework.graph.None;
+import com.deep.framework.graph.Tensor;
+import com.deep.framework.lang.cuda.Block;
+import com.deep.framework.lang.cuda.Grid;
+import jcuda.Pointer;
+import jcuda.Sizeof;
+import jcuda.driver.CUdeviceptr;
+import jcuda.driver.CUfunction;
 import org.junit.Test;
+
+import java.util.stream.IntStream;
+
+import static jcuda.driver.JCudaDriver.cuMemcpyDtoH;
 
 public class AppTest {
 
@@ -14,6 +26,28 @@ public class AppTest {
         TensorExecutor executor = new TensorExecutor(tensor);
         executor.run();
 
+        Double value = 1 / (1 + Math.exp(-(-0.6354469361189982)));
+        System.out.println(value);
+        Double value1 = value * (1 - value);
+        System.out.println(value1 * 0.1694231856183997);
+    }
+
+    @Test
+    public void sigmoidTestxx() {
+        TensorFlow tf = new TensorFlow();
+        Tensor tensor = tf.sigmoid(new Tensor(-0.6354469361189982));
+        TensorExecutor executor = new TensorExecutor(tensor);
+        executor.run();
+        None none = ((None) ((Tensor) tensor.getInput()[0]).getOutput());
+
+        CUfunction sigmoid = CudaExecutor.New().createFunction("Sigmoid", none.toString());
+        CUdeviceptr deviceInput = CudaExecutor.New().createDeviceData(none.getParams().stream().mapToDouble(Double::doubleValue).toArray());
+        CUdeviceptr deviceOutput = CudaExecutor.New().createDeviceData(new double[1]);
+        Pointer kernelParams = CudaExecutor.New().createKernelParams(deviceInput, deviceOutput);
+        CudaExecutor.New().run(sigmoid, kernelParams, new Grid(10000), new Block(1000));
+        double hostOutput[] = new double[1];
+        cuMemcpyDtoH(Pointer.to(hostOutput), deviceOutput, 1 * Sizeof.DOUBLE);
+        System.out.println(hostOutput[0]);
         Double value = 1 / (1 + Math.exp(-(-0.6354469361189982)));
         System.out.println(value);
         Double value1 = value * (1 - value);
