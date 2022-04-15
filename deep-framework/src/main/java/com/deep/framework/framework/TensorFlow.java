@@ -147,7 +147,7 @@ public class TensorFlow implements Serializable {
                 iny.setParams(out.getParams(), valx, valy);
 
                 inx.setGrads(out.getGrads().concat("/{var}"));
-                iny.setGrads("-".concat(out.getGrads().concat("*{var}/Math.pow({var}, 2)")));
+                iny.setGrads("-".concat(out.getGrads().concat("*{var}/powf({var}, 2)")));
             }
 
         };
@@ -169,7 +169,7 @@ public class TensorFlow implements Serializable {
                 inx.setGrad(grad * Math.exp(valx));
 
                 inx.setParams(out.getParams(), valx);
-                inx.setGrads(out.getGrads().concat("*Math.exp({var})"));
+                inx.setGrads(out.getGrads().concat("*expf({var})"));
             }
 
         };
@@ -207,7 +207,7 @@ public class TensorFlow implements Serializable {
                 inx.setGrad(grad * valy * Math.pow(valx, valy - 1));
 
                 inx.setParams(out.getParams(), valy, valx, valy);
-                inx.setGrads(out.getGrads().concat("*{var}*Math.pow({var},{var}-1)"));
+                inx.setGrads(out.getGrads().concat("*{var}*powf({var},{var}-1)"));
             }
 
         };
@@ -251,7 +251,7 @@ public class TensorFlow implements Serializable {
                 inx.setGrad(grad * Math.cos(valx));
 
                 inx.setParams(out.getParams(), valx);
-                inx.setGrads(out.getGrads().concat("*Math.cos({var})"));
+                inx.setGrads(out.getGrads().concat("*cosf({var})"));
             }
 
         };
@@ -273,7 +273,7 @@ public class TensorFlow implements Serializable {
                 inx.setGrad(grad * -Math.sin(valx));
 
                 inx.setParams(out.getParams(), valx);
-                inx.setGrads(out.getGrads().concat("*-Math.sin({var})"));
+                inx.setGrads(out.getGrads().concat("*-sinf({var})"));
             }
 
         };
@@ -295,7 +295,7 @@ public class TensorFlow implements Serializable {
                 inx.setGrad(grad * Math.pow(1 / Math.cos(valx), 2));
 
                 inx.setParams(out.getParams(), valx);
-                inx.setGrads(out.getGrads().concat("*Math.pow(1/cos({var}),2)"));
+                inx.setGrads(out.getGrads().concat("*powf(1/cosf({var}),2)"));
             }
 
         };
@@ -317,7 +317,7 @@ public class TensorFlow implements Serializable {
                 inx.setGrad(grad * -Math.pow(1 / Math.sin(valx), 2));
 
                 inx.setParams(out.getParams(), valx);
-                inx.setGrads(out.getGrads().concat("*-Math.pow(1/Math.sin({var}),2)"));
+                inx.setGrads(out.getGrads().concat("*-powf(1/sinf({var}),2)"));
             }
 
         };
@@ -339,7 +339,7 @@ public class TensorFlow implements Serializable {
                 inx.setGrad(grad * Math.tan(valx) / Math.cos(valx));
 
                 inx.setParams(out.getParams(), valx, valx);
-                inx.setGrads(out.getGrads().concat("*Math.tan({var})/Math.cos({var})"));
+                inx.setGrads(out.getGrads().concat("*tanf({var})/cosf({var})"));
             }
 
         };
@@ -361,7 +361,7 @@ public class TensorFlow implements Serializable {
                 inx.setGrad(grad * -Math.cos(valx) / Math.pow(Math.sin(valx), 2));
 
                 inx.setParams(out.getParams(), valx, valx);
-                inx.setGrads(out.getGrads().concat("*-Math.cos({var})/Math.pow(Math.sin({var}),2)"));
+                inx.setGrads(out.getGrads().concat("*-cosf({var})/powf(sinf({var}),2)"));
             }
 
         };
@@ -383,7 +383,7 @@ public class TensorFlow implements Serializable {
                 inx.setGrad(grad / Math.pow(1 - Math.pow(valx,2), -2));
 
                 inx.setParams(out.getParams(), valx);
-                inx.setGrads(out.getGrads().concat("/Math.pow(1-Math.pow({var},2),-2)"));
+                inx.setGrads(out.getGrads().concat("/powf(1-powf({var},2),-2)"));
             }
 
         };
@@ -405,7 +405,7 @@ public class TensorFlow implements Serializable {
                 inx.setGrad(grad / -Math.pow(1 - Math.pow(valx,2), -2));
 
                 inx.setParams(out.getParams(), valx);
-                inx.setGrads(out.getGrads().concat("/-Math.pow(1-Math.pow({var},2),-2)"));
+                inx.setGrads(out.getGrads().concat("/-powf(1-powf({var},2),-2)"));
             }
 
         };
@@ -427,7 +427,7 @@ public class TensorFlow implements Serializable {
                 inx.setGrad(grad / (1 + Math.pow(valx, 2)));
 
                 inx.setParams(out.getParams(), valx);
-                inx.setGrads(out.getGrads().concat("/(1+Math.pow({var},2))"));
+                inx.setGrads(out.getGrads().concat("/(1+powf({var},2))"));
             }
 
         };
@@ -449,7 +449,7 @@ public class TensorFlow implements Serializable {
                 inx.setGrad(grad / -(1 + Math.pow(valx, 2)));
 
                 inx.setParams(out.getParams(), valx);
-                inx.setGrads(out.getGrads().concat("/-(1+Math.pow({var},2))"));
+                inx.setGrads(out.getGrads().concat("/-(1+powf({var},2))"));
             }
 
         };

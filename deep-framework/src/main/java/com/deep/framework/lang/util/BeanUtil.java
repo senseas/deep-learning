@@ -60,10 +60,10 @@ public class BeanUtil {
 
     public static String tmpl(String content, List<Double> params) {
         String regex = "\\{var\\}";
-        for (int i = 0; i <params.size() ; i++) {
-            content = content.replaceFirst(regex,"inx[".concat(String.valueOf(i)).concat("]"));
+        for (int i = 0; i < params.size(); i++) {
+            content = content.replaceFirst(regex, "inx[".concat(String.valueOf(i)).concat("]"));
         }
-        return content.replaceAll("--","");
+        return content.replaceAll("--|Math.", "");
     }
 
 }

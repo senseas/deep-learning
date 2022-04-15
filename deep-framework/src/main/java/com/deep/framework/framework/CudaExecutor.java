@@ -44,7 +44,7 @@ public class CudaExecutor<E> implements Serializable {
         return new CudaContext(tensor);
     }
 
-    public static void run(CUfunction function, Pointer parameters, Grid grid, Block block) {
+    public void run(CUfunction function, Pointer parameters, Grid grid, Block block) {
         cuLaunchKernel(function,
             grid.x, grid.y, grid.z,
             block.x, block.y, block.z,
@@ -64,7 +64,7 @@ public class CudaExecutor<E> implements Serializable {
      * @param code The source code
      * @return The CUDA function
      */
-    public static CUfunction createFunction(String name, String code) {
+    public CUfunction createFunction(String name, String code) {
         nvrtcProgram program = new nvrtcProgram();
         nvrtcCreateProgram(program, code, null, 0, null, null);
         nvrtcCompileProgram(program, 0, null);
@@ -91,7 +91,7 @@ public class CudaExecutor<E> implements Serializable {
      * @param value The value of the elements
      * @return The pointer to the data
      */
-    public static CUdeviceptr createDeviceData(double[] value) {
+    public CUdeviceptr createDeviceData(double[] value) {
         CUdeviceptr deviceData = new CUdeviceptr();
         cuMemAlloc(deviceData, value.length * Sizeof.DOUBLE);
         cuMemcpyHtoD(deviceData, Pointer.to(value), value.length * Sizeof.DOUBLE);
@@ -105,7 +105,7 @@ public class CudaExecutor<E> implements Serializable {
      * @param args The kernel parameters
      * @return The pointer with the kernel parameters
      */
-    public static Pointer createKernelParams(Object... args) {
+    public Pointer createKernelParams(Object... args) {
         Pointer[] kernelParameters = new Pointer[args.length];
         for (int i = 0; i < args.length; i++) {
             Object arg = args[i];
@@ -120,6 +120,14 @@ public class CudaExecutor<E> implements Serializable {
             } else if (arg instanceof Float) {
                 Float value = (Float) arg;
                 Pointer pointer = Pointer.to(new float[]{value});
+                kernelParameters[i] = pointer;
+            } else if (arg instanceof Long) {
+                Long value = (Long) arg;
+                Pointer pointer = Pointer.to(new long[]{value});
+                kernelParameters[i] = pointer;
+            } else if (arg instanceof Double) {
+                Float value = (Float) arg;
+                Pointer pointer = Pointer.to(new double[]{value});
                 kernelParameters[i] = pointer;
             } else {
                 System.out.println("Type not supported: " + arg.getClass());
