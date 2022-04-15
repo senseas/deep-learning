@@ -147,7 +147,7 @@ public class TensorFlow implements Serializable {
                 iny.setParams(out.getParams(), valx, valy);
 
                 inx.setGrads(out.getGrads().concat("/{var}"));
-                iny.setGrads("-".concat(out.getGrads().concat("*{var}/powf({var}, 2)")));
+                iny.setGrads("-".concat(out.getGrads().concat("*{var}/powf({var},2)")));
             }
 
         };
