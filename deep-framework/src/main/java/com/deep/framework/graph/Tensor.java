@@ -97,16 +97,9 @@ public class Tensor implements Serializable {
 
     public int shape(int i) {return shape[i];}
 
-    public CudaContext getContext() {
-        if (Objects.nonNull(context)) return context;
-        return context = CudaExecutor.New().createContext(this);
-    }
-
     public double getValue() {
         if (Objects.isNull(tensor)) {
-            return (double)this.valuex;
-        } else if (Objects.isNull(tensor.getShape())) {
-            return (double) tensor.getValuex();
+            return (double) this.valuex;
         } else {
             return ((double[]) tensor.getValuex())[idx];
         }
@@ -115,8 +108,6 @@ public class Tensor implements Serializable {
     public void setValue(double value) {
         if (Objects.isNull(tensor)) {
             this.valuex = value;
-        } else if (Objects.isNull(tensor.getShape())) {
-            tensor.setValuex(value);
         } else {
             ((double[]) tensor.getValuex())[idx] = value;
         }
@@ -124,9 +115,7 @@ public class Tensor implements Serializable {
 
     public double getGrad() {
         if (Objects.isNull(tensor)) {
-            return (double)this.gradx;
-        } else if (Objects.isNull(tensor.getShape())) {
-            return (double) tensor.getGradx();
+            return (double) this.gradx;
         } else {
             return ((double[]) tensor.getGradx())[idx];
         }
@@ -134,9 +123,7 @@ public class Tensor implements Serializable {
 
     public void setGrad(double grad) {
         if (Objects.isNull(tensor)) {
-            this.gradx =(double)this.gradx+ grad;
-        } else if (Objects.isNull(tensor.getShape())) {
-            tensor.setGradx((double) tensor.getGradx() + grad);
+            this.gradx = (double) this.gradx + grad;
         } else {
             ((double[]) tensor.getGradx())[idx] += grad;
         }
@@ -145,8 +132,6 @@ public class Tensor implements Serializable {
     public boolean isReduce() {
         if (Objects.isNull(tensor)) {
             return (boolean) this.reducex;
-        } else if (Objects.isNull(tensor.getShape())) {
-            return (boolean) tensor.getReducex();
         } else {
             return ((boolean[]) tensor.getReducex())[idx];
         }
@@ -155,8 +140,6 @@ public class Tensor implements Serializable {
     public void setReduce(boolean reduce) {
         if (Objects.isNull(tensor)) {
             this.reducex = reduce;
-        } else if (Objects.isNull(tensor.getShape())) {
-            tensor.setReducex(reduce);
         } else {
             ((boolean[]) tensor.getReducex())[idx] = reduce;
         }
@@ -166,39 +149,38 @@ public class Tensor implements Serializable {
         if (Objects.isNull(tensor)) {
             this.reducex = false;
             this.gradx = 0d;
-        } else if (Objects.isNull(tensor.getShape())) {
-            tensor.setReducex(false);
-            tensor.setGradx(0d);
         } else {
             ((boolean[]) tensor.getReducex())[idx] = false;
             ((double[]) tensor.getGradx())[idx] = 0d;
         }
     }
 
-    /*public Tensor setParams(Object... arr) {
-        for (Object o : arr) {
+    public Tensor setParams(Object... arr) {
+        /*for (Object o : arr) {
             if (o instanceof List) {
                 params.addAll((List) o);
             } else {
                 params.add((double) o);
             }
-        }
+        }*/
         return this;
-    }*/
+    }
 
-    private List<Double> params = new ArrayList<>();
+    public CudaContext getContext() {
+        if (Objects.nonNull(context)) return context;
+        return context = CudaExecutor.New().createContext(this);
+    }
+
+
     private String name = "Tensor::";
     protected int[] shape;
     private Tensor[] input;
-    protected Object output, valuex = 0d, gradx = 0d;
+    protected Object output, valuex, gradx;
     protected transient Object function, reducex;
     private transient boolean gradre;
     private transient CudaContext context;
     private int idx;
     private transient Tensor tensor;
     private String grads = "1";
-
-
-
-
+    private List<Double> params = new ArrayList<>();
 }
