@@ -1,5 +1,6 @@
 package com.deep.framework;
 
+import com.deep.framework.framework.CudaContext;
 import com.deep.framework.framework.CudaExecutor;
 import com.deep.framework.framework.TensorExecutor;
 import com.deep.framework.framework.TensorFlow;
@@ -38,9 +39,11 @@ public class AppTest {
         Tensor tensor = tf.sigmoid(new Tensor(-0.6354469361189982));
         TensorExecutor executor = new TensorExecutor(tensor);
         executor.run();
-        None none = ((None) ((Tensor) tensor.getInput()[0]).getOutput());
+        Tensor none = (Tensor) tensor.getInput()[0];
 
-        CUfunction sigmoid = CudaExecutor.New().createFunction("Sigmoid", none.toString());
+        CudaContext context = tensor.getContext();
+
+        CUfunction sigmoid = context.getFunction();
         CUdeviceptr deviceInput = CudaExecutor.New().createDeviceData(none.getParams().stream().mapToDouble(Double::doubleValue).toArray());
         CUdeviceptr deviceOutput = CudaExecutor.New().createDeviceData(new double[1]);
         Pointer kernelParams = CudaExecutor.New().createKernelParams(deviceInput, deviceOutput);

@@ -41,7 +41,8 @@ public class CudaExecutor<E> implements Serializable {
     }
 
     public CudaContext createContext(Tensor tensor) {
-        return new CudaContext(tensor);
+        CUfunction function = createFunction(tensor.getName().replace("Tensor::", ""), tensor.toString());
+        return new CudaContext(tensor, function);
     }
 
     public void run(CUfunction function, Pointer parameters, Grid grid, Block block) {

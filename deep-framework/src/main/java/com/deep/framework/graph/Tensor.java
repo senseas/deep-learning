@@ -2,9 +2,12 @@ package com.deep.framework.graph;
 
 import com.deep.framework.framework.CudaContext;
 import com.deep.framework.framework.CudaExecutor;
+import com.deep.framework.lang.util.BeanUtil;
 import lombok.Data;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 import static com.deep.framework.lang.Shape.*;
@@ -92,6 +95,18 @@ public class Tensor implements Serializable {
         return context = CudaExecutor.New().createContext(this);
     }
 
+    public Tensor setParams(Object... arr) {
+        for (Object o : arr) {
+            if (o instanceof List) {
+                params.addAll((List) o);
+            } else {
+                params.add((double) o);
+            }
+        }
+        return this;
+    }
+
+    private List<Double> params = new ArrayList<>();
     private String name = "Tensor::";
     protected int[] shape;
     private Tensor[] input;
@@ -99,4 +114,14 @@ public class Tensor implements Serializable {
     protected transient Object function, reduce;
     private transient boolean gradre;
     private transient CudaContext context;
+    private String grads = "1";
+
+    public String toString() {
+        return new StringBuilder("extern \"C\"")
+            .append("__global__ void Sigmoid(double* inx , double* out)")
+            .append("{")
+            .append("  out[0] = ").append(BeanUtil.tmpl(grads, params))
+            .append(";")
+            .append("}").toString();
+    }
 }

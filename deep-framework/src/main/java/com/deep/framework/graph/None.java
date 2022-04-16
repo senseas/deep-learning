@@ -105,30 +105,8 @@ public class None implements Serializable {
         }
     }
 
-    public None setParams(Object... arr) {
-        for (Object o : arr) {
-            if (o instanceof List) {
-                params.addAll((List) o);
-            } else {
-                params.add((double) o);
-            }
-        }
-        return this;
-    }
-
-    public String toString() {
-        return new StringBuilder("extern \"C\"")
-        .append("__global__ void Sigmoid(double* inx , double* out)")
-        .append("{")
-        .append("  out[0] = ").append(BeanUtil.tmpl(grads, params))
-        .append(";")
-        .append("}").toString();
-    }
-
-    private List<Double> params = new ArrayList<>();
     private int idx;
     private transient Tensor tensor;
     private double value, grad;
     private transient boolean reduce;
-    private String grads = "1";
 }
