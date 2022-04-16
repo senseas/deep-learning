@@ -1,6 +1,5 @@
 package com.deep.framework.framework;
 
-import com.deep.framework.graph.None;
 import com.deep.framework.graph.Tensor;
 import com.deep.framework.lang.Tenser;
 import com.deep.framework.lang.util.BeanUtil;
@@ -37,7 +36,7 @@ public class TensorFlux implements Serializable {
         Object nones = tensor.compute(), output = tensor.getOutput();
         if (nones != output) {
             zerosOutput(tensor, nones);
-            forEach(tensor.getOutput(), nones, (None out, None none) -> {
+            forEach(tensor.getOutput(), nones, (Tensor out, Tensor none) -> {
                 out.setValue(none.getValue());
                 out.reset();
             });
@@ -46,7 +45,7 @@ public class TensorFlux implements Serializable {
 
     public static void computer(Tensor tensor) {
         if (Objects.nonNull(tensor.getOutput())) {
-            forEach(tensor.getOutput(), (None out) -> {
+            forEach(tensor.getOutput(), (Tensor out) -> {
                 out.reset();
             });
         }
@@ -55,14 +54,14 @@ public class TensorFlux implements Serializable {
 
     public static void gradient(Tensor tensor) {
         tensor.gradient();
-        forEach(tensor.getOutput(), (None out) -> {
+        forEach(tensor.getOutput(), (Tensor out) -> {
             out.reset();
         });
     }
 
     public static void reducer(Tensor tensor) {
         if (tensor.isGradre()) {
-            forEach(tensor.getOutput(), (None none) -> {
+            forEach(tensor.getOutput(), (Tensor none) -> {
                 if (!none.isReduce()) {
                     none.setReduce(true);
                     double valu = Math.abs(none.getValue()), grad = Math.abs(none.getGrad());
@@ -79,7 +78,7 @@ public class TensorFlux implements Serializable {
     private static void forwards(Tensor tensor) {
         Object nones = getOutput(tensor.getFunction());
         zerosOutput(tensor, nones);
-        forEach(tensor.getOutput(), nones, (None out, None none) -> {
+        forEach(tensor.getOutput(), nones, (Tensor out, Tensor none) -> {
             out.setValue(none.getValue());
             out.reset();
         });
@@ -87,7 +86,7 @@ public class TensorFlux implements Serializable {
 
     private static void backwards(Tensor tensor) {
         Object nones = getOutput(tensor.getFunction());
-        forEach(tensor.getOutput(), nones, (None out, None none) -> {
+        forEach(tensor.getOutput(), nones, (Tensor out, Tensor none) -> {
             none.setGrad(out.getGrad());
         });
     }
@@ -97,15 +96,15 @@ public class TensorFlux implements Serializable {
             if (BeanUtil.isTensor(o)) {
                 int[] shape = ((Tenser) o).shape;
                 tensor.setShape(shape);
-                tensor.setValue(zeros(shape));
-                tensor.setGrad(zeros(shape));
-                tensor.setReduce(booleans(shape));
+                tensor.setValuex(zeros(shape));
+                tensor.setGradx(zeros(shape));
+                tensor.setReducex(booleans(shape));
                 tensor.setOutput(fillNones(tensor));
             } else {
-                tensor.setValue(0d);
-                tensor.setGrad(0d);
-                tensor.setReduce(false);
-                tensor.setOutput(new None(tensor));
+                tensor.setValuex(0d);
+                tensor.setGradx(0d);
+                tensor.setReducex(false);
+                tensor.setOutput(tensor);
             }
         }
     }
@@ -116,22 +115,10 @@ public class TensorFlux implements Serializable {
                 Tensor o = (Tensor) b;
                 return o.getOutput();
             });
-            return (E) fill(c, shape(None.class, c), b -> b);
+            return (E) fill(c, shape(Tensor.class, c), b -> b);
         } else {
             Tensor o = (Tensor) a;
             return o.getOutput();
-        }
-    }
-
-    public static <E> E getTensor(Object a) {
-        if (BeanUtil.isTensor(a)) {
-            return (E) fill(a, shape(Tensor.class, a), b -> {
-                None o = (None) b;
-                return new Tensor(o);
-            });
-        } else {
-            None o = (None) a;
-            return (E) new Tensor(o);
         }
     }
 

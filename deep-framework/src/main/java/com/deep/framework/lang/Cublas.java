@@ -42,7 +42,7 @@ public class Cublas {
         // DC= [AD=NK * DB=KM]
         cublasDgemm(handle, CUBLAS_OP_N, CUBLAS_OP_N, N, M, K, alpha, DB, N, DA, K, beta, DC, N);
         // Copy the result from the device to the host
-        cublasGetVector(M * N, Sizeof.DOUBLE, DC, 1, Pointer.to((double[]) C.getValue()), 1);
+        cublasGetVector(M * N, Sizeof.DOUBLE, DC, 1, Pointer.to((double[]) C.getValuex()), 1);
     }
 
     //MK*KN
@@ -58,12 +58,12 @@ public class Cublas {
         //GA= KM_T[DB=KN * GC_T=NM]
         cublasDgemm(handle, CUBLAS_OP_T, CUBLAS_OP_N, K, M, N, alpha, DB, N, GC, N, beta, GA, K);
         // Copy the result from the device to the host
-        cublasGetVector(M * K, Sizeof.DOUBLE, GA, 1, Pointer.to((double[]) A.getGrad()), 1);
+        cublasGetVector(M * K, Sizeof.DOUBLE, GA, 1, Pointer.to((double[]) A.getGradx()), 1);
 
         //GB= NK_T[GC_T=NM * DA=MK]
         cublasDgemm(handle, CUBLAS_OP_N, CUBLAS_OP_T, N, K, M, alpha, GC, N, DA, K, beta, GB, N);
         // Copy the result from the device to the host
-        cublasGetVector(K * N, Sizeof.DOUBLE, GB, 1, Pointer.to((double[]) B.getGrad()), 1);
+        cublasGetVector(K * N, Sizeof.DOUBLE, GB, 1, Pointer.to((double[]) B.getGradx()), 1);
     }
 
     public void matmul(int transa, int transb, int M, int N, int K, Pointer A, Pointer B, Pointer C) {

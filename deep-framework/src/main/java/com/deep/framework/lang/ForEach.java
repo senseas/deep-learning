@@ -1,6 +1,5 @@
 package com.deep.framework.lang;
 
-import com.deep.framework.graph.None;
 import com.deep.framework.graph.Tensor;
 import com.deep.framework.lang.function.*;
 import com.deep.framework.lang.util.BeanUtil;
@@ -165,20 +164,20 @@ public class ForEach implements Serializable {
         }
     }
 
-    public static Tenser<None> padding(Tenser<None> a, int padding) {
+    public static Tenser<Tensor> padding(Tenser<Tensor> a, int padding) {
         if (padding == 0) return a;
         int height = a.shape(0), width = a.shape(1);
         int hx = height + 2 * padding, wx = width + 2 * padding;
-        Tenser nones = new Tenser(new None[hx * wx], new int[]{hx, wx});
+        Tenser nones = new Tenser(new Tensor[hx * wx], new int[]{hx, wx});
 
         forEach(padding, wx, (m, n) -> {
-            nones.set(new None(0d, false), m, n);
-            nones.set(new None(0d, false), m + padding + height, n);
+            nones.set(new Tensor(0d, false), m, n);
+            nones.set(new Tensor(0d, false), m + padding + height, n);
         });
 
         forEach(hx, padding, (m, n) -> {
-            nones.set(new None(0d, false), m, n);
-            nones.set(new None(0d, false), m, n + padding + width);
+            nones.set(new Tensor(0d, false), m, n);
+            nones.set(new Tensor(0d, false), m, n + padding + width);
         });
 
         forEach(height, width, (i, l) -> {

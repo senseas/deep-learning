@@ -2,7 +2,7 @@ package com.deep.framework.graph;
 
 import com.deep.framework.framework.CudaContext;
 import com.deep.framework.framework.CudaExecutor;
-import com.deep.framework.lang.util.BeanUtil;
+import com.deep.framework.framework.TensorFlux;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -16,53 +16,53 @@ import static com.deep.framework.lang.Shape.*;
 public class Tensor implements Serializable {
 
     public Tensor(double value) {
-        this.name = "None";
-        this.value = value;
-        this.grad = 0d;
-        this.output = new None(this);
+        this.name = "Tensor";
+        this.valuex = value;
+        this.gradx = 0d;
+        this.output = this;
         this.gradre = true;
     }
 
     public Tensor(double value, boolean gradre) {
-        this.name = "None";
-        this.value = value;
-        this.grad = 0d;
-        this.output = new None(this);
+        this.name = "Tensor";
+        this.valuex = value;
+        this.gradx = 0d;
+        this.output = this;
         this.gradre = gradre;
     }
 
     public Tensor(int[] shape) {
-        this.name = "None";
+        this.name = "Tensor";
         this.shape = shape;
-        this.value = random(shape);
-        this.grad = zeros(shape);
-        this.reduce = booleans(shape);
+        this.valuex = random(shape);
+        this.gradx = zeros(shape);
+        this.reducex = booleans(shape);
         this.output = fillNones(this);
         this.gradre = true;
     }
 
     public Tensor(String name, int[] shape) {
-        this.name = "None::".concat(name);
+        this.name = "Tensor::".concat(name);
         this.shape = shape;
-        this.value = random(shape);
-        this.grad = zeros(shape);
-        this.reduce = booleans(shape);
+        this.valuex = random(shape);
+        this.gradx = zeros(shape);
+        this.reducex = booleans(shape);
         this.output = fillNones(this);
         this.gradre = true;
     }
 
     public Tensor(int[] shape, double value, boolean gradre) {
-        this.name = "None";
+        this.name = "Tensor";
         this.shape = shape;
-        this.value = values(shape, value);
-        this.grad = zeros(shape);
-        this.reduce = booleans(shape);
+        this.valuex = values(shape, value);
+        this.gradx = zeros(shape);
+        this.reducex = booleans(shape);
         this.output = fillNones(this);
         this.gradre = gradre;
     }
 
-    public Tensor(None input) {
-        this.name = "None";
+    public Tensor(Tensor input) {
+        this.name = "Tensor";
         this.output = input;
     }
 
@@ -71,9 +71,16 @@ public class Tensor implements Serializable {
         this.input = input;
     }
 
+    public Tensor(Tensor tensor, int idx) {
+        this.tensor = tensor;
+        this.output = this;
+        this.idx = idx;
+    }
+
     public <M> Tensor(M m) {
         this.name = "Function";
         this.function = m;
+        this.output = TensorFlux.getOutput(m);
     }
 
     public <M> M compute() { return null; }
@@ -95,7 +102,80 @@ public class Tensor implements Serializable {
         return context = CudaExecutor.New().createContext(this);
     }
 
-    public Tensor setParams(Object... arr) {
+    public double getValue() {
+        if (Objects.isNull(tensor)) {
+            return (double)this.valuex;
+        } else if (Objects.isNull(tensor.getShape())) {
+            return (double) tensor.getValuex();
+        } else {
+            return ((double[]) tensor.getValuex())[idx];
+        }
+    }
+
+    public void setValue(double value) {
+        if (Objects.isNull(tensor)) {
+            this.valuex = value;
+        } else if (Objects.isNull(tensor.getShape())) {
+            tensor.setValuex(value);
+        } else {
+            ((double[]) tensor.getValuex())[idx] = value;
+        }
+    }
+
+    public double getGrad() {
+        if (Objects.isNull(tensor)) {
+            return (double)this.gradx;
+        } else if (Objects.isNull(tensor.getShape())) {
+            return (double) tensor.getGradx();
+        } else {
+            return ((double[]) tensor.getGradx())[idx];
+        }
+    }
+
+    public void setGrad(double grad) {
+        if (Objects.isNull(tensor)) {
+            this.gradx =(double)this.gradx+ grad;
+        } else if (Objects.isNull(tensor.getShape())) {
+            tensor.setGradx((double) tensor.getGradx() + grad);
+        } else {
+            ((double[]) tensor.getGradx())[idx] += grad;
+        }
+    }
+
+    public boolean isReduce() {
+        if (Objects.isNull(tensor)) {
+            return (boolean) this.reducex;
+        } else if (Objects.isNull(tensor.getShape())) {
+            return (boolean) tensor.getReducex();
+        } else {
+            return ((boolean[]) tensor.getReducex())[idx];
+        }
+    }
+
+    public void setReduce(boolean reduce) {
+        if (Objects.isNull(tensor)) {
+            this.reducex = reduce;
+        } else if (Objects.isNull(tensor.getShape())) {
+            tensor.setReducex(reduce);
+        } else {
+            ((boolean[]) tensor.getReducex())[idx] = reduce;
+        }
+    }
+
+    public void reset() {
+        if (Objects.isNull(tensor)) {
+            this.reducex = false;
+            this.gradx = 0d;
+        } else if (Objects.isNull(tensor.getShape())) {
+            tensor.setReducex(false);
+            tensor.setGradx(0d);
+        } else {
+            ((boolean[]) tensor.getReducex())[idx] = false;
+            ((double[]) tensor.getGradx())[idx] = 0d;
+        }
+    }
+
+    /*public Tensor setParams(Object... arr) {
         for (Object o : arr) {
             if (o instanceof List) {
                 params.addAll((List) o);
@@ -104,24 +184,21 @@ public class Tensor implements Serializable {
             }
         }
         return this;
-    }
+    }*/
 
     private List<Double> params = new ArrayList<>();
     private String name = "Tensor::";
     protected int[] shape;
     private Tensor[] input;
-    protected Object output, value, grad;
-    protected transient Object function, reduce;
+    protected Object output, valuex = 0d, gradx = 0d;
+    protected transient Object function, reducex;
     private transient boolean gradre;
     private transient CudaContext context;
+    private int idx;
+    private transient Tensor tensor;
     private String grads = "1";
 
-    public String toString() {
-        return new StringBuilder("extern \"C\"")
-            .append("__global__ void Sigmoid(double* inx , double* out)")
-            .append("{")
-            .append("  out[0] = ").append(BeanUtil.tmpl(grads, params))
-            .append(";")
-            .append("}").toString();
-    }
+
+
+
 }

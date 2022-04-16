@@ -41,11 +41,11 @@ public class BeanUtil {
     }
 
     public static boolean isNone(Tensor o) {
-        return o.getName().startsWith("None");
+        return o.getName().startsWith("Tensor");
     }
 
     public static boolean isNotNone(Tensor o) {
-        return !o.getName().startsWith("None");
+        return !o.getName().startsWith("Tensor");
     }
 
     public static boolean isFunction(Tensor o) {

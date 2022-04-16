@@ -4,7 +4,6 @@ import com.deep.framework.framework.CudaContext;
 import com.deep.framework.framework.CudaExecutor;
 import com.deep.framework.framework.TensorExecutor;
 import com.deep.framework.framework.TensorFlow;
-import com.deep.framework.graph.None;
 import com.deep.framework.graph.Tensor;
 import com.deep.framework.lang.cuda.Block;
 import com.deep.framework.lang.cuda.Grid;
@@ -13,8 +12,6 @@ import jcuda.Sizeof;
 import jcuda.driver.CUdeviceptr;
 import jcuda.driver.CUfunction;
 import org.junit.Test;
-
-import java.util.stream.IntStream;
 
 import static jcuda.driver.JCudaDriver.cuMemcpyDtoH;
 

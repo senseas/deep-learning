@@ -25,13 +25,11 @@ public class TensorOperator extends Tensor {
 
     public <M> M getInput(int i) {
         Tensor input = getInput()[i];
-        if (BeanUtil.isFunction(input)) return TensorFlux.getOutput(input.getFunction());
         return input.getOutput();
     }
 
     public Stream inputStream() {
-        return Arrays.stream(getInput()).map(input -> BeanUtil.isFunction(input) ?
-                TensorFlux.getOutput(input.getFunction()) : input.getOutput());
+        return Arrays.stream(getInput()).map(input -> input.getOutput());
     }
 
     public <M> M getOutput() {
@@ -41,14 +39,14 @@ public class TensorOperator extends Tensor {
     public <M> M createOutput(Object o) {
         if (Objects.isNull(getOutput())) {
             this.shape = shapes(o);
-            this.value = zeros(shape);
-            this.grad = zeros(shape);
-            this.reduce = booleans(shape);
+            this.valuex = zeros(shape);
+            this.gradx = zeros(shape);
+            this.reducex = booleans(shape);
             this.output = fillNones(this);
         } else {
-            Arrays.fill((double[]) value, 0d);
-            Arrays.fill((double[]) grad, 0d);
-            Arrays.fill((boolean[]) reduce, false);
+            Arrays.fill((double[]) valuex, 0d);
+            Arrays.fill((double[]) gradx, 0d);
+            Arrays.fill((boolean[]) reducex, false);
         }
         return getOutput();
     }
@@ -65,6 +63,17 @@ public class TensorOperator extends Tensor {
 
     public void reduce() {
         for (Tensor o : getInput()) TensorFlux.reducer(o);
+    }
+
+    public String toString() {
+        return new StringBuilder("extern \"C\"")
+            .append("__global__ void ")
+            .append(getName())
+            .append("(double* inx , double* out)")
+            .append("{")
+            .append("  out[0] = ").append(BeanUtil.tmpl(getGrads(), getParams()))
+            .append(";")
+            .append("}").toString();
     }
 
 }

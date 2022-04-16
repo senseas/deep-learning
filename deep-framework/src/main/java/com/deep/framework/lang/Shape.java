@@ -1,6 +1,5 @@
 package com.deep.framework.lang;
 
-import com.deep.framework.graph.None;
 import com.deep.framework.graph.Tensor;
 import com.deep.framework.graph.TensorConst;
 import com.deep.framework.lang.function.Func;
@@ -23,7 +22,7 @@ public class Shape extends ForEach {
     }
 
     public static <E> E fillNones(Tensor tensor) {
-        None[] nones = IntStream.range(0, size(tensor.getShape())).mapToObj(i -> new None(tensor, i)).toArray(None[]::new);
+        Tensor[] nones = IntStream.range(0, size(tensor.getShape())).mapToObj(i -> new Tensor(tensor, i)).toArray(Tensor[]::new);
         return (E) new Tenser(nones, tensor.getShape());
     }
 
@@ -44,7 +43,7 @@ public class Shape extends ForEach {
     }
 
     public static <E> E zeroNones(Object a) {
-        return (E) fill(shape(None.class, a), o -> new None(0d, false));
+        return (E) fill(shape(Tensor.class, a), o -> new Tensor(0d, false));
     }
 
     public static Object shape(Class clas, Object o) {
@@ -91,7 +90,7 @@ public class Shape extends ForEach {
     public static double[] linesValue(Object arr) {
         double[] list = new double[size(arr)];
         AtomicInteger index = new AtomicInteger();
-        forEach(arr, (None a) -> {
+        forEach(arr, (Tensor a) -> {
             list[index.getAndIncrement()] = a.getValue();
         });
         return list;
@@ -100,7 +99,7 @@ public class Shape extends ForEach {
     public static double[] linesGrad(Object arr) {
         double[] list = new double[size(arr)];
         AtomicInteger index = new AtomicInteger();
-        forEach(arr, (None a) -> {
+        forEach(arr, (Tensor a) -> {
             list[index.getAndIncrement()] = a.getGrad();
         });
         return list;

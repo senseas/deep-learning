@@ -22,13 +22,13 @@ public class CudaContext implements Serializable {
 
     public Pointer getValue() {
         if (Objects.nonNull(value)) return value;
-        double[] value = (double[]) tensor.getValue();
+        double[] value = (double[]) tensor.getValuex();
         return CudaExecutor.New().createDeviceData(value);
     }
 
     public Pointer getGrad() {
         if (Objects.nonNull(grad)) return grad;
-        double[] value = (double[]) tensor.getGrad();
+        double[] value = (double[]) tensor.getGradx();
         return CudaExecutor.New().createDeviceData(value);
     }
 }

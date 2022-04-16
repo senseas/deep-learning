@@ -1,32 +1,30 @@
+/*
 package com.deep.framework.graph;
 
-import com.deep.framework.lang.util.BeanUtil;
 import lombok.Data;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
 
 @Data
-public class None implements Serializable {
+public class Tensor implements Serializable {
 
-    public None(Tensor tensor) {
+    public Tensor(Tensor tensor) {
         this.tensor = tensor;
     }
 
-    public None(Tensor tensor, int idx) {
+    public Tensor(Tensor tensor, int idx) {
         this.tensor = tensor;
         this.idx = idx;
     }
 
-    public None(double value) {
+    public Tensor(double value) {
         this.value = value;
         this.grad = 0d;
         this.reduce = false;
     }
 
-    public None(double value, boolean gradre) {
+    public Tensor(double value, boolean gradre) {
         this.value = value;
         this.grad = 0d;
         this.reduce = false;
@@ -36,9 +34,9 @@ public class None implements Serializable {
         if (Objects.isNull(tensor)) {
             return this.value;
         } else if (Objects.isNull(tensor.getShape())) {
-            return (double) tensor.getValue();
+            return (double) tensor.getValuex();
         } else {
-            return ((double[]) tensor.getValue())[idx];
+            return ((double[]) tensor.getValuex())[idx];
         }
     }
 
@@ -46,9 +44,9 @@ public class None implements Serializable {
         if (Objects.isNull(tensor)) {
             this.value = value;
         } else if (Objects.isNull(tensor.getShape())) {
-            tensor.setValue(value);
+            tensor.setValuex(value);
         } else {
-            ((double[]) tensor.getValue())[idx] = value;
+            ((double[]) tensor.getValuex())[idx] = value;
         }
     }
 
@@ -56,9 +54,9 @@ public class None implements Serializable {
         if (Objects.isNull(tensor)) {
             return this.grad;
         } else if (Objects.isNull(tensor.getShape())) {
-            return (double) tensor.getGrad();
+            return (double) tensor.getGradx();
         } else {
-            return ((double[]) tensor.getGrad())[idx];
+            return ((double[]) tensor.getGradx())[idx];
         }
     }
 
@@ -66,9 +64,9 @@ public class None implements Serializable {
         if (Objects.isNull(tensor)) {
             this.grad += grad;
         } else if (Objects.isNull(tensor.getShape())) {
-            tensor.setGrad((double) tensor.getGrad() + grad);
+            tensor.setGradx((double) tensor.getGradx() + grad);
         } else {
-            ((double[]) tensor.getGrad())[idx] += grad;
+            ((double[]) tensor.getGradx())[idx] += grad;
         }
     }
 
@@ -76,9 +74,9 @@ public class None implements Serializable {
         if (Objects.isNull(tensor)) {
             return this.reduce;
         } else if (Objects.isNull(tensor.getShape())) {
-            return (boolean) tensor.getReduce();
+            return (boolean) tensor.getReducex();
         } else {
-            return ((boolean[]) tensor.getReduce())[idx];
+            return ((boolean[]) tensor.getReducex())[idx];
         }
     }
 
@@ -86,9 +84,9 @@ public class None implements Serializable {
         if (Objects.isNull(tensor)) {
             this.reduce = reduce;
         } else if (Objects.isNull(tensor.getShape())) {
-            tensor.setReduce(reduce);
+            tensor.setReducex(reduce);
         } else {
-            ((boolean[]) tensor.getReduce())[idx] = reduce;
+            ((boolean[]) tensor.getReducex())[idx] = reduce;
         }
     }
 
@@ -97,11 +95,11 @@ public class None implements Serializable {
             this.reduce = false;
             this.grad = 0d;
         } else if (Objects.isNull(tensor.getShape())) {
-            tensor.setReduce(false);
-            tensor.setGrad(0d);
+            tensor.setReducex(false);
+            tensor.setGradx(0d);
         } else {
-            ((boolean[]) tensor.getReduce())[idx] = false;
-            ((double[]) tensor.getGrad())[idx] = 0d;
+            ((boolean[]) tensor.getReducex())[idx] = false;
+            ((double[]) tensor.getGradx())[idx] = 0d;
         }
     }
 
@@ -110,3 +108,4 @@ public class None implements Serializable {
     private double value, grad;
     private transient boolean reduce;
 }
+*/
