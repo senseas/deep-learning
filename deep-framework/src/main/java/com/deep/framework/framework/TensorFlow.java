@@ -195,6 +195,196 @@ public class TensorFlow implements Serializable {
         };
     }
 
+    public Tensor sin(Tensor... input) {
+        return new TensorOperator("Sin", input) {
+
+            public None compute() {
+                None inx = getInput(0);
+                double valx = inx.getValue();
+                return new None(Math.sin(valx));
+            }
+
+            public void gradient() {
+                None inx = getInput(0), out = getOutput();
+                double valx = inx.getValue();
+                double grad = out.getGrad();
+                inx.setGrad(grad * Math.cos(valx));
+            }
+
+        };
+    }
+
+    public Tensor cos(Tensor... input) {
+        return new TensorOperator("Cos", input) {
+
+            public None compute() {
+                None inx = getInput(0);
+                double valx = inx.getValue();
+                return new None(-Math.sin(valx));
+            }
+
+            public void gradient() {
+                None inx = getInput(0), out = getOutput();
+                double valx = inx.getValue();
+                double grad = out.getGrad();
+                inx.setGrad(grad * -Math.sin(valx));
+            }
+
+        };
+    }
+
+    public Tensor tan(Tensor... input) {
+        return new TensorOperator("Tan", input) {
+
+            public None compute() {
+                None inx = getInput(0);
+                double valx = inx.getValue();
+                return new None(Math.tan(valx));
+            }
+
+            public void gradient() {
+                None inx = getInput(0), out = getOutput();
+                double valx = inx.getValue();
+                double grad = out.getGrad();
+                inx.setGrad(grad * Math.pow(1 / Math.cos(valx), 2));
+            }
+
+        };
+    }
+
+    public Tensor cot(Tensor... input) {
+        return new TensorOperator("Cot", input) {
+
+            public None compute() {
+                None inx = getInput(0);
+                double valx = inx.getValue();
+                return new None(Math.cos(valx) / Math.sin(valx));
+            }
+
+            public void gradient() {
+                None inx = getInput(0), out = getOutput();
+                double valx = inx.getValue();
+                double grad = out.getGrad();
+                inx.setGrad(grad * -Math.pow(1 / Math.sin(valx), 2));
+            }
+
+        };
+    }
+
+    public Tensor sec(Tensor... input) {
+        return new TensorOperator("Sec", input) {
+
+            public None compute() {
+                None inx = getInput(0);
+                double valx = inx.getValue();
+                return new None(1 / Math.cos(valx));
+            }
+
+            public void gradient() {
+                None inx = getInput(0), out = getOutput();
+                double valx = inx.getValue();
+                double grad = out.getGrad();
+                inx.setGrad(grad * Math.tan(valx) / Math.cos(valx));
+            }
+
+        };
+    }
+
+    public Tensor csc(Tensor... input) {
+        return new TensorOperator("Csc", input) {
+
+            public None compute() {
+                None inx = getInput(0);
+                double valx = inx.getValue();
+                return new None(1 / Math.sin(valx));
+            }
+
+            public void gradient() {
+                None inx = getInput(0), out = getOutput();
+                double valx = inx.getValue();
+                double grad = out.getGrad();
+                inx.setGrad(grad * -Math.cos(valx) / Math.pow(Math.sin(valx), 2));
+            }
+
+        };
+    }
+
+    public Tensor arcsin(Tensor... input) {
+        return new TensorOperator("Arcsin", input) {
+
+            public None compute() {
+                None inx = getInput(0);
+                double valx = inx.getValue();
+                return new None(Math.asin(valx));
+            }
+
+            public void gradient() {
+                None inx = getInput(0), out = getOutput();
+                double valx = inx.getValue();
+                double grad = out.getGrad();
+                inx.setGrad(grad / Math.pow(1 - Math.pow(valx,2), -2));
+            }
+
+        };
+    }
+
+    public Tensor arccos(Tensor... input) {
+        return new TensorOperator("Arccos", input) {
+
+            public None compute() {
+                None inx = getInput(0);
+                double valx = inx.getValue();
+                return new None(Math.acos(valx));
+            }
+
+            public void gradient() {
+                None inx = getInput(0), out = getOutput();
+                double valx = inx.getValue();
+                double grad = out.getGrad();
+                inx.setGrad(grad / -Math.pow(1 - Math.pow(valx,2), -2));
+            }
+
+        };
+    }
+
+    public Tensor arctan(Tensor... input) {
+        return new TensorOperator("Arctan", input) {
+
+            public None compute() {
+                None inx = getInput(0);
+                double valx = inx.getValue();
+                return new None(Math.atan(valx));
+            }
+
+            public void gradient() {
+                None inx = getInput(0), out = getOutput();
+                double valx = inx.getValue();
+                double grad = out.getGrad();
+                inx.setGrad(grad / (1 + Math.pow(valx, 2)));
+            }
+
+        };
+    }
+
+    public Tensor arccot(Tensor... input) {
+        return new TensorOperator("Arccot", input) {
+
+            public None compute() {
+                None inx = getInput(0);
+                double valx = inx.getValue();
+                return new None(Math.atan(1 / valx));
+            }
+
+            public void gradient() {
+                None inx = getInput(0), out = getOutput();
+                double valx = inx.getValue();
+                double grad = out.getGrad();
+                inx.setGrad(grad / -(1 + Math.pow(valx, 2)));
+            }
+
+        };
+    }
+
     public Tensor relu(Tensor input) {
         return new TensorOperator("Relu", input) {
 
