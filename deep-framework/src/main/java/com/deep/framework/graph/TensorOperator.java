@@ -26,13 +26,11 @@ public class TensorOperator extends Tensor {
 
     public <M> M getInput(int i) {
         Tensor input = getInput()[i];
-        if (BeanUtil.isFunction(input)) return TensorFlux.getOutput(input.getFunction());
         return input.getOutput();
     }
 
     public Stream inputStream() {
-        return Arrays.stream(getInput()).parallel().map(input -> BeanUtil.isFunction(input) ?
-                TensorFlux.getOutput(input.getFunction()) : input.getOutput());
+        return Arrays.stream(getInput()).parallel().map(input -> input.getOutput());
     }
 
     public <M> M getOutput() {

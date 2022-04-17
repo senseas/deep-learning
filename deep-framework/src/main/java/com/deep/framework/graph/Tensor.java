@@ -1,5 +1,6 @@
 package com.deep.framework.graph;
 
+import com.deep.framework.framework.TensorFlux;
 import com.deep.framework.lang.Shape;
 import lombok.Data;
 
@@ -46,6 +47,7 @@ public class Tensor implements Serializable {
     public <M> Tensor(M[] m) {
         this.name = "Function";
         this.function = m;
+        this.output = TensorFlux.getOutput(m);
     }
 
     public <M> M compute() { return null; }
