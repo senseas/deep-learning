@@ -89,7 +89,7 @@ public class Tensor implements Serializable {
 
     public CudaContext getContext() {
         if (Objects.nonNull(context)) return context;
-        return context = CudaExecutor.New().createContext(this);
+        return context = new CudaContext(this);
     }
 
     private String name = "Tensor::";

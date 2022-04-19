@@ -110,22 +110,17 @@ public class None implements Serializable {
             if (o instanceof List) {
                 params.addAll((List) o);
             } else {
-                params.add((double) o);
+                params.add((None) o);
             }
         }
         return this;
     }
 
-    public String toString() {
-        return new StringBuilder("extern \"C\"")
-        .append("__global__ void Sigmoid(double* inx , double* out)")
-        .append("{")
-        .append("  out[0] = ").append(BeanUtil.tmpl(grads, params))
-        .append(";")
-        .append("}").toString();
+    public String getFunc(String name) {
+        return BeanUtil.getCode(name, grads);
     }
 
-    private List<Double> params = new ArrayList<>();
+    private List<None> params = new ArrayList<>();
     private int idx;
     private transient Tensor tensor;
     private double value, grad;

@@ -38,15 +38,13 @@ public class AppTest {
         Tensor tensor = tf.sigmoid(new Tensor(-0.6354469361189982));
         TensorExecutor executor = new TensorExecutor(tensor);
         executor.run();
-        None none = ((None) ((Tensor) tensor.getInput()[0]).getOutput());
+        None none = tensor.getInput()[0].getOutput();
 
-        CUfunction sigmoid = CudaExecutor.New().createFunction("Sigmoid", none.toString());
-        CUdeviceptr deviceInput = CudaExecutor.New().createDeviceData(none.getParams().stream().mapToDouble(Double::doubleValue).toArray());
-        CUdeviceptr deviceOutput = CudaExecutor.New().createDeviceData(new double[1]);
-        Pointer kernelParams = CudaExecutor.New().createKernelParams(deviceInput, deviceOutput);
-        CudaExecutor.New().run(sigmoid, kernelParams, new Grid(10000), new Block(1000));
-        double hostOutput[] = new double[1];
-        cuMemcpyDtoH(Pointer.to(hostOutput), deviceOutput, 1 * Sizeof.DOUBLE);
+        CUfunction sigmoid = CudaExecutor.createFunction("Sigmoid", none.getFunc("Sigmoid"));
+        double[] input = none.getParams().stream().mapToDouble(None::getValue).toArray();
+        double[] hostOutput = new double[1];
+
+        CudaExecutor.run(sigmoid, input, hostOutput);
         System.out.println(hostOutput[0]);
         Double value = 1 / (1 + Math.exp(-(-0.6354469361189982)));
         System.out.println(value);
