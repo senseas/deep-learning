@@ -92,6 +92,10 @@ public class None implements Serializable {
         }
     }
 
+    public void resetx() {
+        this.grad = 0d;
+    }
+
     public void reset() {
         if (Objects.isNull(tensor)) {
             this.reduce = false;
@@ -106,6 +110,7 @@ public class None implements Serializable {
     }
 
     public None setParams(Object... arr) {
+        params = new ArrayList<>();
         for (Object o : arr) {
             if (o instanceof List) {
                 params.addAll((List) o);
@@ -116,14 +121,10 @@ public class None implements Serializable {
         return this;
     }
 
-    public String getFunc(String name) {
-        return BeanUtil.getCode(name, grads);
-    }
-
     private List<None> params = new ArrayList<>();
     private int idx;
     private transient Tensor tensor;
     private double value, grad;
     private transient boolean reduce;
-    private String grads = "1";
+    private String grads = "{var}";
 }

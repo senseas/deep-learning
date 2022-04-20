@@ -1,21 +1,12 @@
 package com.deep.framework;
 
-import com.deep.framework.framework.CudaExecutor;
 import com.deep.framework.framework.TensorExecutor;
 import com.deep.framework.framework.TensorFlow;
 import com.deep.framework.graph.None;
 import com.deep.framework.graph.Tensor;
-import com.deep.framework.lang.cuda.Block;
-import com.deep.framework.lang.cuda.Grid;
-import jcuda.Pointer;
-import jcuda.Sizeof;
-import jcuda.driver.CUdeviceptr;
-import jcuda.driver.CUfunction;
 import org.junit.Test;
 
-import java.util.stream.IntStream;
-
-import static jcuda.driver.JCudaDriver.cuMemcpyDtoH;
+import static com.deep.framework.framework.CudaExecutor.gradient;
 
 public class AppTest {
 
@@ -38,14 +29,11 @@ public class AppTest {
         Tensor tensor = tf.sigmoid(new Tensor(-0.6354469361189982));
         TensorExecutor executor = new TensorExecutor(tensor);
         executor.run();
+
         None none = tensor.getInput()[0].getOutput();
+        gradient(tensor);
+        System.out.println(none.getGrad());
 
-        CUfunction sigmoid = CudaExecutor.createFunction("Sigmoid", none.getFunc("Sigmoid"));
-        double[] input = none.getParams().stream().mapToDouble(None::getValue).toArray();
-        double[] hostOutput = new double[1];
-
-        CudaExecutor.run(sigmoid, input, hostOutput);
-        System.out.println(hostOutput[0]);
         Double value = 1 / (1 + Math.exp(-(-0.6354469361189982)));
         System.out.println(value);
         Double value1 = value * (1 - value);

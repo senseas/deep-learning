@@ -25,6 +25,7 @@ public class TensorFlux implements Serializable {
         forEach(tensor.getFunction(), (Tensor a) -> {
             a.backward();
         });
+        tensor.gradient();
     }
 
     public static void reduce(Tensor tensor) {

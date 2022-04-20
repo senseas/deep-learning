@@ -15,11 +15,13 @@ import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static jcuda.driver.JCudaDriver.*;
 import static jcuda.nvrtc.JNvrtc.*;
+import static jcuda.runtime.JCuda.cudaFree;
 
 @Data
 public class CudaExecutor implements Serializable {
@@ -54,22 +56,30 @@ public class CudaExecutor implements Serializable {
 
         cuMemcpyDtoH(Pointer.to(output), outputDevice, output.length * Sizeof.DOUBLE);
         cuCtxSynchronize();
+
+        cudaFree(inputDevice);
+        cudaFree(outputDevice);
     }
 
     public static void run(CUfunction function, double[] input, double[] output) {
         CUdeviceptr inputDevice = createDeviceData(input);
         CUdeviceptr outputDevice = createDeviceData(output);
+        Pointer kernelParams = createKernelParams(inputDevice, outputDevice);
 
         cuLaunchKernel(function,
             1, 1, 1,
             1, 1, 1,
             0, null,
-            createKernelParams(inputDevice, outputDevice),
+            kernelParams,
             null
         );
 
         cuMemcpyDtoH(Pointer.to(output), outputDevice, output.length * Sizeof.DOUBLE);
         cuCtxSynchronize();
+
+         cudaFree(inputDevice);
+         cudaFree(outputDevice);
+         cudaFree(kernelParams);
     }
 
     /**
@@ -79,12 +89,19 @@ public class CudaExecutor implements Serializable {
      * @param tensor The source code
      * @return The CUDA function
      */
-    public static void createFunction(Tensor tensor) {
+    public static void gradient(Tensor tensor) {
+        None out = tensor.getOutput();
         IntStream.range(0, tensor.getInput().length).forEach(i -> {
             None none = tensor.getInput()[i].getOutput();
-            String name = tensor.getName().replace("Tensor::", "").concat(String.valueOf(i));
-            CUfunction function = createFunction(name, none.getFunc(name));
-            functions.put(name, function);
+            CUfunction function = getFunction(tensor, none, i);
+
+            none.getParams().add(0, new None(out.getGrad()));
+            double[] input = none.getParams().stream().mapToDouble(None::getValue).toArray();
+            none.getParams().remove(0);
+            double[] output = new double[]{1};
+            run(function, input, output);
+            none.resetx();
+            none.setGrad(output[0]);
         });
     }
 
@@ -95,14 +112,15 @@ public class CudaExecutor implements Serializable {
      * @param tensor The source code
      * @return The CUDA function
      */
-    public static CUfunction getFunction(Tensor tensor, int i) {
+    public static CUfunction getFunction(Tensor tensor, None none, int i) {
         String name = tensor.getName().replace("Tensor::", "").concat(String.valueOf(i));
-        CUfunction cUfunction = functions.get(name);
-        if (Objects.isNull(cUfunction)) {
-            createFunction(tensor);
-            cUfunction = functions.get(name);
+        CUfunction function = functions.get(name);
+        if (Objects.isNull(function)) {
+            String code = getCode(name, none.getGrads());
+            function = createFunction(name, code);
+            functions.put(name, function);
         }
-        return cUfunction;
+        return function;
     }
 
     /**
@@ -146,6 +164,39 @@ public class CudaExecutor implements Serializable {
         cuMemAlloc(deviceData, value.length * Sizeof.DOUBLE);
         cuMemcpyHtoD(deviceData, Pointer.to(value), value.length * Sizeof.DOUBLE);
         return deviceData;
+    }
+
+    /**
+     * Create device code
+     *
+     * @param name    of function
+     * @param content The content of the code
+     * @return The pointer to the data
+     */
+    public static String getCode(String name, String content) {
+        AtomicInteger index = new AtomicInteger();
+        StringBuilder code = new StringBuilder("extern \"C\" __global__ void ")
+        .append(name).append("(double* inx , double* out){ out[0] = ");
+        content.chars().mapToObj(a -> String.valueOf((char) a)).reduce((a, b) -> {
+            if (a.equals("{")) {
+                return a.concat(b);
+            }
+            if (b.equals("{")) {
+                code.append(a);
+                return "{";
+            }
+            if (a.concat(b).equals("{var}")) {
+                code.append("inx[").append(index.toString()).append("]");
+                index.incrementAndGet();
+                return "";
+            }
+            if (a.isEmpty()) {
+                code.append(b);
+                return "";
+            }
+            return a.concat(b);
+        });
+        return code.append(";}").toString().replaceAll("--", "");
     }
 
     /**
