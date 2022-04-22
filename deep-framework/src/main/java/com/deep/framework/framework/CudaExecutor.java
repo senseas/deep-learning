@@ -2,6 +2,7 @@ package com.deep.framework.framework;
 
 import com.deep.framework.graph.None;
 import com.deep.framework.graph.Tensor;
+import com.deep.framework.lang.Tenser;
 import com.deep.framework.lang.cuda.Block;
 import com.deep.framework.lang.cuda.Grid;
 import jcuda.Pointer;
@@ -12,13 +13,12 @@ import jcuda.nvrtc.nvrtcProgram;
 import lombok.Data;
 
 import java.io.Serializable;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
+import static com.deep.framework.lang.ForEach.forEach;
 import static jcuda.driver.JCudaDriver.*;
 import static jcuda.nvrtc.JNvrtc.*;
 import static jcuda.runtime.JCuda.cudaFree;
@@ -90,18 +90,18 @@ public class CudaExecutor implements Serializable {
      * @return The CUDA function
      */
     public static void gradient(Tensor tensor) {
-        None out = tensor.getOutput();
+        Tenser outs = tensor.getOutput();
         IntStream.range(0, tensor.getInput().length).forEach(i -> {
-            None none = tensor.getInput()[i].getOutput();
-            CUfunction function = getFunction(tensor, none, i);
-
-            none.getParams().add(0, new None(out.getGrad()));
-            double[] input = none.getParams().stream().mapToDouble(None::getValue).toArray();
-            none.getParams().remove(0);
-            double[] output = new double[]{1};
-            run(function, input, output);
-            none.resetx();
-            none.setGrad(output[0]);
+            Tenser<None> nones = tensor.getInput()[i].getOutput();
+            List<Double> list = new ArrayList<>();
+            forEach(nones, outs, (None inx, None outx) -> {
+                list.add(outx.getGrad());
+                inx.getParams().forEach(b -> list.add(b.getValue()));
+            });
+            CUfunction function = getFunction(tensor, nones.get(0,0), i);
+            double[] input = list.stream().mapToDouble(Double::valueOf).toArray();
+            double[] output = new double[outs.getLength()];
+            run(function, new Grid(outs.getLength()), new Block(1), input, output);
         });
     }
 
@@ -176,26 +176,30 @@ public class CudaExecutor implements Serializable {
     public static String getCode(String name, String content) {
         AtomicInteger index = new AtomicInteger();
         StringBuilder code = new StringBuilder("extern \"C\" __global__ void ")
-        .append(name).append("(double* inx , double* out){ out[0] = ");
+        .append(name).append("(double* inx , double* out){")
+        .append("int idx = blockDim.x * blockIdx.x + threadIdx.x;");
+        StringBuilder express = new StringBuilder();
         content.chars().mapToObj(a -> String.valueOf((char) a)).reduce((a, b) -> {
             if (a.equals("{")) {
                 return a.concat(b);
             }
             if (b.equals("{")) {
-                code.append(a);
+                express.append(a);
                 return "{";
             }
             if (a.concat(b).equals("{var}")) {
-                code.append("inx[").append(index.toString()).append("]");
+                express.append("inx[idx*M+").append(index).append("]");
                 index.incrementAndGet();
                 return "";
             }
             if (a.isEmpty()) {
-                code.append(b);
+                express.append(b);
                 return "";
             }
             return a.concat(b);
         });
+        code.append("int M = ").append(index.get()).append(";");
+        code.append("out[idx] = ").append(express);
         return code.append(";}").toString().replaceAll("--", "");
     }
 

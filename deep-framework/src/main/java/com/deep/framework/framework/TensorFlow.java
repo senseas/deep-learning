@@ -603,9 +603,7 @@ public class TensorFlow implements Serializable {
                 return div(new TensorConst(1d), add(new TensorConst(1d), exp(minus(A))));
             }
 
-            public void gradient() {
-                CudaExecutor.gradient(this);
-            }
+            public void gradient() { }
 
         };
     }
@@ -621,7 +619,9 @@ public class TensorFlow implements Serializable {
                 return B;
             }
 
-            public void gradient() { }
+            public void gradient() {
+                CudaExecutor.gradient(this);
+            }
 
         };
     }
