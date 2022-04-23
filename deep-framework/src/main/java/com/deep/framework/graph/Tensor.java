@@ -1,7 +1,6 @@
 package com.deep.framework.graph;
 
 import com.deep.framework.framework.CudaContext;
-import com.deep.framework.framework.CudaExecutor;
 import lombok.Data;
 
 import java.io.Serializable;

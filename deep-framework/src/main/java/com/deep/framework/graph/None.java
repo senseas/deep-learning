@@ -1,10 +1,10 @@
 package com.deep.framework.graph;
 
-import com.deep.framework.lang.util.BeanUtil;
 import lombok.Data;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
@@ -121,10 +121,34 @@ public class None implements Serializable {
         return this;
     }
 
-    private List<None> params = new ArrayList<>();
+    public None setParamx(Object... arr) {
+        paramx = new ArrayList<>();
+        for (Object o : arr) {
+            if (o instanceof List) {
+                paramx.addAll((List) o);
+            } else if(!(o instanceof TensorConst)) {
+                paramx.add((None) o);
+            }
+        }
+        return this;
+    }
+
+    public String getFuncs() {
+        if (tensor instanceof TensorConst) return String.valueOf(getValue());
+        return funcs;
+    }
+
+    public List<None> getParamx() {
+        if (!paramx.isEmpty()) return paramx;
+        return Arrays.asList(this);
+    }
+
     private int idx;
     private transient Tensor tensor;
     private double value, grad;
     private transient boolean reduce;
     private String grads = "{var}";
+    private String funcs = "out[0]";
+    private List<None> params = new ArrayList<>();
+    private List<None> paramx = new ArrayList<>();
 }

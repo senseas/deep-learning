@@ -5,6 +5,7 @@ import com.deep.framework.lang.Cublas;
 import com.deep.framework.lang.Tenser;
 
 import java.io.Serializable;
+import java.util.stream.Collectors;
 
 import static com.deep.framework.lang.ForEach.forEach;
 import static com.deep.framework.lang.Shape.*;
@@ -16,18 +17,23 @@ public class TensorFlow implements Serializable {
         return new TensorOperator("Add", input) {
 
             public None compute() {
+                None out = getOutput();
                 double value = inputStream().mapToDouble(a -> ((None) a).getValue()).sum();
+
+                out.setParamx(inputStream().map((None a) -> a.getParamx()).collect(Collectors.toList()), out);
+                StringBuffer func = new StringBuffer("(out[").append(out.getParamx().size() - 1).append("]=");
+                inputStream().forEach((None a) -> func.append("+(").append(a.getFuncs()).append(")"));
+                func.append(")");
+                out.setFuncs(func.toString());
+
                 return new None(value);
             }
 
             public void gradient() {
                 None out = getOutput();
-                inputStream().forEach(a -> ((None) a).setGrad(out.getGrad()));
+                inputStream().forEach((None a) -> a.setGrad(out.getGrad()));
 
-                inputStream().forEach(a -> {
-                    ((None) a).setParams(out.getParams());
-                    ((None) a).setGrads(out.getGrads());
-                });
+                inputStream().forEach((None a) -> a.setParams(out.getParams()).setGrads(out.getGrads()));
             }
 
         };
@@ -60,6 +66,12 @@ public class TensorFlow implements Serializable {
             public None compute() {
                 None inx = getInput(0), iny = getInput(1);
                 double valx = inx.getValue(), valy = iny.getValue();
+
+                None out = getOutput();
+                out.setParamx(inx.getParamx(), iny.getParamx(), out);
+                String index = String.valueOf(out.getParamx().size() - 1);
+                out.setFuncs("(out[".concat(index).concat("]=").concat(inx.getFuncs()).concat("-").concat(iny.getFuncs()).concat(")"));
+
                 return new None(valx - valy);
             }
 
@@ -86,6 +98,12 @@ public class TensorFlow implements Serializable {
             public None compute() {
                 None inx = getInput(0);
                 double valx = inx.getValue();
+
+                None out = getOutput();
+                out.setParamx(inx.getParamx(), out);
+                String index = String.valueOf(out.getParamx().size() - 1);
+                out.setFuncs("(out[".concat(index).concat("]=-").concat(inx.getFuncs()).concat(")"));
+
                 return new None(-valx);
             }
 
@@ -107,6 +125,12 @@ public class TensorFlow implements Serializable {
             public None compute() {
                 None inx = getInput(0), iny = getInput(1);
                 double valx = inx.getValue(), valy = iny.getValue();
+
+                None out = getOutput();
+                out.setParamx(inx.getParamx(), iny.getParamx(), out);
+                String index = String.valueOf(out.getParamx().size() - 1);
+                out.setFuncs("(out[".concat(index).concat("]=").concat(inx.getFuncs()).concat("*").concat(iny.getFuncs()).concat(")"));
+
                 return new None(valx * valy);
             }
 
@@ -133,6 +157,12 @@ public class TensorFlow implements Serializable {
             public None compute() {
                 None inx = getInput(0), iny = getInput(1);
                 double valx = inx.getValue(), valy = iny.getValue();
+
+                None out = getOutput();
+                out.setParamx(inx.getParamx(), iny.getParamx(), out);
+                String index = String.valueOf(out.getParamx().size() - 1);
+                out.setFuncs("(out[".concat(index).concat("]=").concat(inx.getFuncs()).concat("/").concat(iny.getFuncs()).concat(")"));
+
                 return new None(valx / valy);
             }
 
@@ -159,6 +189,12 @@ public class TensorFlow implements Serializable {
             public None compute() {
                 None inx = getInput(0);
                 double valx = inx.getValue();
+
+                None out = getOutput();
+                out.setParamx(inx.getParamx(), out);
+                String index = String.valueOf(out.getParamx().size() - 1);
+                out.setFuncs("out[".concat(index).concat("]=expf(").concat(inx.getFuncs()).concat(")"));
+
                 return new None(Math.exp(valx));
             }
 
@@ -197,6 +233,12 @@ public class TensorFlow implements Serializable {
             public None compute() {
                 None inx = getInput(0), iny = getInput(1);
                 double valx = inx.getValue(), valy = iny.getValue();
+
+                None out = getOutput();
+                out.setParamx(inx.getParamx(), iny.getParamx(), out);
+                String index = String.valueOf(out.getParamx().size() - 1);
+                out.setFuncs("(out[".concat(index).concat("]=powf(").concat(inx.getFuncs()).concat(",").concat(iny.getFuncs()).concat("))"));
+
                 return new None(Math.pow(valx, valy));
             }
 
@@ -219,6 +261,12 @@ public class TensorFlow implements Serializable {
             public None compute() {
                 None inx = getInput(0);
                 double valx = inx.getValue();
+
+                None out = getOutput();
+                out.setParamx(inx.getParamx(), out);
+                String index = String.valueOf(out.getParamx().size() - 1);
+                out.setFuncs("(out[".concat(index).concat("]=log(").concat(inx.getFuncs()).concat("))"));
+
                 return new None(Math.log(valx));
             }
 

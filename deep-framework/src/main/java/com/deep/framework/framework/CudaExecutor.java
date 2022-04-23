@@ -89,6 +89,29 @@ public class CudaExecutor implements Serializable {
      * @param tensor The source code
      * @return The CUDA function
      */
+    public static void compute(Tensor tensor) {
+        Tenser outs = tensor.getOutput();
+        IntStream.range(0, tensor.getInput().length).forEach(i -> {
+            Tenser<None> nones = tensor.getInput()[i].getOutput();
+            List<Double> list = new ArrayList<>();
+            forEach(nones, outs, (None inx, None outx) -> {
+                list.add(outx.getGrad());
+                inx.getParams().forEach(b -> list.add(b.getValue()));
+            });
+            CUfunction function = getFunction(tensor, nones.get(0,0), i);
+            double[] input = list.stream().mapToDouble(Double::valueOf).toArray();
+            double[] output = new double[outs.getLength()];
+            run(function, new Grid(outs.getLength()), new Block(1), input, output);
+        });
+    }
+
+    /**
+     * Create a CUDA kernel function by compiling the given code using the
+     * NVRTC, and obtaining the function with the given name
+     *
+     * @param tensor The source code
+     * @return The CUDA function
+     */
     public static void gradient(Tensor tensor) {
         Tenser outs = tensor.getOutput();
         IntStream.range(0, tensor.getInput().length).forEach(i -> {

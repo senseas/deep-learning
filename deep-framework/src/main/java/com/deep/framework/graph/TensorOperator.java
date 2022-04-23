@@ -29,12 +29,14 @@ public class TensorOperator extends Tensor {
         return input.getOutput();
     }
 
-    public Stream inputStream() {
+    public Stream<None> inputStream() {
         return Arrays.stream(getInput()).map(input -> BeanUtil.isFunction(input) ?
                 TensorFlux.getOutput(input.getFunction()) : input.getOutput());
     }
 
     public <M> M getOutput() {
+        if(Objects.nonNull(output))return (M) output;
+        if(Objects.isNull(shape)) output = new None(0d);
         return (M) output;
     }
 
