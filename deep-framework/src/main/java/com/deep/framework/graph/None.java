@@ -114,7 +114,7 @@ public class None implements Serializable {
         for (Object o : arr) {
             if (o instanceof List) {
                 params.addAll((List) o);
-            } else {
+            } else if (o instanceof None) {
                 params.add((None) o);
             }
         }
@@ -151,6 +151,6 @@ public class None implements Serializable {
     private transient boolean reduce;
     private String grads = "{var}";
     private String funcs = "{var}";
-    private List<None> params = new ArrayList<>();
+    private List<None> params;
     private List<None> paramx;
 }

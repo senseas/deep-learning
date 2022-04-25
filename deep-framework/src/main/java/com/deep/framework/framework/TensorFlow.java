@@ -17,12 +17,12 @@ public class TensorFlow implements Serializable {
         return new TensorOperator("Add", input) {
 
             public None compute() {
-                None out = getOutput();
-                double value = inputStream().mapToDouble(a -> a.getValue()).sum();
+                double value = inputStream().mapToDouble(a -> ((None)a).getValue()).sum();
 
-                out.setParamx(inputStream().flatMap(a -> a.getParamx().stream()).collect(Collectors.toList()), out);
+                None out = getOutput();
+                out.setParamx(inputStream().flatMap(a -> ((None)a).getParamx().stream()).collect(Collectors.toList()), out);
                 StringBuffer func = new StringBuffer("({var}=");
-                inputStream().forEach((None a) -> func.append("+(").append(a.getFuncs()).append(")"));
+                inputStream().forEach(a-> func.append("+(").append(((None)a).getFuncs()).append(")"));
                 func.append(")");
                 out.setFuncs(func.toString());
 
@@ -31,9 +31,9 @@ public class TensorFlow implements Serializable {
 
             public void gradient() {
                 None out = getOutput();
-                inputStream().forEach((None a) -> a.setGrad(out.getGrad()));
+                inputStream().forEach(a -> ((None)a).setGrad(out.getGrad()));
 
-                inputStream().forEach((None a) -> a.setParams(out.getParams()).setGrads(out.getGrads()));
+                inputStream().forEach(a -> ((None)a).setParams(out.getParams()).setGrads(out.getGrads()));
             }
 
         };

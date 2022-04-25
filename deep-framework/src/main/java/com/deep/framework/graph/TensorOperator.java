@@ -2,6 +2,7 @@ package com.deep.framework.graph;
 
 import com.deep.framework.framework.TensorFlux;
 import com.deep.framework.lang.util.BeanUtil;
+import lombok.SneakyThrows;
 
 import java.util.Arrays;
 import java.util.Objects;
@@ -29,14 +30,15 @@ public class TensorOperator extends Tensor {
         return input.getOutput();
     }
 
-    public Stream<None> inputStream() {
+    public Stream inputStream() {
         return Arrays.stream(getInput()).map(input -> BeanUtil.isFunction(input) ?
                 TensorFlux.getOutput(input.getFunction()) : input.getOutput());
     }
 
+    @SneakyThrows
     public <M> M getOutput() {
-        if(Objects.nonNull(output))return (M) output;
-        if(Objects.isNull(shape)) output = new None(0d);
+        if (Objects.nonNull(output)) return (M) output;
+        if (this.getClass().getMethod("compute").getReturnType().equals(None.class)) output = new None(0d);
         return (M) output;
     }
 
