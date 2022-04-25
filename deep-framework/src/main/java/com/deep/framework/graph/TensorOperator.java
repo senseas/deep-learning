@@ -35,10 +35,7 @@ public class TensorOperator extends Tensor {
                 TensorFlux.getOutput(input.getFunction()) : input.getOutput());
     }
 
-    @SneakyThrows
     public <M> M getOutput() {
-        if (Objects.nonNull(output)) return (M) output;
-        if (this.getClass().getMethod("compute").getReturnType().equals(None.class)) output = new None(0d);
         return (M) output;
     }
 
@@ -53,6 +50,20 @@ public class TensorOperator extends Tensor {
             Arrays.fill((double[]) value, 0d);
             Arrays.fill((double[]) grad, 0d);
             Arrays.fill((boolean[]) reduce, false);
+        }
+        return getOutput();
+    }
+
+    public <M> M createOutput() {
+        if (Objects.isNull(getOutput())) {
+            this.value = 0d;
+            this.grad = 0d;
+            this.reduce = false;
+            this.output = new None(this);
+        } else {
+            this.value = 0d;
+            this.grad = 0d;
+            this.reduce = false;
         }
         return getOutput();
     }
