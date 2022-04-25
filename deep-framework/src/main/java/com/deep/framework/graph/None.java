@@ -126,7 +126,7 @@ public class None implements Serializable {
         for (Object o : arr) {
             if (o instanceof List) {
                 paramx.addAll((List) o);
-            } else if(!(o instanceof TensorConst)) {
+            } else if (!(o instanceof TensorConst)) {
                 paramx.add((None) o);
             }
         }
@@ -134,12 +134,14 @@ public class None implements Serializable {
     }
 
     public String getFuncs() {
-        if (tensor instanceof TensorConst) return String.valueOf(getValue());
+        if (tensor instanceof TensorConst)
+            return String.valueOf(getValue());
         return funcs;
     }
 
     public List<None> getParamx() {
-        if (!paramx.isEmpty()) return paramx;
+        if (Objects.nonNull(paramx) && !paramx.isEmpty()) return paramx;
+        if (tensor instanceof TensorConst) return Arrays.asList();
         return Arrays.asList(this);
     }
 
@@ -148,7 +150,7 @@ public class None implements Serializable {
     private double value, grad;
     private transient boolean reduce;
     private String grads = "{var}";
-    private String funcs = "out[0]";
+    private String funcs = "{var}";
     private List<None> params = new ArrayList<>();
-    private List<None> paramx = new ArrayList<>();
+    private List<None> paramx;
 }

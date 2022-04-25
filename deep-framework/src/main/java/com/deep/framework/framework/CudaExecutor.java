@@ -42,6 +42,23 @@ public class CudaExecutor implements Serializable {
         cuCtxCreate(context, 0, device);
     }
 
+    public static void run(CUfunction function, Grid grid, Block block, double[] output) {
+        CUdeviceptr outputDevice = createDeviceData(output);
+
+        cuLaunchKernel(function,
+            grid.x, grid.y, grid.z,
+            block.x, block.y, block.z,
+            0, null,
+            createKernelParams(outputDevice),
+            null
+        );
+
+        cuMemcpyDtoH(Pointer.to(output), outputDevice, output.length * Sizeof.DOUBLE);
+        cuCtxSynchronize();
+
+        cudaFree(outputDevice);
+    }
+
     public static void run(CUfunction function, Grid grid, Block block, double[] input, double[] output) {
         CUdeviceptr inputDevice = createDeviceData(input);
         CUdeviceptr outputDevice = createDeviceData(output);
@@ -61,6 +78,23 @@ public class CudaExecutor implements Serializable {
         cudaFree(outputDevice);
     }
 
+    public static void run(CUfunction function, double[] output) {
+        CUdeviceptr outputDevice = createDeviceData(output);
+
+        cuLaunchKernel(function,
+            1, 1, 1,
+            1, 1, 1,
+            0, null,
+            createKernelParams(outputDevice),
+            null
+        );
+
+        cuMemcpyDtoH(Pointer.to(output), outputDevice, output.length * Sizeof.DOUBLE);
+        cuCtxSynchronize();
+
+        cudaFree(outputDevice);
+    }
+
     public static void run(CUfunction function, double[] input, double[] output) {
         CUdeviceptr inputDevice = createDeviceData(input);
         CUdeviceptr outputDevice = createDeviceData(output);
@@ -77,9 +111,9 @@ public class CudaExecutor implements Serializable {
         cuMemcpyDtoH(Pointer.to(output), outputDevice, output.length * Sizeof.DOUBLE);
         cuCtxSynchronize();
 
-         cudaFree(inputDevice);
-         cudaFree(outputDevice);
-         cudaFree(kernelParams);
+        cudaFree(inputDevice);
+        cudaFree(outputDevice);
+        cudaFree(kernelParams);
     }
 
     /**
@@ -90,19 +124,21 @@ public class CudaExecutor implements Serializable {
      * @return The CUDA function
      */
     public static void compute(Tensor tensor) {
-        Tenser outs = tensor.getOutput();
-        IntStream.range(0, tensor.getInput().length).forEach(i -> {
-            Tenser<None> nones = tensor.getInput()[i].getOutput();
+        if (Objects.nonNull(tensor.getShape())) {
+            Tenser<None> tenser = ((Tensor) tensor.getFunction()).getOutput();
             List<Double> list = new ArrayList<>();
-            forEach(nones, outs, (None inx, None outx) -> {
-                list.add(outx.getGrad());
-                inx.getParams().forEach(b -> list.add(b.getValue()));
+            forEach(tenser, (None out) -> {
+                out.getParamx().forEach(b -> list.add(b.getValue()));
             });
-            CUfunction function = getFunction(tensor, nones.get(0,0), i);
-            double[] input = list.stream().mapToDouble(Double::valueOf).toArray();
-            double[] output = new double[outs.getLength()];
-            run(function, new Grid(outs.getLength()), new Block(1), input, output);
-        });
+            CUfunction function = getFunction(tensor, tenser.get(0, 0));
+            double[] output = list.stream().mapToDouble(Double::doubleValue).toArray();
+            run(function, new Grid(tenser.getLength()), new Block(1), output);
+        } else {
+            None out = ((Tensor) tensor.getFunction()).getOutput();
+            CUfunction function = getFunction(tensor, out);
+            double[] output = out.getParamx().stream().mapToDouble(None::getValue).toArray();
+            run(function, output);
+        }
     }
 
     /**
@@ -113,19 +149,33 @@ public class CudaExecutor implements Serializable {
      * @return The CUDA function
      */
     public static void gradient(Tensor tensor) {
-        Tenser outs = tensor.getOutput();
-        IntStream.range(0, tensor.getInput().length).forEach(i -> {
-            Tenser<None> nones = tensor.getInput()[i].getOutput();
-            List<Double> list = new ArrayList<>();
-            forEach(nones, outs, (None inx, None outx) -> {
-                list.add(outx.getGrad());
-                inx.getParams().forEach(b -> list.add(b.getValue()));
+        if (Objects.nonNull(tensor.getShape())) {
+            Tenser tenser = tensor.getOutput();
+            IntStream.range(0, tensor.getInput().length).forEach(i -> {
+                Tenser<None> nones = tensor.getInput()[i].getOutput();
+                List<Double> list = new ArrayList<>();
+                forEach(nones, tenser, (None inx, None out) -> {
+                    list.add(out.getGrad());
+                    inx.getParams().forEach(b -> list.add(b.getValue()));
+                });
+                CUfunction function = getGradient(tensor, nones.get(0, 0), i);
+                double[] input = list.stream().mapToDouble(Double::valueOf).toArray();
+                double[] output = new double[tenser.getLength()];
+                run(function, new Grid(tenser.getLength()), new Block(1), input, output);
             });
-            CUfunction function = getFunction(tensor, nones.get(0,0), i);
-            double[] input = list.stream().mapToDouble(Double::valueOf).toArray();
-            double[] output = new double[outs.getLength()];
-            run(function, new Grid(outs.getLength()), new Block(1), input, output);
-        });
+        } else {
+            None out = tensor.getOutput();
+            IntStream.range(0, tensor.getInput().length).forEach(i -> {
+                None none = tensor.getInput()[i].getOutput();
+                List<Double> list = new ArrayList<>();
+                list.add(out.getGrad());
+                none.getParams().forEach(b -> list.add(b.getValue()));
+                CUfunction function = getGradient(tensor, none, 0);
+                double[] input = list.stream().mapToDouble(Double::valueOf).toArray();
+                double[] output = new double[1];
+                run(function, input, output);
+            });
+        }
     }
 
     /**
@@ -135,14 +185,30 @@ public class CudaExecutor implements Serializable {
      * @param tensor The source code
      * @return The CUDA function
      */
-    public static CUfunction getFunction(Tensor tensor, None none, int i) {
+    public static CUfunction getFunction(Tensor tensor, None none) {
+        String name = tensor.getName().replace("Tensor::", "");
+        CUfunction function = functions.get(name);
+        if (Objects.nonNull(function)) return function;
+        String code = getFuncCode(name, none.getFuncs());
+        function = createFunction(name, code);
+        functions.put(name, function);
+        return function;
+    }
+
+    /**
+     * Create a CUDA kernel function by compiling the given code using the
+     * NVRTC, and obtaining the function with the given name
+     *
+     * @param tensor The source code
+     * @return The CUDA function
+     */
+    public static CUfunction getGradient(Tensor tensor, None none, int i) {
         String name = tensor.getName().replace("Tensor::", "").concat(String.valueOf(i));
         CUfunction function = functions.get(name);
-        if (Objects.isNull(function)) {
-            String code = getCode(name, none.getGrads());
-            function = createFunction(name, code);
-            functions.put(name, function);
-        }
+        if (Objects.nonNull(function)) return function;
+        String code = getCode(name, none.getGrads());
+        function = createFunction(name, code);
+        functions.put(name, function);
         return function;
     }
 
@@ -196,11 +262,64 @@ public class CudaExecutor implements Serializable {
      * @param content The content of the code
      * @return The pointer to the data
      */
+    public static String getFuncCode(String name, String content) {
+        AtomicInteger index = new AtomicInteger();
+        StringBuilder code = new StringBuilder("extern \"C\" __global__ void ");
+        code.append(name).append("(double* out){");
+        code.append("int idx = blockDim.x * blockIdx.x + threadIdx.x;");
+        StringBuilder express = new StringBuilder();
+        content.chars().mapToObj(a -> String.valueOf((char) a)).reduce((a, b) -> {
+            if (a.equals("{")) {
+                return a.concat(b);
+            }
+            if (b.equals("{")) {
+                return "{";
+            }
+            if (a.concat(b).equals("{var}")) {
+                index.incrementAndGet();
+                return "";
+            }
+            if (a.isEmpty()) {
+                return "";
+            }
+            return a.concat(b);
+        });
+        content.chars().mapToObj(a -> String.valueOf((char) a)).reduce((a, b) -> {
+            if (a.equals("{")) {
+                return a.concat(b);
+            }
+            if (b.equals("{")) {
+                express.append(a);
+                return "{";
+            }
+            if (a.concat(b).equals("{var}")) {
+                index.getAndDecrement();
+                express.append("out[idx*M+").append(index).append("]");
+                return "";
+            }
+            if (a.isEmpty()) {
+                express.append(b);
+                return "";
+            }
+            return a.concat(b);
+        });
+        code.append("int M = ").append(index.get()).append(";");
+        code.append(express);
+        return code.append(";}").toString();
+    }
+
+    /**
+     * Create device code
+     *
+     * @param name    of function
+     * @param content The content of the code
+     * @return The pointer to the data
+     */
     public static String getCode(String name, String content) {
         AtomicInteger index = new AtomicInteger();
-        StringBuilder code = new StringBuilder("extern \"C\" __global__ void ")
-        .append(name).append("(double* inx , double* out){")
-        .append("int idx = blockDim.x * blockIdx.x + threadIdx.x;");
+        StringBuilder code = new StringBuilder("extern \"C\" __global__ void ");
+        code.append(name).append("(double* inx , double* out){");
+        code.append("int idx = blockDim.x * blockIdx.x + threadIdx.x;");
         StringBuilder express = new StringBuilder();
         content.chars().mapToObj(a -> String.valueOf((char) a)).reduce((a, b) -> {
             if (a.equals("{")) {

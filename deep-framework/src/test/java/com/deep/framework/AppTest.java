@@ -6,7 +6,7 @@ import com.deep.framework.graph.None;
 import com.deep.framework.graph.Tensor;
 import org.junit.Test;
 
-import static com.deep.framework.framework.CudaExecutor.gradient;
+import static com.deep.framework.framework.CudaExecutor.*;
 
 public class AppTest {
 
@@ -29,7 +29,6 @@ public class AppTest {
         Tensor tensor = tf.sigmoid(new Tensor(-0.6354469361189982));
         TensorExecutor executor = new TensorExecutor(tensor);
         executor.run();
-
         None none = tensor.getInput()[0].getOutput();
         gradient(tensor);
         System.out.println(none.getGrad());
