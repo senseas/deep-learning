@@ -265,8 +265,7 @@ public class CudaExecutor implements Serializable {
     public static String getFuncCode(String name, String content) {
         AtomicInteger index = new AtomicInteger();
         StringBuilder code = new StringBuilder("extern \"C\" __global__ void ");
-        code.append(name).append("(double* out){");
-        code.append("int idx = blockDim.x * blockIdx.x + threadIdx.x;");
+        code.append(name).append("(double* out){ int idx = blockDim.x * blockIdx.x + threadIdx.x;");
         StringBuilder express = new StringBuilder();
         content.chars().mapToObj(a -> String.valueOf((char) a)).reduce((a, b) -> {
             if (a.equals("{")) {
@@ -318,8 +317,7 @@ public class CudaExecutor implements Serializable {
     public static String getCode(String name, String content) {
         AtomicInteger index = new AtomicInteger();
         StringBuilder code = new StringBuilder("extern \"C\" __global__ void ");
-        code.append(name).append("(double* inx , double* out){");
-        code.append("int idx = blockDim.x * blockIdx.x + threadIdx.x;");
+        code.append(name).append("(double* inx , double* out){ int idx = blockDim.x * blockIdx.x + threadIdx.x;");
         StringBuilder express = new StringBuilder();
         content.chars().mapToObj(a -> String.valueOf((char) a)).reduce((a, b) -> {
             if (a.equals("{")) {
