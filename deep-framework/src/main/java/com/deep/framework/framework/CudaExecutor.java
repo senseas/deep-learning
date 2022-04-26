@@ -125,19 +125,13 @@ public class CudaExecutor implements Serializable {
      */
     public static void compute(Tensor tensor) {
         if (tensor.getFunction() instanceof Tenser) {
-            Tenser nones = TensorFlux.getOutput(tensor.getFunction());
-            final None[] none = {null};
-            AtomicInteger length = new AtomicInteger();
-            List<Double> list = new ArrayList<>();
-            forEach(nones, (None out) ->{
-                if (Objects.isNull(none[0])) none[0] = out;
-                out.getParamx().forEach(b -> list.add(b.getValue()));
-                length.incrementAndGet();
-            });
-            CUfunction function = getFunction(tensor, none[0]);
-            double[] output = list.stream().mapToDouble(Double::doubleValue).toArray();
-            run(function, new Grid(length.get()), new Block(1), output);
-            System.out.println(output);
+            Tenser<None> nones = TensorFlux.getOutput(tensor.getFunction());
+            List<None> list = new ArrayList<>();
+            nones.forEach((None a, int i) -> list.addAll(a.getParams()));
+            CUfunction function = getFunction(tensor, nones.findFirst());
+            double[] output = list.stream().mapToDouble(None::getValue).toArray();
+            run(function, new Grid(list.size()), new Block(1), output);
+            nones.forEach((None a, int i) -> a.setValue(output[i]));
         } else {
             None out = ((Tensor) tensor.getFunction()).getOutput();
             CUfunction function = getFunction(tensor, out);
@@ -158,24 +152,16 @@ public class CudaExecutor implements Serializable {
             Tenser tenser = tensor.getOutput();
             IntStream.range(0, tensor.getInput().length).forEach(i -> {
                 Tenser<None> nones = tensor.getInput()[i].getOutput();
-                List<Double> list = new ArrayList<>();
-                final None[] none = {null};
-                AtomicInteger length = new AtomicInteger();
+                List<None> list = new ArrayList();
                 forEach(nones, tenser, (None inx, None out) -> {
-                    if (Objects.isNull(none[0])) none[0] = inx;
-                    list.add(out.getGrad());
-                    inx.getParams().forEach(b -> list.add(b.getValue()));
-                    length.incrementAndGet();
+                    list.add(new None(out.getGrad()));
+                    list.addAll(inx.getParams());
                 });
-                CUfunction function = getGradient(tensor, none[0], i);
-                double[] input = list.stream().mapToDouble(Double::valueOf).toArray();
-                double[] output = new double[length.get()];
-                run(function, new Grid(length.get()), new Block(1), input, output);
-                final int[] index = {0};
-                forEach(nones, (None inx) -> {
-                    inx.setGrad(output[index[0]]);
-                    ++index[0];
-                });
+                CUfunction function = getGradient(tensor, nones.findFirst(), i);
+                double[] input = list.stream().mapToDouble(None::getGrad).toArray();
+                double[] output = new double[list.size()];
+                run(function, new Grid(list.size()), new Block(1), input, output);
+                nones.forEach((None inx, int l) -> inx.setGrad(output[l]));
             });
         } else {
             None out = tensor.getOutput();

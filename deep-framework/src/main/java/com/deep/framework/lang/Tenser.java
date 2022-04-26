@@ -1,8 +1,11 @@
 package com.deep.framework.lang;
 
+import com.deep.framework.lang.function.For;
+
 import java.io.Serializable;
 import java.lang.reflect.Array;
 import java.util.Arrays;
+import java.util.stream.IntStream;
 
 import static com.deep.framework.lang.Shape.size;
 
@@ -83,6 +86,14 @@ public class Tenser<T> implements Serializable {
 
     public int getLength() {
         return shape[0];
+    }
+
+    public T findFirst() {
+        return data[start];
+    }
+
+    public void forEach(For<T> func) {
+        IntStream.range(0, end(0, shape)).forEach(i -> func.apply(data[start + i], i));
     }
 
     private int[] getNext(int[] index) {
