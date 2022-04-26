@@ -3,9 +3,12 @@ package com.deep.framework.framework;
 import com.deep.framework.graph.None;
 import com.deep.framework.graph.Tensor;
 import com.deep.framework.lang.Tenser;
+import com.deep.framework.lang.annotation.Cuda;
 import com.deep.framework.lang.util.BeanUtil;
+import lombok.SneakyThrows;
 
 import java.io.Serializable;
+import java.lang.annotation.Annotation;
 import java.util.Objects;
 
 import static com.deep.framework.lang.Shape.*;
@@ -13,19 +16,32 @@ import static com.deep.framework.lang.Shape.*;
 public class TensorFlux implements Serializable {
     static final double EX = 0.0000000001;
 
+    @SneakyThrows
     public static void forward(Tensor tensor) {
-        forEach(tensor.getFunction(), (Tensor a) -> {
-            a.forward();
-        });
+        Annotation cuda = tensor.getClass().getMethod("compute").getAnnotation(Cuda.class);
+        if (Objects.isNull(cuda) || !tensor.isCompCuda()) {
+            forEach(tensor.getFunction(), (Tensor a) -> {
+                a.forward();
+            });
+        }
+        if (Objects.nonNull(cuda)) {
+            CudaExecutor.compute(tensor);
+        }
         forwards(tensor);
     }
 
+    @SneakyThrows
     public static void backward(Tensor tensor) {
         backwards(tensor);
-        forEach(tensor.getFunction(), (Tensor a) -> {
-            a.backward();
-        });
-        tensor.gradient();
+        Annotation cuda = tensor.getClass().getMethod("gradient").getAnnotation(Cuda.class);
+        if (Objects.isNull(cuda) || !tensor.isGradCuda()) {
+            forEach(tensor.getFunction(), (Tensor a) -> {
+                a.backward();
+            });
+        }
+        if (Objects.nonNull(cuda)) {
+            CudaExecutor.gradient(tensor);
+        }
     }
 
     public static void reduce(Tensor tensor) {

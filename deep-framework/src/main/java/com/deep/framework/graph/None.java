@@ -145,6 +145,12 @@ public class None implements Serializable {
         return Arrays.asList(this);
     }
 
+    public List<None> getParams() {
+        if (Objects.nonNull(params) && !params.isEmpty()) return params;
+        if (tensor instanceof TensorConst) return Arrays.asList();
+        return Arrays.asList(this);
+    }
+
     private int idx;
     private transient Tensor tensor;
     private double value, grad;

@@ -3,6 +3,7 @@ package com.deep.framework.framework;
 import com.deep.framework.graph.*;
 import com.deep.framework.lang.Cublas;
 import com.deep.framework.lang.Tenser;
+import com.deep.framework.lang.annotation.Cuda;
 
 import java.io.Serializable;
 import java.util.stream.Collectors;
@@ -504,8 +505,8 @@ public class TensorFlow implements Serializable {
                 double valx = inx.getValue();
 
                 None out = createOutput();
-                out.setParamx(out, inx.getParamx(), inx.getParamx(), inx.getParamx());
-                out.setFuncs("({var}=".concat(inx.getFuncs()).concat(">0?").concat(inx.getFuncs()).concat(":0.1 *").concat(inx.getFuncs()).concat(")"));
+                out.setParamx(out, inx.getParamx(), inx.getParamx());
+                out.setFuncs("({var}=".concat(inx.getFuncs()).concat("*(").concat(inx.getFuncs()).concat(">0?1:0.1))"));
 
                 return new None(valx > 0 ? valx : 0.1 * valx);
             }
@@ -516,32 +517,26 @@ public class TensorFlow implements Serializable {
                 double grad = out.getGrad();
                 inx.setGrad(valx > 0 ? grad : 0.1 * grad);
 
-                inx.setParams(inx, out.getParams(), out.getParams());
-                inx.setGrads("({var}".concat(">0?").concat("{var}").concat(":0.1 *").concat("{var}").concat(")"));
+                inx.setParams(inx);
+                inx.setGrads(out.getGrads().concat("*").concat("({var}").concat(">0?1:0.1").concat(")"));
             }
 
         };
     }
 
     public Tensor relux(Tensor input) {
-        return new TensorOperator("Relux", input) {
-
+        return new TensorFunction("Relux", input) {
+            @Cuda
             public Object compute() {
-                Object A = getInput(0), B = createOutput(A);
-                forEach(A, B, (None a, None b) -> {
-                    double value = a.getValue();
-                    b.setValue(value > 0 ? value : 0.1 * value);
+                Object A = getInput(0), B = zeroTensors(A);
+                forEach(A, B, (Tensor a, Tenser<Tensor> b, int i) -> {
+                    b.set(relu(a), i);
                 });
                 return B;
             }
 
-            public void gradient() {
-                Object A = getInput(0), B = getOutput();
-                forEach(A, B, (None a, None b) -> {
-                    double grad = b.getGrad();
-                    a.setGrad(a.getValue() > 0 ? grad : 0.1 * grad);
-                });
-            }
+            @Cuda
+            public void gradient() { }
 
         };
     }
@@ -669,7 +664,7 @@ public class TensorFlow implements Serializable {
             }
 
             public void gradient() {
-                CudaExecutor.gradient(this);
+               // CudaExecutor.gradient(this);
             }
 
         };

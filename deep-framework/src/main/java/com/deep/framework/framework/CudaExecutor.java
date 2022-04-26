@@ -124,15 +124,20 @@ public class CudaExecutor implements Serializable {
      * @return The CUDA function
      */
     public static void compute(Tensor tensor) {
-        if (Objects.nonNull(tensor.getShape())) {
-            Tenser<None> tenser = ((Tensor) tensor.getFunction()).getOutput();
+        if (tensor.getFunction() instanceof Tenser) {
+            Tenser nones = TensorFlux.getOutput(tensor.getFunction());
+            final None[] none = {null};
+            AtomicInteger length = new AtomicInteger();
             List<Double> list = new ArrayList<>();
-            forEach(tenser, (None out) -> {
+            forEach(nones, (None out) ->{
+                if (Objects.isNull(none[0])) none[0] = out;
                 out.getParamx().forEach(b -> list.add(b.getValue()));
+                length.incrementAndGet();
             });
-            CUfunction function = getFunction(tensor, tenser.get(0, 0));
+            CUfunction function = getFunction(tensor, none[0]);
             double[] output = list.stream().mapToDouble(Double::doubleValue).toArray();
-            run(function, new Grid(tenser.getLength()), new Block(1), output);
+            run(function, new Grid(length.get()), new Block(1), output);
+            System.out.println(output);
         } else {
             None out = ((Tensor) tensor.getFunction()).getOutput();
             CUfunction function = getFunction(tensor, out);
@@ -149,19 +154,28 @@ public class CudaExecutor implements Serializable {
      * @return The CUDA function
      */
     public static void gradient(Tensor tensor) {
-        if (Objects.nonNull(tensor.getShape())) {
+        if (tensor.getFunction() instanceof Tenser) {
             Tenser tenser = tensor.getOutput();
             IntStream.range(0, tensor.getInput().length).forEach(i -> {
                 Tenser<None> nones = tensor.getInput()[i].getOutput();
                 List<Double> list = new ArrayList<>();
+                final None[] none = {null};
+                AtomicInteger length = new AtomicInteger();
                 forEach(nones, tenser, (None inx, None out) -> {
+                    if (Objects.isNull(none[0])) none[0] = inx;
                     list.add(out.getGrad());
                     inx.getParams().forEach(b -> list.add(b.getValue()));
+                    length.incrementAndGet();
                 });
-                CUfunction function = getGradient(tensor, nones.get(0, 0), i);
+                CUfunction function = getGradient(tensor, none[0], i);
                 double[] input = list.stream().mapToDouble(Double::valueOf).toArray();
-                double[] output = new double[tenser.getLength()];
-                run(function, new Grid(tenser.getLength()), new Block(1), input, output);
+                double[] output = new double[length.get()];
+                run(function, new Grid(length.get()), new Block(1), input, output);
+                final int[] index = {0};
+                forEach(nones, (None inx) -> {
+                    inx.setGrad(output[index[0]]);
+                    ++index[0];
+                });
             });
         } else {
             None out = tensor.getOutput();
@@ -189,6 +203,7 @@ public class CudaExecutor implements Serializable {
         String name = tensor.getName().replace("Tensor::", "");
         CUfunction function = functions.get(name);
         if (Objects.nonNull(function)) return function;
+        tensor.setCompCuda(true);
         String code = getFuncCode(name, none.getFuncs());
         function = createFunction(name, code);
         functions.put(name, function);
@@ -206,6 +221,7 @@ public class CudaExecutor implements Serializable {
         String name = tensor.getName().replace("Tensor::", "").concat(String.valueOf(i));
         CUfunction function = functions.get(name);
         if (Objects.nonNull(function)) return function;
+        tensor.setGradCuda(true);
         String code = getCode(name, none.getGrads());
         function = createFunction(name, code);
         functions.put(name, function);
@@ -272,28 +288,12 @@ public class CudaExecutor implements Serializable {
                 return a.concat(b);
             }
             if (b.equals("{")) {
-                return "{";
-            }
-            if (a.concat(b).equals("{var}")) {
-                index.incrementAndGet();
-                return "";
-            }
-            if (a.isEmpty()) {
-                return "";
-            }
-            return a.concat(b);
-        });
-        content.chars().mapToObj(a -> String.valueOf((char) a)).reduce((a, b) -> {
-            if (a.equals("{")) {
-                return a.concat(b);
-            }
-            if (b.equals("{")) {
                 express.append(a);
                 return "{";
             }
             if (a.concat(b).equals("{var}")) {
-                index.getAndDecrement();
                 express.append("out[idx*M+").append(index).append("]");
+                index.getAndIncrement();
                 return "";
             }
             if (a.isEmpty()) {
