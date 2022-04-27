@@ -508,7 +508,7 @@ public class TensorFlow implements Serializable {
                 out.setParamx(out, inx.getParamx(), inx.getParamx());
                 out.setFuncs("({var}=".concat(inx.getFuncs()).concat("*(").concat(inx.getFuncs()).concat(">0?1:0.1))"));
 
-                return new None(valx > 0 ? valx : 0.1 * valx);
+                return out;//new None(valx > 0 ? valx : 0.1 * valx);
             }
 
             public void gradient() {

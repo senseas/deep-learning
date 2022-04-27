@@ -24,7 +24,7 @@ public class TensorFlux implements Serializable {
             a.forward();
         });
         if(Objects.nonNull(cuda)){
-           // CudaExecutor.compute(tensor);
+           CudaExecutor.compute(tensor);
         }
         forwards(tensor);
     }

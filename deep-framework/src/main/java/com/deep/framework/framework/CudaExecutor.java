@@ -132,11 +132,11 @@ public class CudaExecutor implements Serializable {
         if (tensor.getFunction() instanceof Tenser) {
             Tenser<None> nones = TensorFlux.getOutput(tensor.getFunction());
             List<None> list = new ArrayList<>();
-            nones.forEach((None a, int i) -> list.addAll(a.getParams()));
+            nones.forEach((None a, int i) -> list.addAll(a.getParamx()));
             CUfunction function = getFunction(tensor, nones.findFirst());
             double[] output = list.stream().mapToDouble(None::getValue).toArray();
             run(function, new Grid(nones.size()), new Block(1), output);
-            nones.forEach((None a, int i) -> a.setValue(output[i]));
+            nones.forEach((None a, int i) -> a.setValue(output[i * nones.findFirst().getParamx().size()]));
         } else {
             None out = ((Tensor) tensor.getFunction()).getOutput();
             CUfunction function = getFunction(tensor, out);
