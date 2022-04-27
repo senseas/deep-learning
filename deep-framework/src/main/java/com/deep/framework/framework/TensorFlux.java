@@ -19,29 +19,23 @@ public class TensorFlux implements Serializable {
     @SneakyThrows
     public static void forward(Tensor tensor) {
         Annotation cuda = tensor.getClass().getMethod("compute").getAnnotation(Cuda.class);
-        if (Objects.isNull(cuda) || !tensor.isCompCuda()) {
-            forEach(tensor.getFunction(), (Tensor a) -> {
-                a.forward();
-            });
-        }
-        if (Objects.nonNull(cuda)) {
-            CudaExecutor.compute(tensor);
+
+        forEach(tensor.getFunction(), (Tensor a) -> {
+            a.forward();
+        });
+        if(Objects.nonNull(cuda)){
+           // CudaExecutor.compute(tensor);
         }
         forwards(tensor);
     }
 
-    @SneakyThrows
+
     public static void backward(Tensor tensor) {
         backwards(tensor);
-        Annotation cuda = tensor.getClass().getMethod("gradient").getAnnotation(Cuda.class);
-        if (Objects.isNull(cuda) || !tensor.isGradCuda()) {
-            forEach(tensor.getFunction(), (Tensor a) -> {
-                a.backward();
-            });
-        }
-        if (Objects.nonNull(cuda)) {
-            CudaExecutor.gradient(tensor);
-        }
+        forEach(tensor.getFunction(), (Tensor a) -> {
+            a.backward();
+        });
+        tensor.gradient();
     }
 
     public static void reduce(Tensor tensor) {

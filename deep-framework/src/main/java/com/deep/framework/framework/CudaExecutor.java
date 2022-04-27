@@ -45,11 +45,12 @@ public class CudaExecutor implements Serializable {
     public static void run(CUfunction function, Grid grid, Block block, double[] output) {
         CUdeviceptr outputDevice = createDeviceData(output);
 
+        Pointer kernelParams = createKernelParams(outputDevice);
         cuLaunchKernel(function,
             grid.x, grid.y, grid.z,
             block.x, block.y, block.z,
             0, null,
-            createKernelParams(outputDevice),
+            kernelParams,
             null
         );
 
@@ -57,17 +58,20 @@ public class CudaExecutor implements Serializable {
         cuCtxSynchronize();
 
         cudaFree(outputDevice);
+        cudaFree(kernelParams);
     }
 
     public static void run(CUfunction function, Grid grid, Block block, double[] input, double[] output) {
         CUdeviceptr inputDevice = createDeviceData(input);
         CUdeviceptr outputDevice = createDeviceData(output);
 
+        Pointer kernelParams = createKernelParams(inputDevice, outputDevice);
+
         cuLaunchKernel(function,
             grid.x, grid.y, grid.z,
             block.x, block.y, block.z,
             0, null,
-            createKernelParams(inputDevice, outputDevice),
+            kernelParams,
             null
         );
 
@@ -76,6 +80,7 @@ public class CudaExecutor implements Serializable {
 
         cudaFree(inputDevice);
         cudaFree(outputDevice);
+        cudaFree(kernelParams);
     }
 
     public static void run(CUfunction function, double[] output) {
@@ -130,7 +135,7 @@ public class CudaExecutor implements Serializable {
             nones.forEach((None a, int i) -> list.addAll(a.getParams()));
             CUfunction function = getFunction(tensor, nones.findFirst());
             double[] output = list.stream().mapToDouble(None::getValue).toArray();
-            run(function, new Grid(list.size()), new Block(1), output);
+            run(function, new Grid(nones.size()), new Block(1), output);
             nones.forEach((None a, int i) -> a.setValue(output[i]));
         } else {
             None out = ((Tensor) tensor.getFunction()).getOutput();
@@ -158,9 +163,9 @@ public class CudaExecutor implements Serializable {
                     list.addAll(inx.getParams());
                 });
                 CUfunction function = getGradient(tensor, nones.findFirst(), i);
-                double[] input = list.stream().mapToDouble(None::getGrad).toArray();
-                double[] output = new double[list.size()];
-                run(function, new Grid(list.size()), new Block(1), input, output);
+                double[] input = list.stream().mapToDouble(None::getValue).toArray();
+                double[] output = new double[nones.size()];
+                run(function, new Grid(nones.size()), new Block(1), input, output);
                 nones.forEach((None inx, int l) -> inx.setGrad(output[l]));
             });
         } else {

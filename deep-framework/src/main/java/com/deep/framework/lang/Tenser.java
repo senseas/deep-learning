@@ -7,8 +7,6 @@ import java.lang.reflect.Array;
 import java.util.Arrays;
 import java.util.stream.IntStream;
 
-import static com.deep.framework.lang.Shape.size;
-
 public class Tenser<T> implements Serializable {
 
     public final T[] data;
@@ -32,7 +30,7 @@ public class Tenser<T> implements Serializable {
 
     public Tenser(Class clas, int[] shape) {
         this.shape = shape;
-        this.data = (T[]) Array.newInstance(clas, size(shape));
+        this.data = (T[]) Array.newInstance(clas, size());
         this.start = 0;
         this.nexts = next();
     }
@@ -92,8 +90,12 @@ public class Tenser<T> implements Serializable {
         return data[start];
     }
 
+    public int size() {
+        return Shape.size(shape);
+    }
+
     public void forEach(For<T> func) {
-        IntStream.range(0, end(0, shape)).forEach(i -> func.apply(data[start + i], i));
+        IntStream.range(0, size()).forEach(i -> func.apply(data[start + i], i));
     }
 
     private int[] getNext(int[] index) {

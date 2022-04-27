@@ -515,7 +515,7 @@ public class TensorFlow implements Serializable {
                 None inx = getInput(0), out = getOutput();
                 double valx = inx.getValue();
                 double grad = out.getGrad();
-                inx.setGrad(valx > 0 ? grad : 0.1 * grad);
+                //inx.setGrad(valx > 0 ? grad : 0.1 * grad);
 
                 inx.setParams(inx);
                 inx.setGrads(out.getGrads().concat("*").concat("({var}").concat(">0?1:0.1").concat(")"));
@@ -526,6 +526,7 @@ public class TensorFlow implements Serializable {
 
     public Tensor relux(Tensor input) {
         return new TensorFunction("Relux", input) {
+
             @Cuda
             public Object compute() {
                 Object A = getInput(0), B = zeroTensors(A);
@@ -535,8 +536,9 @@ public class TensorFlow implements Serializable {
                 return B;
             }
 
-            @Cuda
-            public void gradient() { }
+            public void gradient() {
+                CudaExecutor.gradient(this);
+            }
 
         };
     }
