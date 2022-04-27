@@ -4,6 +4,7 @@ import com.deep.framework.framework.TensorExecutor;
 import com.deep.framework.framework.TensorFlow;
 import com.deep.framework.graph.None;
 import com.deep.framework.graph.Tensor;
+import com.deep.framework.lang.Tenser;
 import org.junit.Test;
 
 import static com.deep.framework.framework.CudaExecutor.*;
@@ -37,6 +38,17 @@ public class AppTest {
         System.out.println(value);
         Double value1 = value * (1 - value);
         System.out.println(value1 * 0.1694231856183997);
+    }
+
+    @Test
+    public void reluxTest() {
+        TensorFlow tf = new TensorFlow();
+        Tensor tensor = tf.relux(new Tensor(new int[]{2,3}));
+        TensorExecutor executor = new TensorExecutor(tensor);
+        executor.run();
+        Tenser<None> none = tensor.getInput()[0].getOutput();
+        compute(tensor);
+        System.out.println(none);
     }
 
     @Test
