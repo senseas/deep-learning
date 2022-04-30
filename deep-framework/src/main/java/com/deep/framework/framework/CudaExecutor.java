@@ -160,7 +160,7 @@ public class CudaExecutor implements Serializable {
                 List<None> list = new ArrayList();
                 forEach(nones, tenser, (None inx, None out) -> {
                     list.add(new None(out.getGrad()));
-                    list.addAll(inx.getParams());
+                    inx.getParams().listIterator(1).forEachRemaining(a -> list.add(a));
                 });
                 CUfunction function = getGradient(tensor, nones.findFirst(), i);
                 double[] input = list.stream().mapToDouble(None::getValue).toArray();
@@ -172,11 +172,11 @@ public class CudaExecutor implements Serializable {
             None out = tensor.getOutput();
             IntStream.range(0, tensor.getInput().length).forEach(i -> {
                 None none = tensor.getInput()[i].getOutput();
-                List<Double> list = new ArrayList<>();
-                list.add(out.getGrad());
-                none.getParams().forEach(b -> list.add(b.getValue()));
+                List<None> list = new ArrayList<>();
+                list.add(new None(out.getGrad()));
+                none.getParams().listIterator(1).forEachRemaining(a -> list.add(a));
                 CUfunction function = getGradient(tensor, none, 0);
-                double[] input = list.stream().mapToDouble(Double::valueOf).toArray();
+                double[] input = list.stream().mapToDouble(None::getValue).toArray();
                 double[] output = new double[1];
                 run(function, input, output);
             });
