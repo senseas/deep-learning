@@ -517,7 +517,7 @@ public class TensorFlow implements Serializable {
                 double grad = out.getGrad();
                 //inx.setGrad(valx > 0 ? grad : 0.1 * grad);
 
-                inx.setParams(inx);
+                inx.setParams(out.getParams(), inx);
                 inx.setGrads(out.getGrads().concat("*").concat("({var}").concat(">0?1:0.1").concat(")"));
             }
 
