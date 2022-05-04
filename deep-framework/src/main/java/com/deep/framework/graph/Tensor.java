@@ -97,7 +97,6 @@ public class Tensor implements Serializable {
     protected Object output, value, grad;
     protected transient Object function, reduce;
     private transient boolean gradre;
-    private transient boolean compCuda;
-    private transient boolean gradCuda;
     private transient CudaContext context;
+    private transient boolean out;
 }

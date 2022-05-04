@@ -92,10 +92,6 @@ public class None implements Serializable {
         }
     }
 
-    public void resetx() {
-        this.grad = 0d;
-    }
-
     public void reset() {
         if (Objects.isNull(tensor)) {
             this.reduce = false;
@@ -106,6 +102,14 @@ public class None implements Serializable {
         } else {
             ((boolean[]) tensor.getReduce())[idx] = false;
             ((double[]) tensor.getGrad())[idx] = 0d;
+        }
+    }
+
+    public boolean isOut() {
+        if (Objects.isNull(tensor)) {
+            return this.out;
+        } else {
+            return tensor.isOut();
         }
     }
 
@@ -151,10 +155,49 @@ public class None implements Serializable {
         return Arrays.asList(this);
     }
 
+    public void setGrads(Object... arr) {
+        params = new ArrayList<>();
+        grads = "";
+        for (Object o : arr) {
+            if (o instanceof String) {
+                grads = grads.concat((String) o);
+            } else if (o instanceof None) {
+                None a = (None) o;
+                if (a.isOut()) {
+                    params.addAll(a.getParams());
+                    grads = grads.concat(a.getGrads());
+                } else {
+                    params.add(a);
+                    grads = grads.concat("{var}");
+                }
+            }
+        }
+    }
+
+    public void setFuncs(Object... arr) {
+        paramx = new ArrayList<>();
+        funcs = "(";
+        for (Object o : arr) {
+            if (o instanceof String) {
+                funcs = funcs.concat((String) o);
+            } else if (o instanceof None) {
+                None a = (None) o;
+                if (a.isOut()) {
+                    paramx.add(a);
+                    funcs = funcs.concat("{var}");
+                } else {
+                    paramx.addAll(a.getParamx());
+                    funcs = funcs.concat(a.getFuncs());
+                }
+            }
+        }
+        funcs = funcs.concat(")");
+    }
+
     private int idx;
     private transient Tensor tensor;
     private double value, grad;
-    private transient boolean reduce;
+    private transient boolean reduce, out;
     private String grads = "{var}";
     private String funcs = "{var}";
     private List<None> params;
