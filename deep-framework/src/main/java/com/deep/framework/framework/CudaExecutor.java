@@ -161,7 +161,6 @@ public class CudaExecutor implements Serializable {
                 nones.forEach((None inx, int l) -> inx.setGrad(output[l]));
             });
         } else {
-            None out = tensor.getOutput();
             IntStream.range(0, tensor.getInput().length).forEach(i -> {
                 None none = tensor.getInput()[i].getOutput();
                 CUfunction function = getGradient(tensor, none, 0);
