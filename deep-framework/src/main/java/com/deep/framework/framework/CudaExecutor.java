@@ -131,10 +131,8 @@ public class CudaExecutor implements Serializable {
     public static void compute(Tensor tensor) {
         if (tensor.getFunction() instanceof Tenser) {
             Tenser<None> nones = TensorFlux.getOutput(tensor.getFunction());
-            List<None> list = new ArrayList<>();
-            nones.forEach((None a, int i) -> list.addAll(a.getParamx()));
             CUfunction function = getFunction(tensor, nones.findFirst());
-            double[] output = list.stream().mapToDouble(None::getValue).toArray();
+            double[] output = nones.mapToObj(a -> a.getParamx().stream().mapToDouble(None::getValue)).flatMapToDouble(o -> o).toArray();
             run(function, new Grid(nones.size()), new Block(1), output);
             nones.forEach((None a, int i) -> a.setValue(output[i * nones.findFirst().getParamx().size()]));
         } else {
@@ -156,10 +154,8 @@ public class CudaExecutor implements Serializable {
         if (tensor.getFunction() instanceof Tenser) {
             IntStream.range(0, tensor.getInput().length).forEach(i -> {
                 Tenser<None> nones = tensor.getInput()[i].getOutput();
-                List<None> list = new ArrayList();
-                nones.forEach((None inx, int l) -> list.addAll(inx.getParams()));
                 CUfunction function = getGradient(tensor, nones.findFirst(), i);
-                double[] input = list.stream().mapToDouble(a -> a.isOut() ? a.getGrad() : a.getValue()).toArray();
+                double[] input = nones.mapToObj(a -> a.getParams().stream().mapToDouble(None::getValue)).flatMapToDouble(o -> o).toArray();
                 double[] output = new double[nones.size()];
                 run(function, new Grid(nones.size()), new Block(1), input, output);
                 nones.forEach((None inx, int l) -> inx.setGrad(output[l]));
@@ -169,7 +165,7 @@ public class CudaExecutor implements Serializable {
             IntStream.range(0, tensor.getInput().length).forEach(i -> {
                 None none = tensor.getInput()[i].getOutput();
                 CUfunction function = getGradient(tensor, none, 0);
-                double[] input = none.getParams().stream().mapToDouble(a -> a.isOut() ? a.getGrad() : a.getValue()).toArray();
+                double[] input = none.getParams().stream().mapToDouble(None::getValue).toArray();
                 double[] output = new double[1];
                 run(function, input, output);
             });
