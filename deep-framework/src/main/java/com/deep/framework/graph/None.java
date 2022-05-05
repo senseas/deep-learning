@@ -152,7 +152,7 @@ public class None implements Serializable {
     public List<None> getParams() {
         if (Objects.nonNull(params) && !params.isEmpty()) return params;
         if (tensor instanceof TensorConst) return Arrays.asList();
-        return Arrays.asList(this);
+        return Arrays.asList(new None(this.getGrad()));
     }
 
     public void setGrads(Object... arr) {
@@ -198,8 +198,6 @@ public class None implements Serializable {
     private transient Tensor tensor;
     private double value, grad;
     private transient boolean reduce, out;
-    private String grads = "{var}";
-    private String funcs = "{var}";
-    private List<None> params;
-    private List<None> paramx;
+    private transient String grads = "{var}", funcs = "{var}";
+    private transient List<None> paramx, params;
 }

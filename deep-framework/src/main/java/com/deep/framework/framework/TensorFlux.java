@@ -18,14 +18,11 @@ public class TensorFlux implements Serializable {
 
     @SneakyThrows
     public static void forward(Tensor tensor) {
-        Annotation cuda = tensor.getClass().getMethod("compute").getAnnotation(Cuda.class);
-
         forEach(tensor.getFunction(), (Tensor a) -> {
             a.forward();
         });
-        if(Objects.nonNull(cuda)){
-           CudaExecutor.compute(tensor);
-        }
+        Annotation cuda = tensor.getClass().getMethod("compute").getAnnotation(Cuda.class);
+        if(Objects.nonNull(cuda)) CudaExecutor.compute(tensor);
         forwards(tensor);
     }
 

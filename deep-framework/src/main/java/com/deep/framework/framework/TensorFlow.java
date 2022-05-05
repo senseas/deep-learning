@@ -483,8 +483,8 @@ public class TensorFlow implements Serializable {
 
                 None out = createOutput();
                 out.setFuncs(out, "=", inx, "*(", inx, ">0?1:0.1)");
-
-                return out;//new None(valx > 0 ? valx : 0.1 * valx);
+                return out;
+                //return new None(valx > 0 ? valx : 0.1 * valx);
             }
 
             public void gradient() {
@@ -493,7 +493,6 @@ public class TensorFlow implements Serializable {
                 double grad = out.getGrad();
                 //inx.setGrad(valx > 0 ? grad : 0.1 * grad);
 
-                //inx.setParams(out.getParams(), inx);
                 inx.setGrads(out, "*(", inx, ">0?1:0.1)");
             }
 
