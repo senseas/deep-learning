@@ -2,6 +2,7 @@ package com.deep.framework.lang;
 
 import com.deep.framework.lang.function.For;
 import com.deep.framework.lang.function.Func;
+import com.deep.framework.lang.function.Func1;
 
 import java.io.Serializable;
 import java.lang.reflect.Array;
@@ -97,7 +98,11 @@ public class Tenser<T> implements Serializable {
     }
 
     public void forEach(For<T> func) {
-        IntStream.range(0, size()).forEach(i -> func.apply(data[start + i], i));
+        IntStream.range(0, size()).parallel().forEach(i -> func.apply(data[start + i], i));
+    }
+
+    public void forEach(Func1<T> func) {
+        IntStream.range(0, size()).parallel().forEachOrdered(i -> func.apply(data[start + i]));
     }
 
     public Stream mapToObj(Func<T> func) {

@@ -57,14 +57,8 @@ public class ForEach implements Serializable {
 
     public static <M> void forEach(Object a, Func1<M> func) {
         if (BeanUtil.isTensor(a)) {
-            forEach(Tensers.getLength(a), i -> {
-                Object m = Tensers.get(a, i);
-                if (BeanUtil.isNotTensor(m)) {
-                    func.apply((M) m);
-                } else {
-                    forEach(m, func);
-                }
-            });
+            Tenser<M> tenser = (Tenser) a;
+            tenser.forEach(o -> func.apply(o));
         } else {
             func.apply((M) a);
         }

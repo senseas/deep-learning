@@ -42,9 +42,7 @@ public class TensorFlux implements Serializable {
     }
 
     public static void compute(Tensor tensor) {
-        tensor.setOut(true);
         Object nones = tensor.compute(), output = tensor.getOutput();
-        tensor.setOut(false);
         if (nones != output) {
             zerosOutput(tensor, nones);
             forEach(tensor.getOutput(), nones, (None out, None none) -> {
@@ -64,12 +62,10 @@ public class TensorFlux implements Serializable {
     }
 
     public static void gradient(Tensor tensor) {
-        tensor.setOut(true);
         tensor.gradient();
-        tensor.setOut(false);
-        forEach(tensor.getOutput(), (None out) -> {
+        /*forEach(tensor.getOutput(), (None out) -> {
             out.reset();
-        });
+        });*/
     }
 
     public static void reducer(Tensor tensor) {

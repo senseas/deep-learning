@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Stream;
 
 @Data
 public class None implements Serializable {
@@ -152,18 +153,19 @@ public class None implements Serializable {
     public List<None> getParams() {
         if (Objects.nonNull(params) && !params.isEmpty()) return params;
         if (tensor instanceof TensorConst) return Arrays.asList();
-        return Arrays.asList(new None(this.getGrad()));
+        return Arrays.asList(new NoneOut(this));
     }
 
     public void setGrads(Object... arr) {
         params = new ArrayList<>();
         grads = "";
+        None none = getNone(arr);
         for (Object o : arr) {
             if (o instanceof String) {
                 grads = grads.concat((String) o);
             } else if (o instanceof None) {
                 None a = (None) o;
-                if (a.isOut()) {
+                if (a.equals(none)) {
                     params.addAll(a.getParams());
                     grads = grads.concat(a.getGrads());
                 } else {
@@ -174,21 +176,29 @@ public class None implements Serializable {
         }
     }
 
+    private None getNone(Object[] arr) {
+        return (None) Stream.of(arr).filter(a -> a instanceof None).reduce((a, b) -> {
+            None m = (None) a;
+            if (Objects.nonNull(m.getTensor())) {
+                for (Tensor o : m.getTensor().getInput()) {
+                    if (o.getOutput().equals(b)) return a;
+                }
+            }
+            return b;
+        }).get();
+    }
+
     public void setFuncs(Object... arr) {
         paramx = new ArrayList<>();
-        funcs = "(";
+        paramx.add(this);
+        funcs = "({var}=";
         for (Object o : arr) {
             if (o instanceof String) {
                 funcs = funcs.concat((String) o);
             } else if (o instanceof None) {
                 None a = (None) o;
-                if (a.isOut()) {
-                    paramx.add(a);
-                    funcs = funcs.concat("{var}");
-                } else {
-                    paramx.addAll(a.getParamx());
-                    funcs = funcs.concat(a.getFuncs());
-                }
+                paramx.addAll(a.getParamx());
+                funcs = funcs.concat(a.getFuncs());
             }
         }
         funcs = funcs.concat(")");

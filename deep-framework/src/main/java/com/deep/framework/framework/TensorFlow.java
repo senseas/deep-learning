@@ -21,7 +21,7 @@ public class TensorFlow implements Serializable {
                 double value = inputStream().mapToDouble(a -> ((None) a).getValue()).sum();
 
                 None out = createOutput();
-                Stream<Stream> stream = Stream.of(Stream.of(out, "="), inputStream().flatMap(a -> Stream.of("+(", a, ")")));
+                Stream<Stream> stream = Stream.of(inputStream().flatMap(a -> Stream.of("+(", a, ")")));
                 out.setFuncs(stream.flatMap(a -> a).toArray());
 
                 return new None(value);
@@ -66,7 +66,7 @@ public class TensorFlow implements Serializable {
                 double valx = inx.getValue(), valy = iny.getValue();
 
                 None out = createOutput();
-                out.setFuncs(out, "=", inx, "-", iny);
+                out.setFuncs(inx, "-", iny);
 
                 return new None(valx - valy);
             }
@@ -93,7 +93,7 @@ public class TensorFlow implements Serializable {
                 double valx = inx.getValue();
 
                 None out = createOutput();
-                out.setFuncs(out, "=-", inx);
+                out.setFuncs("-", inx);
 
                 return new None(-valx);
             }
@@ -117,7 +117,7 @@ public class TensorFlow implements Serializable {
                 double valx = inx.getValue(), valy = iny.getValue();
 
                 None out = createOutput();
-                out.setFuncs(out, "=", inx, "*", iny);
+                out.setFuncs(inx, "*", iny);
 
                 return new None(valx * valy);
             }
@@ -144,7 +144,7 @@ public class TensorFlow implements Serializable {
                 double valx = inx.getValue(), valy = iny.getValue();
 
                 None out = createOutput();
-                out.setFuncs(out, "=", inx, "/", iny);
+                out.setFuncs(inx, "/", iny);
 
                 return new None(valx / valy);
             }
@@ -171,7 +171,7 @@ public class TensorFlow implements Serializable {
                 double valx = inx.getValue();
 
                 None out = createOutput();
-                out.setFuncs(out, "=expf(", inx, ")");
+                out.setFuncs("expf(", inx, ")");
 
                 return new None(Math.exp(valx));
             }
@@ -212,7 +212,7 @@ public class TensorFlow implements Serializable {
                 double valx = inx.getValue(), valy = iny.getValue();
 
                 None out = createOutput();
-                out.setFuncs(out, "=powf(", inx, ",", iny, ")");
+                out.setFuncs("powf(", inx, ",", iny, ")");
 
                 return new None(Math.pow(valx, valy));
             }
@@ -237,7 +237,7 @@ public class TensorFlow implements Serializable {
                 double valx = inx.getValue();
 
                 None out = createOutput();
-                out.setFuncs(out, "=log(", inx, ")");
+                out.setFuncs("log(", inx, ")");
 
                 return new None(Math.log(valx));
             }
@@ -482,7 +482,7 @@ public class TensorFlow implements Serializable {
                 double valx = inx.getValue();
 
                 None out = createOutput();
-                out.setFuncs(out, "=", inx, "*(", inx, ">0?1:0.1)");
+                out.setFuncs(inx, "*(", inx, ">0?1:0.1)");
                 return out;
                 //return new None(valx > 0 ? valx : 0.1 * valx);
             }
@@ -640,9 +640,7 @@ public class TensorFlow implements Serializable {
                 return B;
             }
 
-            public void gradient() {
-               // CudaExecutor.gradient(this);
-            }
+            public void gradient() { }
 
         };
     }
