@@ -157,7 +157,7 @@ public class None implements Serializable {
     }
 
     public void setGrads(Object... arr) {
-        if (Objects.nonNull(grads)) return;
+        if (Objects.nonNull(params)) return;
         params = new ArrayList<>();
         grads = "";
         None none = getNone(arr);

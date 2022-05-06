@@ -22,7 +22,9 @@ public class TensorFlux implements Serializable {
             a.forward();
         });
         Annotation cuda = tensor.getClass().getMethod("compute").getAnnotation(Cuda.class);
-        if(Objects.nonNull(cuda)) CudaExecutor.compute(tensor);
+        if (Objects.nonNull(cuda)) {
+            CudaExecutor.compute(tensor);
+        }
         forwards(tensor);
     }
 
