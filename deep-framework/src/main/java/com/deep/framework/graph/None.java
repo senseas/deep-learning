@@ -157,6 +157,7 @@ public class None implements Serializable {
     }
 
     public void setGrads(Object... arr) {
+        if (Objects.nonNull(grads)) return;
         params = new ArrayList<>();
         grads = "";
         None none = getNone(arr);
@@ -189,6 +190,7 @@ public class None implements Serializable {
     }
 
     public void setFuncs(Object... arr) {
+        if (Objects.nonNull(paramx)) return;
         paramx = new ArrayList<>();
         paramx.add(this);
         funcs = "({var}=";

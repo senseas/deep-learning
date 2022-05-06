@@ -98,7 +98,7 @@ public class Tenser<T> implements Serializable {
     }
 
     public void forEach(For<T> func) {
-        IntStream.range(0, size()).parallel().forEach(i -> func.apply(data[start + i], i));
+        IntStream.range(0, size()).parallel().forEachOrdered(i -> func.apply(data[start + i], i));
     }
 
     public void forEach(Func1<T> func) {
