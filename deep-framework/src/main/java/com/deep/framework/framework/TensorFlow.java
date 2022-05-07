@@ -511,9 +511,7 @@ public class TensorFlow implements Serializable {
                 return B;
             }
 
-            public void gradient() {
-                CudaExecutor.gradient(this);
-            }
+            public void gradient() { }
 
         };
     }

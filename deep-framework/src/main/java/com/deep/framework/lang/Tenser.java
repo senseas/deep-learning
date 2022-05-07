@@ -105,10 +105,6 @@ public class Tenser<T> implements Serializable {
         IntStream.range(0, size()).parallel().forEachOrdered(i -> func.apply(data[start + i]));
     }
 
-    public Stream mapToObj(Func<T> func) {
-        return IntStream.range(0, size()).mapToObj(i -> func.apply(data[start + i]));
-    }
-
     private int[] getNext(int[] index) {
         return Arrays.copyOfRange(this.shape, index.length, this.shape.length);
     }

@@ -18,7 +18,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-import static com.deep.framework.lang.ForEach.forEach;
 import static jcuda.driver.JCudaDriver.*;
 import static jcuda.nvrtc.JNvrtc.*;
 import static jcuda.runtime.JCuda.cudaFree;
@@ -132,14 +131,18 @@ public class CudaExecutor implements Serializable {
         if (tensor.getFunction() instanceof Tenser) {
             Tenser<None> nones = TensorFlux.getOutput(tensor.getFunction());
             CUfunction function = getFunction(tensor, nones.findFirst());
-            double[] output = nones.mapToObj(a -> a.getParamx().stream().mapToDouble(None::getValue)).flatMapToDouble(o -> o).toArray();
+            List<None> list = new ArrayList<>();
+            nones.forEach(a -> list.addAll(a.getParamx()));
+            double[] output = list.stream().mapToDouble(None::getValue).toArray();
             run(function, new Grid(nones.size()), new Block(1), output);
-            nones.forEach((None a, int i) -> a.setValue(output[i * nones.findFirst().getParamx().size()]));
+            IntStream.range(0, list.size()).parallel().forEachOrdered(i -> list.get(i).setValue(output[i]));
         } else {
             None out = ((Tensor) tensor.getFunction()).getOutput();
             CUfunction function = getFunction(tensor, out);
-            double[] output = out.getParamx().stream().mapToDouble(None::getValue).toArray();
+            List<None> list = out.getParamx();
+            double[] output = list.stream().mapToDouble(None::getValue).toArray();
             run(function, output);
+            IntStream.range(0, list.size()).forEach(i -> list.get(i).setValue(output[i]));
         }
     }
 
@@ -155,7 +158,9 @@ public class CudaExecutor implements Serializable {
             IntStream.range(0, tensor.getInput().length).forEach(i -> {
                 Tenser<None> nones = tensor.getInput()[i].getOutput();
                 CUfunction function = getGradient(tensor, nones.findFirst(), i);
-                double[] input = nones.mapToObj(a -> a.getParams().stream().mapToDouble(None::getValue)).flatMapToDouble(o -> o).toArray();
+                List<None> list = new ArrayList<>();
+                nones.forEach(a -> list.addAll(a.getParams()));
+                double[] input = list.stream().mapToDouble(None::getValue).toArray();
                 double[] output = new double[nones.size()];
                 run(function, new Grid(nones.size()), new Block(1), input, output);
                 nones.forEach((None inx, int l) -> inx.setGrad(output[l]));
@@ -167,6 +172,7 @@ public class CudaExecutor implements Serializable {
                 double[] input = none.getParams().stream().mapToDouble(None::getValue).toArray();
                 double[] output = new double[1];
                 run(function, input, output);
+                none.setGrad(output[0]);
             });
         }
     }

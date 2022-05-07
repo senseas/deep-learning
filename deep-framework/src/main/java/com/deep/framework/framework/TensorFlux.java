@@ -28,13 +28,16 @@ public class TensorFlux implements Serializable {
         forwards(tensor);
     }
 
-
+    @SneakyThrows
     public static void backward(Tensor tensor) {
         backwards(tensor);
         forEach(tensor.getFunction(), (Tensor a) -> {
             a.backward();
         });
-        tensor.gradient();
+        Annotation cuda = tensor.getClass().getMethod("compute").getAnnotation(Cuda.class);
+        if (Objects.nonNull(cuda)) {
+            CudaExecutor.gradient(tensor);
+        }
     }
 
     public static void reduce(Tensor tensor) {
