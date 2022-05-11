@@ -73,6 +73,16 @@ public class None implements Serializable {
         }
     }
 
+    public void setGradx(double grad) {
+        if (Objects.isNull(tensor)) {
+            this.grad = grad;
+        } else if (Objects.isNull(tensor.getShape())) {
+            tensor.setGrad(grad);
+        } else {
+            ((double[]) tensor.getGrad())[idx] = grad;
+        }
+    }
+
     public boolean isReduce() {
         if (Objects.isNull(tensor)) {
             return this.reduce;
@@ -166,7 +176,7 @@ public class None implements Serializable {
                 grads = grads.concat((String) o);
             } else if (o instanceof None) {
                 None a = (None) o;
-                if (a.equals(none)) {
+                if (a == none) {
                     params.addAll(a.getParams());
                     grads = grads.concat(a.getGrads());
                 } else {

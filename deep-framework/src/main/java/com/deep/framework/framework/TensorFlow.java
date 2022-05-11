@@ -171,7 +171,7 @@ public class TensorFlow implements Serializable {
                 double valx = inx.getValue();
 
                 None out = createOutput();
-                out.setFuncs("expf(", inx, ")");
+                out.setFuncs("exp(", inx, ")");
 
                 return new None(Math.exp(valx));
             }
@@ -182,7 +182,7 @@ public class TensorFlow implements Serializable {
                 double grad = out.getGrad();
                 inx.setGrad(grad * Math.exp(valx));
 
-                inx.setGrads(out, "*expf(", inx, ")");
+                inx.setGrads(out, "*exp(", inx, ")");
             }
 
         };
@@ -617,6 +617,7 @@ public class TensorFlow implements Serializable {
     public Tensor sigmoid(Tensor input) {
         return new TensorFunction("Sigmoid", input) {
 
+            @Cuda
             public Tensor compute() {
                 Tensor A = getInput(0);
                 return div(new TensorConst(1d), add(new TensorConst(1d), exp(minus(A))));
@@ -676,6 +677,7 @@ public class TensorFlow implements Serializable {
     public Tensor softmaxCross(Tensor... input) {
         return new TensorFunction("SoftmaxCross", input) {
 
+            @Cuda
             public Tensor compute() {
                 Tensor a = getInput(0), b = getInput(1);
                 return minus(mul(a, log(b)));

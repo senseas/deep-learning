@@ -135,7 +135,7 @@ public class CudaExecutor implements Serializable {
             nones.forEach(a -> list.addAll(a.getParamx()));
             double[] output = list.stream().mapToDouble(None::getValue).toArray();
             run(function, new Grid(nones.size()), new Block(1), output);
-            IntStream.range(0, list.size()).parallel().forEachOrdered(i -> list.get(i).setValue(output[i]));
+            IntStream.range(0, list.size()).forEach(i -> list.get(i).setValue(output[i]));
         } else {
             None out = ((Tensor) tensor.getFunction()).getOutput();
             CUfunction function = getFunction(tensor, out);
@@ -163,16 +163,16 @@ public class CudaExecutor implements Serializable {
                 double[] input = list.stream().mapToDouble(None::getValue).toArray();
                 double[] output = new double[nones.size()];
                 run(function, new Grid(nones.size()), new Block(1), input, output);
-                nones.forEach((None inx, int l) -> inx.setGrad(output[l]));
+                nones.forEach((None inx, int l) -> inx.setGradx(output[l]));
             });
         } else {
             IntStream.range(0, tensor.getInput().length).forEach(i -> {
                 None none = tensor.getInput()[i].getOutput();
-                CUfunction function = getGradient(tensor, none, 0);
+                CUfunction function = getGradient(tensor, none, i);
                 double[] input = none.getParams().stream().mapToDouble(None::getValue).toArray();
                 double[] output = new double[1];
                 run(function, input, output);
-                none.setGrad(output[0]);
+                none.setGradx(output[0]);
             });
         }
     }
