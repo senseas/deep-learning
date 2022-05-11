@@ -176,7 +176,9 @@ public class None implements Serializable {
                 grads = grads.concat((String) o);
             } else if (o instanceof None) {
                 None a = (None) o;
-                if (a == none) {
+                if (a.getTensor() instanceof TensorConst) {
+                    grads = grads.concat(String.valueOf(a.getValue()));
+                } else if (a == none) {
                     params.addAll(a.getParams());
                     grads = grads.concat(a.getGrads());
                 } else {
@@ -209,8 +211,12 @@ public class None implements Serializable {
                 funcs = funcs.concat((String) o);
             } else if (o instanceof None) {
                 None a = (None) o;
-                paramx.addAll(a.getParamx());
-                funcs = funcs.concat(a.getFuncs());
+                if (a.getTensor() instanceof TensorConst) {
+                    funcs = funcs.concat(String.valueOf(a.getValue()));
+                } else {
+                    paramx.addAll(a.getParamx());
+                    funcs = funcs.concat(a.getFuncs());
+                }
             }
         }
         funcs = funcs.concat(")");
