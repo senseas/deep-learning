@@ -124,30 +124,6 @@ public class None implements Serializable {
         }
     }
 
-    public None setParams(Object... arr) {
-        params = new ArrayList<>();
-        for (Object o : arr) {
-            if (o instanceof List) {
-                params.addAll((List) o);
-            } else if (o instanceof None) {
-                params.add((None) o);
-            }
-        }
-        return this;
-    }
-
-    public None setParamx(Object... arr) {
-        paramx = new ArrayList<>();
-        for (Object o : arr) {
-            if (o instanceof List) {
-                paramx.addAll((List) o);
-            } else if (!(o instanceof TensorConst)) {
-                paramx.add((None) o);
-            }
-        }
-        return this;
-    }
-
     public String getFuncs() {
         if (tensor instanceof TensorConst)
             return String.valueOf(getValue());
