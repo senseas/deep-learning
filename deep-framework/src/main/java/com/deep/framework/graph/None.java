@@ -73,16 +73,6 @@ public class None implements Serializable {
         }
     }
 
-    public void setGradx(double grad) {
-        if (Objects.isNull(tensor)) {
-            this.grad = grad;
-        } else if (Objects.isNull(tensor.getShape())) {
-            tensor.setGrad(grad);
-        } else {
-            ((double[]) tensor.getGrad())[idx] = grad;
-        }
-    }
-
     public boolean isReduce() {
         if (Objects.isNull(tensor)) {
             return this.reduce;
@@ -116,14 +106,6 @@ public class None implements Serializable {
         }
     }
 
-    public boolean isOut() {
-        if (Objects.isNull(tensor)) {
-            return this.out;
-        } else {
-            return tensor.isOut();
-        }
-    }
-
     public String getFuncs() {
         if (tensor instanceof TensorConst)
             return String.valueOf(getValue());
@@ -131,15 +113,36 @@ public class None implements Serializable {
     }
 
     public List<None> getParamx() {
-        if (Objects.nonNull(paramx) && !paramx.isEmpty()) return paramx;
         if (tensor instanceof TensorConst) return Arrays.asList();
+        if (Objects.nonNull(paramx) && !paramx.isEmpty()) return paramx;
         return Arrays.asList(this);
     }
 
     public List<None> getParams() {
-        if (Objects.nonNull(params) && !params.isEmpty()) return params;
         if (tensor instanceof TensorConst) return Arrays.asList();
+        if (Objects.nonNull(params) && !params.isEmpty()) return params;
         return Arrays.asList(new NoneOut(this));
+    }
+
+    public void setFuncs(Object... arr) {
+        if (Objects.nonNull(paramx)) return;
+        paramx = new ArrayList<>();
+        paramx.add(this);
+        funcs = "";
+        for (Object o : arr) {
+            if (o instanceof String) {
+                funcs = funcs.concat((String) o);
+            } else if (o instanceof None) {
+                None a = (None) o;
+                if (a.getTensor() instanceof TensorConst) {
+                    funcs = funcs.concat(a.getFuncs());
+                } else {
+                    paramx.addAll(a.getParamx());
+                    funcs = funcs.concat(a.getFuncs());
+                }
+            }
+        }
+        funcs = "({var}=".concat(funcs).concat(")");
     }
 
     public void setGrads(Object... arr) {
@@ -177,31 +180,10 @@ public class None implements Serializable {
         }).get();
     }
 
-    public void setFuncs(Object... arr) {
-        if (Objects.nonNull(paramx)) return;
-        paramx = new ArrayList<>();
-        paramx.add(this);
-        funcs = "({var}=";
-        for (Object o : arr) {
-            if (o instanceof String) {
-                funcs = funcs.concat((String) o);
-            } else if (o instanceof None) {
-                None a = (None) o;
-                if (a.getTensor() instanceof TensorConst) {
-                    funcs = funcs.concat(String.valueOf(a.getValue()));
-                } else {
-                    paramx.addAll(a.getParamx());
-                    funcs = funcs.concat(a.getFuncs());
-                }
-            }
-        }
-        funcs = funcs.concat(")");
-    }
-
     private int idx;
     private transient Tensor tensor;
     private double value, grad;
-    private transient boolean reduce, out;
+    private transient boolean reduce;
     private transient String grads = "{var}", funcs = "{var}";
     private transient List<None> paramx, params;
 }

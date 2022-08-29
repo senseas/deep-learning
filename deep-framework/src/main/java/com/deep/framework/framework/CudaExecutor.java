@@ -1,5 +1,6 @@
 package com.deep.framework.framework;
 
+import com.alibaba.fastjson.JSONObject;
 import com.deep.framework.graph.None;
 import com.deep.framework.graph.Tensor;
 import com.deep.framework.lang.Tenser;
@@ -163,7 +164,7 @@ public class CudaExecutor implements Serializable {
                 double[] input = list.stream().mapToDouble(None::getValue).toArray();
                 double[] output = new double[nones.size()];
                 run(function, new Grid(nones.size()), new Block(1), input, output);
-                nones.forEach((None inx, int l) -> inx.setGradx(output[l]));
+                nones.forEach((None inx, int l) -> inx.setGrad(output[l]));
             });
         } else {
             IntStream.range(0, tensor.getInput().length).forEach(i -> {
@@ -172,7 +173,7 @@ public class CudaExecutor implements Serializable {
                 double[] input = none.getParams().stream().mapToDouble(None::getValue).toArray();
                 double[] output = new double[1];
                 run(function, input, output);
-                none.setGradx(output[0]);
+                none.setGrad(output[0]);
             });
         }
     }
