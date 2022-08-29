@@ -2,10 +2,10 @@ package com.deep.framework.graph;
 
 import java.util.List;
 
-public class NoneOut extends None {
+public class NoneGrad extends None {
     private None one;
 
-    public NoneOut(None one) {
+    public NoneGrad(None one) {
         super(null);
         this.one = one;
     }
@@ -22,4 +22,7 @@ public class NoneOut extends None {
         return one.getParams();
     }
 
+    public String getGrads() {
+        return one.getGrads();
+    }
 }

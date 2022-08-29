@@ -7,7 +7,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Stream;
 
 @Data
 public class None implements Serializable {
@@ -121,7 +120,7 @@ public class None implements Serializable {
     public List<None> getParams() {
         if (tensor instanceof TensorConst) return Arrays.asList();
         if (Objects.nonNull(params) && !params.isEmpty()) return params;
-        return Arrays.asList(new NoneOut(this));
+        return Arrays.asList(this);
     }
 
     public void setFuncs(Object... arr) {
@@ -149,7 +148,6 @@ public class None implements Serializable {
         if (Objects.nonNull(params)) return;
         params = new ArrayList<>();
         grads = "";
-        None none = getNone(arr);
         for (Object o : arr) {
             if (o instanceof String) {
                 grads = grads.concat((String) o);
@@ -157,7 +155,7 @@ public class None implements Serializable {
                 None a = (None) o;
                 if (a.getTensor() instanceof TensorConst) {
                     grads = grads.concat(String.valueOf(a.getValue()));
-                } else if (a == none) {
+                } else if (a instanceof NoneGrad) {
                     params.addAll(a.getParams());
                     grads = grads.concat(a.getGrads());
                 } else {
@@ -168,16 +166,12 @@ public class None implements Serializable {
         }
     }
 
-    private None getNone(Object[] arr) {
-        return (None) Stream.of(arr).filter(a -> a instanceof None).reduce((a, b) -> {
-            None m = (None) a;
-            if (Objects.nonNull(m.getTensor())) {
-                for (Tensor o : m.getTensor().getInput()) {
-                    if (o.getOutput().equals(b)) return a;
-                }
-            }
-            return b;
-        }).get();
+    public None grad() {
+        NoneGrad noneGrad = new NoneGrad(this);
+        if (Objects.isNull(params)) {
+            params = Arrays.asList(noneGrad);
+        }
+        return noneGrad;
     }
 
     private int idx;

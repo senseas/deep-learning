@@ -31,7 +31,7 @@ public class TensorFlow implements Serializable {
                 None out = getOutput();
                 inputStream().forEach(a -> ((None) a).setGrad(out.getGrad()));
 
-                inputStream().forEach(a -> ((None) a).setGrads(out));
+                inputStream().forEach(a -> ((None) a).setGrads(out.grad()));
             }
 
         };
@@ -77,8 +77,8 @@ public class TensorFlow implements Serializable {
                 inx.setGrad(grad);
                 iny.setGrad(-grad);
 
-                inx.setGrads(out);
-                iny.setGrads("-", out);
+                inx.setGrads(out.grad());
+                iny.setGrads("-", out.grad());
             }
 
         };
@@ -103,7 +103,7 @@ public class TensorFlow implements Serializable {
                 double grad = out.getGrad();
                 inx.setGrad(-grad);
 
-                inx.setGrads("-", out);
+                inx.setGrads("-", out.grad());
             }
 
         };
@@ -129,8 +129,8 @@ public class TensorFlow implements Serializable {
                 inx.setGrad(grad * valy);
                 iny.setGrad(grad * valx);
 
-                inx.setGrads(out, "*", iny);
-                iny.setGrads(out, "*", inx);
+                inx.setGrads(out.grad(), "*", iny);
+                iny.setGrads(out.grad(), "*", inx);
             }
 
         };
@@ -156,8 +156,8 @@ public class TensorFlow implements Serializable {
                 inx.setGrad(grad / valy);
                 iny.setGrad(-grad * valx / Math.pow(valy, 2));
 
-                inx.setGrads(out, "/", iny);
-                iny.setGrads("-", out, "*", inx, "/pow(", iny, ",2.0)");
+                inx.setGrads(out.grad(), "/", iny);
+                iny.setGrads("-", out.grad(), "*", inx, "/pow(", iny, ",2.0)");
             }
 
         };
@@ -182,7 +182,7 @@ public class TensorFlow implements Serializable {
                 double grad = out.getGrad();
                 inx.setGrad(grad * Math.exp(valx));
 
-                inx.setGrads(out, "*exp(", inx, ")");
+                inx.setGrads(out.grad(), "*exp(", inx, ")");
             }
 
         };
@@ -223,7 +223,7 @@ public class TensorFlow implements Serializable {
                 double grad = out.getGrad();
                 inx.setGrad(grad * valy * Math.pow(valx, valy - 1));
 
-                inx.setGrads(out, "*", iny, "*pow(", inx, ",", iny, "-1.0)");
+                inx.setGrads(out.grad(), "*", iny, "*pow(", inx, ",", iny, "-1.0)");
             }
 
         };
@@ -248,7 +248,7 @@ public class TensorFlow implements Serializable {
                 double grad = out.getGrad();
                 inx.setGrad(grad / valx);
 
-                inx.setGrads(out, "/", inx);
+                inx.setGrads(out.grad(), "/", inx);
             }
 
         };
@@ -273,7 +273,7 @@ public class TensorFlow implements Serializable {
                 double grad = out.getGrad();
                 inx.setGrad(grad * Math.cos(valx));
 
-                out.setGrads(out, "*cos(", inx, ")");
+                out.setGrads(out.grad(), "*cos(", inx, ")");
             }
 
         };
@@ -298,7 +298,7 @@ public class TensorFlow implements Serializable {
                 double grad = out.getGrad();
                 inx.setGrad(grad * -Math.sin(valx));
 
-                inx.setGrads(out, "*-sin(", inx, ")");
+                inx.setGrads(out.grad(), "*-sin(", inx, ")");
             }
 
         };
@@ -323,7 +323,7 @@ public class TensorFlow implements Serializable {
                 double grad = out.getGrad();
                 inx.setGrad(grad * Math.pow(1 / Math.cos(valx), 2));
 
-                inx.setGrads(out, "*pow(1.0/cos(", inx, "),2.0)");
+                inx.setGrads(out.grad(), "*pow(1.0/cos(", inx, "),2.0)");
             }
 
         };
@@ -348,7 +348,7 @@ public class TensorFlow implements Serializable {
                 double grad = out.getGrad();
                 inx.setGrad(grad * -Math.pow(1 / Math.sin(valx), 2));
 
-                inx.setGrads(out, "*-pow(1.0/sin(", inx, "),2.0)");
+                inx.setGrads(out.grad(), "*-pow(1.0/sin(", inx, "),2.0)");
             }
 
         };
@@ -373,7 +373,7 @@ public class TensorFlow implements Serializable {
                 double grad = out.getGrad();
                 inx.setGrad(grad * Math.tan(valx) / Math.cos(valx));
 
-                inx.setGrads(out, "*tan(", inx, ")/cos(", inx, ")");
+                inx.setGrads(out.grad(), "*tan(", inx, ")/cos(", inx, ")");
             }
 
         };
@@ -398,7 +398,7 @@ public class TensorFlow implements Serializable {
                 double grad = out.getGrad();
                 inx.setGrad(grad * -Math.cos(valx) / Math.pow(Math.sin(valx), 2));
 
-                inx.setGrads(out, "*-cos(", inx, ")/pow(sin(", inx, "),2)");
+                inx.setGrads(out.grad(), "*-cos(", inx, ")/pow(sin(", inx, "),2)");
             }
 
         };
@@ -423,7 +423,7 @@ public class TensorFlow implements Serializable {
                 double grad = out.getGrad();
                 inx.setGrad(grad / Math.pow(1 - Math.pow(valx,2), -2));
 
-                inx.setGrads(out, "/pow(1.0-pow(", inx, ",2.0),-2.0)");
+                inx.setGrads(out.grad(), "/pow(1.0-pow(", inx, ",2.0),-2.0)");
             }
 
         };
@@ -448,7 +448,7 @@ public class TensorFlow implements Serializable {
                 double grad = out.getGrad();
                 inx.setGrad(grad / -Math.pow(1 - Math.pow(valx,2), -2));
 
-                inx.setGrads(out, "/-pow(1.0-pow(", inx, ",2.0),-2.0)");
+                inx.setGrads(out.grad(), "/-pow(1.0-pow(", inx, ",2.0),-2.0)");
             }
 
         };
@@ -473,7 +473,7 @@ public class TensorFlow implements Serializable {
                 double grad = out.getGrad();
                 inx.setGrad(grad / (1 + Math.pow(valx, 2)));
 
-                inx.setGrads(out, "/(1.0+pow(", inx, ",2.0))");
+                inx.setGrads(out.grad(), "/(1.0+pow(", inx, ",2.0))");
             }
 
         };
@@ -498,7 +498,7 @@ public class TensorFlow implements Serializable {
                 double grad = out.getGrad();
                 inx.setGrad(grad / -(1 + Math.pow(valx, 2)));
 
-                inx.setGrads(out, "/-(1.0+pow(", inx, ",2.0))");
+                inx.setGrads(out.grad(), "/-(1.0+pow(", inx, ",2.0))");
             }
 
         };
@@ -523,7 +523,7 @@ public class TensorFlow implements Serializable {
                 double grad = out.getGrad();
                 //inx.setGrad(valx > 0 ? grad : 0.1 * grad);
 
-                inx.setGrads(out, "*(", inx, ">0?1:0.1)");
+                inx.setGrads(out.grad(), "*(", inx, ">0?1:0.1)");
             }
 
         };
