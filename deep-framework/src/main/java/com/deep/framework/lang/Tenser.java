@@ -1,14 +1,12 @@
 package com.deep.framework.lang;
 
 import com.deep.framework.lang.function.For;
-import com.deep.framework.lang.function.Func;
 import com.deep.framework.lang.function.Func1;
 
 import java.io.Serializable;
 import java.lang.reflect.Array;
 import java.util.Arrays;
 import java.util.stream.IntStream;
-import java.util.stream.Stream;
 
 public class Tenser<T> implements Serializable {
 
