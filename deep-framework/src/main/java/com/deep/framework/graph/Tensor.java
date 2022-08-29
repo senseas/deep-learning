@@ -1,6 +1,7 @@
 package com.deep.framework.graph;
 
 import com.deep.framework.framework.CudaContext;
+import com.deep.framework.framework.TensorFlux;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -70,6 +71,7 @@ public class Tensor implements Serializable {
     public <M> Tensor(M m) {
         this.name = "Function";
         this.function = m;
+        this.output = TensorFlux.getOutput(function);
     }
 
     public <M> M compute() { return null; }

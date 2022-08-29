@@ -1,7 +1,6 @@
 package com.deep.framework.graph;
 
 import com.deep.framework.framework.TensorFlux;
-import com.deep.framework.lang.util.BeanUtil;
 
 import java.util.Arrays;
 import java.util.Objects;
@@ -25,13 +24,11 @@ public class TensorOperator extends Tensor {
 
     public <M> M getInput(int i) {
         Tensor input = getInput()[i];
-        if (BeanUtil.isFunction(input)) return TensorFlux.getOutput(input.getFunction());
         return input.getOutput();
     }
 
     public Stream inputStream() {
-        return Arrays.stream(getInput()).map(input -> BeanUtil.isFunction(input) ?
-                TensorFlux.getOutput(input.getFunction()) : input.getOutput());
+        return Arrays.stream(getInput()).map(input -> input.getOutput());
     }
 
     public <M> M getOutput() {
