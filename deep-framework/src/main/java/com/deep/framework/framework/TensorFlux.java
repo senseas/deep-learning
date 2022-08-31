@@ -2,7 +2,6 @@ package com.deep.framework.framework;
 
 import com.deep.framework.graph.None;
 import com.deep.framework.graph.Tensor;
-import com.deep.framework.lang.Tenser;
 import com.deep.framework.lang.annotation.Cuda;
 import com.deep.framework.lang.util.BeanUtil;
 import lombok.SneakyThrows;
@@ -126,8 +125,8 @@ public class TensorFlux implements Serializable {
 
     public static void createOutput(Tensor tensor, Object o) {
         if (Objects.isNull((tensor.getOutput()))) {
-            if (BeanUtil.isTensor(o)) {
-                int[] shape = ((Tenser) o).shape;
+            if (BeanUtil.isTensor(o) || BeanUtil.isArray(o)) {
+                int[] shape = shapes(o);
                 tensor.setShape(shape);
                 tensor.setValue(zeros(shape));
                 tensor.setGrad(zeros(shape));

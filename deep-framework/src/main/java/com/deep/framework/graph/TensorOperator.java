@@ -36,23 +36,12 @@ public class TensorOperator extends Tensor {
     }
 
     public <M> M createOutput(Object o) {
-        if (Objects.isNull(getOutput())) {
-            this.shape = shapes(o);
-            this.value = zeros(shape);
-            this.grad = zeros(shape);
-            this.reduce = booleans(shape);
-            this.output = fillNones(this);
-        }
+        TensorFlux.createOutput(this, o);
         return getOutput();
     }
 
     public <M> M createOutput() {
-        if (Objects.isNull(getOutput())) {
-            this.value = 0d;
-            this.grad = 0d;
-            this.reduce = false;
-            this.output = new None(this);
-        }
+        TensorFlux.createOutput(this, 1);
         return getOutput();
     }
 
