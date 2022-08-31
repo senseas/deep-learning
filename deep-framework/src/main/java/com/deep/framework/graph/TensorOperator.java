@@ -42,10 +42,6 @@ public class TensorOperator extends Tensor {
             this.grad = zeros(shape);
             this.reduce = booleans(shape);
             this.output = fillNones(this);
-        } else {
-            Arrays.fill((double[]) value, 0d);
-            Arrays.fill((double[]) grad, 0d);
-            Arrays.fill((boolean[]) reduce, false);
         }
         return getOutput();
     }
@@ -56,10 +52,6 @@ public class TensorOperator extends Tensor {
             this.grad = 0d;
             this.reduce = false;
             this.output = new None(this);
-        } else {
-            this.value = 0d;
-            this.grad = 0d;
-            this.reduce = false;
         }
         return getOutput();
     }

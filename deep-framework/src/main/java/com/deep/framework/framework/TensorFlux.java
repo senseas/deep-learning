@@ -9,6 +9,7 @@ import lombok.SneakyThrows;
 
 import java.io.Serializable;
 import java.lang.annotation.Annotation;
+import java.util.Arrays;
 import java.util.Objects;
 
 import static com.deep.framework.lang.Shape.*;
@@ -47,12 +48,18 @@ public class TensorFlux implements Serializable {
     }
 
     public static void compute(Tensor tensor) {
-        Object nones = tensor.compute(), output = tensor.getOutput();
-        if (nones != output) {
+        Object output = tensor.getOutput();
+        if (Objects.nonNull(output)) {
+            restOutput(tensor);
+            Object nones = tensor.compute();
+            forEach(tensor.getOutput(), nones, (None out, None none) -> {
+                out.setValue(none.getValue());
+            });
+        } else {
+            Object nones = tensor.compute();
             zerosOutput(tensor, nones);
             forEach(tensor.getOutput(), nones, (None out, None none) -> {
                 out.setValue(none.getValue());
-                out.reset();
             });
         }
     }
@@ -103,6 +110,18 @@ public class TensorFlux implements Serializable {
         forEach(tensor.getOutput(), nones, (None out, None none) -> {
             none.setGrad(out.getGrad());
         });
+    }
+
+    public static void restOutput(Tensor tensor) {
+        if (BeanUtil.isTensor(tensor.getOutput())) {
+            Arrays.fill((double[]) tensor.getValue(), 0d);
+            Arrays.fill((double[]) tensor.getGrad(), 0d);
+            Arrays.fill((boolean[]) tensor.getReduce(), false);
+        } else {
+            tensor.setValue(0d);
+            tensor.setGrad(0d);
+            tensor.setReduce(false);
+        }
     }
 
     public static void zerosOutput(Tensor tensor, Object o) {
