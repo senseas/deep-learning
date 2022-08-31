@@ -50,14 +50,14 @@ public class TensorFlux implements Serializable {
     public static void compute(Tensor tensor) {
         Object output = tensor.getOutput();
         if (Objects.nonNull(output)) {
-            restOutput(tensor);
+            resetOutput(tensor);
             Object nones = tensor.compute();
             forEach(tensor.getOutput(), nones, (None out, None none) -> {
                 out.setValue(none.getValue());
             });
         } else {
             Object nones = tensor.compute();
-            zerosOutput(tensor, nones);
+            createOutput(tensor, nones);
             forEach(tensor.getOutput(), nones, (None out, None none) -> {
                 out.setValue(none.getValue());
             });
@@ -98,7 +98,7 @@ public class TensorFlux implements Serializable {
 
     private static void forwards(Tensor tensor) {
         Object nones = getOutput(tensor.getFunction());
-        zerosOutput(tensor, nones);
+        createOutput(tensor, nones);
         forEach(tensor.getOutput(), nones, (None out, None none) -> {
             out.setValue(none.getValue());
             out.reset();
@@ -112,7 +112,7 @@ public class TensorFlux implements Serializable {
         });
     }
 
-    public static void restOutput(Tensor tensor) {
+    public static void resetOutput(Tensor tensor) {
         if (BeanUtil.isTensor(tensor.getOutput())) {
             Arrays.fill((double[]) tensor.getValue(), 0d);
             Arrays.fill((double[]) tensor.getGrad(), 0d);
@@ -124,7 +124,7 @@ public class TensorFlux implements Serializable {
         }
     }
 
-    public static void zerosOutput(Tensor tensor, Object o) {
+    public static void createOutput(Tensor tensor, Object o) {
         if (Objects.isNull((tensor.getOutput()))) {
             if (BeanUtil.isTensor(o)) {
                 int[] shape = ((Tenser) o).shape;
