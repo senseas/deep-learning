@@ -40,8 +40,6 @@ public class TensorOperator extends Tensor {
     public <M> M createOutput(Object o) {
         if (Objects.isNull(getOutput())) {
             this.output = zeroNones(o);
-        } else {
-            farEach(getOutput(), (None out) -> {out.setValue(0d);out.reset();});
         }
         return getOutput();
     }
