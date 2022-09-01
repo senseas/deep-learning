@@ -12,7 +12,7 @@ import java.util.stream.IntStream;
 public class ForEach implements Serializable {
 
     public static void farEach(int a, Range1 r) {
-        IntStream.range(0, a).parallel().forEach(i -> r.apply(i));
+        IntStream.range(0, a).forEach(i -> r.apply(i));
     }
 
     public static void forEach(int a, Range1 r) {

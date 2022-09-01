@@ -61,6 +61,7 @@ public class TensorFlux implements Serializable {
 
     public static void gradient(Tensor tensor) {
         tensor.gradient();
+        forEach(tensor.getOutput(), None::reset);
     }
 
     public static void reducer(Tensor tensor) {
