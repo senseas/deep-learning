@@ -3,16 +3,18 @@ package com.deep.framework.jit.statement;
 import com.deep.framework.jit.lexer.TokenType;
 import lombok.Data;
 
+import java.util.ArrayList;
 import java.util.List;
 
-import static com.deep.framework.jit.lexer.TokenType.CLASS;
-import static com.deep.framework.jit.lexer.TokenType.RBRACE;
+import static com.deep.framework.jit.lexer.TokenType.*;
+import static javax.lang.model.SourceVersion.isIdentifier;
 
 @Data
 public class ClassStatement implements Statement {
-    public List<FunctionStatement> implement;
-    public List<FunctionStatement> extend;
-    public BlockStatement block;
+    public List<Object> implement = new ArrayList<>();
+    public List<FunctionStatement> extend = new ArrayList<>();
+    public List<Object> generics = new ArrayList<>();
+    public BlockStatement body;
 
     public String access;
     public String name;
@@ -22,23 +24,41 @@ public class ClassStatement implements Statement {
         if (obj.equals(CLASS)) {
             parent.statements.add(this);
             StringBuilder buffer = new StringBuilder();
+            Object o = lexers.remove(0);
             while (true) {
-                Object o = lexers.get(0);
-                lexers.remove(0);
-               /* if (o.equals(BlockStatement.tokenType)) {
-                    name = buffer.toString();
-                    block = new BlockStatement();
-                    block.parser(parent, o, lexers);
+                o = lexers.remove(0);
+                if (o instanceof String && isIdentifier((String) o)) {
+                    name = (String) o;
+                } else if (o.equals(LT)) {
+
+                } else if (o.equals(GT)) {
+
+                } else if (o.equals(IMPLEMENTS)) {
+                    implement(implement, lexers);
+                } else if (o.equals(LBRACE)) {
+                    body = new BlockStatement();
+                    body.parser(parent, o, lexers);
                     return;
-                } else */
-                if (o.equals(RBRACE)) {
+                } else if (o.equals(RBRACE)) {
                     name = buffer.toString();
-                    block = new BlockStatement();
-                    block.parser(parent, o, lexers);
+                    body = new BlockStatement();
+                    body.parser(parent, o, lexers);
                     return;
                 } else {
                     buffer.append(o);
                 }
+            }
+        }
+    }
+
+    private void implement(List<Object> implement, List<Object> lexers) {
+        while (true) {
+            Object o = lexers.remove(0);
+            if (o instanceof String && isIdentifier((String) o)) {
+                implement.add(o);
+            } else if (o.equals(LBRACE)) {
+                lexers.add(0, o);
+                return;
             }
         }
     }

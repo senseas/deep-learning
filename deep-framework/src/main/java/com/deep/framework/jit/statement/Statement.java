@@ -12,5 +12,5 @@ public interface Statement {
 
     default TokenType getTokenType(){
         return null;
-    };
+    }
 }

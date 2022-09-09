@@ -14,25 +14,15 @@ import static javax.lang.model.SourceVersion.isIdentifier;
 public class Parser {
     public Lexer lexer = new BlockLexer(null);
     public List<Object> list = new ArrayList<>();
-    public static List<Statement> statementList = new ArrayList();
-    static Map<TokenType, Statement> statements = new HashMap<TokenType, Statement>() {{
+    public static List<TokenType> ends = new ArrayList<>();
+    public static List<Statement> statements = new ArrayList();
+    public static Map<TokenType, Statement> tokens = new HashMap<TokenType, Statement>() {{
         put(TokenType.PACKAGE, new PackageStatement());
         put(TokenType.IMPORT, new ImportStatement());
         put(TokenType.AT, new AnnotationStatement());
         put(TokenType.CLASS, new ClassStatement());
         put(TokenType.LBRACE, new BlockStatement());
     }};
-
-    public void add(String a) {
-        if (!a.isEmpty()) {
-            if (Objects.nonNull(TokenType.getType(a))) {
-                TokenType tokenType = TokenType.getType(a);
-                list.add(tokenType);
-            } else {
-                list.add(a);
-            }
-        }
-    }
 
     public void parser(String strFile) {
         Stream<String> stream = FileUtil.readFile(strFile);
@@ -61,18 +51,27 @@ public class Parser {
         });
     }
 
+    private void add(String a) {
+        if (!a.isEmpty()) {
+            if (Objects.nonNull(TokenType.getType(a))) {
+                TokenType tokenType = TokenType.getType(a);
+                list.add(tokenType);
+            } else {
+                list.add(a);
+            }
+        }
+    }
+
     public static void parser(Statement parent, TokenType end, List<Object> lexers) {
         while (!lexers.isEmpty()) {
-            Object o = lexers.get(0);
-            if (o.equals(end)) return;
-            if (statements.containsKey(o)) {
-                Statement statement = statements.get(o);
+            Object o = lexers.remove(0);
+            if (tokens.containsKey(o)) {
+                Statement statement = tokens.get(o);
                 statement.parser(parent, o, lexers);
             } else {
-                lexers.remove(0);
                 ObjectStatement objectStatement = new ObjectStatement();
                 objectStatement.setObject(o);
-                Parser.statementList.add(objectStatement);
+                Parser.statements.add(objectStatement);
             }
         }
     }
