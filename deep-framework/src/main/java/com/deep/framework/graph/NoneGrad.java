@@ -6,7 +6,7 @@ public class NoneGrad extends None {
     private None one;
 
     public NoneGrad(None one) {
-        super(null);
+        super(0d);
         this.one = one;
     }
 

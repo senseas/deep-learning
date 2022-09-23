@@ -14,17 +14,19 @@ public class Tensor implements Serializable {
 
     public Tensor(double value) {
         this.name = "None";
-        this.value = value;
-        this.grad = 0d;
-        this.output = new None(this);
+        this.value = new double[]{value};
+        this.grad = new double[]{0d};
+        this.reduce = new boolean[]{false};
+        this.output = new None(this.value, grad, reduce);
         this.gradre = true;
     }
 
     public Tensor(double value, boolean gradre) {
         this.name = "None";
-        this.value = value;
-        this.grad = 0d;
-        this.output = new None(this);
+        this.value = new double[]{value};
+        this.grad = new double[]{0d};
+        this.reduce = new boolean[]{false};
+        this.output = new None(this.value, grad, reduce);
         this.gradre = gradre;
     }
 
@@ -96,8 +98,10 @@ public class Tensor implements Serializable {
     private String name = "Tensor::";
     protected int[] shape;
     private Tensor[] input;
-    protected Object output, value, grad;
-    protected transient Object function, reduce;
+    protected Object output;
+    protected double[] value, grad;
+    protected transient boolean[] reduce;
+    protected transient Object function;
     private transient boolean gradre;
     private transient CudaContext context;
     private transient boolean out;

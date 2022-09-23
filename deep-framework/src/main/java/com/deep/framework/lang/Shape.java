@@ -23,7 +23,7 @@ public class Shape extends ForEach {
     }
 
     public static <E> E fillNones(Tensor tensor) {
-        None[] nones = IntStream.range(0, size(tensor.getShape())).mapToObj(i -> new None(tensor, i)).toArray(None[]::new);
+        None[] nones = IntStream.range(0, size(tensor.getShape())).mapToObj(i -> new None(tensor.getValue(), tensor.getGrad(), tensor.getReduce(), i)).toArray(None[]::new);
         return (E) new Tenser(nones, tensor.getShape());
     }
 
