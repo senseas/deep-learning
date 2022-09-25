@@ -3,10 +3,10 @@ package com.deep.framework.graph;
 import lombok.Data;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Data
 public class None implements Serializable {
@@ -105,79 +105,90 @@ public class None implements Serializable {
         }
     }
 
-    public String getFuncs() {
-        if (tensor instanceof TensorConst)
-            return String.valueOf(getValue());
-        return funcs;
-    }
-
-    public List<None> getParamx() {
-        if (tensor instanceof TensorConst) return Arrays.asList();
-        if (Objects.nonNull(paramx) && !paramx.isEmpty()) return paramx;
-        return Arrays.asList(this);
-    }
-
-    public List<None> getParams() {
-        if (tensor instanceof TensorConst) return Arrays.asList();
-        if (Objects.nonNull(params) && !params.isEmpty()) return params;
-        return Arrays.asList(this);
-    }
-
     public void setFuncs(Object... arr) {
-        if (Objects.nonNull(paramx)) return;
-        paramx = new ArrayList<>();
-        paramx.add(this);
-        funcs = "";
+        funcx.add(this);
+        String code = func;
+        func = "";
         for (Object o : arr) {
-            if (o instanceof String) {
-                funcs = funcs.concat((String) o);
-            } else if (o instanceof None) {
-                None a = (None) o;
+            if (o instanceof String a) {
+                func = func.concat(a);
+            } else if (o instanceof None a) {
                 if (a.getTensor() instanceof TensorConst) {
-                    funcs = funcs.concat(a.getFuncs());
+                    func = func + a.getValue();
+                } else if (a.getFuncx().isEmpty()) {
+                    funcx.add(a);
+                    func = func.concat("a" + a.getId());
+                    param =param.concat(a.getParam());
                 } else {
-                    paramx.addAll(a.getParamx());
-                    funcs = funcs.concat(a.getFuncs());
+                    funcx.addAll(a.getFuncx());
+                    func = func.concat("a" + a.getId());
+                    param =param.concat(a.getParam());
+                    code = code.concat(a.getFunc());
                 }
             }
         }
-        funcs = "({var}=".concat(funcs).concat(")");
+        param = param.concat("a" + id+",");
+        func = "double ".concat("a" + id).concat("=").concat(func);
+        func = code.concat("\n").concat(func).concat(";");
+        //System.out.println(func);
     }
 
     public void setGrads(Object... arr) {
-        if (Objects.nonNull(params)) return;
-        params = new ArrayList<>();
-        grads = "";
+        gradx.add(this);
+        String code = gradc;
+        gradc = "";
         for (Object o : arr) {
-            if (o instanceof String) {
-                grads = grads.concat((String) o);
-            } else if (o instanceof None) {
-                None a = (None) o;
+            if (o instanceof String a) {
+                gradc = gradc.concat(a);
+            } else if (o instanceof None a) {
                 if (a.getTensor() instanceof TensorConst) {
-                    grads = grads.concat(String.valueOf(a.getValue()));
+                    gradc = gradc + a.getValue();
                 } else if (a instanceof NoneGrad) {
-                    params.addAll(a.getParams());
-                    grads = grads.concat(a.getGrads());
+                    if (a.getGradx().isEmpty()) {
+                        gradx.add(a);
+                        gradc = gradc.concat("e" + a.getId());
+                    } else {
+                        gradx.addAll(a.getGradx());
+                        gradc = gradc.concat("e" + a.getId());
+                        code = code.concat(a.getGradc());
+                    }
                 } else {
-                    params.add(a);
-                    grads = grads.concat("{var}");
+                    gradx.add(a);
+                    gradc = gradc.concat("a" + a.getId());
                 }
             }
+        }
+        gradc = "double ".concat("e" + id).concat("=").concat(gradc);
+        gradc = code.concat("\n").concat(gradc).concat(";");
+        System.out.println(gradc);
+
+        if(!gradx.isEmpty()){
+            None none = Stream.of(gradx).flatMap(Collection::stream).filter(a -> a instanceof NoneGrad).findFirst().get();
+            String a =
+            "class Tensor {\n" +
+            "  double " + none.getParam() + ";\n" +
+            "  void compute(double a"+ id +") {\n" +
+            "    " + none.getFunc() +
+            "  }\n" +
+            "  void gradient(double a"+ id +", double e"+none.getId()+") {\n" +
+            "    " +gradc +
+            "  }\n" +
+            "};\n";
+            System.out.println(a);
         }
     }
 
     public None grad() {
-        NoneGrad noneGrad = new NoneGrad(this);
-        if (Objects.isNull(params)) {
-            params = Arrays.asList(noneGrad);
-        }
-        return noneGrad;
+        return new NoneGrad(this);
     }
 
     private int idx;
     private transient Tensor tensor;
     private double value, grad;
     private transient boolean reduce;
-    private transient String grads = "{var}", funcs = "{var}";
-    private transient List<None> paramx, params;
+    private int id = ID.getAndIncrement();
+    private String param = "";
+    private transient String func = "", gradc = "";
+    private transient List<None> funcx = new ArrayList<>(), gradx = new ArrayList<>();
+    public static AtomicInteger ID = new AtomicInteger();
 }

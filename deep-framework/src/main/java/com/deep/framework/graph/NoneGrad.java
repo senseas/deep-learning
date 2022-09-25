@@ -14,15 +14,28 @@ public class NoneGrad extends None {
         return one.getGrad();
     }
 
-    public List<None> getParamx() {
-        return one.getParamx();
+    public int getId() {
+        return one.getId();
     }
 
-    public List<None> getParams() {
-        return one.getParams();
+    public List<None> getFuncx() {
+        return one.getFuncx();
     }
 
-    public String getGrads() {
-        return one.getGrads();
+    public List<None> getGradx() {
+        return one.getGradx();
     }
+
+    public String getGradc() {
+        return one.getGradc();
+    }
+
+    public String getFunc() {
+        return one.getFunc();
+    }
+
+    public String getParam() {
+        return one.getParam();
+    }
+
 }

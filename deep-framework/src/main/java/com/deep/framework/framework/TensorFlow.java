@@ -6,6 +6,8 @@ import com.deep.framework.lang.Tenser;
 import com.deep.framework.lang.annotation.Cuda;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.stream.Stream;
 
 import static com.deep.framework.lang.ForEach.forEach;
@@ -21,7 +23,7 @@ public class TensorFlow implements Serializable {
                 double value = inputStream().mapToDouble(a -> ((None) a).getValue()).sum();
 
                 None out = createOutput();
-                Stream<Stream> stream = Stream.of(inputStream().flatMap(a -> Stream.of("+(", a, ")")));
+                Stream<Stream> stream = Stream.of(inputStream().flatMap(a -> Stream.of("+", a)));
                 out.setFuncs(stream.flatMap(a -> a).toArray());
 
                 return new None(value);
@@ -770,8 +772,12 @@ public class TensorFlow implements Serializable {
 
             public None compute() {
                 Object A = getInput(0);
-                None B = new None(0d);
+                None B = createOutput();
                 forEach(A, (None a) -> B.setValue(B.getValue() + a.getValue()));
+
+                List<Object> list = new ArrayList<>();
+                forEach(A, (None a) -> list.addAll(List.of("+", a)));
+                B.setFuncs(list.toArray());
                 return B;
             }
 
@@ -779,6 +785,8 @@ public class TensorFlow implements Serializable {
                 Object A = getInput(0);
                 None B = getOutput();
                 forEach(A, (None a) -> a.setGrad(B.getGrad()));
+
+                forEach(A, (None a) -> a.setGrads(B.grad()));
             }
 
         };

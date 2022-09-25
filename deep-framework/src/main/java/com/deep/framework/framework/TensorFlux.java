@@ -2,12 +2,10 @@ package com.deep.framework.framework;
 
 import com.deep.framework.graph.None;
 import com.deep.framework.graph.Tensor;
-import com.deep.framework.lang.annotation.Cuda;
 import com.deep.framework.lang.util.BeanUtil;
 import lombok.SneakyThrows;
 
 import java.io.Serializable;
-import java.lang.annotation.Annotation;
 import java.util.Arrays;
 import java.util.Objects;
 
@@ -21,10 +19,6 @@ public class TensorFlux implements Serializable {
         forEach(tensor.getFunction(), (Tensor a) -> {
             a.forward();
         });
-        Annotation cuda = tensor.getClass().getMethod("compute").getAnnotation(Cuda.class);
-        if (Objects.nonNull(cuda)) {
-            CudaExecutor.compute(tensor);
-        }
         forwards(tensor);
     }
 
@@ -34,10 +28,6 @@ public class TensorFlux implements Serializable {
         forEach(tensor.getFunction(), (Tensor a) -> {
             a.backward();
         });
-        Annotation cuda = tensor.getClass().getMethod("compute").getAnnotation(Cuda.class);
-        if (Objects.nonNull(cuda)) {
-            CudaExecutor.gradient(tensor);
-        }
     }
 
     public static void reduce(Tensor tensor) {
@@ -99,6 +89,9 @@ public class TensorFlux implements Serializable {
         Object nones = getOutput(tensor.getFunction());
         createOutput(tensor, nones);
         forEach(tensor.getOutput(), nones, (None out, None none) -> {
+            out.setId(none.getId());
+            out.setFunc(none.getFunc());
+            out.setFuncx(none.getFuncx());
             out.setValue(none.getValue());
             out.reset();
         });
@@ -107,6 +100,8 @@ public class TensorFlux implements Serializable {
     private static void backwards(Tensor tensor) {
         Object nones = getOutput(tensor.getFunction());
         forEach(tensor.getOutput(), nones, (None out, None none) -> {
+            none.setGradc(out.getGradc());
+            none.setGradx(out.getGradx());
             none.setGrad(out.getGrad());
         });
     }
