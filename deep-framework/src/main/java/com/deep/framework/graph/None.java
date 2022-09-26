@@ -3,10 +3,10 @@ package com.deep.framework.graph;
 import lombok.Data;
 
 import java.io.Serializable;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @Data
 public class None implements Serializable {
@@ -118,19 +118,19 @@ public class None implements Serializable {
                 } else if (a.getFuncx().isEmpty()) {
                     funcx.add(a);
                     func = func.concat("a" + a.getId());
-                    param =param.concat(a.getParam());
+                    param = param.concat(a.getParam());
                 } else {
                     funcx.addAll(a.getFuncx());
                     func = func.concat("a" + a.getId());
-                    param =param.concat(a.getParam());
+                    param = param.concat(a.getParam());
                     code = code.concat(a.getFunc());
                 }
             }
         }
-        param = param.concat("a" + id+",");
-        func = "double ".concat("a" + id).concat("=").concat(func);
+        param = param.concat("a" + id + ",");
+        func = "".concat("a" + id).concat("=").concat(func);
         func = code.concat("\n").concat(func).concat(";");
-        //System.out.println(func);
+        System.out.println(func);
     }
 
     public void setGrads(Object... arr) {
@@ -161,21 +161,6 @@ public class None implements Serializable {
         gradc = "double ".concat("e" + id).concat("=").concat(gradc);
         gradc = code.concat("\n").concat(gradc).concat(";");
         System.out.println(gradc);
-
-        if(!gradx.isEmpty()){
-            None none = Stream.of(gradx).flatMap(Collection::stream).filter(a -> a instanceof NoneGrad).findFirst().get();
-            String a =
-            "class Tensor {\n" +
-            "  double " + none.getParam() + ";\n" +
-            "  void compute(double a"+ id +") {\n" +
-            "    " + none.getFunc() +
-            "  }\n" +
-            "  void gradient(double a"+ id +", double e"+none.getId()+") {\n" +
-            "    " +gradc +
-            "  }\n" +
-            "};\n";
-            System.out.println(a);
-        }
     }
 
     public None grad() {

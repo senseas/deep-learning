@@ -2,12 +2,14 @@ package com.deep.framework.framework;
 
 import com.deep.framework.graph.None;
 import com.deep.framework.graph.Tensor;
+import com.deep.framework.lang.Tenser;
 import com.deep.framework.lang.util.BeanUtil;
 import lombok.SneakyThrows;
 
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 import static com.deep.framework.lang.Shape.*;
 
@@ -28,6 +30,39 @@ public class TensorFlux implements Serializable {
         forEach(tensor.getFunction(), (Tensor a) -> {
             a.backward();
         });
+        None output;
+        if (BeanUtil.isTensor(tensor.getFunction())) {
+            output = ((Tenser<None>) tensor.getOutput()).findFirst();
+        } else {
+            output = tensor.getOutput();
+        }
+
+        String parama = Arrays.stream(tensor.getInput()).map(a -> {
+            return "double a" + ((None) a.getOutput()).getId();
+        }).collect(Collectors.joining(","));
+
+        String parame = Arrays.stream(tensor.getInput()).map(a -> {
+            return "double e" + ((None) a.getOutput()).getId();
+        }).collect(Collectors.joining(","));
+
+        String code = Arrays.stream(tensor.getInput()).map(a -> {
+            return ((None) a.getOutput()).getGradc();
+        }).collect(Collectors.joining());
+
+        String[] filex = output.getParam().split(",");
+        String files = Arrays.stream(filex).limit(filex.length - 1).collect(Collectors.joining(","));
+
+        String a =
+        "class Tensor {\n" +
+        "  double " + files + ";\n" +
+        "  void compute(double a" + output.getId() + "," + parama + ") {\n" +
+        "    " + output.getFunc() +
+        "  }\n" +
+        "  void gradient(double e" + output.getId() + "," + parame + ") {\n" +
+        "    " + code +
+        "  }\n" +
+        "};\n";
+        System.out.println(a);
     }
 
     public static void reduce(Tensor tensor) {
@@ -92,6 +127,7 @@ public class TensorFlux implements Serializable {
             out.setId(none.getId());
             out.setFunc(none.getFunc());
             out.setFuncx(none.getFuncx());
+            out.setParam(none.getParam());
             out.setValue(none.getValue());
             out.reset();
         });
