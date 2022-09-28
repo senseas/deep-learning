@@ -1,5 +1,6 @@
 package com.deep.framework.graph;
 
+import com.deep.framework.framework.TensorExecutor;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -8,6 +9,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 @Data
 public class None implements Serializable {
@@ -73,6 +75,16 @@ public class None implements Serializable {
         }
     }
 
+    public void setGradi(double grad) {
+        if (Objects.isNull(tensor)) {
+            this.grad = grad;
+        } else if (Objects.isNull(tensor.getShape())) {
+            tensor.setGrad(grad);
+        } else {
+            ((double[]) tensor.getGrad())[idx] = grad;
+        }
+    }
+
     public boolean isReduce() {
         if (Objects.isNull(tensor)) {
             return this.reduce;
@@ -106,13 +118,14 @@ public class None implements Serializable {
         }
     }
 
-    public String getGradId() {return "e" + id;}
-    public String getValId() {return "a" + id;}
-    public None grad() {
-        return new NoneGrad(this);
-    }
+    public String getGradId() {return "{e" + id + "}";}
+
+    public String getValId() {return "{a" + id + "}";}
+
+    public None grad() {return new NoneGrad(this);}
 
     public void setFuncs(Object... arr) {
+        if (!TensorExecutor.status) return;
         funcx.add(this);
         String code = func;
         func = "";
@@ -134,12 +147,14 @@ public class None implements Serializable {
                 }
             }
         }
+        funcx = funcx.stream().distinct().collect(Collectors.toList());
         param = param.concat(getValId()).concat(",");
         func = getValId().concat("=").concat(func);
         func = code.concat("\n").concat(func).concat(";");
     }
 
     public void setGrads(Object... arr) {
+        if (!TensorExecutor.status) return;
         boolean accu = funcx.isEmpty();
         String code = gradc;
         gradc = "";
@@ -155,7 +170,7 @@ public class None implements Serializable {
                         gradc = gradc.concat(a.getGradId());
                     } else {
                         gradx.addAll(a.getGradx());
-                        gradc = gradc.concat(a.getGradId());
+                        gradc = gradc.concat("e"+a.getId());
                         code = code.concat(a.getGradc());
                     }
                 } else {
@@ -166,25 +181,16 @@ public class None implements Serializable {
         }
 
         gradx = gradx.stream().distinct().collect(Collectors.toList());
-        gradc = (accu ? getGradId().concat("+=") : "double ".concat(getGradId()).concat("=")).concat(gradc);
+        gradc = (accu ? getGradId().concat("+=") : "double ".concat("e"+getId()).concat("=")).concat(gradc);
         gradc = code.concat("\n").concat(gradc).concat(";");
-
-        String para = gradx.stream().map(a -> {
-            if (a instanceof NoneGrad) return "double ".concat(a.getGradId());
-            return "double ".concat(a.getValId());
-        }).collect(Collectors.joining(","));
-
-        String gradient = "void gradient(" + para + "){" + gradc + "\n}";
-        //System.out.println(gradient);
     }
 
-    private int idx;
-    private transient Tensor tensor;
-    private double value, grad;
-    private transient boolean reduce;
     private int id = ID.getAndIncrement();
-    private String param = "";
-    private transient String func = "", gradc = "";
+    private double value, grad;
+    private transient int idx;
+    private transient Tensor tensor;
+    private transient boolean reduce;
+    private transient String param = "", func = "", gradc = "";
     private transient List<None> funcx = new ArrayList<>(), gradx = new ArrayList<>();
-    public static AtomicInteger ID = new AtomicInteger();
+    public transient static AtomicInteger ID = new AtomicInteger();
 }

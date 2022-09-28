@@ -7,12 +7,15 @@ import com.deep.framework.lang.function.Func2;
 import lombok.Data;
 
 import java.io.Serializable;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static com.deep.framework.lang.ForEach.forEach;
 
 @Data
 public class TensorExecutor<E> implements Serializable {
     public static double rate = 0.003;
+    public static boolean status = true;
+    public static AtomicInteger deep = new AtomicInteger();
     private Tensor tensor;
     private Tensor input, label;
 
@@ -37,6 +40,7 @@ public class TensorExecutor<E> implements Serializable {
         tensor.forward();
         this.backward();
         tensor.reduce();
+        status = false;
         //System.out.println(System.currentTimeMillis() - ss);
     }
 

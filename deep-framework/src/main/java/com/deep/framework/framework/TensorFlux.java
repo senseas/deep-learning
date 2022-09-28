@@ -2,10 +2,12 @@ package com.deep.framework.framework;
 
 import com.deep.framework.graph.None;
 import com.deep.framework.graph.Tensor;
+import com.deep.framework.lang.annotation.Cuda;
 import com.deep.framework.lang.util.BeanUtil;
 import lombok.SneakyThrows;
 
 import java.io.Serializable;
+import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -19,50 +21,63 @@ public class TensorFlux implements Serializable {
 
     @SneakyThrows
     public static void forward(Tensor tensor) {
+        TensorExecutor.deep.getAndIncrement();
         forEach(tensor.getFunction(), (Tensor a) -> {
             a.forward();
         });
+        Annotation cuda = tensor.getClass().getMethod("compute").getAnnotation(Cuda.class);
+        if (Objects.nonNull(cuda)) {
+            CudaExecutor.compute(tensor);
+        }
         forwards(tensor);
+        TensorExecutor.deep.getAndDecrement();
     }
 
     @SneakyThrows
     public static void backward(Tensor tensor) {
+        TensorExecutor.deep.getAndIncrement();
         backwards(tensor);
         forEach(tensor.getFunction(), (Tensor a) -> {
             a.backward();
         });
-
-        List<String> parama = new ArrayList(), parame = new ArrayList(), paramg = new ArrayList();
-        Arrays.stream(tensor.getInput()).forEach(a -> {
-            forEach(a.getOutput(), (None o) -> {
-                parama.add("double a" + o.getId());
-                parame.add("double e" + o.getId());
-                paramg.addAll(List.of(o.getGradc().split(";")));
+        TensorExecutor.deep.getAndDecrement();
+        Annotation cuda = tensor.getClass().getMethod("compute").getAnnotation(Cuda.class);
+        if (Objects.nonNull(cuda)) {
+            CudaExecutor.gradient(tensor);
+        }
+        if (TensorExecutor.status) {
+            List<String> parama = new ArrayList(), parame = new ArrayList(), paramg = new ArrayList();
+            Arrays.stream(tensor.getInput()).forEach(a -> {
+                forEach(a.getOutput(), (None o) -> {
+                    parama.add("double a" + o.getId());
+                    parame.add("double e" + o.getId());
+                    paramg.addAll(List.of(o.getGradc().split(";")));
+                });
             });
-        });
 
-        List<String> paramf = new ArrayList(), paramc = new ArrayList(), paramp = new ArrayList();
-        forEach(tensor.getOutput(), (None a) -> {
-            paramf.add(a.getParam());
-            paramp.add("double e" + a.getId());
-            paramc.addAll(List.of(a.getFunc().split(";")));
-        });
+            List<String> paramf = new ArrayList(), paramc = new ArrayList(), paramp = new ArrayList();
+            forEach(tensor.getOutput(), (None a) -> {
+                paramf.add(a.getParam());
+                paramp.add("double e" + a.getId());
+                paramc.addAll(List.of(a.getFunc().split(";")));
+            });
 
-        String paramcx = paramc.stream().distinct().collect(Collectors.joining(";")) + ";";
-        String paramgx = paramg.stream().distinct().collect(Collectors.joining(";")) + ";";
-        String code =
-        "class Tensor {\n" +
-        "private:\n"+
-        "  double " + String.join("", paramf) + ";\n" +
-        "public:\n"+
-        "  void compute(" + String.join(",", parama) + ") {\n" +
-        "    " + paramcx +
-        "\n  }\n" +
-        "  void gradient("+ String.join(",", parama) +","+ String.join(",", paramp) +"," + String.join(",", parame) + ") {\n" +
-        "    " + paramgx +
-        "\n  }\n" +
-        "};";
-        System.out.println(code);
+            String paramcx = paramc.stream().distinct().collect(Collectors.joining(";")) + ";";
+            String paramgx = paramg.stream().distinct().collect(Collectors.joining(";")) + ";";
+            String code =
+            "class Tensor {\n" +
+            "private:\n"+
+            "  double " + String.join("", paramf) + ";\n" +
+            "public:\n"+
+            "  void compute(" + String.join(",", parama) + ") {\n" +
+            "    " + paramcx +
+            "\n  }\n" +
+            "  void gradient("+ String.join(",", parama) +","+ String.join(",", paramp) +"," + String.join(",", parame) + ") {\n" +
+            "    " + paramgx +
+            "\n  }\n" +
+            "};";
+            //System.out.println(code);
+        }
     }
 
     public static void reduce(Tensor tensor) {
@@ -123,11 +138,15 @@ public class TensorFlux implements Serializable {
     private static void forwards(Tensor tensor) {
         Object nones = getOutput(tensor.getFunction());
         createOutput(tensor, nones);
+        if (TensorExecutor.status&&TensorExecutor.deep.get()>1) {
+            forEach(tensor.getOutput(), nones, (None out, None none) -> {
+                out.setId(none.getId());
+                out.setFunc(none.getFunc());
+                out.setFuncx(none.getFuncx());
+                out.setParam(none.getParam());
+            });
+        }
         forEach(tensor.getOutput(), nones, (None out, None none) -> {
-            out.setId(none.getId());
-            out.setFunc(none.getFunc());
-            out.setFuncx(none.getFuncx());
-            out.setParam(none.getParam());
             out.setValue(none.getValue());
             out.reset();
         });
@@ -135,9 +154,13 @@ public class TensorFlux implements Serializable {
 
     private static void backwards(Tensor tensor) {
         Object nones = getOutput(tensor.getFunction());
+        if (TensorExecutor.status&&TensorExecutor.deep.get()>1) {
+            forEach(tensor.getOutput(), nones, (None out, None none) -> {
+                none.setGradc(out.getGradc());
+                none.setGradx(out.getGradx());
+            });
+        }
         forEach(tensor.getOutput(), nones, (None out, None none) -> {
-            none.setGradc(out.getGradc());
-            none.setGradx(out.getGradx());
             none.setGrad(out.getGrad());
         });
     }

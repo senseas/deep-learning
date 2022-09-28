@@ -1,6 +1,7 @@
 package com.deep.framework.framework;
 
 import com.deep.framework.graph.None;
+import com.deep.framework.graph.NoneGrad;
 import com.deep.framework.graph.Tensor;
 import com.deep.framework.lang.Tenser;
 import com.deep.framework.lang.cuda.Block;
@@ -130,7 +131,7 @@ public class CudaExecutor implements Serializable {
     public static void compute(Tensor tensor) {
         if (tensor.getFunction() instanceof Tenser) {
             Tenser<None> nones = TensorFlux.getOutput(tensor.getFunction());
-            CUfunction function = getFunction(tensor, nones.findFirst());
+            CUfunction function = getFunction1(tensor, nones.findFirst());
             List<None> list = new ArrayList<>();
             nones.forEach(a -> list.addAll(a.getFuncx()));
             double[] output = list.stream().mapToDouble(None::getValue).toArray();
@@ -138,7 +139,7 @@ public class CudaExecutor implements Serializable {
             IntStream.range(0, list.size()).forEach(i -> list.get(i).setValue(output[i]));
         } else {
             None out = ((Tensor) tensor.getFunction()).getOutput();
-            CUfunction function = getFunction(tensor, out);
+            CUfunction function = getFunction1(tensor, out);
             List<None> list = out.getFuncx();
             double[] output = list.stream().mapToDouble(None::getValue).toArray();
             run(function, output);
@@ -154,27 +155,26 @@ public class CudaExecutor implements Serializable {
      * @return The CUDA function
      */
     public static void gradient(Tensor tensor) {
-        if (tensor.getFunction() instanceof Tenser) {
-            IntStream.range(0, tensor.getInput().length).forEach(i -> {
-                Tenser<None> nones = tensor.getInput()[i].getOutput();
-                CUfunction function = getGradient(tensor, nones.findFirst(), i);
+        IntStream.range(0, tensor.getInput().length).forEach(i -> {
+            Object out = tensor.getInput()[i].getOutput();
+            if (out instanceof Tenser) {
+                Tenser<None> nones = (Tenser<None>) out;
+                CUfunction function = getGradient2(tensor, nones.findFirst(), i);
                 List<None> list = new ArrayList<>();
                 nones.forEach(a -> list.addAll(a.getGradx()));
                 double[] input = list.stream().mapToDouble(None::getValue).toArray();
                 double[] output = new double[nones.size()];
                 run(function, new Grid(nones.size()), new Block(1), input, output);
-                nones.forEach((None inx, int l) -> inx.setGrad(output[l]));
-            });
-        } else {
-            IntStream.range(0, tensor.getInput().length).forEach(i -> {
-                None none = tensor.getInput()[i].getOutput();
-                CUfunction function = getGradient(tensor, none, i);
+                nones.forEach((None inx, int l) -> inx.setGradi(output[l]));
+            } else {
+                None none = (None) out;
+                CUfunction function = getGradient2(tensor, none, i);
                 double[] input = none.getGradx().stream().mapToDouble(None::getValue).toArray();
                 double[] output = new double[1];
                 run(function, input, output);
-                none.setGrad(output[0]);
-            });
-        }
+                none.setGrads(output[0]);
+            }
+        });
     }
 
     /**
@@ -201,11 +201,76 @@ public class CudaExecutor implements Serializable {
      * @param tensor The source code
      * @return The CUDA function
      */
+    public static CUfunction getFunction1(Tensor tensor, None none) {
+        String name = tensor.getName().replace("Tensor::", "");
+        CUfunction function = functions.get(name);
+        if (Objects.nonNull(function)) return function;
+
+        List<None> funcx = none.getFuncx();
+        final String[] codex = {none.getFunc()};
+        IntStream.range(0, funcx.size()).forEach(i -> {
+            codex[0] = codex[0].replaceAll("\\{a" + funcx.get(i).getId() + "\\}", "data[idx*M+" + i + "]");
+        });
+
+        StringBuilder code = new StringBuilder("extern \"C\" __global__ void ").append(name).append("(double* data){");
+        code.append("int idx = blockDim.x * blockIdx.x + threadIdx.x;");
+        code.append("int M = ").append(funcx.size()).append(";");
+        code.append(codex[0]);
+        code.append("}");
+
+        function = createFunction(name, code.toString());
+        functions.put(name, function);
+        return function;
+    }
+
+    /**
+     * Create a CUDA kernel function by compiling the given code using the
+     * NVRTC, and obtaining the function with the given name
+     *
+     * @param tensor The source code
+     * @return The CUDA function
+     */
     public static CUfunction getGradient(Tensor tensor, None none, int i) {
         String name = tensor.getName().replace("Tensor::", "").concat(String.valueOf(i));
         CUfunction function = functions.get(name);
         if (Objects.nonNull(function)) return function;
         String code = getCode(name, none.getGradc());
+        function = createFunction(name, code);
+        functions.put(name, function);
+        return function;
+    }
+
+    /**
+     * Create a CUDA kernel function by compiling the given code using the
+     * NVRTC, and obtaining the function with the given name
+     *
+     * @param tensor The source code
+     * @return The CUDA function
+     */
+    public static CUfunction getGradient2(Tensor tensor, None none, int l) {
+        String name = tensor.getName().replace("Tensor::", "").concat(String.valueOf(l));
+
+        CUfunction function = functions.get(name);
+        if (Objects.nonNull(function)) return function;
+
+        List<None> gradx = none.getGradx();
+        final String[] codex = {none.getGradc()};
+        IntStream.range(0, gradx.size()).forEach(i -> {
+            None none1 = gradx.get(i);
+            codex[0] = codex[0].replace(none1.getValId(), "data[idx*M+" + i + "]");
+            if(none1 instanceof NoneGrad){
+                codex[0] = codex[0].replace(none1.getGradId(), "data[idx*M+" + i + "]");
+            }
+        });
+
+        codex[0] = codex[0].replace(none.getGradId() , "grad[idx]");
+        String code = new StringBuilder("extern \"C\" __global__ void ").append(name).append("(double* data, double* grad){")
+        .append("int idx = blockDim.x * blockIdx.x + threadIdx.x;")
+        .append("int M = ").append(gradx.size()).append(";")
+        .append(codex[0])
+        .append("}").toString();
+
+
         function = createFunction(name, code);
         functions.put(name, function);
         return function;

@@ -515,15 +515,15 @@ public class TensorFlow implements Serializable {
 
                 None out = createOutput();
                 out.setFuncs(inx, "*(", inx, ">0?1:0.1)");
-                return out;
-                //return new None(valx > 0 ? valx : 0.1 * valx);
+                //return out;
+                return new None(valx > 0 ? valx : 0.1 * valx);
             }
 
             public void gradient() {
                 None inx = getInput(0), out = getOutput();
                 double valx = inx.getValue();
                 double grad = out.getGrad();
-                //inx.setGrad(valx > 0 ? grad : 0.1 * grad);
+                inx.setGrad(valx > 0 ? grad : 0.1 * grad);
 
                 inx.setGrads(out.grad(), "*(", inx, ">0?1:0.1)");
             }
@@ -649,7 +649,6 @@ public class TensorFlow implements Serializable {
     public Tensor sigmoid(Tensor input) {
         return new TensorFunction("Sigmoid", input) {
 
-            @Cuda
             public Tensor compute() {
                 Tensor A = getInput(0);
                 return div(new TensorConst(1d), add(new TensorConst(1d), exp(minus(A))));
@@ -663,6 +662,7 @@ public class TensorFlow implements Serializable {
     public Tensor sigmoidx(Tensor input) {
         return new TensorFunction("Sigmoidx", input) {
 
+            @Cuda
             public Object compute() {
                 Object A = getInput(0), B = zeroTensors(A);
                 forEach(A, B, (Tensor a, Tenser<Tensor> b, int i) -> {
@@ -709,7 +709,6 @@ public class TensorFlow implements Serializable {
     public Tensor softmaxCross(Tensor... input) {
         return new TensorFunction("SoftmaxCross", input) {
 
-            @Cuda
             public Tensor compute() {
                 Tensor a = getInput(0), b = getInput(1);
                 return minus(mul(a, log(b)));
@@ -723,6 +722,7 @@ public class TensorFlow implements Serializable {
     public Tensor softmaxCrossx(Tensor... input) {
         return new TensorFunction("SoftmaxCrossx", input) {
 
+            @Cuda
             public Tensor compute() {
                 Object A = getInput(0), B = getInput(1);
                 Tensor[] C = {new TensorConst(0d)};
