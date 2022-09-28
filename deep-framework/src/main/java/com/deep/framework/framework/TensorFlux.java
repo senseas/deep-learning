@@ -2,12 +2,13 @@ package com.deep.framework.framework;
 
 import com.deep.framework.graph.None;
 import com.deep.framework.graph.Tensor;
-import com.deep.framework.lang.Tenser;
 import com.deep.framework.lang.util.BeanUtil;
 import lombok.SneakyThrows;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -30,39 +31,36 @@ public class TensorFlux implements Serializable {
         forEach(tensor.getFunction(), (Tensor a) -> {
             a.backward();
         });
-        None output;
-        if (BeanUtil.isTensor(tensor.getFunction())) {
-            output = ((Tenser<None>) tensor.getOutput()).findFirst();
-        } else {
-            output = tensor.getOutput();
-        }
 
-        String parama = Arrays.stream(tensor.getInput()).map(a -> {
-            return "double a" + ((None) a.getOutput()).getId();
-        }).collect(Collectors.joining(","));
+        List<String> parama = new ArrayList(), parame = new ArrayList(), paramg = new ArrayList();
+        Arrays.stream(tensor.getInput()).forEach(a -> {
+            forEach(a.getOutput(), (None o) -> {
+                parama.add("double a" + o.getId());
+                parame.add("double e" + o.getId());
+                paramg.addAll(List.of(o.getGradc().split(";")));
+            });
+        });
 
-        String parame = Arrays.stream(tensor.getInput()).map(a -> {
-            return "double e" + ((None) a.getOutput()).getId();
-        }).collect(Collectors.joining(","));
+        List<String> paramf = new ArrayList(), paramc = new ArrayList(), paramp = new ArrayList();
+        forEach(tensor.getOutput(), (None a) -> {
+            paramf.add(a.getParam());
+            paramp.add("double e" + a.getId());
+            paramc.addAll(List.of(a.getFunc().split(";")));
+        });
 
-        String code = Arrays.stream(tensor.getInput()).map(a -> {
-            return ((None) a.getOutput()).getGradc();
-        }).collect(Collectors.joining());
-
-        String[] filex = output.getParam().split(",");
-        String files = Arrays.stream(filex).limit(filex.length - 1).collect(Collectors.joining(","));
-
-        String a =
+        String paramcx = paramc.stream().distinct().collect(Collectors.joining(";")) + ";";
+        String paramgx = paramg.stream().distinct().collect(Collectors.joining(";")) + ";";
+        String code =
         "class Tensor {\n" +
-        "  double " + files + ";\n" +
-        "  void compute(double a" + output.getId() + "," + parama + ") {\n" +
-        "    " + output.getFunc() +
-        "  }\n" +
-        "  void gradient(double e" + output.getId() + "," + parame + ") {\n" +
-        "    " + code +
-        "  }\n" +
-        "};\n";
-        System.out.println(a);
+        "  double " + String.join("", paramf) + ";\n" +
+        "  void compute(" + String.join(",", parama) + ") {\n" +
+        "    " + paramcx +
+        "\n  }\n" +
+        "  void gradient("+ String.join(",", parama) +","+ String.join(",", paramp) +"," + String.join(",", parame) + ") {\n" +
+        "    " + paramgx +
+        "\n  }\n" +
+        "};";
+        System.out.println(code);
     }
 
     public static void reduce(Tensor tensor) {

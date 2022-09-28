@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 @Data
 public class None implements Serializable {
@@ -129,12 +130,19 @@ public class None implements Serializable {
         }
         param = param.concat("a" + id + ",");
         func = "".concat("a" + id).concat("=").concat(func);
-        func = code.concat("\n").concat(func).concat(";");
-        System.out.println(func);
+        func = code.concat(func).concat(";");
+        //System.out.println(func);
+
+        /*final String[] codex = {func};
+        List<None> nones = funcx.stream().distinct().toList();
+        IntStream.range(0, nones.size()).forEach(i -> {
+            codex[0] = codex[0].replaceAll("\\{a" + nones.get(i).getId()+"\\}", "out[" + i+"]");
+        });*/
+        //System.out.println(codex[0]);
     }
 
     public void setGrads(Object... arr) {
-        gradx.add(this);
+        boolean accu = funcx.isEmpty();
         String code = gradc;
         gradc = "";
         for (Object o : arr) {
@@ -158,9 +166,34 @@ public class None implements Serializable {
                 }
             }
         }
-        gradc = "double ".concat("e" + id).concat("=").concat(gradc);
-        gradc = code.concat("\n").concat(gradc).concat(";");
-        System.out.println(gradc);
+
+        gradx = new ArrayList<>(gradx.stream().distinct().toList());
+        if (accu) {
+            gradc = "out[e" + id + "]+=".concat(gradc);
+        } else {
+            gradc = "double ".concat("e" + id).concat("=").concat(gradc);
+        }
+        gradc = code.concat(gradc).concat(";");
+        //System.out.println(gradc);
+
+        String para = gradx.stream().map(a -> {
+            if (a instanceof NoneGrad) {
+                return "double e" + a.getId();
+            }
+            return "double a" + a.getId();
+        }).collect(Collectors.joining(","));
+
+        String gradient = "void gradient(" + para + "){" + gradc + "}";
+        //System.out.println(gradient);
+
+        /**
+         final String[] codex = {gradc};
+         List<None> nones = gradx.stream().distinct().toList();
+         IntStream.range(0,nones.size()).forEach(i->{
+         codex[0] = codex[0].replaceAll("e"+nones.get(i).getId(),"x"+i);
+         });
+         System.out.println(codex[0]);
+         */
     }
 
     public None grad() {
