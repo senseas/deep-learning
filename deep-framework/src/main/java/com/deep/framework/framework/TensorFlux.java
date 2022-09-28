@@ -52,7 +52,7 @@ public class TensorFlux implements Serializable {
         String paramgx = paramg.stream().distinct().collect(Collectors.joining(";")) + ";";
         String code =
         "class Tensor {\n" +
-         "private:\n"+
+        "private:\n"+
         "  double " + String.join("", paramf) + ";\n" +
         "public:\n"+
         "  void compute(" + String.join(",", parama) + ") {\n" +

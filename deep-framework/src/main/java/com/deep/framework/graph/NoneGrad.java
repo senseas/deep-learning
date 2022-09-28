@@ -18,6 +18,10 @@ public class NoneGrad extends None {
         return one.getId();
     }
 
+    public String getGradId() {return one.getGradId();}
+
+    public String getValId() {return one.getValId();}
+
     public List<None> getFuncx() {
         return one.getFuncx();
     }

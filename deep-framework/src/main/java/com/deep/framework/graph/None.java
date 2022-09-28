@@ -106,6 +106,12 @@ public class None implements Serializable {
         }
     }
 
+    public String getGradId() {return "e" + id;}
+    public String getValId() {return "a" + id;}
+    public None grad() {
+        return new NoneGrad(this);
+    }
+
     public void setFuncs(Object... arr) {
         funcx.add(this);
         String code = func;
@@ -118,27 +124,19 @@ public class None implements Serializable {
                     func = func + a.getValue();
                 } else if (a.getFuncx().isEmpty()) {
                     funcx.add(a);
-                    func = func.concat("a" + a.getId());
+                    func = func.concat(a.getValId());
                     param = param.concat(a.getParam());
                 } else {
                     funcx.addAll(a.getFuncx());
-                    func = func.concat("a" + a.getId());
+                    func = func.concat(a.getValId());
                     param = param.concat(a.getParam());
                     code = code.concat(a.getFunc());
                 }
             }
         }
-        param = param.concat("a" + id + ",");
-        func = "".concat("a" + id).concat("=").concat(func);
-        func = code.concat(func).concat(";");
-        //System.out.println(func);
-
-        /*final String[] codex = {func};
-        List<None> nones = funcx.stream().distinct().toList();
-        IntStream.range(0, nones.size()).forEach(i -> {
-            codex[0] = codex[0].replaceAll("\\{a" + nones.get(i).getId()+"\\}", "out[" + i+"]");
-        });*/
-        //System.out.println(codex[0]);
+        param = param.concat(getValId()).concat(",");
+        func = getValId().concat("=").concat(func);
+        func = code.concat("\n").concat(func).concat(";");
     }
 
     public void setGrads(Object... arr) {
@@ -154,50 +152,30 @@ public class None implements Serializable {
                 } else if (a instanceof NoneGrad) {
                     if (a.getGradx().isEmpty()) {
                         gradx.add(a);
-                        gradc = gradc.concat("e" + a.getId());
+                        gradc = gradc.concat(a.getGradId());
                     } else {
                         gradx.addAll(a.getGradx());
-                        gradc = gradc.concat("e" + a.getId());
+                        gradc = gradc.concat(a.getGradId());
                         code = code.concat(a.getGradc());
                     }
                 } else {
                     gradx.add(a);
-                    gradc = gradc.concat("a" + a.getId());
+                    gradc = gradc.concat(a.getValId());
                 }
             }
         }
 
-        gradx = new ArrayList<>(gradx.stream().distinct().toList());
-        if (accu) {
-            gradc = "out[e" + id + "]+=".concat(gradc);
-        } else {
-            gradc = "double ".concat("e" + id).concat("=").concat(gradc);
-        }
-        gradc = code.concat(gradc).concat(";");
-        //System.out.println(gradc);
+        gradx = gradx.stream().distinct().collect(Collectors.toList());
+        gradc = (accu ? getGradId().concat("+=") : "double ".concat(getGradId()).concat("=")).concat(gradc);
+        gradc = code.concat("\n").concat(gradc).concat(";");
 
         String para = gradx.stream().map(a -> {
-            if (a instanceof NoneGrad) {
-                return "double e" + a.getId();
-            }
-            return "double a" + a.getId();
+            if (a instanceof NoneGrad) return "double ".concat(a.getGradId());
+            return "double ".concat(a.getValId());
         }).collect(Collectors.joining(","));
 
-        String gradient = "void gradient(" + para + "){" + gradc + "}";
+        String gradient = "void gradient(" + para + "){" + gradc + "\n}";
         //System.out.println(gradient);
-
-        /**
-         final String[] codex = {gradc};
-         List<None> nones = gradx.stream().distinct().toList();
-         IntStream.range(0,nones.size()).forEach(i->{
-         codex[0] = codex[0].replaceAll("e"+nones.get(i).getId(),"x"+i);
-         });
-         System.out.println(codex[0]);
-         */
-    }
-
-    public None grad() {
-        return new NoneGrad(this);
     }
 
     private int idx;
