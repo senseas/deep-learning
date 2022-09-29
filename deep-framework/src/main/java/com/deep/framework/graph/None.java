@@ -117,7 +117,7 @@ public class None implements Serializable {
         }
     }
 
-    public String getGradId() {return "{e" + id + "}";}
+    public String getGradId() {return "e" + id;}
 
     public String getValId() {return "{a" + id + "}";}
 
@@ -154,7 +154,6 @@ public class None implements Serializable {
 
     public void setGrads(Object... arr) {
         if (!TensorExecutor.status) return;
-        boolean accu = funcx.isEmpty();
         String code = gradc;
         gradc = "";
         for (Object o : arr) {
@@ -166,10 +165,10 @@ public class None implements Serializable {
                 } else if (a instanceof NoneGrad) {
                     if (a.getGradx().isEmpty()) {
                         gradx.add(a);
-                        gradc = gradc.concat(a.getGradId());
+                        gradc = gradc.concat("{" + a.getGradId() + "}");
                     } else {
                         gradx.addAll(a.getGradx());
-                        gradc = gradc.concat("e" + a.getId());
+                        gradc = gradc.concat(a.getGradId());
                         code = code.concat(a.getGradc());
                     }
                 } else {
@@ -180,7 +179,7 @@ public class None implements Serializable {
         }
 
         gradx = gradx.stream().distinct().collect(Collectors.toList());
-        gradc = (accu ? getGradId().concat("+=") : "double ".concat("e" + getId()).concat("=")).concat(gradc);
+        gradc = "double ".concat(getGradId()).concat("=").concat(gradc);
         gradc = code.concat("\n").concat(gradc).concat(";");
     }
 

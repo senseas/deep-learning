@@ -1,7 +1,6 @@
 package com.deep.framework.framework;
 
 import com.deep.framework.graph.None;
-import com.deep.framework.graph.NoneGrad;
 import com.deep.framework.graph.Tensor;
 import com.deep.framework.lang.Tenser;
 import com.deep.framework.lang.cuda.Block;
@@ -209,14 +208,15 @@ public class CudaExecutor implements Serializable {
         List<None> funcx = none.getFuncx();
         final String[] codex = {none.getFunc()};
         IntStream.range(0, funcx.size()).forEach(i -> {
-            codex[0] = codex[0].replace(funcx.get(i).getValId(),"data[idx*M+" + i + "]");
+            codex[0] = codex[0].replace(funcx.get(i).getValId(), "data[idx*M+" + i + "]");
         });
 
-        StringBuilder code = new StringBuilder("extern \"C\" __global__ void ").append(name).append("(double* data){");
-        code.append("int idx = blockDim.x * blockIdx.x + threadIdx.x;");
-        code.append("int M = ").append(funcx.size()).append(";");
-        code.append(codex[0]);
-        code.append("}");
+        String code = "extern \"C\" __global__ void " +
+            name + "(double* data){" +
+                "int idx = blockDim.x * blockIdx.x + threadIdx.x;" +
+                "int M = " + funcx.size() + ";" +
+                codex[0] +
+            "}";
 
         function = createFunction(name, code.toString());
         functions.put(name, function);
@@ -256,19 +256,17 @@ public class CudaExecutor implements Serializable {
         List<None> gradx = none.getGradx();
         final String[] codex = {none.getGradc()};
         IntStream.range(0, gradx.size()).forEach(i -> {
-            None none1 = gradx.get(i);
-            codex[0] = codex[0].replace(none1.getValId(), "data[idx*M+" + i + "]");
-            if (none1 instanceof NoneGrad) {
-                codex[0] = codex[0].replace(none1.getGradId(), "data[idx*M+" + i + "]");
-            }
+            None o = gradx.get(i);
+            codex[0] = codex[0].replace(o.getValId(), "data[idx*M+" + i + "]").replace("{" + o.getGradId() + "}", "data[idx*M+" + i + "]");
         });
 
-        codex[0] = codex[0].replace(none.getGradId() , "grad[idx]");
-        String code = new StringBuilder("extern \"C\" __global__ void ").append(name).append("(double* data, double* grad){")
-        .append("int idx = blockDim.x * blockIdx.x + threadIdx.x;")
-        .append("int M = ").append(gradx.size()).append(";")
-        .append(codex[0])
-        .append("}").toString();
+        codex[0] = codex[0].replace("double e" + none.getId() + "=", "grad[idx]+=");
+        String code = "extern \"C\" __global__ void " +
+            name + "(double* data, double* grad){" +
+                "int idx = blockDim.x * blockIdx.x + threadIdx.x;" +
+                "int M = " + gradx.size() + ";" +
+                codex[0] +
+            "}";
 
         function = createFunction(name, code);
         functions.put(name, function);
