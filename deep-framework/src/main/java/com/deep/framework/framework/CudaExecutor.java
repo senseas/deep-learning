@@ -210,27 +210,25 @@ public class CudaExecutor implements Serializable {
         StringBuilder code = new StringBuilder("extern \"C\" __global__ void ").append(name).append("(double* data){");
         code.append("int idx = blockDim.x * blockIdx.x + threadIdx.x;");
         code.append("int M = ").append(map.size()).append(";");
-        StringBuilder express = new StringBuilder();
         content.chars().mapToObj(a -> String.valueOf((char) a)).reduce((a, b) -> {
             if (a.equals("{")) {
                 return a.concat(b);
             }
             if (b.equals("{")) {
-                express.append(a);
+                code.append(a);
                 return "{";
             }
             Integer inx = map.get(a.concat(b));
             if (Objects.nonNull(inx)) {
-                express.append("data[idx*M+").append(inx).append("]");
+                code.append("data[idx*M+").append(inx).append("]");
                 return "";
             }
             if (a.isEmpty()) {
-                express.append(b);
+                code.append(b);
                 return "";
             }
             return a.concat(b);
         });
-        code.append(express);
         code.append("}");
         return code.toString();
     }
@@ -272,27 +270,25 @@ public class CudaExecutor implements Serializable {
         StringBuilder code = new StringBuilder("extern \"C\" __global__ void ").append(name).append("(double* data , double* grad){");
         code.append("int idx = blockDim.x * blockIdx.x + threadIdx.x;");
         code.append("int M = ").append(none.getGradx().size()).append(";");
-        StringBuilder express = new StringBuilder();
         content.chars().mapToObj(a -> String.valueOf((char) a)).reduce((a, b) -> {
             if (a.equals("{")) {
                 return a.concat(b);
             }
             if (b.equals("{")) {
-                express.append(a);
+                code.append(a);
                 return "{";
             }
             Integer inx = map.get(a.concat(b));
             if (Objects.nonNull(inx)) {
-                express.append("data[idx*M+").append(inx).append("]");
+                code.append("data[idx*M+").append(inx).append("]");
                 return "";
             }
             if (a.isEmpty()) {
-                express.append(b);
+                code.append(b);
                 return "";
             }
             return a.concat(b);
         });
-        code.append(express);
         code.append("}");
         return code.toString().replace("double e" + none.getId() + "=", "grad[idx]+=");
     }
