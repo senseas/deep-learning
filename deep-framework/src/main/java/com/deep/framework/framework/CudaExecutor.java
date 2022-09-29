@@ -209,7 +209,7 @@ public class CudaExecutor implements Serializable {
         List<None> funcx = none.getFuncx();
         final String[] codex = {none.getFunc()};
         IntStream.range(0, funcx.size()).forEach(i -> {
-            codex[0] = codex[0].replaceAll("\\{a" + funcx.get(i).getId() + "\\}", "data[idx*M+" + i + "]");
+            codex[0] = codex[0].replace(funcx.get(i).getValId(),"data[idx*M+" + i + "]");
         });
 
         StringBuilder code = new StringBuilder("extern \"C\" __global__ void ").append(name).append("(double* data){");
@@ -258,7 +258,7 @@ public class CudaExecutor implements Serializable {
         IntStream.range(0, gradx.size()).forEach(i -> {
             None none1 = gradx.get(i);
             codex[0] = codex[0].replace(none1.getValId(), "data[idx*M+" + i + "]");
-            if(none1 instanceof NoneGrad){
+            if (none1 instanceof NoneGrad) {
                 codex[0] = codex[0].replace(none1.getGradId(), "data[idx*M+" + i + "]");
             }
         });
@@ -269,7 +269,6 @@ public class CudaExecutor implements Serializable {
         .append("int M = ").append(gradx.size()).append(";")
         .append(codex[0])
         .append("}").toString();
-
 
         function = createFunction(name, code);
         functions.put(name, function);

@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 @Data
 public class None implements Serializable {
@@ -170,7 +169,7 @@ public class None implements Serializable {
                         gradc = gradc.concat(a.getGradId());
                     } else {
                         gradx.addAll(a.getGradx());
-                        gradc = gradc.concat("e"+a.getId());
+                        gradc = gradc.concat("e" + a.getId());
                         code = code.concat(a.getGradc());
                     }
                 } else {
@@ -181,7 +180,7 @@ public class None implements Serializable {
         }
 
         gradx = gradx.stream().distinct().collect(Collectors.toList());
-        gradc = (accu ? getGradId().concat("+=") : "double ".concat("e"+getId()).concat("=")).concat(gradc);
+        gradc = (accu ? getGradId().concat("+=") : "double ".concat("e" + getId()).concat("=")).concat(gradc);
         gradc = code.concat("\n").concat(gradc).concat(";");
     }
 
