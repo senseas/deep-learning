@@ -42,4 +42,8 @@ public class NoneGrad extends None {
         return one.getParam();
     }
 
+    public String getParan() {
+        return one.getParan();
+    }
+
 }

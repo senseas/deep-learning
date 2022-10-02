@@ -148,13 +148,14 @@ public class None implements Serializable {
         }
         funcx = funcx.stream().distinct().collect(Collectors.toList());
         param = param.concat(getValId()).concat(",");
-        func = getValId().concat("=").concat(func);
-        func = code.concat("\n").concat(func).concat(";");
+        func = getValId().concat("=").concat(func).concat(";");
+        func = code.concat("\n").concat(func);
     }
 
     public void setGrads(Object... arr) {
         if (!TensorExecutor.status) return;
         String code = gradc;
+        String paras = paran;
         gradc = "";
         for (Object o : arr) {
             if (o instanceof String a) {
@@ -170,6 +171,7 @@ public class None implements Serializable {
                         gradx.addAll(a.getGradx());
                         gradc = gradc.concat(a.getGradId());
                         code = code.concat(a.getGradc());
+                        paras = paras.concat(a.getParan()).concat(a.getGradId()).concat(",");
                     }
                 } else {
                     gradx.add(a);
@@ -178,9 +180,10 @@ public class None implements Serializable {
             }
         }
 
+        paran = paras;
         gradx = gradx.stream().distinct().collect(Collectors.toList());
-        gradc = "double ".concat(getGradId()).concat("=").concat(gradc);
-        gradc = code.concat("\n").concat(gradc).concat(";");
+        gradc = getGradId().concat("=").concat(gradc).concat(";");
+        gradc = code.concat("\n").concat(gradc);
     }
 
     private int id = ID.getAndIncrement();
@@ -188,7 +191,7 @@ public class None implements Serializable {
     private transient int idx;
     private transient Tensor tensor;
     private transient boolean reduce;
-    private transient String param = "", func = "", gradc = "";
+    private transient String param = "", paran = "", func = "", gradc = "";
     private transient List<None> funcx = new ArrayList<>(), gradx = new ArrayList<>();
     public transient static AtomicInteger ID = new AtomicInteger();
 }

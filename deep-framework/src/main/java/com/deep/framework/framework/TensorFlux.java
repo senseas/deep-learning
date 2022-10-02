@@ -40,6 +40,12 @@ public class TensorFlux implements Serializable {
         forEach(tensor.getFunction(), (Tensor a) -> {
             a.backward();
         });
+        if (TensorExecutor.status) {
+            forEach(tensor.getOutput(), (None out) -> {
+                out.reset();
+                out.setGradc("");
+            });
+        }
         TensorExecutor.deep.getAndDecrement();
         Annotation cuda = tensor.getClass().getMethod("compute").getAnnotation(Cuda.class);
         if (Objects.nonNull(cuda)) {
@@ -66,13 +72,13 @@ public class TensorFlux implements Serializable {
             String paramgx = paramg.stream().distinct().collect(Collectors.joining(";")) + ";";
             String code =
             "class Tensor {\n" +
-            "private:\n"+
+            "private:\n" +
             "  double " + String.join("", paramf) + ";\n" +
-            "public:\n"+
+            "public:\n" +
             "  void compute(" + String.join(",", parama) + ") {\n" +
             "    " + paramcx +
             "\n  }\n" +
-            "  void gradient("+ String.join(",", parama) +","+ String.join(",", paramp) +"," + String.join(",", parame) + ") {\n" +
+            "  void gradient(" + String.join(",", parama) + "," + String.join(",", paramp) + "," + String.join(",", parame) + ") {\n" +
             "    " + paramgx +
             "\n  }\n" +
             "};";
@@ -114,9 +120,12 @@ public class TensorFlux implements Serializable {
 
     public static void gradient(Tensor tensor) {
         tensor.gradient();
-        /*forEach(tensor.getOutput(), (None out) -> {
-            out.reset();
-        });*/
+        if (TensorExecutor.status) {
+            forEach(tensor.getOutput(), (None out) -> {
+                out.reset();
+                out.setGradc("");
+            });
+        }
     }
 
     public static void reducer(Tensor tensor) {
@@ -138,7 +147,7 @@ public class TensorFlux implements Serializable {
     private static void forwards(Tensor tensor) {
         Object nones = getOutput(tensor.getFunction());
         createOutput(tensor, nones);
-        if (TensorExecutor.status&&TensorExecutor.deep.get()>1) {
+        if (TensorExecutor.status && TensorExecutor.deep.get() > 1) {
             forEach(tensor.getOutput(), nones, (None out, None none) -> {
                 out.setId(none.getId());
                 out.setFunc(none.getFunc());
@@ -154,10 +163,11 @@ public class TensorFlux implements Serializable {
 
     private static void backwards(Tensor tensor) {
         Object nones = getOutput(tensor.getFunction());
-        if (TensorExecutor.status&&TensorExecutor.deep.get()>1) {
+        if (TensorExecutor.status && TensorExecutor.deep.get() > 1) {
             forEach(tensor.getOutput(), nones, (None out, None none) -> {
                 none.setGradc(out.getGradc());
                 none.setGradx(out.getGradx());
+                none.setParan(out.getParan());
             });
         }
         forEach(tensor.getOutput(), nones, (None out, None none) -> {

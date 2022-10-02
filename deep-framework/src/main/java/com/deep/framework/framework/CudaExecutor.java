@@ -14,6 +14,7 @@ import lombok.Data;
 
 import java.io.Serializable;
 import java.util.*;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -254,6 +255,7 @@ public class CudaExecutor implements Serializable {
         });
 
         String code = getGradCode(name, none.getGradc(), none, map);
+        System.out.println(code);
         function = createFunction(name, code);
         functions.put(name, function);
         return function;
@@ -270,6 +272,8 @@ public class CudaExecutor implements Serializable {
         StringBuilder code = new StringBuilder("extern \"C\" __global__ void ").append(name).append("(double* data , double* grad){");
         code.append("int idx = blockDim.x * blockIdx.x + threadIdx.x;");
         code.append("int M = ").append(none.getGradx().size()).append(";");
+        String val = Arrays.stream(none.getParan().split(",")).distinct().collect(Collectors.joining(","));
+        code.append("double " + val + ";");
         content.chars().mapToObj(a -> String.valueOf((char) a)).reduce((a, b) -> {
             if (a.equals("{")) {
                 return a.concat(b);
@@ -290,7 +294,7 @@ public class CudaExecutor implements Serializable {
             return a.concat(b);
         });
         code.append("}");
-        return code.toString().replace("double e" + none.getId() + "=", "grad[idx]+=");
+        return code.toString().replace(none.getGradId() + "=", "grad[idx]+=");
     }
 
     /**
