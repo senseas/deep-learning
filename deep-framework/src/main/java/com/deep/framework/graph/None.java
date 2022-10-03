@@ -124,66 +124,66 @@ public class None implements Serializable {
     public None grad() {return new NoneGrad(this);}
 
     public void setFuncs(Object... arr) {
-        if (!TensorExecutor.status) return;
-        funcx.add(this);
-        String code = func;
-        func = "";
-        for (Object o : arr) {
-            if (o instanceof String a) {
-                func = func.concat(a);
-            } else if (o instanceof None a) {
-                if (a.getTensor() instanceof TensorConst) {
-                    func = func + a.getValue();
-                } else if (a.getFuncx().isEmpty()) {
-                    funcx.add(a);
-                    func = func.concat(a.getValId());
-                    param = param.concat(a.getParam());
-                } else {
-                    funcx.addAll(a.getFuncx());
-                    func = func.concat(a.getValId());
-                    param = param.concat(a.getParam());
-                    code = code.concat(a.getFunc());
+        if (TensorExecutor.status) {
+            funcx.add(this);
+            String code = func;
+            func = "";
+            for (Object o : arr) {
+                if (o instanceof String a) {
+                    func = func.concat(a);
+                } else if (o instanceof None a) {
+                    if (a.getTensor() instanceof TensorConst) {
+                        func = func + a.getValue();
+                    } else if (a.getFuncx().isEmpty()) {
+                        funcx.add(a);
+                        func = func.concat(a.getValId());
+                        param = param.concat(a.getParam());
+                    } else {
+                        funcx.addAll(a.getFuncx());
+                        func = func.concat(a.getValId());
+                        param = param.concat(a.getParam());
+                        code = code.concat(a.getFunc());
+                    }
                 }
             }
+            funcx = funcx.stream().toList();
+            param = param.concat(getValId()).concat(",");
+            func = getValId().concat("=").concat(func).concat(";");
+            func = code.concat(func);
         }
-        funcx = funcx.stream().distinct().collect(Collectors.toList());
-        param = param.concat(getValId()).concat(",");
-        func = getValId().concat("=").concat(func).concat(";");
-        func = code.concat("\n").concat(func);
     }
 
     public void setGrads(Object... arr) {
-        if (!TensorExecutor.status) return;
-        String code = gradc;
-        String paras = paran;
-        gradc = "";
-        for (Object o : arr) {
-            if (o instanceof String a) {
-                gradc = gradc.concat(a);
-            } else if (o instanceof None a) {
-                if (a.getTensor() instanceof TensorConst) {
-                    gradc = gradc + a.getValue();
-                } else if (a instanceof NoneGrad) {
-                    if (a.getGradx().isEmpty()) {
-                        gradx.add(a);
-                        gradc = gradc.concat("{" + a.getGradId() + "}");
+        if (TensorExecutor.status) {
+            String code = gradc, paras = paran;
+            gradc = "";
+            for (Object o : arr) {
+                if (o instanceof String a) {
+                    gradc = gradc.concat(a);
+                } else if (o instanceof None a) {
+                    if (a.getTensor() instanceof TensorConst) {
+                        gradc = gradc + a.getValue();
+                    } else if (a instanceof NoneGrad) {
+                        if (a.getGradx().isEmpty()) {
+                            gradx.add(a);
+                            gradc = gradc.concat("{" + a.getGradId() + "}");
+                        } else {
+                            gradx.addAll(a.getGradx());
+                            gradc = gradc.concat(a.getGradId());
+                            code = code.concat(a.getGradc());
+                            paras = paras.concat(a.getParan()).concat(a.getGradId()).concat(",");
+                        }
                     } else {
-                        gradx.addAll(a.getGradx());
-                        gradc = gradc.concat(a.getGradId());
-                        code = code.concat(a.getGradc());
-                        paras = paras.concat(a.getParan()).concat(a.getGradId()).concat(",");
+                        gradx.add(a);
+                        gradc = gradc.concat(a.getValId());
                     }
-                } else {
-                    gradx.add(a);
-                    gradc = gradc.concat(a.getValId());
                 }
             }
+            paran = paras;
+            gradx = gradx.stream().distinct().collect(Collectors.toList());
+            gradc = getGradId().concat("=").concat(gradc).concat(";");
+            gradc = code.concat(gradc);
         }
-
-        paran = paras;
-        gradx = gradx.stream().distinct().collect(Collectors.toList());
-        gradc = getGradId().concat("=").concat(gradc).concat(";");
-        gradc = code.concat("\n").concat(gradc);
     }
 
     private int id = ID.getAndIncrement();
