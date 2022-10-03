@@ -146,7 +146,7 @@ public class None implements Serializable {
                     }
                 }
             }
-            funcx = funcx.stream().toList();
+            funcx = funcx.stream().distinct().collect(Collectors.toList());
             param = param.concat(getValId()).concat(",");
             func = getValId().concat("=").concat(func).concat(";");
             func = code.concat(func);
