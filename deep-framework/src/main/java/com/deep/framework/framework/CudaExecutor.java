@@ -3,6 +3,7 @@ package com.deep.framework.framework;
 import com.deep.framework.graph.None;
 import com.deep.framework.graph.Tensor;
 import com.deep.framework.lang.Tenser;
+import com.deep.framework.lang.annotation.Cuda;
 import com.deep.framework.lang.cuda.Block;
 import com.deep.framework.lang.cuda.Grid;
 import jcuda.Pointer;
@@ -11,6 +12,7 @@ import jcuda.driver.*;
 import jcuda.nvrtc.JNvrtc;
 import jcuda.nvrtc.nvrtcProgram;
 import lombok.Data;
+import lombok.SneakyThrows;
 
 import java.io.Serializable;
 import java.util.*;
@@ -127,7 +129,9 @@ public class CudaExecutor implements Serializable {
      * @param tensor The source code
      * @return The CUDA function
      */
+    @SneakyThrows
     public static void compute(Tensor tensor) {
+        if (!tensor.getClass().getMethod("compute").isAnnotationPresent(Cuda.class)) return;
         if (tensor.getFunction() instanceof Tenser) {
             Tenser<None> nones = TensorFlux.getOutput(tensor.getFunction());
             CUfunction function = getFunction(tensor, nones.findFirst());
@@ -153,7 +157,9 @@ public class CudaExecutor implements Serializable {
      * @param tensor The source code
      * @return The CUDA function
      */
+    @SneakyThrows
     public static void gradient(Tensor tensor) {
+        if (!tensor.getClass().getMethod("compute").isAnnotationPresent(Cuda.class)) return;
         IntStream.range(0, tensor.getInput().length).forEach(i -> {
             Object out = tensor.getInput()[i].getOutput();
             if (out instanceof Tenser) {
