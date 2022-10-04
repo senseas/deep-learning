@@ -14,7 +14,6 @@ import static com.deep.framework.lang.Shape.*;
 public class TensorFlux implements Serializable {
     static final double EX = 0.0000000001;
 
-    @SneakyThrows
     public static void forward(Tensor tensor) {
         TensorExecutor.deep.getAndIncrement();
         forEach(tensor.getFunction(), (Tensor a) -> {
@@ -25,7 +24,6 @@ public class TensorFlux implements Serializable {
         TensorExecutor.deep.getAndDecrement();
     }
 
-    @SneakyThrows
     public static void backward(Tensor tensor) {
         TensorExecutor.deep.getAndIncrement();
         backwards(tensor);
