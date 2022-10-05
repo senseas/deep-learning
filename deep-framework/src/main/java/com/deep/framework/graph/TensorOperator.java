@@ -3,10 +3,7 @@ package com.deep.framework.graph;
 import com.deep.framework.framework.TensorFlux;
 
 import java.util.Arrays;
-import java.util.Objects;
 import java.util.stream.Stream;
-
-import static com.deep.framework.lang.Shape.*;
 
 public class TensorOperator extends Tensor {
 
