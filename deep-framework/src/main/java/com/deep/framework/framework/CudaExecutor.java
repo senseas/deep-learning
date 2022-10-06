@@ -177,7 +177,7 @@ public class CudaExecutor implements Serializable {
                 double[] input = none.getGradx().stream().mapToDouble(None::getValue).toArray();
                 double[] output = new double[1];
                 run(function, input, output);
-                none.setGrads(output[0]);
+                none.setGradi(output[0]);
             }
         });
     }
