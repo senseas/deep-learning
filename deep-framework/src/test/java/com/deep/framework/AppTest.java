@@ -69,9 +69,16 @@ public class AppTest {
     }
 
     @Test
-    public void squarexTest() {
+    public void squareTest() {
         TensorFlow tf = new TensorFlow();
         Tensor tensor = tf.square(new Tensor(0.01), new Tensor(0.391249035007275));
+        TensorExecutor executor = new TensorExecutor(tensor);
+        executor.run();
+    }
+    @Test
+    public void squarexTest() {
+        TensorFlow tf = new TensorFlow();
+        Tensor tensor = tf.squarex(new Tensor(new int[]{6}), new Tensor(new int[]{6}));
         TensorExecutor executor = new TensorExecutor(tensor);
         executor.run();
     }
