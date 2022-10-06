@@ -155,7 +155,7 @@ public class None implements Serializable {
 
     public void setGrads(Object... arr) {
         if (TensorExecutor.status) {
-            String code = gradc, paras = paran;
+            String code = gradc;
             gradc = "";
             for (Object o : arr) {
                 if (o instanceof String a) {
