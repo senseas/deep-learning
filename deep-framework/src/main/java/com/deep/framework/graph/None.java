@@ -126,7 +126,7 @@ public class None implements Serializable {
     public void setFuncs(Object... arr) {
         if (TensorExecutor.status) {
             funcx.add(this);
-            String code = func;
+            String code = "";
             func = "";
             for (Object o : arr) {
                 if (o instanceof String a) {
