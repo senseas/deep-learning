@@ -182,7 +182,6 @@ public class None implements Serializable {
             gradx = gradx.stream().distinct().collect(Collectors.toList());
             gradc = getGradId().concat("=").concat(gradc).concat(";");
             gradc = code.concat(gradc);
-            System.out.println(paran);
         }
     }
 
