@@ -3,7 +3,6 @@ package com.deep.framework.framework;
 import com.deep.framework.graph.None;
 import com.deep.framework.graph.Tensor;
 import com.deep.framework.lang.util.BeanUtil;
-import lombok.SneakyThrows;
 
 import java.io.Serializable;
 import java.util.Arrays;
@@ -30,12 +29,14 @@ public class TensorFlux implements Serializable {
         forEach(tensor.getFunction(), (Tensor a) -> {
             a.backward();
         });
-        if (TensorExecutor.status) {
-            forEach(tensor.getOutput(), (None out) -> {
-                //out.reset();
+        forEach(tensor.getOutput(), (None out) -> {
+            if (!out.getGradx().isEmpty()) {
+                out.reset();
+            }
+            if (TensorExecutor.status) {
                 out.setGradc("");
-            });
-        }
+            }
+        });
         CudaExecutor.gradient(tensor);
         TensorExecutor.deep.getAndDecrement();
     }
@@ -74,12 +75,14 @@ public class TensorFlux implements Serializable {
 
     public static void gradient(Tensor tensor) {
         tensor.gradient();
-        if (TensorExecutor.status) {
-            forEach(tensor.getOutput(), (None out) -> {
-                //out.reset();
+        forEach(tensor.getOutput(), (None out) -> {
+            if (!out.getGradx().isEmpty()) {
+                out.reset();
+            }
+            if (TensorExecutor.status) {
                 out.setGradc("");
-            });
-        }
+            }
+        });
     }
 
     public static void reducer(Tensor tensor) {
