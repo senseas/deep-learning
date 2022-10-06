@@ -141,13 +141,13 @@ public class None implements Serializable {
                     } else {
                         funcx.addAll(a.getFuncx());
                         func = func.concat(a.getValId());
-                        param = param.concat(a.getParam());
                         code = code.concat(a.getFunc());
+                        param = param.concat(a.getParam());
                     }
                 }
             }
-            funcx = funcx.stream().distinct().collect(Collectors.toList());
             param = param.concat(getValId()).concat(",");
+            funcx = funcx.stream().distinct().collect(Collectors.toList());
             func = getValId().concat("=").concat(func).concat(";");
             func = code.concat(func);
         }
@@ -171,7 +171,7 @@ public class None implements Serializable {
                             gradx.addAll(a.getGradx());
                             gradc = gradc.concat(a.getGradId());
                             code = code.concat(a.getGradc());
-                            paras = paras.concat(a.getParan()).concat(a.getGradId()).concat(",");
+                            paran = paran.concat(a.getParan()).concat(a.getGradId()).concat(",");
                         }
                     } else {
                         gradx.add(a);
@@ -179,10 +179,10 @@ public class None implements Serializable {
                     }
                 }
             }
-            paran = paras;
             gradx = gradx.stream().distinct().collect(Collectors.toList());
             gradc = getGradId().concat("=").concat(gradc).concat(";");
             gradc = code.concat(gradc);
+            System.out.println(paran);
         }
     }
 
