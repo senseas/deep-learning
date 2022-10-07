@@ -19,6 +19,7 @@ public class TensorFlux implements Serializable {
             a.forward();
         });
         CudaExecutor.compute(tensor);
+        clearFunc(tensor);
         forwards(tensor);
         TensorExecutor.deep.getAndDecrement();
     }
