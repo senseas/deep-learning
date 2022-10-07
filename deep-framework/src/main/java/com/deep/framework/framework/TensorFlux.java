@@ -29,14 +29,7 @@ public class TensorFlux implements Serializable {
         forEach(tensor.getFunction(), (Tensor a) -> {
             a.backward();
         });
-        forEach(tensor.getOutput(), (None out) -> {
-            if (!out.getGradx().isEmpty()) {
-                out.reset();
-            }
-            if (TensorExecutor.status) {
-                out.setGradc("");
-            }
-        });
+        clearGradc(tensor);
         CudaExecutor.gradient(tensor);
         TensorExecutor.deep.getAndDecrement();
     }
@@ -50,17 +43,29 @@ public class TensorFlux implements Serializable {
     public static void compute(Tensor tensor) {
         Object output = tensor.getOutput();
         if (Objects.nonNull(output)) {
-            resetOutput(tensor);
+            clearOutput(tensor);
             Object nones = tensor.compute();
+            clearFunc(tensor);
             forEach(tensor.getOutput(), nones, (None out, None none) -> {
                 out.setValue(none.getValue());
             });
         } else {
             Object nones = tensor.compute();
+            clearFunc(tensor);
             createOutput(tensor, nones);
             forEach(tensor.getOutput(), nones, (None out, None none) -> {
                 out.setValue(none.getValue());
             });
+        }
+    }
+
+    private static void clearFunc(Tensor tensor) {
+        if (TensorExecutor.status) {
+            for (Tensor in : tensor.getInput()) {
+                forEach(in.getOutput(), (None out) -> {
+                    out.setFunc("");
+                });
+            }
         }
     }
 
@@ -75,12 +80,18 @@ public class TensorFlux implements Serializable {
 
     public static void gradient(Tensor tensor) {
         tensor.gradient();
+        clearGradc(tensor);
+    }
+
+    private static void clearGradc(Tensor tensor) {
+        if (TensorExecutor.status) {
+            forEach(tensor.getOutput(), (None out) -> {
+                out.setGradc("");
+            });
+        }
         forEach(tensor.getOutput(), (None out) -> {
             if (!out.getGradx().isEmpty()) {
                 out.reset();
-            }
-            if (TensorExecutor.status) {
-                out.setGradc("");
             }
         });
     }
@@ -132,7 +143,7 @@ public class TensorFlux implements Serializable {
         });
     }
 
-    public static void resetOutput(Tensor tensor) {
+    public static void clearOutput(Tensor tensor) {
         if (BeanUtil.isTensor(tensor.getOutput())) {
             Arrays.fill((double[]) tensor.getValue(), 0d);
             Arrays.fill((double[]) tensor.getGrad(), 0d);
