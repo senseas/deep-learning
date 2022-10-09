@@ -45,6 +45,10 @@ public class Tenser<T> implements Serializable {
         }
     }
 
+    public <E> E data(int index) {
+        return (E) this.data[start + index];
+    }
+
     public void set(T[] data, int... index) {
         int start = start(index), end = end(start, index);
         for (int i = start; i < end; i++) {
@@ -87,7 +91,7 @@ public class Tenser<T> implements Serializable {
         return shape[0];
     }
 
-    public T findFirst() {
+    public T first() {
         return data[start];
     }
 

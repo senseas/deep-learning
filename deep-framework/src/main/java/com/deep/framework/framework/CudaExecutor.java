@@ -134,7 +134,7 @@ public class CudaExecutor implements Serializable {
         if (!tensor.getClass().getMethod("compute").isAnnotationPresent(Cuda.class)) return;
         if (tensor.getFunction() instanceof Tenser) {
             Tenser<None> nones = TensorFlux.getOutput(tensor.getFunction());
-            CUfunction function = getFunction(tensor, nones.findFirst());
+            CUfunction function = getFunction(tensor, nones.first());
             List<None> list = new ArrayList<>();
             nones.forEach(a -> list.addAll(a.getFuncx()));
             double[] output = list.stream().mapToDouble(None::getValue).toArray();
@@ -164,7 +164,7 @@ public class CudaExecutor implements Serializable {
             Object out = tensor.getInput()[i].getOutput();
             if (out instanceof Tenser) {
                 Tenser<None> nones = (Tenser<None>) out;
-                CUfunction function = getGradient(tensor, nones.findFirst(), i);
+                CUfunction function = getGradient(tensor, nones.first(), i);
                 List<None> list = new ArrayList<>();
                 nones.forEach(a -> list.addAll(a.getGradx()));
                 double[] input = list.stream().mapToDouble(None::getValue).toArray();
@@ -180,6 +180,63 @@ public class CudaExecutor implements Serializable {
                 none.setGradi(output[0]);
             }
         });
+    }
+
+    /**
+     * Create a CUDA kernel function by compiling the given code using the
+     * NVRTC, and obtaining the function with the given name
+     *
+     * @param tensor The source code
+     * @return The CUDA function
+     */
+    @SneakyThrows
+    public static void gradientx(Tensor tensor) {
+        if (!tensor.getClass().getMethod("compute").isAnnotationPresent(Cuda.class)) return;
+        Object out = tensor.getInput()[0].getOutput();
+        List<None> list = new ArrayList<>();
+        int length = tensor.getInput().length;
+        if (out instanceof Tenser) {
+            int size = ((Tenser<None>) out).size();
+            IntStream.range(0, size).forEach(i -> {
+                List<None> lists = new ArrayList<>();
+                IntStream.range(0, length).forEach(l -> {
+                    Tenser<None> nones = tensor.getInput()[l].getOutput();
+                    None none = nones.data(i);
+                    lists.addAll(none.getGradx());
+                });
+                list.addAll(lists.stream().distinct().toList());
+            });
+
+            double[] input = list.stream().mapToDouble(None::getValue).toArray();
+            double[] output = new double[length * size];
+            CUfunction function = getGradientx(tensor);
+            run(function, new Grid(size), new Block(1), input, output);
+
+            IntStream.range(0, size).forEach(i -> {
+                IntStream.range(0, length).forEach(l -> {
+                    Tenser<None> nones = tensor.getInput()[l].getOutput();
+                    None none = nones.data(i);
+                    none.setGradi(output[i * length + l]);
+                });
+            });
+
+        } else {
+
+            IntStream.range(0, length).forEach(l -> {
+                None none = tensor.getInput()[l].getOutput();
+                list.addAll(none.getGradx());
+            });
+
+            double[] input = list.stream().distinct().mapToDouble(None::getValue).toArray();
+            double[] output = new double[length];
+            CUfunction function = getGradientx(tensor);
+            run(function, new Grid(length), new Block(1), input, output);
+
+            IntStream.range(0, length).forEach(l -> {
+                None none = tensor.getInput()[l].getOutput();
+                none.setGradi(output[l]);
+            });
+        }
     }
 
     /**
@@ -217,7 +274,12 @@ public class CudaExecutor implements Serializable {
         StringBuilder code = new StringBuilder("extern \"C\" __global__ void ").append(name).append("(double* data){");
         code.append("int idx = blockDim.x * blockIdx.x + threadIdx.x;");
         code.append("int M = ").append(map.size()).append(";");
-        content.chars().mapToObj(a -> String.valueOf((char) a)).reduce((a, b) -> {
+        code.append(content.chars().mapToObj(a -> String.valueOf((char) a)).reduce((a, b) -> {
+            Integer inx = map.get(a);
+            if (Objects.nonNull(inx)) {
+                code.append("data[idx*M+").append(inx).append("]");
+                return b;
+            }
             if (a.equals("{")) {
                 return a.concat(b);
             }
@@ -225,17 +287,8 @@ public class CudaExecutor implements Serializable {
                 code.append(a);
                 return "{";
             }
-            Integer inx = map.get(a.concat(b));
-            if (Objects.nonNull(inx)) {
-                code.append("data[idx*M+").append(inx).append("]");
-                return "";
-            }
-            if (a.isEmpty()) {
-                code.append(b);
-                return "";
-            }
             return a.concat(b);
-        });
+        }).get());
         code.append("}");
         return code.toString();
     }
@@ -264,6 +317,62 @@ public class CudaExecutor implements Serializable {
         System.out.println(code);
         function = createFunction(name, code);
         functions.put(name, function);
+
+        return function;
+    }
+    /**
+     * Create a CUDA kernel function by compiling the given code using the
+     * NVRTC, and obtaining the function with the given name
+     *
+     * @param tensor The source code
+     * @return The CUDA function
+     */
+    public static CUfunction getGradientx(Tensor tensor) {
+        String name = tensor.getName().replace("Tensor::", "Grad");
+        CUfunction function = functions.get(name);
+        if (Objects.nonNull(function)) return function;
+
+        StringBuffer para = new StringBuffer();
+        StringBuffer code = new StringBuffer();
+        List<None> paraList = new ArrayList<>();
+        List<None> gradList = new ArrayList<>();
+
+        Arrays.stream(tensor.getInput()).map(in -> {
+            Object out = in.getOutput();
+            if (out instanceof Tenser) {
+                Tenser<None> nones = (Tenser<None>) out;
+                return nones.first();
+            } else {
+                None none = (None) out;
+                return none;
+            }
+        }).forEach((a) -> {
+            para.append(a.getParan());
+            code.append(a.getGradc());
+            paraList.addAll(a.getGradx());
+            gradList.add(a);
+        });
+
+        List<None> paraLists = paraList.stream().distinct().toList();
+        Map<String, Integer> data = new HashMap<>();
+        IntStream.range(0, paraLists.size()).forEach(i -> {
+            None o = paraLists.get(i);
+            data.put(o.getValId(), i);
+            data.put("{" + o.getGradId() + "}", i);
+        });
+
+        Map<String, Integer> grad = new HashMap<>();
+        IntStream.range(0, gradList.size()).forEach(i -> {
+            None o = gradList.get(i);
+            grad.put(o.getGradId().concat("="), i);
+        });
+
+        String gradCode = getGradCode(name, gradList.size(), paraLists.size(), para.toString(), code.toString(), grad, data);
+
+        System.out.println(gradCode);
+        function = createFunction(name, gradCode);
+        functions.put(name, function);
+
         return function;
     }
 
@@ -280,7 +389,16 @@ public class CudaExecutor implements Serializable {
         code.append("int M = ").append(none.getGradx().size()).append(";");
         String val = Arrays.stream(none.getParan().split(",")).distinct().collect(Collectors.joining(","));
         code.append("double " + val + ";");
-        content.chars().mapToObj(a -> String.valueOf((char) a)).reduce((a, b) -> {
+        code.append(content.chars().mapToObj(a -> String.valueOf((char) a)).reduce((a, b) -> {
+            Integer inx = map.get(a);
+            if (Objects.nonNull(inx)) {
+                code.append("data[idx*M+").append(inx).append("]");
+                return b;
+            }
+            if (Objects.equals(none.getGradId().concat("="), a)) {
+                code.append("grad[idx]+=");
+                return b;
+            }
             if (a.equals("{")) {
                 return a.concat(b);
             }
@@ -288,19 +406,67 @@ public class CudaExecutor implements Serializable {
                 code.append(a);
                 return "{";
             }
-            Integer inx = map.get(a.concat(b));
-            if (Objects.nonNull(inx)) {
-                code.append("data[idx*M+").append(inx).append("]");
-                return "";
+            if (a.equals(";")) {
+                code.append(a);
+                return b;
             }
-            if (a.isEmpty()) {
-                code.append(b);
-                return "";
+            if (b.equals(";")) {
+                code.append(a);
+                return ";";
             }
             return a.concat(b);
-        });
+        }).get());
         code.append("}");
-        return code.toString().replace(none.getGradId() + "=", "grad[idx]+=");
+        return code.toString();
+    }
+
+    /**
+     * Create device code
+     *
+     * @param name    of function
+     * @param content The content of the code
+     * @return The pointer to the data
+     */
+    public static String getGradCode(String name, Integer sizes, Integer size, String var, String content, Map<String, Integer> grad, Map<String, Integer> param) {
+        var = Arrays.stream(var.split(",")).distinct().collect(Collectors.joining(",")).concat(";");
+        content = Arrays.stream(content.split(";")).distinct().collect(Collectors.joining(";")).concat(";");
+
+        StringBuilder code = new StringBuilder("extern \"C\" __global__ void ").append(name).append("(double* data , double* grad){");
+        code.append("int idx = blockDim.x * blockIdx.x + threadIdx.x;");
+        code.append("int M = ").append(size).append(";");
+        code.append("int N = ").append(sizes).append(";");
+        code.append("double ").append(var);
+
+        code.append(content.chars().mapToObj(a -> String.valueOf((char) a)).reduce((a, b) -> {
+            Integer inx = param.get(a);
+            if (Objects.nonNull(inx)) {
+                code.append("data[idx*M+").append(inx).append("]");
+                return b;
+            }
+            Integer ing = grad.get(a);
+            if (Objects.nonNull(ing)) {
+                code.append("grad[idx*N+").append(ing).append("]+=");
+                return b;
+            }
+            if (a.equals("{")) {
+                return a.concat(b);
+            }
+            if (b.equals("{")) {
+                code.append(a);
+                return "{";
+            }
+            if (a.equals(";")) {
+                code.append(a);
+                return b;
+            }
+            if (b.equals(";")) {
+                code.append(a);
+                return ";";
+            }
+            return a.concat(b);
+        }).get());
+        code.append("}");
+        return code.toString();
     }
 
     /**
