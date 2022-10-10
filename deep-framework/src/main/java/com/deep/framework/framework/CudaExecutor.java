@@ -197,14 +197,13 @@ public class CudaExecutor implements Serializable {
         int length = tensor.getInput().length;
         if (out instanceof Tenser) {
             int size = ((Tenser<None>) out).size();
+
             IntStream.range(0, size).forEach(i -> {
-                List<None> lists = new ArrayList<>();
-                IntStream.range(0, length).forEach(l -> {
+                list.addAll(IntStream.range(0, length).mapToObj(l -> {
                     Tenser<None> nones = tensor.getInput()[l].getOutput();
                     None none = nones.data(i);
-                    lists.addAll(none.getGradx());
-                });
-                list.addAll(lists.stream().distinct().toList());
+                    return none.getGradx().stream();
+                }).flatMap(a -> a).distinct().toList());
             });
 
             double[] input = list.stream().mapToDouble(None::getValue).toArray();
