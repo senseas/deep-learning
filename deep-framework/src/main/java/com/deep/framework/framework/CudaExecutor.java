@@ -15,10 +15,7 @@ import lombok.Data;
 import lombok.SneakyThrows;
 
 import java.io.Serializable;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -135,38 +132,41 @@ public class CudaExecutor implements Serializable {
     @SneakyThrows
     public static void compute(Tensor tensor) {
         if (!tensor.getClass().getMethod("compute").isAnnotationPresent(Cuda.class)) return;
+
+        List<Tensor> list = Arrays.stream(tensor.getInput()).filter(Tensor::isGradre).toList();
         if (tensor.getFunction() instanceof Tenser) {
             Tenser<Tensor> tensors = (Tenser<Tensor>) tensor.getFunction();
+            CUfunction function = getFunction(tensor, tensors.first());
             String[] param = TensorCore.fparam.split(",");
-            int size = tensors.size(), sizep = param.length, sizei = tensor.getInput().length;
-            double[] output = new double[size * sizep];
+            int size = tensors.size(), length = param.length;
+            double[] output = new double[size * length];
 
             IntStream.range(0, size).forEach(i -> {
-                IntStream.range(0, sizei).forEach(l -> {
-                    double[] values = (double[]) tensor.getInput()[l].getValue();
-                    if (!tensor.getInput()[l].isGradre()) return;
-                    output[i * sizei + l] = values[i];
+                IntStream.range(0, list.size()).forEach(l -> {
+                    double[] values = (double[]) list.get(l).getValue();
+                    output[i * length + l] = values[i];
                 });
             });
 
-            CUfunction function = getFunction(tensor, tensors.first());
             run(function, new Grid(size), new Block(1), output);
+            Double[] data = IntStream.range(0, size).mapToObj(i -> output[i * length + length - 1]).toArray(Double[]::new);
             //IntStream.range(0, list.size()).forEach(i -> list.get(i).setValue(output[i]));
-            Double[] cudaData = IntStream.range(0, size).mapToObj(i -> output[i * sizep + (sizep - 1)]).toArray(Double[]::new);
-            double[] cpudata = (double[]) tensor.getValue();
-
-            IntStream.range(0, size).forEach(i -> {
-                if (Math.abs(cudaData[i] - cpudata[i]) > 0.00000001) {
-                    System.out.println(i);
-                }
-            });
         } else {
-            None out = ((Tensor) tensor.getFunction()).getOutput();
-            CUfunction function = getFunction(tensor, (Tensor) tensor.getFunction());
-//            List<None> list = out.getFuncx();
-//            double[] output = list.stream().mapToDouble(None::getValue).toArray();
-//            run(function, output);
-//            IntStream.range(0, list.size()).forEach(i -> list.get(i).setValue(output[i]));
+            Tensor first = (Tensor) tensor.getFunction();
+            CUfunction function = getFunction(tensor, first);
+            String[] param = TensorCore.fparam.split(",");
+            int  length = param.length;
+            double[] output = new double[length];
+
+            IntStream.range(0, list.size()).forEach(l -> {
+                double value = (double) list.get(l).getValue();
+                output[l] = value;
+            });
+
+            run(function, output);
+
+            Double data = output[ length - 1];
+            //IntStream.range(0, list.size()).forEach(i -> list.get(i).setValue(output[i]));
         }
     }
 
@@ -271,9 +271,9 @@ public class CudaExecutor implements Serializable {
         CUfunction function = functions.get(name);
         if (Objects.nonNull(function)) return function;
 
-        TensorCore.func = TensorCore.code = "";
+        TensorCore.func = TensorCore.code =TensorCore.fparam = "";
         TensorCore.forward(first);
-        String code = TensorCore.code.replace(first.getName(), name);
+        String code = TensorCore.code.replace("name", name);
         System.out.println(code);
         System.out.println(TensorCore.fparam);
 

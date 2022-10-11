@@ -71,7 +71,7 @@ public class TensorFlow implements Serializable {
 
 
     public Tensor minus(Tensor input) {
-        return new TensorOperator("Minus", input) {
+        return new TensorOperator("Minusx", input) {
 
             public None compute() {
                 None inx = getInput(0);

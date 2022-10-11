@@ -51,7 +51,7 @@ public class TensorCompiler implements Serializable {
     }
 
     public TensorFunctor minus(Tensor input) {
-        return new TensorFunctor("Minus", input) {
+        return new TensorFunctor("Minusx", input) {
 
             public String compute() {
                 None inx = getInput(0);
@@ -139,7 +139,7 @@ public class TensorCompiler implements Serializable {
 
             public String compute() {
                 None inx = getInput(0);
-                return getValId() + "=log(" + inx.getValId() + ")";
+                return getValId() + "=log(" + inx.getValId() + ");";
             }
 
             public String gradient(String grad) {
