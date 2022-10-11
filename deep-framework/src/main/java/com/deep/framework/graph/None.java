@@ -1,24 +1,22 @@
 package com.deep.framework.graph;
 
-import com.deep.framework.framework.TensorExecutor;
 import lombok.Data;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
 
 @Data
 public class None implements Serializable {
 
     public None(Tensor tensor) {
         this.tensor = tensor;
+        this.gradre = tensor.isGradre();
     }
 
     public None(Tensor tensor, int idx) {
         this.tensor = tensor;
+        this.gradre = tensor.isGradre();
         this.idx = idx;
     }
 
@@ -32,6 +30,7 @@ public class None implements Serializable {
         this.value = value;
         this.grad = 0d;
         this.reduce = false;
+        this.gradre = gradre;
     }
 
     public double getValue() {
@@ -117,80 +116,21 @@ public class None implements Serializable {
         }
     }
 
-    public String getGradId() {return "e" + id;}
-
-    public String getValId() {return "{a" + id + "}";}
-
-    public None grad() {return new NoneGrad(this);}
-
-    public void setFuncs(Object... arr) {
-        if (TensorExecutor.status) {
-            funcx.add(this);
-            String code = "";
-            func = "";
-            for (Object o : arr) {
-                if (o instanceof String a) {
-                    func = func.concat(a);
-                } else if (o instanceof None a) {
-                    if (a.getTensor() instanceof TensorConst) {
-                        func = func + a.getValue();
-                    } else if (a.getFuncx().isEmpty()) {
-                        funcx.add(a);
-                        func = func.concat(a.getValId());
-                        param = param.concat(a.getParam());
-                    } else {
-                        funcx.addAll(a.getFuncx());
-                        func = func.concat(a.getValId());
-                        code = code.concat(a.getFunc());
-                        param = param.concat(a.getParam());
-                    }
-                }
-            }
-            param = param.concat(getValId()).concat(",");
-            funcx = funcx.stream().distinct().collect(Collectors.toList());
-            func = getValId().concat("=").concat(func).concat(";");
-            func = code.concat(func);
-        }
+    public String getGradId() {
+        return " e" + id + " ";
     }
 
-    public void setGrads(Object... arr) {
-        if (TensorExecutor.status) {
-            String code = gradc;
-            gradc = "";
-            for (Object o : arr) {
-                if (o instanceof String a) {
-                    gradc = gradc.concat(a);
-                } else if (o instanceof None a) {
-                    if (a.getTensor() instanceof TensorConst) {
-                        gradc = gradc + a.getValue();
-                    } else if (a instanceof NoneGrad) {
-                        if (a.getGradx().isEmpty()) {
-                            gradx.add(a);
-                            gradc = gradc.concat("{" + a.getGradId() + "}");
-                        } else {
-                            gradx.addAll(a.getGradx());
-                            gradc = gradc.concat(a.getGradId());
-                            code = code.concat(a.getGradc());
-                            paran = paran.concat(a.getParan()).concat(a.getGradId()).concat(",");
-                        }
-                    } else {
-                        gradx.add(a);
-                        gradc = gradc.concat(a.getValId());
-                    }
-                }
-            }
-            gradx = gradx.stream().distinct().collect(Collectors.toList());
-            gradc = getGradId().concat("=").concat(gradc).concat(";");
-            gradc = code.concat(gradc);
+    public String getValId() {
+        if (gradre) {
+            return " a" + id + " ";
         }
+        return "" + getValue();
     }
 
-    private int id = ID.getAndIncrement();
     private double value, grad;
     private transient int idx;
     private transient Tensor tensor;
-    private transient boolean reduce;
-    private transient String param = "", paran = "", func = "", gradc = "";
-    private transient List<None> funcx = new ArrayList<>(), gradx = new ArrayList<>();
+    private transient boolean reduce, gradre;
+    private int id = ID.getAndIncrement();
     public transient static AtomicInteger ID = new AtomicInteger();
 }

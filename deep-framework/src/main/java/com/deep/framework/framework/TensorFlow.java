@@ -6,9 +6,6 @@ import com.deep.framework.lang.Tenser;
 import com.deep.framework.lang.annotation.Cuda;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Stream;
 
 import static com.deep.framework.lang.ForEach.forEach;
 import static com.deep.framework.lang.Shape.*;
@@ -21,19 +18,12 @@ public class TensorFlow implements Serializable {
 
             public None compute() {
                 double value = inputStream().mapToDouble(a -> ((None) a).getValue()).sum();
-
-                None out = createOutput();
-                Stream<Stream> stream = Stream.of(inputStream().flatMap(a -> Stream.of("+", a)));
-                out.setFuncs(stream.flatMap(a -> a).toArray());
-
                 return new None(value);
             }
 
             public void gradient() {
                 None out = getOutput();
                 inputStream().forEach(a -> ((None) a).setGrad(out.getGrad()));
-
-                inputStream().forEach(a -> ((None) a).setGrads(out.grad()));
             }
 
         };
@@ -66,10 +56,6 @@ public class TensorFlow implements Serializable {
             public None compute() {
                 None inx = getInput(0), iny = getInput(1);
                 double valx = inx.getValue(), valy = iny.getValue();
-
-                None out = createOutput();
-                out.setFuncs(inx, "-", iny);
-
                 return new None(valx - valy);
             }
 
@@ -78,9 +64,6 @@ public class TensorFlow implements Serializable {
                 double grad = out.getGrad();
                 inx.setGrad(grad);
                 iny.setGrad(-grad);
-
-                inx.setGrads(out.grad());
-                iny.setGrads("-", out.grad());
             }
 
         };
@@ -93,10 +76,6 @@ public class TensorFlow implements Serializable {
             public None compute() {
                 None inx = getInput(0);
                 double valx = inx.getValue();
-
-                None out = createOutput();
-                out.setFuncs("-", inx);
-
                 return new None(-valx);
             }
 
@@ -104,8 +83,6 @@ public class TensorFlow implements Serializable {
                 None inx = getInput(0), out = getOutput();
                 double grad = out.getGrad();
                 inx.setGrad(-grad);
-
-                inx.setGrads("-", out.grad());
             }
 
         };
@@ -117,10 +94,6 @@ public class TensorFlow implements Serializable {
             public None compute() {
                 None inx = getInput(0), iny = getInput(1);
                 double valx = inx.getValue(), valy = iny.getValue();
-
-                None out = createOutput();
-                out.setFuncs(inx, "*", iny);
-
                 return new None(valx * valy);
             }
 
@@ -130,9 +103,6 @@ public class TensorFlow implements Serializable {
                 double grad = out.getGrad();
                 inx.setGrad(grad * valy);
                 iny.setGrad(grad * valx);
-
-                inx.setGrads(out.grad(), "*", iny);
-                iny.setGrads(out.grad(), "*", inx);
             }
 
         };
@@ -144,10 +114,6 @@ public class TensorFlow implements Serializable {
             public None compute() {
                 None inx = getInput(0), iny = getInput(1);
                 double valx = inx.getValue(), valy = iny.getValue();
-
-                None out = createOutput();
-                out.setFuncs(inx, "/", iny);
-
                 return new None(valx / valy);
             }
 
@@ -157,9 +123,6 @@ public class TensorFlow implements Serializable {
                 double grad = out.getGrad();
                 inx.setGrad(grad / valy);
                 iny.setGrad(-grad * valx / Math.pow(valy, 2));
-
-                inx.setGrads(out.grad(), "/", iny);
-                iny.setGrads("-", out.grad(), "*", inx, "/pow(", iny, ",2.0)");
             }
 
         };
@@ -171,10 +134,6 @@ public class TensorFlow implements Serializable {
             public None compute() {
                 None inx = getInput(0);
                 double valx = inx.getValue();
-
-                None out = createOutput();
-                out.setFuncs("exp(", inx, ")");
-
                 return new None(Math.exp(valx));
             }
 
@@ -183,8 +142,6 @@ public class TensorFlow implements Serializable {
                 double valx = inx.getValue();
                 double grad = out.getGrad();
                 inx.setGrad(grad * Math.exp(valx));
-
-                inx.setGrads(out.grad(), "*exp(", inx, ")");
             }
 
         };
@@ -212,10 +169,6 @@ public class TensorFlow implements Serializable {
             public None compute() {
                 None inx = getInput(0), iny = getInput(1);
                 double valx = inx.getValue(), valy = iny.getValue();
-
-                None out = createOutput();
-                out.setFuncs("pow(", inx, ",", iny, ")");
-
                 return new None(Math.pow(valx, valy));
             }
 
@@ -224,8 +177,6 @@ public class TensorFlow implements Serializable {
                 double valx = inx.getValue(), valy = iny.getValue();
                 double grad = out.getGrad();
                 inx.setGrad(grad * valy * Math.pow(valx, valy - 1));
-
-                inx.setGrads(out.grad(), "*", iny, "*pow(", inx, ",", iny, "-1.0)");
             }
 
         };
@@ -237,10 +188,6 @@ public class TensorFlow implements Serializable {
             public None compute() {
                 None inx = getInput(0);
                 double valx = inx.getValue();
-
-                None out = createOutput();
-                out.setFuncs("log(", inx, ")");
-
                 return new None(Math.log(valx));
             }
 
@@ -249,8 +196,25 @@ public class TensorFlow implements Serializable {
                 double valx = inx.getValue();
                 double grad = out.getGrad();
                 inx.setGrad(grad / valx);
+            }
 
-                inx.setGrads(out.grad(), "/", inx);
+        };
+    }
+
+    public Tensor sum(Tensor input) {
+        return new TensorOperator("Sum", input) {
+
+            public None compute() {
+                Object A = getInput(0);
+                None B = createOutput();
+                forEach(A, (None a) -> B.setValue(B.getValue() + a.getValue()));
+                return B;
+            }
+
+            public void gradient() {
+                Object A = getInput(0);
+                None B = getOutput();
+                forEach(A, (None a) -> a.setGrad(B.getGrad()));
             }
 
         };
@@ -262,10 +226,6 @@ public class TensorFlow implements Serializable {
             public None compute() {
                 None inx = getInput(0);
                 double valx = inx.getValue();
-
-                None out = createOutput();
-                out.setFuncs("sin(", inx, ")");
-
                 return new None(Math.sin(valx));
             }
 
@@ -274,8 +234,6 @@ public class TensorFlow implements Serializable {
                 double valx = inx.getValue();
                 double grad = out.getGrad();
                 inx.setGrad(grad * Math.cos(valx));
-
-                out.setGrads(out.grad(), "*cos(", inx, ")");
             }
 
         };
@@ -287,10 +245,6 @@ public class TensorFlow implements Serializable {
             public None compute() {
                 None inx = getInput(0);
                 double valx = inx.getValue();
-
-                None out = createOutput();
-                out.setFuncs("cos(", inx, ")");
-
                 return new None(Math.cos(valx));
             }
 
@@ -299,8 +253,6 @@ public class TensorFlow implements Serializable {
                 double valx = inx.getValue();
                 double grad = out.getGrad();
                 inx.setGrad(grad * -Math.sin(valx));
-
-                inx.setGrads(out.grad(), "*-sin(", inx, ")");
             }
 
         };
@@ -312,10 +264,6 @@ public class TensorFlow implements Serializable {
             public None compute() {
                 None inx = getInput(0);
                 double valx = inx.getValue();
-
-                None out = createOutput();
-                out.setFuncs("tan(", inx, ")");
-
                 return new None(Math.tan(valx));
             }
 
@@ -324,8 +272,6 @@ public class TensorFlow implements Serializable {
                 double valx = inx.getValue();
                 double grad = out.getGrad();
                 inx.setGrad(grad * Math.pow(1 / Math.cos(valx), 2));
-
-                inx.setGrads(out.grad(), "*pow(1.0/cos(", inx, "),2.0)");
             }
 
         };
@@ -337,10 +283,6 @@ public class TensorFlow implements Serializable {
             public None compute() {
                 None inx = getInput(0);
                 double valx = inx.getValue();
-
-                None out = createOutput();
-                out.setFuncs("cos(", inx, ")/sin(", inx, ")");
-
                 return new None(Math.cos(valx) / Math.sin(valx));
             }
 
@@ -349,8 +291,6 @@ public class TensorFlow implements Serializable {
                 double valx = inx.getValue();
                 double grad = out.getGrad();
                 inx.setGrad(grad * -Math.pow(1 / Math.sin(valx), 2));
-
-                inx.setGrads(out.grad(), "*-pow(1.0/sin(", inx, "),2.0)");
             }
 
         };
@@ -362,10 +302,6 @@ public class TensorFlow implements Serializable {
             public None compute() {
                 None inx = getInput(0);
                 double valx = inx.getValue();
-
-                None out = createOutput();
-                out.setFuncs("1.0/cos(", inx, ")");
-
                 return new None(1 / Math.cos(valx));
             }
 
@@ -374,8 +310,6 @@ public class TensorFlow implements Serializable {
                 double valx = inx.getValue();
                 double grad = out.getGrad();
                 inx.setGrad(grad * Math.tan(valx) / Math.cos(valx));
-
-                inx.setGrads(out.grad(), "*tan(", inx, ")/cos(", inx, ")");
             }
 
         };
@@ -387,10 +321,6 @@ public class TensorFlow implements Serializable {
             public None compute() {
                 None inx = getInput(0);
                 double valx = inx.getValue();
-
-                None out = createOutput();
-                out.setFuncs("1.0/sin(", inx, ")");
-
                 return new None(1 / Math.sin(valx));
             }
 
@@ -399,8 +329,6 @@ public class TensorFlow implements Serializable {
                 double valx = inx.getValue();
                 double grad = out.getGrad();
                 inx.setGrad(grad * -Math.cos(valx) / Math.pow(Math.sin(valx), 2));
-
-                inx.setGrads(out.grad(), "*-cos(", inx, ")/pow(sin(", inx, "),2)");
             }
 
         };
@@ -412,10 +340,6 @@ public class TensorFlow implements Serializable {
             public None compute() {
                 None inx = getInput(0);
                 double valx = inx.getValue();
-
-                None out = createOutput();
-                out.setFuncs("asin(", inx, ")");
-
                 return new None(Math.asin(valx));
             }
 
@@ -424,8 +348,6 @@ public class TensorFlow implements Serializable {
                 double valx = inx.getValue();
                 double grad = out.getGrad();
                 inx.setGrad(grad / Math.pow(1 - Math.pow(valx,2), -2));
-
-                inx.setGrads(out.grad(), "/pow(1.0-pow(", inx, ",2.0),-2.0)");
             }
 
         };
@@ -437,10 +359,6 @@ public class TensorFlow implements Serializable {
             public None compute() {
                 None inx = getInput(0);
                 double valx = inx.getValue();
-
-                None out = createOutput();
-                out.setFuncs("acos(", inx, ")");
-
                 return new None(Math.acos(valx));
             }
 
@@ -449,8 +367,6 @@ public class TensorFlow implements Serializable {
                 double valx = inx.getValue();
                 double grad = out.getGrad();
                 inx.setGrad(grad / -Math.pow(1 - Math.pow(valx,2), -2));
-
-                inx.setGrads(out.grad(), "/-pow(1.0-pow(", inx, ",2.0),-2.0)");
             }
 
         };
@@ -462,10 +378,6 @@ public class TensorFlow implements Serializable {
             public None compute() {
                 None inx = getInput(0);
                 double valx = inx.getValue();
-
-                None out = createOutput();
-                out.setFuncs("atan(", inx, ")");
-
                 return new None(Math.atan(valx));
             }
 
@@ -474,8 +386,6 @@ public class TensorFlow implements Serializable {
                 double valx = inx.getValue();
                 double grad = out.getGrad();
                 inx.setGrad(grad / (1 + Math.pow(valx, 2)));
-
-                inx.setGrads(out.grad(), "/(1.0+pow(", inx, ",2.0))");
             }
 
         };
@@ -487,10 +397,6 @@ public class TensorFlow implements Serializable {
             public None compute() {
                 None inx = getInput(0);
                 double valx = inx.getValue();
-
-                None out = createOutput();
-                out.setFuncs("atan(1.0 / ", inx, ")");
-
                 return new None(atan(1 / valx));
             }
 
@@ -499,8 +405,6 @@ public class TensorFlow implements Serializable {
                 double valx = inx.getValue();
                 double grad = out.getGrad();
                 inx.setGrad(grad / -(1 + Math.pow(valx, 2)));
-
-                inx.setGrads(out.grad(), "/-(1.0+pow(", inx, ",2.0))");
             }
 
         };
@@ -512,10 +416,6 @@ public class TensorFlow implements Serializable {
             public None compute() {
                 None inx = getInput(0);
                 double valx = inx.getValue();
-
-                None out = createOutput();
-                out.setFuncs(inx, "*(", inx, ">0?1:0.1)");
-                //return out;
                 return new None(valx > 0 ? valx : 0.1 * valx);
             }
 
@@ -524,8 +424,6 @@ public class TensorFlow implements Serializable {
                 double valx = inx.getValue();
                 double grad = out.getGrad();
                 inx.setGrad(valx > 0 ? grad : 0.1 * grad);
-
-                inx.setGrads(out.grad(), "*(", inx, ">0?1:0.1)");
             }
 
         };
@@ -763,31 +661,6 @@ public class TensorFlow implements Serializable {
             }
 
             public void gradient() { }
-
-        };
-    }
-
-    public Tensor sum(Tensor input) {
-        return new TensorOperator("Sum", input) {
-
-            public None compute() {
-                Object A = getInput(0);
-                None B = createOutput();
-                forEach(A, (None a) -> B.setValue(B.getValue() + a.getValue()));
-
-                List<Object> list = new ArrayList<>();
-                forEach(A, (None a) -> list.addAll(List.of("+", a)));
-                B.setFuncs(list.toArray());
-                return B;
-            }
-
-            public void gradient() {
-                Object A = getInput(0);
-                None B = getOutput();
-                forEach(A, (None a) -> a.setGrad(B.getGrad()));
-
-                forEach(A, (None a) -> a.setGrads(B.grad()));
-            }
 
         };
     }

@@ -18,9 +18,8 @@ public class TensorFlux implements Serializable {
         forEach(tensor.getFunction(), (Tensor a) -> {
             a.forward();
         });
-        CudaExecutor.compute(tensor);
-        clearFunc(tensor);
         forwards(tensor);
+        CudaExecutor.compute(tensor);
         TensorExecutor.deep.getAndDecrement();
     }
 
@@ -30,7 +29,6 @@ public class TensorFlux implements Serializable {
         forEach(tensor.getFunction(), (Tensor a) -> {
             a.backward();
         });
-        clearGradc(tensor);
         CudaExecutor.gradient(tensor);
         TensorExecutor.deep.getAndDecrement();
     }
@@ -46,27 +44,15 @@ public class TensorFlux implements Serializable {
         if (Objects.nonNull(output)) {
             clearOutput(tensor);
             Object nones = tensor.compute();
-            clearFunc(tensor);
             forEach(tensor.getOutput(), nones, (None out, None none) -> {
                 out.setValue(none.getValue());
             });
         } else {
             Object nones = tensor.compute();
-            clearFunc(tensor);
             createOutput(tensor, nones);
             forEach(tensor.getOutput(), nones, (None out, None none) -> {
                 out.setValue(none.getValue());
             });
-        }
-    }
-
-    private static void clearFunc(Tensor tensor) {
-        if (TensorExecutor.status) {
-            for (Tensor in : tensor.getInput()) {
-                forEach(in.getOutput(), (None out) -> {
-                    out.setFunc("");
-                });
-            }
         }
     }
 
@@ -81,20 +67,6 @@ public class TensorFlux implements Serializable {
 
     public static void gradient(Tensor tensor) {
         tensor.gradient();
-        clearGradc(tensor);
-    }
-
-    private static void clearGradc(Tensor tensor) {
-        if (TensorExecutor.status) {
-            forEach(tensor.getOutput(), (None out) -> {
-                out.setGradc("");
-            });
-        }
-        forEach(tensor.getOutput(), (None out) -> {
-            if (!out.getGradx().isEmpty()) {
-                out.reset();
-            }
-        });
     }
 
     public static void reducer(Tensor tensor) {
@@ -116,15 +88,9 @@ public class TensorFlux implements Serializable {
     private static void forwards(Tensor tensor) {
         Object nones = getOutput(tensor.getFunction());
         createOutput(tensor, nones);
-        if (TensorExecutor.status && TensorExecutor.deep.get() > 1) {
-            forEach(tensor.getOutput(), nones, (None out, None none) -> {
-                out.setId(none.getId());
-                out.setFunc(none.getFunc());
-                out.setFuncx(none.getFuncx());
-                out.setParam(none.getParam());
-            });
-        }
         forEach(tensor.getOutput(), nones, (None out, None none) -> {
+            out.setId(none.getId());
+            out.setGradre(none.isGradre());
             out.setValue(none.getValue());
             out.reset();
         });
@@ -132,13 +98,6 @@ public class TensorFlux implements Serializable {
 
     private static void backwards(Tensor tensor) {
         Object nones = getOutput(tensor.getFunction());
-        if (TensorExecutor.status && TensorExecutor.deep.get() > 1) {
-            forEach(tensor.getOutput(), nones, (None out, None none) -> {
-                none.setGradc(out.getGradc());
-                none.setGradx(out.getGradx());
-                none.setParan(out.getParan());
-            });
-        }
         forEach(tensor.getOutput(), nones, (None out, None none) -> {
             none.setGrad(out.getGrad());
         });
@@ -152,6 +111,7 @@ public class TensorFlux implements Serializable {
         } else {
             tensor.setValue(0d);
             tensor.setGrad(0d);
+            tensor.setGradre(true);
             tensor.setReduce(false);
         }
     }
@@ -164,11 +124,13 @@ public class TensorFlux implements Serializable {
                 tensor.setValue(zeros(shape));
                 tensor.setGrad(zeros(shape));
                 tensor.setReduce(booleans(shape));
+                tensor.setGradre(true);
                 tensor.setOutput(fillNones(tensor));
             } else {
                 tensor.setValue(0d);
                 tensor.setGrad(0d);
                 tensor.setReduce(false);
+                tensor.setGradre(true);
                 tensor.setOutput(new None(tensor));
             }
         }

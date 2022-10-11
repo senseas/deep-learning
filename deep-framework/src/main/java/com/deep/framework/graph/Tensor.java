@@ -16,16 +16,16 @@ public class Tensor implements Serializable {
         this.name = "None";
         this.value = value;
         this.grad = 0d;
-        this.output = new None(this);
         this.gradre = true;
+        this.output = new None(this);
     }
 
     public Tensor(double value, boolean gradre) {
         this.name = "None";
         this.value = value;
         this.grad = 0d;
-        this.output = new None(this);
         this.gradre = gradre;
+        this.output = new None(this);
     }
 
     public Tensor(int[] shape) {
@@ -34,8 +34,8 @@ public class Tensor implements Serializable {
         this.value = random(shape);
         this.grad = zeros(shape);
         this.reduce = booleans(shape);
-        this.output = fillNones(this);
         this.gradre = true;
+        this.output = fillNones(this);
     }
 
     public Tensor(String name, int[] shape) {
@@ -44,8 +44,8 @@ public class Tensor implements Serializable {
         this.value = random(shape);
         this.grad = zeros(shape);
         this.reduce = booleans(shape);
-        this.output = fillNones(this);
         this.gradre = true;
+        this.output = fillNones(this);
     }
 
     public Tensor(int[] shape, double value, boolean gradre) {
@@ -54,8 +54,8 @@ public class Tensor implements Serializable {
         this.value = values(shape, value);
         this.grad = zeros(shape);
         this.reduce = booleans(shape);
-        this.output = fillNones(this);
         this.gradre = gradre;
+        this.output = fillNones(this);
     }
 
     public Tensor(None input) {
