@@ -104,7 +104,7 @@ public class TensorFlux implements Serializable {
     }
 
     public static void clearOutput(Tensor tensor) {
-        if (BeanUtil.isTensor(tensor.getOutput())) {
+        if (BeanUtil.isTenser(tensor.getOutput())) {
             Arrays.fill((double[]) tensor.getValue(), 0d);
             Arrays.fill((double[]) tensor.getGrad(), 0d);
             Arrays.fill((boolean[]) tensor.getReduce(), false);
@@ -118,7 +118,7 @@ public class TensorFlux implements Serializable {
 
     public static void createOutput(Tensor tensor, Object o) {
         if (Objects.isNull((tensor.getOutput()))) {
-            if (BeanUtil.isTensor(o) || BeanUtil.isArray(o)) {
+            if (BeanUtil.isTenser(o) || BeanUtil.isArray(o)) {
                 int[] shape = shapes(o);
                 tensor.setShape(shape);
                 tensor.setValue(zeros(shape));
@@ -137,7 +137,7 @@ public class TensorFlux implements Serializable {
     }
 
     public static <E> E getOutput(Object a) {
-        if (BeanUtil.isTensor(a)) {
+        if (BeanUtil.isTenser(a)) {
             Object c = fill(a, shape(Object.class, a), b -> {
                 Tensor o = (Tensor) b;
                 return o.getOutput();
@@ -150,7 +150,7 @@ public class TensorFlux implements Serializable {
     }
 
     public static <E> E getTensor(Object a) {
-        if (BeanUtil.isTensor(a)) {
+        if (BeanUtil.isTenser(a)) {
             return (E) fill(a, shape(Tensor.class, a), b -> {
                 None o = (None) b;
                 return new Tensor(o);

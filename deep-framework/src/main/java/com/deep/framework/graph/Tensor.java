@@ -60,6 +60,7 @@ public class Tensor implements Serializable {
 
     public Tensor(None input) {
         this.name = "None";
+        this.gradre = input.isGradre();
         this.output = input;
     }
 

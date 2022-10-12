@@ -19,12 +19,12 @@ public class BeanUtil {
         return !(tensor instanceof TensorOperator);
     }
 
-    public static boolean isTensor(Object o) {
+    public static boolean isTenser(Object o) {
         if (Objects.isNull(o)) return false;
         return o instanceof Tenser;
     }
 
-    public static boolean isNotTensor(Object o) {
+    public static boolean isNotTenser(Object o) {
         if (Objects.isNull(o)) return true;
         return !(o instanceof Tenser);
     }

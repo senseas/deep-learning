@@ -6,6 +6,7 @@ import com.deep.framework.lang.Tenser;
 import com.deep.framework.lang.annotation.Cuda;
 import com.deep.framework.lang.cuda.Block;
 import com.deep.framework.lang.cuda.Grid;
+import com.deep.framework.lang.util.BeanUtil;
 import jcuda.Pointer;
 import jcuda.Sizeof;
 import jcuda.driver.*;
@@ -15,7 +16,10 @@ import lombok.Data;
 import lombok.SneakyThrows;
 
 import java.io.Serializable;
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -133,39 +137,83 @@ public class CudaExecutor implements Serializable {
     public static void compute(Tensor tensor) {
         if (!tensor.getClass().getMethod("compute").isAnnotationPresent(Cuda.class)) return;
 
-        List<Tensor> list = Arrays.stream(tensor.getInput()).filter(Tensor::isGradre).toList();
-        if (tensor.getFunction() instanceof Tenser) {
-            Tenser<Tensor> tensors = (Tenser<Tensor>) tensor.getFunction();
-            CUfunction function = getFunction(tensor, tensors.first());
-            String[] param = TensorCore.fparam.split(",");
-            int size = tensors.size(), length = param.length;
-            double[] output = new double[size * length];
+        CUfunction function = getFunction(tensor);
+        String[] param = TensorCore.fparam.split(",");
+        int length = param.length;
 
-            IntStream.range(0, size).forEach(i -> {
-                IntStream.range(0, list.size()).forEach(l -> {
-                    double[] values = (double[]) list.get(l).getValue();
-                    output[i * length + l] = values[i];
+        if (BeanUtil.isTenser(tensor.getFunction())) {
+            Tenser<Tensor> tenser =(Tenser<Tensor>)tensor.getFunction();
+            if(isSame(tensor)){
+                Map<String, Tensor> map = new HashMap<>();
+                Arrays.stream(tensor.getInput()).filter(Tensor::isGradre).forEach(a -> {
+                    if (BeanUtil.isTenser(a.getOutput())) {
+                        Tenser<None> output = a.getOutput();
+                        map.put(output.first().getValId().trim(), a);
+                    } else {
+                        None out = a.getOutput();
+                        map.put(out.getValId().trim(), a);
+                    }
                 });
+
+                double[] output = new double[tenser.size()*length];
+                IntStream.range(0, tenser.size()).forEach(i -> {
+                    IntStream.range(0, length).forEach(l -> {
+                        Tensor none = map.get(param[l]);
+                        if (Objects.nonNull(none)) {
+                            double[] values = (double[]) none.getValue();
+                            output[i * length +l] = values[i];
+                        }
+                    });
+                });
+
+                run(function, new Grid(tenser.size()), new Block(1), output);
+                Double[] data = IntStream.range(0, tenser.size()).mapToObj(i -> output[i * length + length - 1]).toArray(Double[]::new);
+            }else{
+                Map<String, None> map = new HashMap<>();
+                Arrays.stream(tensor.getInput()).filter(Tensor::isGradre).forEach(a -> {
+                    if (BeanUtil.isTenser(a.getOutput())) {
+                        Tenser<None> output = a.getOutput();
+                        output.forEach(out -> map.put(out.getValId().trim(), out));
+                    } else {
+                        None out = a.getOutput();
+                        map.put(out.getValId().trim(), out);
+                    }
+                });
+
+                double[] output = new double[length];
+                IntStream.range(0, length).forEach(l -> {
+                    None none = map.get(param[l]);
+                    if (Objects.nonNull(none)) {
+                        output[l] = none.getValue();
+                    }
+                });
+
+                run(function, new Grid(tenser.size()), new Block(1), output);
+                //Double[] data = IntStream.range(0, length).mapToObj(i -> output[i * length + length - 1]).toArray(Double[]::new);
+                //IntStream.range(0, list.size()).forEach(i -> list.get(i).setValue(output[i]));
+            }
+        } else {
+            Map<String, None> map = new HashMap<>();
+            Arrays.stream(tensor.getInput()).filter(Tensor::isGradre).forEach(a -> {
+                if (BeanUtil.isTenser(a.getOutput())) {
+                    Tenser<None> output = a.getOutput();
+                    output.forEach(out -> map.put(out.getValId().trim(), out));
+                } else {
+                    None out = a.getOutput();
+                    map.put(out.getValId().trim(), out);
+                }
             });
 
-            run(function, new Grid(size), new Block(1), output);
-            Double[] data = IntStream.range(0, size).mapToObj(i -> output[i * length + length - 1]).toArray(Double[]::new);
-            //IntStream.range(0, list.size()).forEach(i -> list.get(i).setValue(output[i]));
-        } else {
-            Tensor first = (Tensor) tensor.getFunction();
-            CUfunction function = getFunction(tensor, first);
-            String[] param = TensorCore.fparam.split(",");
-            int  length = param.length;
             double[] output = new double[length];
-
-            IntStream.range(0, list.size()).forEach(l -> {
-                double value = (double) list.get(l).getValue();
-                output[l] = value;
+            IntStream.range(0, length).forEach(l -> {
+                None none = map.get(param[l]);
+                if (Objects.nonNull(none)) {
+                    output[l] = none.getValue();
+                }
             });
 
             run(function, output);
-
-            Double data = output[ length - 1];
+            double data = output[length - 1];
             //IntStream.range(0, list.size()).forEach(i -> list.get(i).setValue(output[i]));
         }
     }
@@ -265,21 +313,49 @@ public class CudaExecutor implements Serializable {
      * @param tensor The source code
      * @return The CUDA function
      */
-    public static CUfunction getFunction(Tensor tensor, Tensor first) {
+    public static CUfunction getFunction(Tensor tensor) {
         String name = tensor.getName().replace("Tensor::", "");
 
         CUfunction function = functions.get(name);
         if (Objects.nonNull(function)) return function;
 
-        TensorCore.func = TensorCore.code =TensorCore.fparam = "";
-        TensorCore.forward(first);
-        String code = TensorCore.code.replace("name", name);
-        System.out.println(code);
-        System.out.println(TensorCore.fparam);
+        String code;
+        if (BeanUtil.isTenser(tensor.getFunction())) {
+            Tenser<Tensor> tenser = (Tenser<Tensor>) tensor.getFunction();
+            if (isSame(tensor)) {
+                TensorCore.func = TensorCore.code = TensorCore.fparam = "";
+                TensorCore.forward(tenser.first());
+                code = TensorCore.code.replace("compute", name);
+            } else {
+                TensorCore.func = TensorCore.code = TensorCore.fparam = "";
+                tenser.forEach(TensorCore::forward);
+                code = TensorCore.code.replace("compute", name);
+            }
+        } else {
+            TensorCore.func = TensorCore.code = TensorCore.fparam = "";
+            TensorCore.forward((Tensor) tensor.getFunction());
+            code = TensorCore.code.replace("compute", name);
+        }
 
+        System.out.println(code);
         function = createFunction(name, code);
         functions.put(name, function);
         return function;
+    }
+
+    public static Boolean isSame(Tensor tensor) {
+        Tenser<Tensor> tenser = (Tenser<Tensor>) tensor.getFunction();
+        if (tenser.size() == 1) return true;
+        Tensor m = tenser.data(0), n = tenser.data(1);
+
+        TensorCore.func = TensorCore.code = TensorCore.fparam = "";
+        TensorCore.forward(m);
+        String codem = TensorCore.code;
+
+        TensorCore.func = TensorCore.code = TensorCore.fparam = "";
+        TensorCore.forward(n);
+        String coden = TensorCore.code;
+        return codem.equals(coden);
     }
 
     /**

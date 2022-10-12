@@ -7,6 +7,7 @@ import java.io.Serializable;
 import java.lang.reflect.Array;
 import java.util.Arrays;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 public class Tenser<T> implements Serializable {
 
@@ -105,6 +106,10 @@ public class Tenser<T> implements Serializable {
 
     public void forEach(Func1<T> func) {
         IntStream.range(0, size()).forEach(i -> func.apply(data[start + i]));
+    }
+
+    public <M> Stream<M> stream() {
+        return IntStream.range(0, size()).mapToObj(i -> (M) data[start + i]);
     }
 
     private int[] getNext(int[] index) {
