@@ -858,6 +858,7 @@ public class TensorFlow implements Serializable {
     public Tensor softmax(Tensor input) {
         return new TensorFunction("Softmax", input) {
 
+            @Cuda
             public Object compute() {
                 Tenser A = getInput(0), B = zeroTensors(A);
                 forEach(A, B, (Tensor a, Tenser<Tensor> b, int i) -> {
