@@ -16,7 +16,7 @@ import static com.deep.framework.lang.ForEach.forEach;
 public class TensorCore implements Serializable {
     public static Map<String, TensorFunctor> map = new HashMap<>();
     public static String func = "", grad = "", fparam = "", gparam = "", code = "";
-    public static String fparamx = "", gparamx = "", gradout;
+    public static String fparamx = "", gparamx = "", gradout, next;
 
     static {
         TensorCompiler tc = new TensorCompiler();
@@ -110,7 +110,7 @@ public class TensorCore implements Serializable {
 
         String code = getGradCode(tensor, getParam(gparam), dataParam, gradParam);
         System.out.println(code);
-        return Arrays.stream(code.split("  ")).map(a -> Objects.nonNull(gradMap.get(a)) ? "grad[idx*N+" + gradMap.get(a) + "]+" : a).map(a -> Objects.nonNull(gradOutMap.get(a)) ? "gradx[idx * M +".concat(gradOutMap.get(a)).concat("]") : a).map(a -> Objects.nonNull(dataMap.get(a)) ? "data[idx * M +".concat(dataMap.get(a)).concat("]") : a).collect(Collectors.joining(""));
+        return Arrays.stream(code.split("  ")).map(a -> Objects.nonNull(gradMap.get(a)) ? "grad[X[idx]+" + gradMap.get(a) + "]+" : a).map(a -> Objects.nonNull(gradOutMap.get(a)) ? "gradx[idx * M +".concat(gradOutMap.get(a)).concat("]") : a).map(a -> Objects.nonNull(dataMap.get(a)) ? "data[idx * M +".concat(dataMap.get(a)).concat("]") : a).collect(Collectors.joining(""));
     }
 
     private static String getInputParam(Tensor tensor) {
@@ -154,6 +154,7 @@ public class TensorCore implements Serializable {
         return "extern \"C\" __global__ void gradient(double* data, double* gradx, double* grad)" + "{" +
             "int idx = blockDim.x * blockIdx.x + threadIdx.x;" +
             "int M = " + dataParam.length + ", N = " + gradParam.length + ";" +
+            "int X[]= {" + next + "};" +
             "double " + String.join(",", param) + ";" +
             grad +
         "}";
