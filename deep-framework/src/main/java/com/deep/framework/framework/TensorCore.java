@@ -154,7 +154,7 @@ public class TensorCore implements Serializable {
         return "extern \"C\" __global__ void gradient(double* data, double* gradx, double* grad)" + "{" +
             "int idx = blockDim.x * blockIdx.x + threadIdx.x;" +
             "int M = " + dataParam.length + ", N = " + gradParam.length + ";" +
-            "double " + Arrays.stream(param).collect(Collectors.joining(",")) + ";" +
+            "double " + String.join(",", param) + ";" +
             grad +
         "}";
     }
