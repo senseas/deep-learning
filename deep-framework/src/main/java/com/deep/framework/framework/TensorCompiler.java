@@ -219,7 +219,7 @@ public class TensorCompiler implements Serializable {
 
             public String compute() {
                 None inx = getInput(0);
-                return getValId() + "=1/cos(" + inx.getValId() + ")";
+                return getValId() + "=1.0/cos(" + inx.getValId() + ")";
             }
 
             public String gradient(String grad) {
@@ -235,7 +235,7 @@ public class TensorCompiler implements Serializable {
 
             public String compute() {
                 None inx = getInput(0);
-                return getValId() + "=1/sin(" + inx.getValId() + ")";
+                return getValId() + "=1.0/sin(" + inx.getValId() + ")";
             }
 
             public String gradient(String grad) {
