@@ -92,7 +92,7 @@ public class TensorCore implements Serializable {
         IntStream.range(0, param.length).forEach(i -> map.put(param[i].trim(), String.valueOf(i)));
 
         String code = getFuncCode(tensor, param);
-        return Arrays.stream(code.split(" ")).map(a -> Objects.nonNull(map.get(a)) ? "data[idx * M +".concat(map.get(a)).concat("]") : a).collect(Collectors.joining(" "));
+        return Arrays.stream(code.split("  ")).map(a -> Objects.nonNull(map.get(a)) ? "data[idx * M +".concat(map.get(a)).concat("]") : a).collect(Collectors.joining(""));
     }
 
     private static String getGradCode(Tensor tensor, String fparam, String gparam, String gparamx) {
@@ -110,7 +110,7 @@ public class TensorCore implements Serializable {
 
         String code = getGradCode(tensor, getParam(gparam), dataParam, gradParam);
         System.out.println(code);
-        return Arrays.stream(code.split(" ")).map(a -> Objects.nonNull(gradMap.get(a)) ? "grad[idx*N+" + gradMap.get(a) + "]+" : a).map(a -> Objects.nonNull(gradOutMap.get(a)) ? "gradx[idx * M +".concat(gradOutMap.get(a)).concat("]") : a).map(a -> Objects.nonNull(dataMap.get(a)) ? "data[idx * M +".concat(dataMap.get(a)).concat("]") : a).collect(Collectors.joining(" "));
+        return Arrays.stream(code.split("  ")).map(a -> Objects.nonNull(gradMap.get(a)) ? "grad[idx*N+" + gradMap.get(a) + "]+" : a).map(a -> Objects.nonNull(gradOutMap.get(a)) ? "gradx[idx * M +".concat(gradOutMap.get(a)).concat("]") : a).map(a -> Objects.nonNull(dataMap.get(a)) ? "data[idx * M +".concat(dataMap.get(a)).concat("]") : a).collect(Collectors.joining(""));
     }
 
     private static String getInputParam(Tensor tensor) {
@@ -136,16 +136,6 @@ public class TensorCore implements Serializable {
             }
         }).map(None::getGradId).toList();
         return list.isEmpty() ? "" : String.join(",", list).concat(",");
-    }
-
-    public static String getGradOutParam(Tensor tensor) {
-        if (BeanUtil.isTenser(tensor.getOutput())) {
-            Tenser<None> output = tensor.getOutput();
-            return output.stream().map(None::getGradId).collect(Collectors.joining(","));
-        } else {
-            None output = tensor.getOutput();
-            return output.getGradId();
-        }
     }
 
     public static String[] getParam(String param) {

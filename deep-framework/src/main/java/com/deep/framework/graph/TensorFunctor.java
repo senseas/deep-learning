@@ -22,11 +22,11 @@ public abstract class TensorFunctor {
     public abstract <M> M gradient(String grad);
 
     public String getGradId() {
-        return " e" + id + " ";
+        return "  e" + id + "  ";
     }
 
     public String getValId() {
-        return " a" + id + " ";
+        return "  a" + id + "  ";
     }
 
     private int id;

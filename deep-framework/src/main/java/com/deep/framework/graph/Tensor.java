@@ -2,6 +2,8 @@ package com.deep.framework.graph;
 
 import com.deep.framework.framework.CudaContext;
 import com.deep.framework.framework.TensorFlux;
+import com.deep.framework.lang.Tenser;
+import com.deep.framework.lang.util.BeanUtil;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -94,11 +96,23 @@ public class Tensor implements Serializable {
         return context = new CudaContext(this);
     }
 
+    public double[] getGradOutData() {
+        if (BeanUtil.isTenser(this.getOutput())) {
+            Tenser<None> output = this.getOutput();
+            return output.stream().mapToDouble(None::getGrad).toArray();
+        } else {
+            None output = this.getOutput();
+            return new double[]{output.getGrad()};
+        }
+    }
+
     private String name = "Tensor::";
     protected int[] shape;
     private Tensor[] input;
     protected Object output, value, grad;
     protected transient Object function, reduce;
+    private double[] data;
+    private String fparam, gparam;
     private transient boolean gradre;
     private transient CudaContext context;
     private transient boolean out;

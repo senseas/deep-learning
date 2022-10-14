@@ -1,5 +1,6 @@
 package com.deep.framework.framework;
 
+import com.alibaba.fastjson.JSONObject;
 import com.deep.framework.graph.None;
 import com.deep.framework.graph.Tensor;
 import com.deep.framework.lang.Tenser;
@@ -66,11 +67,12 @@ public class CudaExecutor implements Serializable {
         cudaFree(kernelParams);
     }
 
-    public static void run(CUfunction function, Grid grid, Block block, double[] input, double[] output) {
-        CUdeviceptr inputDevice = createDeviceData(input);
-        CUdeviceptr outputDevice = createDeviceData(output);
+    public static void run(CUfunction function, Grid grid, Block block, double[] data, double[] gradx, double[] grad) {
+        CUdeviceptr dataDevice = createDeviceData(data);
+        CUdeviceptr gradxDevice = createDeviceData(gradx);
+        CUdeviceptr gradDevice = createDeviceData(grad);
 
-        Pointer kernelParams = createKernelParams(inputDevice, outputDevice);
+        Pointer kernelParams = createKernelParams(dataDevice, gradxDevice, gradDevice);
 
         cuLaunchKernel(function,
             grid.x, grid.y, grid.z,
@@ -80,11 +82,12 @@ public class CudaExecutor implements Serializable {
             null
         );
 
-        cuMemcpyDtoH(Pointer.to(output), outputDevice, output.length * Sizeof.DOUBLE);
+        cuMemcpyDtoH(Pointer.to(grad), gradDevice, grad.length * Sizeof.DOUBLE);
         cuCtxSynchronize();
 
-        cudaFree(inputDevice);
-        cudaFree(outputDevice);
+        cudaFree(dataDevice);
+        cudaFree(gradxDevice);
+        cudaFree(gradDevice);
         cudaFree(kernelParams);
     }
 
@@ -105,10 +108,12 @@ public class CudaExecutor implements Serializable {
         cudaFree(outputDevice);
     }
 
-    public static void run(CUfunction function, double[] input, double[] output) {
-        CUdeviceptr inputDevice = createDeviceData(input);
-        CUdeviceptr outputDevice = createDeviceData(output);
-        Pointer kernelParams = createKernelParams(inputDevice, outputDevice);
+    public static void run(CUfunction function, double[] data, double[] gradx, double[] grad) {
+        CUdeviceptr dataDevice = createDeviceData(data);
+        CUdeviceptr gradxDevice = createDeviceData(gradx);
+        CUdeviceptr gradDevice = createDeviceData(grad);
+
+        Pointer kernelParams = createKernelParams(dataDevice, gradxDevice, gradDevice);
 
         cuLaunchKernel(function,
             1, 1, 1,
@@ -118,11 +123,12 @@ public class CudaExecutor implements Serializable {
             null
         );
 
-        cuMemcpyDtoH(Pointer.to(output), outputDevice, output.length * Sizeof.DOUBLE);
+        cuMemcpyDtoH(Pointer.to(grad), gradDevice, grad.length * Sizeof.DOUBLE);
         cuCtxSynchronize();
 
-        cudaFree(inputDevice);
-        cudaFree(outputDevice);
+        cudaFree(dataDevice);
+        cudaFree(gradxDevice);
+        cudaFree(gradDevice);
         cudaFree(kernelParams);
     }
 
@@ -138,7 +144,7 @@ public class CudaExecutor implements Serializable {
         if (!tensor.getClass().getMethod("compute").isAnnotationPresent(Cuda.class)) return;
 
         CUfunction function = getFunction(tensor);
-        String[] param = TensorCore.fparam.split(",");
+        String[] param = tensor.getFparam().split(",");
         int length = param.length;
 
         if (BeanUtil.isTenser(tensor.getFunction())) {
@@ -170,6 +176,7 @@ public class CudaExecutor implements Serializable {
                 });
 
                 run(function, new Grid(size), new Block(1), output);
+                tensor.setData(output);
                 IntStream.range(0, size).forEach(i -> {
                     None none = tenser.data(i);
                     none.setValue(output[i * length + length - 1]);
@@ -195,6 +202,7 @@ public class CudaExecutor implements Serializable {
                 });
 
                 run(function, new Grid(size), new Block(1), output);
+                tensor.setData(output);
                 IntStream.range(0, length).forEach(l -> {
                     None none = mapper.get(param[l]);
                     if (Objects.nonNull(none)) {
@@ -223,6 +231,7 @@ public class CudaExecutor implements Serializable {
             });
 
             run(function, output);
+            tensor.setData(output);
             None out = tensor.getOutput();
             out.setValue(output[length - 1]);
         }
@@ -271,38 +280,15 @@ public class CudaExecutor implements Serializable {
                     });
                 });
 
-                run(function, new Grid(size), new Block(1), output);
+                run(function, new Grid(size), new Block(1), tensor.getData(), tensor.getGradOutData(), output);
                 IntStream.range(0, size).forEach(i -> {
                     None none = tenser.data(i);
                     none.setValue(output[i * length + length - 1]);
                 });
             } else {
-                Map<String, None> map = new HashMap<>();
-                Arrays.stream(tensor.getInput()).filter(Tensor::isGradre).forEach(a -> {
-                    if (BeanUtil.isTenser(a.getOutput())) {
-                        Tenser<None> output = a.getOutput();
-                        output.forEach(out -> map.put(out.getValId().trim(), out));
-                    } else {
-                        None out = a.getOutput();
-                        map.put(out.getValId().trim(), out);
-                    }
-                });
-
-                double[] output = new double[length];
-                IntStream.range(0, length).forEach(l -> {
-                    None none = map.get(param[l]);
-                    if (Objects.nonNull(none)) {
-                        output[l] = none.getValue();
-                    }
-                });
-
-                run(function, new Grid(size), new Block(1), output);
-                IntStream.range(0, length).forEach(l -> {
-                    None none = mapper.get(param[l]);
-                    if (Objects.nonNull(none)) {
-                        none.setValue(output[l]);
-                    }
-                });
+                double[] output = new double[size];
+                run(function, tensor.getData(), tensor.getGradOutData(), output);
+                System.out.println(JSONObject.toJSONString(output));
             }
         } else {
             Map<String, None> map = new HashMap<>();
@@ -324,7 +310,7 @@ public class CudaExecutor implements Serializable {
                 }
             });
 
-            run(function, output);
+            run(function, tensor.getData(), tensor.getGradOutData(), output);
             None out = tensor.getOutput();
             out.setValue(output[length - 1]);
         }
@@ -361,6 +347,7 @@ public class CudaExecutor implements Serializable {
             code = TensorCore.code.replace("compute", name);
         }
 
+        tensor.setFparam(String.join(",", TensorCore.getParam(TensorCore.fparam)));
         System.out.println(code);
         function = createFunction(name, code);
         functions.put(name, function);
@@ -396,37 +383,42 @@ public class CudaExecutor implements Serializable {
         if (Objects.nonNull(function)) return function;
 
         String code;
-        TensorCore.gradout = TensorCore.getGradOutParam(tensor);
+        TensorCore.gradout = getGradOutParam(tensor);
         if (BeanUtil.isTenser(tensor.getFunction())) {
             Tenser<Tensor> tenser = (Tenser<Tensor>) tensor.getFunction();
             if (isSame(tensor)) {
-                TensorCore.func = TensorCore.code = TensorCore.fparam = "";
-                TensorCore.forward(tensor);
-
+                TensorCore.fparam = tensor.getFparam();
                 TensorCore.grad = TensorCore.code = TensorCore.gparam = "";
                 TensorCore.backward(tenser.first());
                 code = TensorCore.code.replace("gradient", name);
             } else {
-                TensorCore.func = TensorCore.code = TensorCore.fparam = "";
-                TensorCore.forward(tensor);
-
+                TensorCore.fparam = tensor.getFparam();
                 TensorCore.grad = TensorCore.code = TensorCore.gparam = "";
                 tenser.forEach(TensorCore::backward);
                 code = TensorCore.code.replace("gradient", name);
             }
         } else {
-            TensorCore.func = TensorCore.code = TensorCore.fparam = "";
-            TensorCore.forward(tensor);
-
+            TensorCore.fparam = tensor.getFparam();
             TensorCore.grad = TensorCore.code = TensorCore.gparam = "";
             TensorCore.backward((Tensor) tensor.getFunction());
             code = TensorCore.code.replace("gradient", name);
         }
 
+        tensor.setGparam(String.join(",", TensorCore.getParam(TensorCore.gparam)));
         System.out.println(code);
-        function = createFunction(name, code);
+        function = createFunction(name, code.replace("e16,","").replace("e29,",""));
         functions.put(name, function);
         return function;
+    }
+
+    public static String getGradOutParam(Tensor tensor) {
+        if (BeanUtil.isTenser(tensor.getOutput())) {
+            Tenser<None> output = tensor.getOutput();
+            return output.stream().map(None::getGradId).collect(Collectors.joining(","));
+        } else {
+            None output = tensor.getOutput();
+            return output.getGradId();
+        }
     }
 
     /**

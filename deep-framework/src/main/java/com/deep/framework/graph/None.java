@@ -117,12 +117,12 @@ public class None implements Serializable {
     }
 
     public String getGradId() {
-        return " e" + id + " ";
+        return "  e" + id + "  ";
     }
 
     public String getValId() {
         if (gradre) {
-            return " a" + id + " ";
+            return "  a" + id + "  ";
         }
         return "" + getValue();
     }
