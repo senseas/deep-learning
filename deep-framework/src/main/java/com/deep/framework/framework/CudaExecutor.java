@@ -415,7 +415,7 @@ public class CudaExecutor implements Serializable {
 
 
     public static String getGradNextParam(Tensor tensor) {
-        List<Integer> nexts = new ArrayList<>();
+        List<Integer> nexts = new ArrayList(List.of(0));
         Arrays.stream(tensor.getInput()).filter(Tensor::isGradre).forEach(a -> {
             if (BeanUtil.isTenser(a.getOutput())) {
                 Tenser<None> output = a.getOutput();

@@ -104,13 +104,17 @@ public class TensorCore implements Serializable {
         Map<String, String> gradMap = new HashMap<>();
         IntStream.range(0, gradParam.length).forEach(i -> gradMap.put(gradParam[i].trim(), String.valueOf(i)));
 
+        String[] gradNextParam = getParam(next);
+        Map<String, String> gradNextMap = new HashMap<>();
+        IntStream.range(0, gradNextParam.length).forEach(i -> gradNextMap.put(String.valueOf(i),gradNextParam[i].trim()));
+
         String[] gradOutParam = getParam(gradout);
         Map<String, String> gradOutMap = new HashMap<>();
         IntStream.range(0, gradOutParam.length).forEach(i -> gradOutMap.put(gradOutParam[i].trim(), String.valueOf(i)));
 
         String code = getGradCode(tensor, getParam(gparam), dataParam, gradParam);
         System.out.println(code);
-        return Arrays.stream(code.split("  ")).map(a -> Objects.nonNull(gradMap.get(a)) ? "grad[X[idx]+" + gradMap.get(a) + "]+" : a).map(a -> Objects.nonNull(gradOutMap.get(a)) ? "gradx[idx * M +".concat(gradOutMap.get(a)).concat("]") : a).map(a -> Objects.nonNull(dataMap.get(a)) ? "data[idx * M +".concat(dataMap.get(a)).concat("]") : a).collect(Collectors.joining(""));
+        return Arrays.stream(code.split("  ")).map(a -> Objects.nonNull(gradMap.get(a)) ? "grad[idx+" + gradNextMap.get(gradMap.get(a)) + "]" : a).map(a -> Objects.nonNull(gradOutMap.get(a)) ? "gradx[idx]" : a).map(a -> Objects.nonNull(dataMap.get(a)) ? "data[idx * M +".concat(dataMap.get(a)).concat("]") : a).collect(Collectors.joining(""));
     }
 
     private static String getInputParam(Tensor tensor) {
@@ -153,8 +157,7 @@ public class TensorCore implements Serializable {
     private static String getGradCode(Tensor tensor, String[] param, String[] dataParam, String[] gradParam) {
         return "extern \"C\" __global__ void gradient(double* data, double* gradx, double* grad)" + "{" +
             "int idx = blockDim.x * blockIdx.x + threadIdx.x;" +
-            "int M = " + dataParam.length + ", N = " + gradParam.length + ";" +
-            "int X[]= {" + next + "};" +
+            "int M = " + dataParam.length + ";" +
             "double " + String.join(",", param) + ";" +
             grad +
         "}";
