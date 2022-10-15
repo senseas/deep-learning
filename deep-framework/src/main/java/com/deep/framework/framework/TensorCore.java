@@ -16,7 +16,8 @@ import static com.deep.framework.lang.ForEach.forEach;
 public class TensorCore implements Serializable {
     public static Map<String, TensorFunctor> map = new HashMap<>();
     public static String func = "", grad = "", fparam = "", gparam = "", code = "";
-    public static String fparamx = "", gparamx = "", gradout, inext;
+    public static String fparamx = "", gparamx = "", gradout;
+    public static Map<String, Integer> inxMap, inxGradMap;
 
     static {
         TensorCompiler tc = new TensorCompiler();
@@ -88,10 +89,6 @@ public class TensorCore implements Serializable {
     }
 
     private static String getFuncCode(Tensor tensor, String fparam) {
-        String[] inNext = getParam(inext);
-        Map<String, String> inNextMap = new HashMap<>();
-        IntStream.range(0, inNext.length).forEach(i -> inNextMap.put(String.valueOf(i), inNext[i].trim()));
-
         String[] inParam = getParam(fparamx);
         Map<String, String> inMap = new HashMap<>();
         IntStream.range(0, inParam.length).forEach(i -> inMap.put(inParam[i].trim(), String.valueOf(i)));
@@ -102,18 +99,14 @@ public class TensorCore implements Serializable {
 
         String codes = getFuncCode(tensor, outParam);
         String code = Arrays.stream(codes.split("  "))
-        .map(a -> Objects.nonNull(inMap.get(a)) ? "in[idx+" + inNextMap.get(inMap.get(a)) + "]" : a)
-        .map(a -> Objects.nonNull(outMap.get(a)) ? "out[idx * M +".concat(outMap.get(a)).concat("]") : a)
+        .map(a -> Objects.nonNull(inMap.get(a)) ? "in[idx+" + inxMap.get(a) + "]" : a)
+        .map(a -> Objects.nonNull(outMap.get(a)) ? "out[idx * M +" + outMap.get(a) + "]" : a)
         .collect(Collectors.joining(""));
 
         return code;
     }
 
     private static String getGradCode(Tensor tensor, String fparam, String gparam, String gparamx) {
-        String[] inNext = getParam(inext);
-        Map<String, String> inNextMap = new HashMap<>();
-        IntStream.range(0, inNext.length).forEach(i -> inNextMap.put(String.valueOf(i), inNext[i].trim()));
-
         String[] inParam = getParam(fparamx);
         Map<String, String> inMap = new HashMap<>();
         IntStream.range(0, inParam.length).forEach(i -> inMap.put(inParam[i].trim(), String.valueOf(i)));
@@ -132,18 +125,17 @@ public class TensorCore implements Serializable {
 
         String codes = getGradCode(tensor, getParam(gparam), outParam, inGradParam);
         String code = Arrays.stream(codes.split("  "))
-        .map(a -> Objects.nonNull(inMap.get(a)) ? "in[idx +" + inNextMap.get(inMap.get(a)) + "]" : a)
+        .map(a -> Objects.nonNull(inMap.get(a)) ? "in[idx+" + inxMap.get(a) + "]" : a)
         .map(a -> Objects.nonNull(outMap.get(a)) ? "out[idx * M +" + outMap.get(a) + "]" : a)
         .map(a -> Objects.nonNull(outGradMap.get(a)) ? "outGrad[idx + " + outGradMap.get(a) + "]" : a)
-        .map(a -> Objects.nonNull(inGradMap.get(a)) ? "inGrad[idx +" + inNextMap.get(inGradMap.get(a)) + "]+" : a)
+        .map(a -> Objects.nonNull(inGradMap.get(a)) ? "inGrad[idx +" + inGradMap.get(a) + "]+" : a)
         .collect(Collectors.joining(""));
 
         return code;
     }
 
     private static String getInputParam(Tensor tensor) {
-        List<String> list = Arrays.stream(tensor.getInput())
-        .filter(Tensor::isGradre).filter(BeanUtil::isNone).flatMap(a -> {
+        List<String> list = Arrays.stream(tensor.getInput()).filter(Tensor::isGradre).filter(BeanUtil::isNone).flatMap(a -> {
             if (BeanUtil.isTenser(a.getOutput())) {
                 Tenser<None> output = a.getOutput();
                 return output.stream();
@@ -156,8 +148,7 @@ public class TensorCore implements Serializable {
     }
 
     private static String getGradParam(Tensor tensor) {
-        List<String> list = Arrays.stream(tensor.getInput())
-        .filter(Tensor::isGradre).filter(BeanUtil::isNone).flatMap(a -> {
+        List<String> list = Arrays.stream(tensor.getInput()).filter(Tensor::isGradre).filter(BeanUtil::isNone).flatMap(a -> {
             if (BeanUtil.isTenser(a.getOutput())) {
                 Tenser<None> output = a.getOutput();
                 return output.stream();

@@ -590,6 +590,7 @@ public class TensorFlow implements Serializable {
     public Tensor squarex(Tensor... input) {
         return new TensorFunction("Squarex", input) {
 
+            @Cuda
             public Tensor compute() {
                 Object A = getInput(0), B = getInput(1);
                 Tensor[] C = {new TensorConst(0d)};

@@ -74,7 +74,7 @@ public class CudaExecutor implements Serializable {
                 1, 1, 1,
                 1, 1, 1,
                 0, null,
-                createKernelParams(outDevice),
+                kernelParams,
                 null
         );
 
@@ -259,8 +259,19 @@ public class CudaExecutor implements Serializable {
         CUfunction function = functions.get(name);
         if (Objects.nonNull(function)) return function;
 
+        Map<String, Integer> inxMap = new HashMap<>();
+        Arrays.stream(tensor.getInput()).filter(Tensor::isGradre).forEach(a -> {
+            if (BeanUtil.isTenser(a.getOutput())) {
+                Tenser<None> output = a.getOutput();
+                output.forEach(out -> inxMap.put(out.getValId().trim(), inxMap.size()));
+            } else {
+                None out = a.getOutput();
+                inxMap.put(out.getValId().trim(), inxMap.size());
+            }
+        });
+
         String code;
-        TensorCore.inext = getInputNextParam(tensor);
+        TensorCore.inxMap = inxMap;
         if (BeanUtil.isTenser(tensor.getFunction())) {
             Tenser<Tensor> tenser = (Tenser<Tensor>) tensor.getFunction();
             if (isSame(tensor)) {
@@ -314,9 +325,25 @@ public class CudaExecutor implements Serializable {
         CUfunction function = functions.get(name);
         if (Objects.nonNull(function)) return function;
 
+        Map<String, Integer> inxMap = new HashMap<>(), inxGradMap = new HashMap<>();
+        Arrays.stream(tensor.getInput()).filter(Tensor::isGradre).forEach(a -> {
+            if (BeanUtil.isTenser(a.getOutput())) {
+                Tenser<None> output = a.getOutput();
+                output.forEach(out -> {
+                    inxMap.put(out.getValId().trim(), inxMap.size());
+                    inxGradMap.put(out.getGradId().trim(), inxMap.size());
+                });
+            } else {
+                None out = a.getOutput();
+                inxMap.put(out.getValId().trim(), inxMap.size());
+                inxGradMap.put(out.getGradId().trim(), inxMap.size());
+            }
+        });
+
         String code;
-        TensorCore.inext = getInputNextParam(tensor);
         TensorCore.gradout = getGradOutParam(tensor);
+        TensorCore.inxMap = inxMap;
+        TensorCore.inxGradMap = inxGradMap;
         if (BeanUtil.isTenser(tensor.getFunction())) {
             Tenser<Tensor> tenser = (Tenser<Tensor>) tensor.getFunction();
             if (isSame(tensor)) {
@@ -345,30 +372,6 @@ public class CudaExecutor implements Serializable {
         function = createFunction(name, code);
         functions.put(name, function);
         return function;
-    }
-
-    public static String getInputNextParam(Tensor tensor) {
-        List<Integer> nexts = new ArrayList(List.of(0));
-        if (tensor.getInput().length == 1) {
-            Arrays.stream(tensor.getInput()).filter(Tensor::isGradre).forEach(a -> {
-                if (BeanUtil.isTenser(a.getOutput())) {
-                    Tenser<None> output = a.getOutput();
-                    output.forEach((None o) -> nexts.add(nexts.get(nexts.size() - 1) + 1));
-                } else {
-                    nexts.add(nexts.get(nexts.size() - 1) + 1);
-                }
-            });
-        } else {
-            Arrays.stream(tensor.getInput()).filter(Tensor::isGradre).forEach(a -> {
-                if (BeanUtil.isTenser(a.getOutput())) {
-                    Tenser<None> output = a.getOutput();
-                    nexts.add(nexts.get(nexts.size() - 1) + output.size());
-                } else {
-                    nexts.add(nexts.get(nexts.size() - 1) + 1);
-                }
-            });
-        }
-        return nexts.stream().map(String::valueOf).collect(Collectors.joining(","));
     }
 
     public static String getGradOutParam(Tensor tensor) {
