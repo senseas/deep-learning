@@ -100,8 +100,13 @@ public class TensorCore implements Serializable {
         Map<String, String> outMap = new HashMap<>();
         IntStream.range(0, outParam.length).forEach(i -> outMap.put(outParam[i].trim(), String.valueOf(i)));
 
-        String code = getFuncCode(tensor, outParam);
-        return Arrays.stream(code.split("  ")).map(a -> Objects.nonNull(inMap.get(a)) ? "in[idx+" + inNextMap.get(inMap.get(a)) + "]" : a).map(a -> Objects.nonNull(outMap.get(a)) ? "out[idx * M +".concat(outMap.get(a)).concat("]") : a).collect(Collectors.joining(""));
+        String codes = getFuncCode(tensor, outParam);
+        String code = Arrays.stream(codes.split("  "))
+        .map(a -> Objects.nonNull(inMap.get(a)) ? "in[idx+" + inNextMap.get(inMap.get(a)) + "]" : a)
+        .map(a -> Objects.nonNull(outMap.get(a)) ? "out[idx * M +".concat(outMap.get(a)).concat("]") : a)
+        .collect(Collectors.joining(""));
+
+        return code;
     }
 
     private static String getGradCode(Tensor tensor, String fparam, String gparam, String gparamx) {
@@ -125,12 +130,20 @@ public class TensorCore implements Serializable {
         Map<String, String> inGradMap = new HashMap<>();
         IntStream.range(0, inGradParam.length).forEach(i -> inGradMap.put(inGradParam[i].trim(), String.valueOf(i)));
 
-        String code = getGradCode(tensor, getParam(gparam), outParam, inGradParam);
-        return Arrays.stream(code.split("  ")).map(a -> Objects.nonNull(inMap.get(a)) ? "in[idx +" + inNextMap.get(inMap.get(a)) + "]" : a).map(a -> Objects.nonNull(outMap.get(a)) ? "out[idx * M +" + outMap.get(a) + "]" : a).map(a -> Objects.nonNull(outGradMap.get(a)) ? "outGrad[idx + " + outGradMap.get(a) + "]" : a).map(a -> Objects.nonNull(inGradMap.get(a)) ? "inGrad[idx +" + inNextMap.get(inGradMap.get(a)) + "]+" : a).collect(Collectors.joining(""));
+        String codes = getGradCode(tensor, getParam(gparam), outParam, inGradParam);
+        String code = Arrays.stream(codes.split("  "))
+        .map(a -> Objects.nonNull(inMap.get(a)) ? "in[idx +" + inNextMap.get(inMap.get(a)) + "]" : a)
+        .map(a -> Objects.nonNull(outMap.get(a)) ? "out[idx * M +" + outMap.get(a) + "]" : a)
+        .map(a -> Objects.nonNull(outGradMap.get(a)) ? "outGrad[idx + " + outGradMap.get(a) + "]" : a)
+        .map(a -> Objects.nonNull(inGradMap.get(a)) ? "inGrad[idx +" + inNextMap.get(inGradMap.get(a)) + "]+" : a)
+        .collect(Collectors.joining(""));
+
+        return code;
     }
 
     private static String getInputParam(Tensor tensor) {
-        List<String> list = Arrays.stream(tensor.getInput()).filter(Tensor::isGradre).filter(BeanUtil::isNone).flatMap(a -> {
+        List<String> list = Arrays.stream(tensor.getInput())
+        .filter(Tensor::isGradre).filter(BeanUtil::isNone).flatMap(a -> {
             if (BeanUtil.isTenser(a.getOutput())) {
                 Tenser<None> output = a.getOutput();
                 return output.stream();
@@ -143,7 +156,8 @@ public class TensorCore implements Serializable {
     }
 
     private static String getGradParam(Tensor tensor) {
-        List<String> list = Arrays.stream(tensor.getInput()).filter(Tensor::isGradre).filter(BeanUtil::isNone).flatMap(a -> {
+        List<String> list = Arrays.stream(tensor.getInput())
+        .filter(Tensor::isGradre).filter(BeanUtil::isNone).flatMap(a -> {
             if (BeanUtil.isTenser(a.getOutput())) {
                 Tenser<None> output = a.getOutput();
                 return output.stream();
