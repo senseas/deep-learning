@@ -174,7 +174,7 @@ public class TensorCore implements Serializable {
     }
 
     private static String getFuncCode(Tensor tensor, String[] param) {
-        return "extern \"C\" __global__ void compute(double* in, double* out)" + "{" +
+        return "extern \"C\" __global__ void compute(double* in, double* out){" +
             "int idx = blockDim.x * blockIdx.x + threadIdx.x;" +
             "int M = " + param.length + ";" +
             func +
@@ -182,7 +182,7 @@ public class TensorCore implements Serializable {
     }
 
     private static String getGradCode(Tensor tensor, String[] param, String[] dataParam, String[] gradParam) {
-        return "extern \"C\" __global__ void gradient(double* in, double* out, double* outGrad, double* inGrad)" + "{" +
+        return "extern \"C\" __global__ void gradient(double* in, double* out, double* outGrad, double* inGrad){" +
             "int idx = blockDim.x * blockIdx.x + threadIdx.x;" +
             "int M = " + dataParam.length + ";" +
             "double " + String.join(",", param) + ";" +
