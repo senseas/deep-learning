@@ -96,7 +96,7 @@ public class Tensor implements Serializable {
         return context = new CudaContext(this);
     }
 
-    public double[] getGradOutData() {
+    public double[] getOutGradData() {
         if (BeanUtil.isTenser(this.getOutput())) {
             Tenser<None> output = this.getOutput();
             return output.stream().mapToDouble(None::getGrad).toArray();
@@ -112,7 +112,7 @@ public class Tensor implements Serializable {
     protected Object output, value, grad;
     protected transient Object function, reduce;
     private double[] data;
-    private String fparam, gparam;
+    private String fparam, gparam, fparamx, gparamx;
     private transient boolean gradre;
     private transient CudaContext context;
     private transient boolean out;
