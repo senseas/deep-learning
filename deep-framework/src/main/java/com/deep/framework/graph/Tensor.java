@@ -113,7 +113,7 @@ public class Tensor implements Serializable {
     protected transient Object function, reduce;
     private double[] data;
     private String outParams, inParams;
-    private transient boolean gradre;
+    private transient boolean gradre, parallel;
     private transient CudaContext context;
     private transient boolean out;
 }

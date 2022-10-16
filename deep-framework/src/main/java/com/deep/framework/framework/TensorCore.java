@@ -89,13 +89,18 @@ public class TensorCore implements Serializable {
     }
 
     private static String getFuncCode(Tensor tensor, String outParams) {
+        String[] inParam = getParam(inParams);
+        Map<String, String> inMap = new HashMap<>();
+        IntStream.range(0, inParam.length).forEach(i -> inMap.put(inParam[i], String.valueOf(i)));
+
         String[] outParam = getParam(outParams);
         Map<String, String> outMap = new HashMap<>();
         IntStream.range(0, outParam.length).forEach(i -> outMap.put(outParam[i], String.valueOf(i)));
 
         String codes = getFuncCode(tensor, outParam);
         return Arrays.stream(codes.split("  ")).map(a -> {
-            if (Objects.nonNull(inxMap.get(a))) return "in[idx+" + inxMap.get(a) + "]";
+            if (Objects.nonNull(inMap.get(a))) return "in[idx+" + inMap.get(a) + "]";
+            if (Objects.nonNull(inxMap) && Objects.nonNull(inxMap.get(a))) return "in[idx+" + inxMap.get(a) + "]";
             if (Objects.nonNull(outMap.get(a))) return "out[idx * M +" + outMap.get(a) + "]";
             return a;
         }).collect(Collectors.joining(""));
