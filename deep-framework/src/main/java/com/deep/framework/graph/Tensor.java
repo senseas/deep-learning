@@ -112,7 +112,7 @@ public class Tensor implements Serializable {
     protected Object output, value, grad;
     protected transient Object function, reduce;
     private double[] data;
-    private String fparam, gparam, fparamx, gparamx;
+    private String outParams, inParams;
     private transient boolean gradre;
     private transient CudaContext context;
     private transient boolean out;
