@@ -330,13 +330,15 @@ public class CudaExecutor implements Serializable {
             if (BeanUtil.isTenser(a.getOutput())) {
                 Tenser<None> output = a.getOutput();
                 output.forEach(out -> {
-                    inxMap.put(out.getValId().trim(), inxMap.size());
-                    inxGradMap.put(out.getGradId().trim(), inxMap.size());
+                    int size = inxMap.size();
+                    inxMap.put(out.getValId().trim(), size);
+                    inxGradMap.put(out.getGradId().trim(), size);
                 });
             } else {
                 None out = a.getOutput();
-                inxMap.put(out.getValId().trim(), inxMap.size());
-                inxGradMap.put(out.getGradId().trim(), inxMap.size());
+                int size = inxMap.size();
+                inxMap.put(out.getValId().trim(), size);
+                inxGradMap.put(out.getGradId().trim(), size);
             }
         });
 
