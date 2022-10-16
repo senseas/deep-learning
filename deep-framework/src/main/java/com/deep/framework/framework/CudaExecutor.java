@@ -44,108 +44,6 @@ public class CudaExecutor implements Serializable {
         cuCtxCreate(context, 0, device);
     }
 
-    public static void run(CUfunction function, Grid grid, Block block, double[] in, double[] out) {
-        CUdeviceptr inDevice = createDeviceData(in);
-        CUdeviceptr outDevice = createDeviceData(out);
-
-        Pointer kernelParams = createKernelParams(inDevice, outDevice);
-        cuLaunchKernel(function,
-                grid.x, grid.y, grid.z,
-                block.x, block.y, block.z,
-                0, null,
-                kernelParams,
-                null
-        );
-
-        cuMemcpyDtoH(Pointer.to(out), outDevice, out.length * Sizeof.DOUBLE);
-        cuCtxSynchronize();
-
-        cudaFree(inDevice);
-        cudaFree(outDevice);
-        cudaFree(kernelParams);
-    }
-
-    public static void run(CUfunction function, double[] in, double[] out) {
-        CUdeviceptr inDevice = createDeviceData(in);
-        CUdeviceptr outDevice = createDeviceData(out);
-
-        Pointer kernelParams = createKernelParams(inDevice, outDevice);
-        cuLaunchKernel(function,
-                1, 1, 1,
-                1, 1, 1,
-                0, null,
-                kernelParams,
-                null
-        );
-
-        cuMemcpyDtoH(Pointer.to(out), outDevice, out.length * Sizeof.DOUBLE);
-        cuCtxSynchronize();
-
-        cudaFree(inDevice);
-        cudaFree(outDevice);
-        cudaFree(kernelParams);
-    }
-
-    public static void run(CUfunction function, Grid grid, Block block, double[] in, double[] out, double[] outGrad, double[] inGrad) {
-        CUdeviceptr inDevice = createDeviceData(in);
-        CUdeviceptr outDevice = createDeviceData(out);
-        CUdeviceptr outGradDevice = createDeviceData(outGrad);
-        CUdeviceptr inGradDevice = createDeviceData(inGrad);
-
-        Pointer kernelParams = createKernelParams(inDevice, outDevice, outGradDevice, inGradDevice);
-
-        cuLaunchKernel(function,
-                grid.x, grid.y, grid.z,
-                block.x, block.y, block.z,
-                0, null,
-                kernelParams,
-                null
-        );
-
-        cuMemcpyDtoH(Pointer.to(inGrad), inGradDevice, inGrad.length * Sizeof.DOUBLE);
-        cuCtxSynchronize();
-
-        cudaFree(inDevice);
-        cudaFree(outDevice);
-        cudaFree(outGradDevice);
-        cudaFree(inGradDevice);
-        cudaFree(kernelParams);
-    }
-
-
-    public static void run(CUfunction function, double[] in, double[] out, double[] outGrad, double[] inGrad) {
-        CUdeviceptr inDevice = createDeviceData(in);
-        CUdeviceptr outDevice = createDeviceData(out);
-        CUdeviceptr outGradDevice = createDeviceData(outGrad);
-        CUdeviceptr inGradDevice = createDeviceData(inGrad);
-
-        Pointer kernelParams = createKernelParams(inDevice, outDevice, outGradDevice, inGradDevice);
-
-        cuLaunchKernel(function,
-                1, 1, 1,
-                1, 1, 1,
-                0, null,
-                kernelParams,
-                null
-        );
-
-        cuMemcpyDtoH(Pointer.to(inGrad), inGradDevice, inGrad.length * Sizeof.DOUBLE);
-        cuCtxSynchronize();
-
-        cudaFree(inDevice);
-        cudaFree(outDevice);
-        cudaFree(outGradDevice);
-        cudaFree(inGradDevice);
-        cudaFree(kernelParams);
-    }
-
-    /**
-     * Create a CUDA kernel function by compiling the given code using the
-     * NVRTC, and obtaining the function with the given name
-     *
-     * @param tensor The source code
-     * @return The CUDA function
-     */
     @SneakyThrows
     public static void compute(Tensor tensor) {
         if (!tensor.getClass().getMethod("compute").isAnnotationPresent(Cuda.class)) return;
@@ -191,13 +89,6 @@ public class CudaExecutor implements Serializable {
         }
     }
 
-    /**
-     * Create a CUDA kernel function by compiling the given code using the
-     * NVRTC, and obtaining the function with the given name
-     *
-     * @param tensor The source code
-     * @return The CUDA function
-     */
     @SneakyThrows
     public static void gradient(Tensor tensor) {
         if (!tensor.getClass().getMethod("compute").isAnnotationPresent(Cuda.class)) return;
@@ -250,7 +141,7 @@ public class CudaExecutor implements Serializable {
      * Create a CUDA kernel function by compiling the given code using the
      * NVRTC, and obtaining the function with the given name
      *
-     * @param tensor The source code
+     * @param tensor The operator
      * @return The CUDA function
      */
     public static CUfunction getFunction(Tensor tensor) {
@@ -259,19 +150,18 @@ public class CudaExecutor implements Serializable {
         CUfunction function = functions.get(name);
         if (Objects.nonNull(function)) return function;
 
-        Map<String, Integer> inxMap = new HashMap<>();
+        TensorCore.inxMap = new HashMap<>();
         Arrays.stream(tensor.getInput()).filter(Tensor::isGradre).forEach(a -> {
             if (BeanUtil.isTenser(a.getOutput())) {
                 Tenser<None> output = a.getOutput();
-                output.forEach(out -> inxMap.put(out.getValId().trim(), inxMap.size()));
+                output.forEach(out -> TensorCore.inxMap.put(out.getValId().trim(), TensorCore.inxMap.size()));
             } else {
                 None out = a.getOutput();
-                inxMap.put(out.getValId().trim(), inxMap.size());
+                TensorCore.inxMap.put(out.getValId().trim(), TensorCore.inxMap.size());
             }
         });
 
         String code;
-        TensorCore.inxMap = inxMap;
         if (BeanUtil.isTenser(tensor.getFunction())) {
             Tenser<Tensor> tenser = (Tenser<Tensor>) tensor.getFunction();
             if (isSame(tensor)) {
@@ -316,8 +206,8 @@ public class CudaExecutor implements Serializable {
      * Create a CUDA kernel function by compiling the given code using the
      * NVRTC, and obtaining the function with the given name
      *
-     * @param tensor The source code
-     * @return The CUDA function
+     * @param tensor The operator
+     * @return The CUDA gradient function
      */
     public static CUfunction getGradient(Tensor tensor) {
         String name = tensor.getName().replace("Tensor::", "Grad");
@@ -325,27 +215,26 @@ public class CudaExecutor implements Serializable {
         CUfunction function = functions.get(name);
         if (Objects.nonNull(function)) return function;
 
-        Map<String, Integer> inxMap = new HashMap<>(), inxGradMap = new HashMap<>();
+        TensorCore.inxMap = new HashMap<>();
+        TensorCore.inxGradMap = new HashMap<>();
         Arrays.stream(tensor.getInput()).filter(Tensor::isGradre).forEach(a -> {
             if (BeanUtil.isTenser(a.getOutput())) {
                 Tenser<None> output = a.getOutput();
                 output.forEach(out -> {
-                    int size = inxMap.size();
-                    inxMap.put(out.getValId().trim(), size);
-                    inxGradMap.put(out.getGradId().trim(), size);
+                    int size = TensorCore.inxMap.size();
+                    TensorCore.inxMap.put(out.getValId().trim(), size);
+                    TensorCore.inxGradMap.put(out.getGradId().trim(), size);
                 });
             } else {
                 None out = a.getOutput();
-                int size = inxMap.size();
-                inxMap.put(out.getValId().trim(), size);
-                inxGradMap.put(out.getGradId().trim(), size);
+                int size = TensorCore.inxMap.size();
+                TensorCore.inxMap.put(out.getValId().trim(), size);
+                TensorCore.inxGradMap.put(out.getGradId().trim(), size);
             }
         });
 
         String code;
         TensorCore.outGradParams = getGradOutParam(tensor);
-        TensorCore.inxMap = inxMap;
-        TensorCore.inxGradMap = inxGradMap;
         if (BeanUtil.isTenser(tensor.getFunction())) {
             Tenser<Tensor> tenser = (Tenser<Tensor>) tensor.getFunction();
             if (isSame(tensor)) {
@@ -383,6 +272,76 @@ public class CudaExecutor implements Serializable {
             None output = tensor.getOutput();
             return output.getGradId();
         }
+    }
+
+    public static void run(CUfunction function, Grid grid, Block block, double[] in, double[] out) {
+        CUdeviceptr inDevice = createDeviceData(in);
+        CUdeviceptr outDevice = createDeviceData(out);
+
+        Pointer kernelParams = createKernelParams(inDevice, outDevice);
+        cuLaunchKernel(function, grid.x, grid.y, grid.z, block.x, block.y, block.z, 0, null, kernelParams, null);
+
+        cuMemcpyDtoH(Pointer.to(out), outDevice, out.length * Sizeof.DOUBLE);
+        cuCtxSynchronize();
+
+        cudaFree(inDevice);
+        cudaFree(outDevice);
+        cudaFree(kernelParams);
+    }
+
+    public static void run(CUfunction function, double[] in, double[] out) {
+        CUdeviceptr inDevice = createDeviceData(in);
+        CUdeviceptr outDevice = createDeviceData(out);
+
+        Pointer kernelParams = createKernelParams(inDevice, outDevice);
+        cuLaunchKernel(function, 1, 1, 1, 1, 1, 1, 0, null, kernelParams, null);
+
+        cuMemcpyDtoH(Pointer.to(out), outDevice, out.length * Sizeof.DOUBLE);
+        cuCtxSynchronize();
+
+        cudaFree(inDevice);
+        cudaFree(outDevice);
+        cudaFree(kernelParams);
+    }
+
+    public static void run(CUfunction function, Grid grid, Block block, double[] in, double[] out, double[] outGrad, double[] inGrad) {
+        CUdeviceptr inDevice = createDeviceData(in);
+        CUdeviceptr outDevice = createDeviceData(out);
+        CUdeviceptr outGradDevice = createDeviceData(outGrad);
+        CUdeviceptr inGradDevice = createDeviceData(inGrad);
+
+        Pointer kernelParams = createKernelParams(inDevice, outDevice, outGradDevice, inGradDevice);
+
+        cuLaunchKernel(function, grid.x, grid.y, grid.z, block.x, block.y, block.z, 0, null, kernelParams, null);
+
+        cuMemcpyDtoH(Pointer.to(inGrad), inGradDevice, inGrad.length * Sizeof.DOUBLE);
+        cuCtxSynchronize();
+
+        cudaFree(inDevice);
+        cudaFree(outDevice);
+        cudaFree(outGradDevice);
+        cudaFree(inGradDevice);
+        cudaFree(kernelParams);
+    }
+
+    public static void run(CUfunction function, double[] in, double[] out, double[] outGrad, double[] inGrad) {
+        CUdeviceptr inDevice = createDeviceData(in);
+        CUdeviceptr outDevice = createDeviceData(out);
+        CUdeviceptr outGradDevice = createDeviceData(outGrad);
+        CUdeviceptr inGradDevice = createDeviceData(inGrad);
+
+        Pointer kernelParams = createKernelParams(inDevice, outDevice, outGradDevice, inGradDevice);
+
+        cuLaunchKernel(function, 1, 1, 1, 1, 1, 1, 0, null, kernelParams, null);
+
+        cuMemcpyDtoH(Pointer.to(inGrad), inGradDevice, inGrad.length * Sizeof.DOUBLE);
+        cuCtxSynchronize();
+
+        cudaFree(inDevice);
+        cudaFree(outDevice);
+        cudaFree(outGradDevice);
+        cudaFree(inGradDevice);
+        cudaFree(kernelParams);
     }
 
     /**
