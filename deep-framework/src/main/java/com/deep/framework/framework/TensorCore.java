@@ -94,12 +94,11 @@ public class TensorCore implements Serializable {
         IntStream.range(0, outParam.length).forEach(i -> outMap.put(outParam[i], String.valueOf(i)));
 
         String codes = getFuncCode(tensor, outParam);
-        String code = Arrays.stream(codes.split("  "))
-        .map(a -> Objects.nonNull(inxMap.get(a)) ? "in[idx+" + inxMap.get(a) + "]" : a)
-        .map(a -> Objects.nonNull(outMap.get(a)) ? "out[idx * M +" + outMap.get(a) + "]" : a)
-        .collect(Collectors.joining(""));
-
-        return code;
+        return Arrays.stream(codes.split("  ")).map(a -> {
+            if (Objects.nonNull(inxMap.get(a))) return "in[idx+" + inxMap.get(a) + "]";
+            if (Objects.nonNull(outMap.get(a))) return "out[idx * M +" + outMap.get(a) + "]";
+            return a;
+        }).collect(Collectors.joining(""));
     }
 
     private static String getGradCode(Tensor tensor, String outParams, String gradParams, String inGradParams) {
@@ -112,14 +111,13 @@ public class TensorCore implements Serializable {
         IntStream.range(0, outGradParam.length).forEach(i -> outGradMap.put(outGradParam[i], String.valueOf(i)));
 
         String codes = getGradCode(tensor, getParam(gradParams), outParam);
-        String code = Arrays.stream(codes.split("  "))
-        .map(a -> Objects.nonNull(inxMap.get(a)) ? "in[idx+" + inxMap.get(a) + "]" : a)
-        .map(a -> Objects.nonNull(outMap.get(a)) ? "out[idx * M +" + outMap.get(a) + "]" : a)
-        .map(a -> Objects.nonNull(outGradMap.get(a)) ? "outGrad[idx + " + outGradMap.get(a) + "]" : a)
-        .map(a -> Objects.nonNull(inxGradMap.get(a)) ? "inGrad[idx +" + inxGradMap.get(a) + "]+" : a)
-        .collect(Collectors.joining(""));
-
-        return code;
+        return Arrays.stream(codes.split("  ")).map(a -> {
+            if (Objects.nonNull(inxMap.get(a))) return "in[idx+" + inxMap.get(a) + "]";
+            if (Objects.nonNull(inxGradMap.get(a))) return "inGrad[idx +" + inxGradMap.get(a) + "]+";
+            if (Objects.nonNull(outMap.get(a))) return "out[idx * M +" + outMap.get(a) + "]";
+            if (Objects.nonNull(outGradMap.get(a))) return "outGrad[idx + " + outGradMap.get(a) + "]";
+            return a;
+        }).collect(Collectors.joining(""));
     }
 
     private static String getInputParam(Tensor tensor) {
