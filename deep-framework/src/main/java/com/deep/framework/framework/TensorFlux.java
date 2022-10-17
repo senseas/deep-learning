@@ -19,7 +19,7 @@ public class TensorFlux implements Serializable {
             a.forward();
         });
         forwards(tensor);
-        //CudaExecutor.compute(tensor);
+        CudaExecutor.compute(tensor);
         TensorExecutor.deep.getAndDecrement();
     }
 
@@ -29,7 +29,7 @@ public class TensorFlux implements Serializable {
         forEach(tensor.getFunction(), (Tensor a) -> {
             a.backward();
         });
-        //CudaExecutor.gradient(tensor);
+        CudaExecutor.gradient(tensor);
         TensorExecutor.deep.getAndDecrement();
     }
 
@@ -111,7 +111,6 @@ public class TensorFlux implements Serializable {
         } else {
             tensor.setValue(0d);
             tensor.setGrad(0d);
-            tensor.setGradre(true);
             tensor.setReduce(false);
         }
     }
@@ -124,13 +123,11 @@ public class TensorFlux implements Serializable {
                 tensor.setValue(zeros(shape));
                 tensor.setGrad(zeros(shape));
                 tensor.setReduce(booleans(shape));
-                tensor.setGradre(true);
                 tensor.setOutput(fillNones(tensor));
             } else {
                 tensor.setValue(0d);
                 tensor.setGrad(0d);
                 tensor.setReduce(false);
-                tensor.setGradre(true);
                 tensor.setOutput(new None(tensor));
             }
         }

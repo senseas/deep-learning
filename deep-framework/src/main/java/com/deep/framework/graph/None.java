@@ -121,10 +121,10 @@ public class None implements Serializable {
     }
 
     public String getValId() {
-        if (gradre) {
-            return "  a" + id + "  ";
+        if (tensor instanceof TensorConst) {
+            return "" + getValue();
         }
-        return "" + getValue();
+        return "  a" + id + "  ";
     }
 
     private double value, grad;

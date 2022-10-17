@@ -57,7 +57,7 @@ public class CudaExecutor implements Serializable {
         String[] param = tensor.getOutParams().split(",");
         int length = param.length;
 
-        double[] input = Arrays.stream(tensor.getInput()).filter(Tensor::isGradre).flatMapToDouble(a -> {
+        double[] input = Arrays.stream(tensor.getInput()).flatMapToDouble(a -> {
             if (BeanUtil.isTenser(a.getOutput())) {
                 return Arrays.stream((double[]) a.getValue());
             } else {
@@ -74,10 +74,10 @@ public class CudaExecutor implements Serializable {
                 tensor.setData(output);
                 tensor.setValue(IntStream.range(0, size).mapToDouble(i -> output[i * length + length - 1]).toArray());
             } else {
-                double[] output = new double[length];
-                run(function, new Grid(size), new Block(1), input, output);
-                tensor.setData(output);
                 int l = length / size;
+                double[] output = new double[length];
+                run(function, new Grid(1), new Block(1), input, output);
+                tensor.setData(output);
                 tensor.setValue(IntStream.range(0, size).mapToDouble(i -> output[i * l + l - 1]).toArray());
             }
         } else {
@@ -94,7 +94,7 @@ public class CudaExecutor implements Serializable {
         if (!tensor.getClass().getMethod("compute").isAnnotationPresent(Cuda.class)) return;
 
         CUfunction function = getGradient(tensor);
-        double[] input = Arrays.stream(tensor.getInput()).filter(Tensor::isGradre).flatMapToDouble(a -> {
+        double[] input = Arrays.stream(tensor.getInput()).flatMapToDouble(a -> {
             if (BeanUtil.isTenser(a.getOutput())) {
                 return Arrays.stream((double[]) a.getValue());
             } else {
@@ -102,7 +102,7 @@ public class CudaExecutor implements Serializable {
             }
         }).toArray();
 
-        None[] list = Arrays.stream(tensor.getInput()).filter(Tensor::isGradre).flatMap(a -> {
+        None[] list = Arrays.stream(tensor.getInput()).flatMap(a -> {
             if (BeanUtil.isTenser(a.getOutput())) {
                 Tenser<None> output = a.getOutput();
                 return output.stream();
@@ -157,7 +157,7 @@ public class CudaExecutor implements Serializable {
         isSame(tensor);
 
         TensorCore.inxMap = new HashMap<>();
-        Arrays.stream(tensor.getInput()).filter(Tensor::isGradre).forEach(a -> {
+        Arrays.stream(tensor.getInput()).forEach(a -> {
             if (BeanUtil.isTenser(a.getOutput())) {
                 Tenser<None> output = a.getOutput();
                 output.forEach(out -> TensorCore.inxMap.put(out.getValId().trim(), TensorCore.inxMap.size()));
@@ -210,7 +210,7 @@ public class CudaExecutor implements Serializable {
 
         TensorCore.inxMap = new HashMap<>();
         TensorCore.inxGradMap = new HashMap<>();
-        Arrays.stream(tensor.getInput()).filter(Tensor::isGradre).forEach(a -> {
+        Arrays.stream(tensor.getInput()).forEach(a -> {
             if (BeanUtil.isTenser(a.getOutput())) {
                 Tenser<None> output = a.getOutput();
                 output.forEach(out -> {

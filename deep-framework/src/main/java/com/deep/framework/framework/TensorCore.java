@@ -126,7 +126,7 @@ public class TensorCore implements Serializable {
     }
 
     private static String getInputParam(Tensor tensor) {
-        List<String> list = Arrays.stream(tensor.getInput()).filter(Tensor::isGradre).filter(BeanUtil::isNone).flatMap(a -> {
+        List<String> list = Arrays.stream(tensor.getInput()).filter(BeanUtil::isNone).flatMap(a -> {
             if (BeanUtil.isTenser(a.getOutput())) {
                 Tenser<None> output = a.getOutput();
                 return output.stream();
@@ -139,7 +139,7 @@ public class TensorCore implements Serializable {
     }
 
     private static String getGradParam(Tensor tensor) {
-        List<String> list = Arrays.stream(tensor.getInput()).filter(Tensor::isGradre).filter(BeanUtil::isNone).flatMap(a -> {
+        List<String> list = Arrays.stream(tensor.getInput()).filter(BeanUtil::isNone).flatMap(a -> {
             if (BeanUtil.isTenser(a.getOutput())) {
                 Tenser<None> output = a.getOutput();
                 return output.stream();
