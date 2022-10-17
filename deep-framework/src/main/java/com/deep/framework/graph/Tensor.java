@@ -115,5 +115,4 @@ public class Tensor implements Serializable {
     private String outParams, inParams;
     private transient boolean gradre, parallel;
     private transient CudaContext context;
-    private transient boolean out;
 }
