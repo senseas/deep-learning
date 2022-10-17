@@ -1,6 +1,5 @@
 package com.deep.framework.framework;
 
-import com.alibaba.fastjson.JSONObject;
 import com.deep.framework.graph.None;
 import com.deep.framework.graph.Tensor;
 import com.deep.framework.lang.Tenser;
@@ -73,21 +72,18 @@ public class CudaExecutor implements Serializable {
                 double[] output = new double[size * length];
                 run(function, new Grid(size), new Block(1), input, output);
                 tensor.setData(output);
-                double[] cudaout = IntStream.range(0, size).mapToDouble(i -> output[i * length + length - 1]).toArray();
-                System.out.println(JSONObject.toJSONString(tensor.getValue()).equals(JSONObject.toJSONString(cudaout)));
+                tensor.setValue(IntStream.range(0, size).mapToDouble(i -> output[i * length + length - 1]).toArray());
             } else {
                 double[] output = new double[length];
                 run(function, new Grid(size), new Block(1), input, output);
                 tensor.setData(output);
                 int l = length / size;
-                double[] cudaout = IntStream.range(0, size).mapToDouble(i -> output[i * l + l - 1]).toArray();
-                System.out.println(JSONObject.toJSONString(tensor.getValue()).equals(JSONObject.toJSONString(cudaout)));
+                tensor.setValue(IntStream.range(0, size).mapToDouble(i -> output[i * l + l - 1]).toArray());
             }
         } else {
             double[] output = new double[length];
             run(function, input, output);
             tensor.setData(output);
-            System.out.println(JSONObject.toJSONString(tensor.getValue()).equals(JSONObject.toJSONString(output[length - 1])));
             None out = tensor.getOutput();
             out.setValue(output[length - 1]);
         }
