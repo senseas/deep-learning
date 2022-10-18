@@ -32,8 +32,7 @@ import static jcuda.runtime.JCuda.cudaFree;
 public class CudaExecutor implements Serializable {
 
     private static Map<String, CUfunction> functions = new HashMap<String, CUfunction>();
-    private static Map<String, String> params = new HashMap<String, String>();
-    private static Map<String, Boolean> parallels = new HashMap<String, Boolean>();
+    private static Map<String, Tensor> parallels = new HashMap<String, Tensor>();
 
     /**
      * Perform a default initialization of CUDA, creating a context
@@ -149,8 +148,9 @@ public class CudaExecutor implements Serializable {
 
         CUfunction function = functions.get(name);
         if (Objects.nonNull(function)) {
-            tensor.setOutParams(params.get(name));
-            tensor.setParallel(parallels.get(name));
+            Tensor parallel = parallels.get(name);
+            tensor.setOutParams(parallel.getOutParams());
+            tensor.setParallel(parallel.isParallel());
             return function;
         }
 
@@ -189,8 +189,7 @@ public class CudaExecutor implements Serializable {
         tensor.setInParams(String.join(",", TensorCore.getParam(TensorCore.inParams)));
         System.out.println(code);
         function = createFunction(name, code);
-        params.put(name, tensor.getOutParams());
-        parallels.put(name, tensor.isParallel());
+        parallels.put(name, tensor);
         functions.put(name, function);
         return function;
     }
@@ -258,26 +257,22 @@ public class CudaExecutor implements Serializable {
     }
 
     public static boolean isSame(Tensor tensor) {
-        if (BeanUtil.isNotTenser(tensor.getFunction())) {
-            tensor.setParallel(true);
-            return true;
+        if (BeanUtil.isTenser(tensor.getFunction())) {
+            Tenser<Tensor> tenser = (Tenser<Tensor>) tensor.getFunction();
+            if (!Objects.equals(tenser.size(), 1)) {
+                Tensor m = tenser.data(0), n = tenser.data(1);
+
+                TensorCore.func = TensorCore.code = TensorCore.inParams = TensorCore.outParams = "";
+                TensorCore.forward(m);
+                String codem = TensorCore.code;
+
+                TensorCore.func = TensorCore.code = TensorCore.inParams = TensorCore.outParams = "";
+                TensorCore.forward(n);
+                String coden = TensorCore.code;
+
+                tensor.setParallel(codem.equals(coden));
+            }
         }
-        Tenser<Tensor> tenser = (Tenser<Tensor>) tensor.getFunction();
-        if (tenser.size() == 1) {
-            tensor.setParallel(true);
-            return true;
-        }
-        Tensor m = tenser.data(0), n = tenser.data(1);
-
-        TensorCore.func = TensorCore.code = TensorCore.inParams = TensorCore.outParams = "";
-        TensorCore.forward(m);
-        String codem = TensorCore.code;
-
-        TensorCore.func = TensorCore.code = TensorCore.inParams = TensorCore.outParams = "";
-        TensorCore.forward(n);
-        String coden = TensorCore.code;
-
-        tensor.setParallel(codem.equals(coden));
         return tensor.isParallel();
     }
 
