@@ -73,7 +73,7 @@ public class None implements Serializable {
         }
     }
 
-    public void setGradi(double grad) {
+    public void setGradx(double grad) {
         if (Objects.isNull(tensor)) {
             this.grad = grad;
         } else if (Objects.isNull(tensor.getShape())) {

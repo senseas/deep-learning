@@ -119,20 +119,20 @@ public class CudaExecutor implements Serializable {
                 run(function, new Grid(size), new Block(1), input, tensor.getData(), tensor.getOutGradData(), inGrad);
                 IntStream.range(0, list.length).forEach(i -> {
                     None none = list[i];
-                    //none.setValue(inGrad[i]);
+                    none.setGradx(inGrad[i]);
                 });
             } else {
                 run(function, input, tensor.getData(), tensor.getOutGradData(), inGrad);
                 IntStream.range(0, list.length).forEach(i -> {
                     None none = list[i];
-                    //none.setValue(inGrad[i]);
+                    none.setGradx(inGrad[i]);
                 });
             }
         } else {
             run(function, input, tensor.getData(), tensor.getOutGradData(), inGrad);
             IntStream.range(0, list.length).forEach(i -> {
                 None none = list[i];
-                //none.setValue(inGrad[i]);
+                none.setGradx(inGrad[i]);
             });
         }
     }
