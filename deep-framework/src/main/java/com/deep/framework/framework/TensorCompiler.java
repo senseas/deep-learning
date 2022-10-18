@@ -2,7 +2,9 @@ package com.deep.framework.framework;
 
 import com.deep.framework.graph.None;
 import com.deep.framework.graph.Tensor;
+import com.deep.framework.graph.TensorConst;
 import com.deep.framework.graph.TensorFunctor;
+import com.deep.framework.lang.function.Func1;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -24,9 +26,9 @@ public class TensorCompiler implements Serializable {
             }
 
             public String gradient(String grad) {
-                return Arrays.stream(getInput()).map(a -> (None) a.getOutput())
-                 .filter(None::isGradre).map(a -> a.getGradId() + "=" + getGradId() + ";")
-                 .collect(Collectors.joining());
+                return Arrays.stream(getInput()).filter(a -> !(a instanceof TensorConst))
+                .map(a -> (None) a.getOutput()).map(a -> a.getGradId() + "=" + getGradId() + ";")
+                .collect(Collectors.joining());
             }
 
         };
@@ -42,8 +44,8 @@ public class TensorCompiler implements Serializable {
 
             public String gradient(String grad) {
                 None inx = getInput(0), iny = getInput(1);
-                if (inx.isGradre()) grad += inx.getGradId() + "=" + getGradId() + ";";
-                if (iny.isGradre()) grad += iny.getGradId() + "=-" + getGradId() + ";";
+                if (inx.isVal()) grad += inx.getGradId() + "=" + getGradId() + ";";
+                if (iny.isVal()) grad += iny.getGradId() + "=-" + getGradId() + ";";
                 return grad;
             }
 
@@ -76,8 +78,8 @@ public class TensorCompiler implements Serializable {
 
             public String gradient(String grad) {
                 None inx = getInput(0), iny = getInput(1);
-                if (inx.isGradre()) grad += inx.getGradId() + "=" + getGradId() + "*" + iny.getValId() + ";";
-                if (iny.isGradre()) grad += iny.getGradId() + "=" + getGradId() + "*" + inx.getValId() + ";";
+                if (inx.isVal()) grad += inx.getGradId() + "=" + getGradId() + "*" + iny.getValId() + ";";
+                if (iny.isVal()) grad += iny.getGradId() + "=" + getGradId() + "*" + inx.getValId() + ";";
                 return grad;
             }
 
@@ -94,8 +96,8 @@ public class TensorCompiler implements Serializable {
 
             public String gradient(String grad) {
                 None inx = getInput(0), iny = getInput(1);
-                if (inx.isGradre()) grad += inx.getGradId() + "=" + getGradId() + "/" + iny.getValId() + ";";
-                if (iny.isGradre()) grad += iny.getGradId() + "=-" + getGradId() + "*" + inx.getValId() + "/pow(" + iny.getValId() + ",2.0);";
+                if (inx.isVal()) grad += inx.getGradId() + "=" + getGradId() + "/" + iny.getValId() + ";";
+                if (iny.isVal()) grad += iny.getGradId() + "=-" + getGradId() + "*" + inx.getValId() + "/pow(" + iny.getValId() + ",2.0);";
                 return grad;
             }
 
@@ -332,15 +334,15 @@ public class TensorCompiler implements Serializable {
             public String compute() {
                 Object A = getInput(0);
                 List<None> list = new ArrayList<>();
-                forEach(A, (None a) -> list.add(a));
+                forEach(A, (Func1<None>) list::add);
                 return getValId() + "=" + list.stream().map(a -> "+" + a.getValId()).collect(Collectors.joining()) + ";";
             }
 
             public String gradient(String grad) {
                 Object A = getInput(0);
                 List<None> list = new ArrayList<>();
-                forEach(A, (None a) -> list.add(a));
-                return list.stream().filter(None::isGradre).map(a -> a.getGradId() + "=" + getGradId() + ";").collect(Collectors.joining());
+                forEach(A, (Func1<None>) list::add);
+                return list.stream().filter(None::isVal).map(a -> a.getGradId() + "=" + getGradId() + ";").collect(Collectors.joining());
             }
 
         };

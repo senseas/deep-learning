@@ -115,7 +115,8 @@ public class TensorCore implements Serializable {
         Map<String, String> outGradMap = new HashMap<>();
         IntStream.range(0, outGradParam.length).forEach(i -> outGradMap.put(outGradParam[i], String.valueOf(i)));
 
-        String codes = getGradCode(tensor, getParam(gradParams), outParam);
+        String[] param = Arrays.stream(getParam(gradParams)).filter(a -> code.contains(a)).toArray(String[]::new);
+        String codes = getGradCode(tensor, param, outParam);
         return Arrays.stream(codes.split("  ")).map(a -> {
             if (Objects.nonNull(inxMap.get(a))) return "in[idx+" + inxMap.get(a) + "]";
             if (Objects.nonNull(inxGradMap.get(a))) return "inGrad[idx +" + inxGradMap.get(a) + "]+";

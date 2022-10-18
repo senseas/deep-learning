@@ -127,6 +127,10 @@ public class None implements Serializable {
         return "  a" + id + "  ";
     }
 
+    public boolean isVal() {
+        return !(tensor instanceof TensorConst);
+    }
+
     private double value, grad;
     private transient int idx;
     private transient Tensor tensor;
