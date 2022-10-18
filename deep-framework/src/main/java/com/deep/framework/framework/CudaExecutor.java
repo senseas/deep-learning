@@ -260,6 +260,7 @@ public class CudaExecutor implements Serializable {
         if (BeanUtil.isTenser(tensor.getFunction())) {
             Tenser<Tensor> tenser = (Tenser<Tensor>) tensor.getFunction();
             if (!Objects.equals(tenser.size(), 1)) {
+                TensorCore.inxMap = null;
                 Tensor m = tenser.data(0), n = tenser.data(1);
 
                 TensorCore.func = TensorCore.code = TensorCore.inParams = TensorCore.outParams = "";
