@@ -156,6 +156,14 @@ public class TensorCore implements Serializable {
         return Arrays.stream(param.split(",")).map(String::trim).distinct().toArray(String[]::new);
     }
 
+    public static void forwardClear() {
+        func = code = inParams = outParams = "";
+    }
+
+    public static void backwardClear() {
+        grad = code = gradParams = "";
+    }
+
     private static String getFuncCode(Tensor tensor, String[] param) {
         return "extern \"C\" __global__ void compute(double* in, double* out){" +
             "int idx = blockDim.x * blockIdx.x + threadIdx.x;" +

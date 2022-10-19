@@ -171,16 +171,16 @@ public class CudaExecutor implements Serializable {
         if (BeanUtil.isTenser(tensor.getFunction())) {
             Tenser<Tensor> tenser = (Tenser<Tensor>) tensor.getFunction();
             if (tensor.isParallel()) {
-                TensorCore.func = TensorCore.code = TensorCore.inParams = TensorCore.outParams = "";
+                TensorCore.forwardClear();
                 TensorCore.forward(tenser.first());
                 code = TensorCore.code.replace("compute", name);
             } else {
-                TensorCore.func = TensorCore.code = TensorCore.inParams = TensorCore.outParams = "";
+                TensorCore.forwardClear();
                 tenser.forEach(TensorCore::forward);
                 code = TensorCore.code.replace("compute", name);
             }
         } else {
-            TensorCore.func = TensorCore.code = TensorCore.inParams = TensorCore.outParams = "";
+            TensorCore.forwardClear();
             TensorCore.forward((Tensor) tensor.getFunction());
             code = TensorCore.code.replace("compute", name);
         }
@@ -232,20 +232,20 @@ public class CudaExecutor implements Serializable {
             if (tensor.isParallel()) {
                 TensorCore.outParams = tensor.getOutParams();
                 TensorCore.inParams = tensor.getInParams();
-                TensorCore.grad = TensorCore.code = TensorCore.gradParams = "";
+                TensorCore.backwardClear();
                 TensorCore.backward(tenser.first());
                 code = TensorCore.code.replace("gradient", name);
             } else {
                 TensorCore.outParams = tensor.getOutParams();
                 TensorCore.inParams = tensor.getInParams();
-                TensorCore.grad = TensorCore.code = TensorCore.gradParams = "";
+                TensorCore.backwardClear();
                 tenser.forEach(TensorCore::backward);
                 code = TensorCore.code.replace("gradient", name);
             }
         } else {
             TensorCore.outParams = tensor.getOutParams();
             TensorCore.inParams = tensor.getInParams();
-            TensorCore.grad = TensorCore.code = TensorCore.gradParams = "";
+            TensorCore.backwardClear();
             TensorCore.backward((Tensor) tensor.getFunction());
             code = TensorCore.code.replace("gradient", name);
         }
@@ -263,11 +263,11 @@ public class CudaExecutor implements Serializable {
                 TensorCore.inxMap = null;
                 Tensor m = tenser.data(0), n = tenser.data(1);
 
-                TensorCore.func = TensorCore.code = TensorCore.inParams = TensorCore.outParams = "";
+                TensorCore.forwardClear();
                 TensorCore.forward(m);
                 String codem = TensorCore.code;
 
-                TensorCore.func = TensorCore.code = TensorCore.inParams = TensorCore.outParams = "";
+                TensorCore.forwardClear();
                 TensorCore.forward(n);
                 String coden = TensorCore.code;
 

@@ -12,8 +12,11 @@ public class TensorOperator extends Tensor {
         if (Arrays.asList("Add", "Addx").contains(name)) {
             Stream<Tensor> stream = Stream.of();
             for (Tensor o : input) {
-                Stream<Tensor> children = o.getName().equals(getName()) ? Arrays.stream(o.getInput()) : Stream.of(o);
-                stream = Stream.concat(stream, children);
+                if (o.getName().equals(getName())) {
+                    stream = Stream.concat(stream, Arrays.stream(o.getInput()));
+                } else if (!((o instanceof TensorConst) && o.getValue().equals(0.0))) {
+                    stream = Stream.concat(stream, Stream.of(o));
+                }
             }
             setInput(stream.toArray(Tensor[]::new));
         }
