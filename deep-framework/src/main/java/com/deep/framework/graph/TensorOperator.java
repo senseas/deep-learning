@@ -28,7 +28,7 @@ public class TensorOperator extends Tensor {
     }
 
     public Stream inputStream() {
-        return Arrays.stream(getInput()).map(input -> input.getOutput());
+        return Arrays.stream(getInput()).map(Tensor::getOutput);
     }
 
     public <M> M getOutput() {

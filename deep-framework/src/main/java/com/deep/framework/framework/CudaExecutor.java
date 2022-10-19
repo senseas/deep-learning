@@ -53,8 +53,6 @@ public class CudaExecutor implements Serializable {
         if (!tensor.getClass().getMethod("compute").isAnnotationPresent(Cuda.class)) return;
 
         CUfunction function = getFunction(tensor);
-        String[] param = tensor.getOutParams().split(",");
-        int length = param.length;
 
         double[] input = Arrays.stream(tensor.getInput()).flatMapToDouble(a -> {
             if (BeanUtil.isTenser(a.getOutput())) {
@@ -64,6 +62,8 @@ public class CudaExecutor implements Serializable {
             }
         }).toArray();
 
+        String[] param = tensor.getOutParams().split(",");
+        int length = param.length;
         if (BeanUtil.isTenser(tensor.getFunction())) {
             Tenser<None> tenser = tensor.getOutput();
             int size = tenser.size();
@@ -101,37 +101,31 @@ public class CudaExecutor implements Serializable {
             }
         }).toArray();
 
-        None[] list = Arrays.stream(tensor.getInput()).flatMap(a -> {
-            if (BeanUtil.isTenser(a.getOutput())) {
-                Tenser<None> output = a.getOutput();
-                return output.stream();
-            } else {
-                None out = a.getOutput();
-                return Stream.of(out);
-            }
-        }).toArray(None[]::new);
-
-        double[] inGrad = new double[list.length];
+        double[] inGrad = new double[input.length];
+        int length = tensor.getInput().length, l = input.length / length;
         if (BeanUtil.isTenser(tensor.getFunction())) {
             if (tensor.isParallel()) {
                 int size = ((Tenser<None>) tensor.getOutput()).size();
                 run(function, new Grid(size), new Block(1), input, tensor.getData(), tensor.getOutGradData(), inGrad);
-                IntStream.range(0, list.length).forEach(i -> {
-                    None none = list[i];
-                    none.setGradx(inGrad[i]);
+                IntStream.range(0, length).forEach(i -> {
+                    int from = i * l;
+                    Tensor in = tensor.getInput()[i];
+                    in.setGrad(Arrays.copyOfRange(inGrad, from, from + l));
                 });
             } else {
                 run(function, input, tensor.getData(), tensor.getOutGradData(), inGrad);
-                IntStream.range(0, list.length).forEach(i -> {
-                    None none = list[i];
-                    none.setGradx(inGrad[i]);
+                IntStream.range(0, length).forEach(i -> {
+                    int from = i * l;
+                    Tensor in = tensor.getInput()[i];
+                    in.setGrad(Arrays.copyOfRange(inGrad, from, from + l));
                 });
             }
         } else {
             run(function, input, tensor.getData(), tensor.getOutGradData(), inGrad);
-            IntStream.range(0, list.length).forEach(i -> {
-                None none = list[i];
-                none.setGradx(inGrad[i]);
+            IntStream.range(0, length).forEach(i -> {
+                int from = i * l;
+                Tensor in = tensor.getInput()[i];
+                in.setGrad(Arrays.copyOfRange(inGrad, from, from + l));
             });
         }
     }

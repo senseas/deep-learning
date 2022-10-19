@@ -173,10 +173,12 @@ public class TensorCore implements Serializable {
     }
 
     private static String getGradCode(Tensor tensor, String[] param, String[] outParam) {
+        String params = String.join(",", param);
+        params = params.isEmpty() ? "" : "double " + params + ";";
         return "extern \"C\" __global__ void gradient(double* in, double* out, double* outGrad, double* inGrad){" +
             "int idx = blockDim.x * blockIdx.x + threadIdx.x;" +
             "int M = " + outParam.length + ";" +
-            "double " + String.join(",", param) + ";" +
+            params +
             grad +
         "}";
     }

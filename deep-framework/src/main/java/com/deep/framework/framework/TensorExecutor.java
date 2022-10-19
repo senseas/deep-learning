@@ -60,12 +60,12 @@ public class TensorExecutor<E> implements Serializable {
     }
 
     public void setInput(Object o) {
-        Func2<None, Double> func = (m, n) -> m.setValue(n);
+        Func2<None, Double> func = None::setValue;
         forEach(input.getOutput(), Tensers.tenser(o), func);
     }
 
     public void setLabel(Object o) {
-        Func2<None, Double> func = (m, n) -> m.setValue(n);
+        Func2<None, Double> func = None::setValue;
         forEach(label.getOutput(), Tensers.tenser(o), func);
     }
 
