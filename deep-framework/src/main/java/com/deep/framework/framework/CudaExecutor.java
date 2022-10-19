@@ -66,6 +66,7 @@ public class CudaExecutor implements Serializable {
         int length = param.length;
         if (BeanUtil.isTenser(tensor.getFunction())) {
             Tenser<None> tenser = tensor.getOutput();
+            Map<String, None> map = tenser.stream().collect(Collectors.toMap(a -> a.getValId().trim(), a -> a));
             int size = tenser.size();
             if (tensor.isParallel()) {
                 double[] output = new double[size * length];
@@ -73,11 +74,10 @@ public class CudaExecutor implements Serializable {
                 tensor.setData(output);
                 tensor.setValue(IntStream.range(0, size).mapToDouble(i -> output[i * length + length - 1]).toArray());
             } else {
-                int l = length / size;
                 double[] output = new double[length];
                 run(function, new Grid(1), new Block(1), input, output);
                 tensor.setData(output);
-                tensor.setValue(IntStream.range(0, size).mapToDouble(i -> output[i * l + l - 1]).toArray());
+                tensor.setValue(IntStream.range(0, length).filter(i -> Objects.nonNull(map.get(param[i]))).mapToDouble(i -> output[i]).toArray());
             }
         } else {
             double[] output = new double[length];
