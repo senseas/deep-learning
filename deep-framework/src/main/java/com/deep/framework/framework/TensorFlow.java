@@ -1,7 +1,7 @@
 package com.deep.framework.framework;
 
 import com.deep.framework.graph.*;
-import com.deep.framework.lang.Cublas;
+import com.deep.framework.lang.cuda.Cublas;
 import com.deep.framework.lang.Tenser;
 import com.deep.framework.lang.annotation.Cuda;
 

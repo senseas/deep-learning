@@ -7,6 +7,8 @@ import jcuda.driver.CUfunction;
 import java.io.Serializable;
 import java.util.Objects;
 
+import static com.deep.framework.lang.cuda.Cuda.createDeviceData;
+
 public class CudaContext implements Serializable {
 
     private final Tensor tensor;
@@ -20,12 +22,12 @@ public class CudaContext implements Serializable {
     public Pointer getValue() {
         if (Objects.nonNull(value)) return value;
         double[] value = (double[]) tensor.getValue();
-        return CudaExecutor.createDeviceData(value);
+        return createDeviceData(value);
     }
 
     public Pointer getGrad() {
         if (Objects.nonNull(grad)) return grad;
         double[] value = (double[]) tensor.getGrad();
-        return CudaExecutor.createDeviceData(value);
+        return createDeviceData(value);
     }
 }

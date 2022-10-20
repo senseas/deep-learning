@@ -107,13 +107,13 @@ public class TensorFlux implements Serializable {
 
     public static void clearOutput(Tensor tensor) {
         if (BeanUtil.isTenser(tensor.getOutput())) {
-            Arrays.fill((double[]) tensor.getValue(), 0d);
-            Arrays.fill((double[]) tensor.getGrad(), 0d);
-            Arrays.fill((boolean[]) tensor.getReduce(), false);
+            Arrays.fill(tensor.getValue(), 0d);
+            Arrays.fill(tensor.getGrad(), 0d);
+            Arrays.fill(tensor.getReduce(), false);
         } else {
-            tensor.setValue(0d);
-            tensor.setGrad(0d);
-            tensor.setReduce(false);
+            tensor.setValue(new double[]{0d});
+            tensor.setGrad(new double[]{0d});
+            tensor.setReduce(new boolean[]{false});
         }
     }
 
@@ -127,9 +127,9 @@ public class TensorFlux implements Serializable {
                 tensor.setReduce(booleans(shape));
                 tensor.setOutput(fillNones(tensor));
             } else {
-                tensor.setValue(0d);
-                tensor.setGrad(0d);
-                tensor.setReduce(false);
+                tensor.setValue(new double[]{0d});
+                tensor.setGrad(new double[]{0d});
+                tensor.setReduce(new boolean[]{false});
                 tensor.setOutput(new None(tensor));
             }
         }

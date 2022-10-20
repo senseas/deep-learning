@@ -2,8 +2,6 @@ package com.deep.framework.graph;
 
 import com.deep.framework.framework.CudaContext;
 import com.deep.framework.framework.TensorFlux;
-import com.deep.framework.lang.Tenser;
-import com.deep.framework.lang.util.BeanUtil;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -16,16 +14,18 @@ public class Tensor implements Serializable {
 
     public Tensor(double value) {
         this.name = "None";
-        this.value = value;
-        this.grad = 0d;
+        this.value = new double[]{value};
+        this.grad = new double[]{0d};
+        this.reduce = new boolean[]{false};
         this.gradre = true;
         this.output = new None(this);
     }
 
     public Tensor(double value, boolean gradre) {
         this.name = "None";
-        this.value = value;
-        this.grad = 0d;
+        this.value = new double[]{value};
+        this.grad = new double[]{0d};
+        this.reduce = new boolean[]{false};
         this.gradre = gradre;
         this.output = new None(this);
     }
@@ -96,22 +96,14 @@ public class Tensor implements Serializable {
         return context = new CudaContext(this);
     }
 
-    public double[] getOutGradData() {
-        if (BeanUtil.isTenser(this.getOutput())) {
-            Tenser<None> output = this.getOutput();
-            return output.stream().mapToDouble(None::getGrad).toArray();
-        } else {
-            None output = this.getOutput();
-            return new double[]{output.getGrad()};
-        }
-    }
-
     private String name = "Tensor::";
-    protected int[] shape;
     private Tensor[] input;
-    protected Object output, value, grad;
-    protected transient Object function, reduce;
-    private double[] data;
+    protected Object output;
+    protected transient Object function;
+    protected int[] shape;
+    protected double[] value, grad;
+    protected transient boolean[] reduce;
+    private transient double[] data;
     private String outParams, inParams;
     private transient boolean gradre, parallel;
     private transient CudaContext context;

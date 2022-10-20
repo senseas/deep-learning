@@ -1,4 +1,4 @@
-package com.deep.framework.lang;
+package com.deep.framework.lang.cuda;
 
 import com.deep.framework.graph.Tensor;
 import jcuda.Pointer;
