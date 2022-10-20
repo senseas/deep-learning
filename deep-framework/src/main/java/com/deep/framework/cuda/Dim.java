@@ -1,4 +1,4 @@
-package com.deep.framework.lang.cuda;
+package com.deep.framework.cuda;
 
 public class Dim {
     public int x, y, z;

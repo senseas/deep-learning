@@ -1,4 +1,4 @@
-package com.deep.framework.lang.cuda;
+package com.deep.framework.cuda;
 
 import jcuda.Pointer;
 import jcuda.Sizeof;

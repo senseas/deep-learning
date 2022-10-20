@@ -7,7 +7,7 @@ import jcuda.driver.CUfunction;
 import java.io.Serializable;
 import java.util.Objects;
 
-import static com.deep.framework.lang.cuda.Cuda.createDeviceData;
+import static com.deep.framework.cuda.Cuda.createDeviceData;
 
 public class CudaContext implements Serializable {
 

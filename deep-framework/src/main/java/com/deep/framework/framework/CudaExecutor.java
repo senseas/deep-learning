@@ -4,7 +4,7 @@ import com.deep.framework.graph.None;
 import com.deep.framework.graph.Tensor;
 import com.deep.framework.lang.Tenser;
 import com.deep.framework.lang.annotation.Cuda;
-import com.deep.framework.lang.cuda.Dim;
+import com.deep.framework.cuda.Dim;
 import com.deep.framework.lang.util.BeanUtil;
 import jcuda.driver.CUfunction;
 import lombok.Data;
@@ -18,8 +18,8 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import static com.deep.framework.lang.cuda.Cuda.createFunction;
-import static com.deep.framework.lang.cuda.Cuda.run;
+import static com.deep.framework.cuda.Cuda.createFunction;
+import static com.deep.framework.cuda.Cuda.run;
 
 @Data
 public class CudaExecutor implements Serializable {
