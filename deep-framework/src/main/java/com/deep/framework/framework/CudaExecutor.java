@@ -170,6 +170,7 @@ public class CudaExecutor implements Serializable {
         CUfunction function = functions.get(name);
         if (Objects.nonNull(function)) return function;
 
+        TensorCore.outGradParams = getGradOutParam(tensor);
         TensorCore.inxGradMap = new HashMap<>();
         Arrays.stream(tensor.getInput()).forEach(a -> {
             if (BeanUtil.isTenser(a.getOutput())) {
@@ -182,7 +183,6 @@ public class CudaExecutor implements Serializable {
         });
 
         String code;
-        TensorCore.outGradParams = getGradOutParam(tensor);
         if (BeanUtil.isTenser(tensor.getFunction())) {
             Tenser<Tensor> tenser = (Tenser<Tensor>) tensor.getFunction();
             if (tensor.isParallel()) {
