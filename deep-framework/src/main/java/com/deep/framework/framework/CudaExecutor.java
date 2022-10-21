@@ -151,6 +151,9 @@ public class CudaExecutor implements Serializable {
         function = createFunction(name, code);
         parallels.put(name, tensor);
         functions.put(name, function);
+
+        getGradient(tensor);
+
         return function;
     }
 
@@ -167,21 +170,14 @@ public class CudaExecutor implements Serializable {
         CUfunction function = functions.get(name);
         if (Objects.nonNull(function)) return function;
 
-        TensorCore.inxMap = new HashMap<>();
         TensorCore.inxGradMap = new HashMap<>();
         Arrays.stream(tensor.getInput()).forEach(a -> {
             if (BeanUtil.isTenser(a.getOutput())) {
                 Tenser<None> output = a.getOutput();
-                output.forEach(out -> {
-                    int size = TensorCore.inxMap.size();
-                    TensorCore.inxMap.put(out.getValId().trim(), size);
-                    TensorCore.inxGradMap.put(out.getGradId().trim(), size);
-                });
+                output.forEach(out -> TensorCore.inxGradMap.put(out.getGradId().trim(), TensorCore.inxGradMap.size()));
             } else {
                 None out = a.getOutput();
-                int size = TensorCore.inxMap.size();
-                TensorCore.inxMap.put(out.getValId().trim(), size);
-                TensorCore.inxGradMap.put(out.getGradId().trim(), size);
+                TensorCore.inxGradMap.put(out.getGradId().trim(), TensorCore.inxGradMap.size());
             }
         });
 
@@ -190,21 +186,15 @@ public class CudaExecutor implements Serializable {
         if (BeanUtil.isTenser(tensor.getFunction())) {
             Tenser<Tensor> tenser = (Tenser<Tensor>) tensor.getFunction();
             if (tensor.isParallel()) {
-                TensorCore.outParams = tensor.getOutParams();
-                TensorCore.inParams = tensor.getInParams();
                 TensorCore.backwardClear();
                 TensorCore.backward(tenser.first());
                 code = TensorCore.code.replace("gradient", name);
             } else {
-                TensorCore.outParams = tensor.getOutParams();
-                TensorCore.inParams = tensor.getInParams();
                 TensorCore.backwardClear();
                 tenser.forEach(TensorCore::backward);
                 code = TensorCore.code.replace("gradient", name);
             }
         } else {
-            TensorCore.outParams = tensor.getOutParams();
-            TensorCore.inParams = tensor.getInParams();
             TensorCore.backwardClear();
             TensorCore.backward((Tensor) tensor.getFunction());
             code = TensorCore.code.replace("gradient", name);
