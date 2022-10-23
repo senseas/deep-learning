@@ -131,13 +131,12 @@ public class TensorCore implements Serializable {
         Map<String, String> outGradMap = new HashMap<>();
         IntStream.range(0, outGradParams.size()).forEach(i -> outGradMap.put(outGradParams.get(i), String.valueOf(i)));
 
-        String[] param = gradParams.stream().filter(a -> code.contains(a)).toArray(String[]::new);
-        String codes = getGradCode(param);
+        String codes = getGradCode(gradParams);
         return getGradCodex(outMap, outGradMap, codes);
     }
 
-    private String getGradCode(String[] param) {
-        String params = String.join(",", param);
+    private String getGradCode(List<String> gradParams) {
+        String params = gradParams.stream().filter(a -> code.contains(a)).collect(Collectors.joining(","));
         return new StringBuilder()
         .append("extern \"C\" __global__ void gradient(double* in, double* out, double* outGrad, double* inGrad){")
             .append("int idx = blockDim.x * blockIdx.x + threadIdx.x;")
@@ -180,10 +179,6 @@ public class TensorCore implements Serializable {
                 return Stream.of(out);
             }
         }).map(None::getGradId).map(String::trim).toList();
-    }
-
-    public String[] getParam(String param) {
-        return Arrays.stream(param.split(",")).map(String::trim).distinct().toArray(String[]::new);
     }
 
 }
