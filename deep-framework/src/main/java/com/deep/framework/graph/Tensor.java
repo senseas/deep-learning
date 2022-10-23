@@ -5,6 +5,7 @@ import com.deep.framework.framework.TensorFlux;
 import lombok.Data;
 
 import java.io.Serializable;
+import java.util.List;
 import java.util.Objects;
 
 import static com.deep.framework.lang.Shape.*;
@@ -104,7 +105,7 @@ public class Tensor implements Serializable {
     protected double[] value, grad;
     protected transient boolean[] reduce;
     private transient double[] data;
-    private String outParams, inParams;
+    private List<String> outParams, inParams;
     private transient boolean gradre, parallel;
     private transient CudaContext context;
 }

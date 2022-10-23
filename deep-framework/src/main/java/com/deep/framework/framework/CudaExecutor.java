@@ -1,20 +1,17 @@
 package com.deep.framework.framework;
 
+import com.deep.framework.cuda.Dim;
 import com.deep.framework.graph.None;
 import com.deep.framework.graph.Tensor;
 import com.deep.framework.lang.Tenser;
 import com.deep.framework.lang.annotation.Cuda;
-import com.deep.framework.cuda.Dim;
 import com.deep.framework.lang.util.BeanUtil;
 import jcuda.driver.CUfunction;
 import lombok.Data;
 import lombok.SneakyThrows;
 
 import java.io.Serializable;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -34,8 +31,7 @@ public class CudaExecutor implements Serializable {
 
         CUfunction function = getFunction(tensor);
         double[] input = Arrays.stream(tensor.getInput()).flatMapToDouble(a -> Arrays.stream(a.getValue())).toArray();
-        String[] param = tensor.getOutParams().split(",");
-        int length = param.length;
+        int length = tensor.getOutParams().size();
 
         if (BeanUtil.isTenser(tensor.getFunction())) {
             Tenser<None> tenser = tensor.getOutput();
@@ -50,7 +46,7 @@ public class CudaExecutor implements Serializable {
                 double[] output = new double[length];
                 run(function, new Dim(1), new Dim(1), input, output);
                 tensor.setData(output);
-                tensor.setValue(IntStream.range(0, length).filter(i -> Objects.nonNull(map.get(param[i]))).mapToDouble(i -> output[i]).toArray());
+                tensor.setValue(IntStream.range(0, length).filter(i -> Objects.nonNull(map.get(tensor.getOutParams().get(i)))).mapToDouble(i -> output[i]).toArray());
             }
         } else {
             double[] output = new double[length];
@@ -144,8 +140,8 @@ public class CudaExecutor implements Serializable {
             code = core.code.replace("compute", name);
         }
 
-        tensor.setOutParams(String.join(",", core.getParam(core.outParams)));
-        tensor.setInParams(String.join(",", core.getParam(core.inParams)));
+        tensor.setOutParams(core.outParams);
+        tensor.setInParams(core.inParams);
         System.out.println(code);
         function = createFunction(name, code);
         parallels.put(name, tensor);
@@ -211,7 +207,7 @@ public class CudaExecutor implements Serializable {
                 TensorCore corem = new TensorCore();
                 corem.forward(m);
 
-                TensorCore  coren = new TensorCore();
+                TensorCore coren = new TensorCore();
                 coren.forward(n);
 
                 tensor.setParallel(corem.code.equals(coren.code));
@@ -220,13 +216,13 @@ public class CudaExecutor implements Serializable {
         return tensor.isParallel();
     }
 
-    public static String getGradOutParam(Tensor tensor) {
+    public static List<String> getGradOutParam(Tensor tensor) {
         if (BeanUtil.isTenser(tensor.getOutput())) {
             Tenser<None> output = tensor.getOutput();
-            return output.stream().map(None::getGradId).collect(Collectors.joining(","));
+            return output.stream().map(None::getGradId).map(String::trim).toList();
         } else {
             None output = tensor.getOutput();
-            return output.getGradId();
+            return Arrays.asList(output.getGradId().trim());
         }
     }
 
