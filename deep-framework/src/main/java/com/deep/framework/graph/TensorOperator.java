@@ -14,7 +14,7 @@ public class TensorOperator extends Tensor {
             for (Tensor o : input) {
                 if (o.getName().equals(getName())) {
                     stream = Stream.concat(stream, Arrays.stream(o.getInput()));
-                } else if (!((o instanceof TensorConst) && o.getValue().equals(0.0))) {
+                } else if (!(o instanceof TensorConst && o.getValue()[0] == 0.0)) {
                     stream = Stream.concat(stream, Stream.of(o));
                 }
             }
