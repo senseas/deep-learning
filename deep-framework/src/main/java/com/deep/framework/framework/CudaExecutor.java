@@ -26,6 +26,7 @@ public class CudaExecutor implements Serializable {
 
     private static Map<String, CUfunction> functions = new HashMap<>();
     private static Map<String, Tensor> parallels = new HashMap<>();
+    private static TensorCore core;
 
     @SneakyThrows
     public static void compute(Tensor tensor) {
@@ -115,15 +116,16 @@ public class CudaExecutor implements Serializable {
         }
 
         isSame(tensor);
+        core = new TensorCore();
 
-        TensorCore.inxMap = new HashMap<>();
+        core.inxMap = new HashMap<>();
         Arrays.stream(tensor.getInput()).forEach(a -> {
             if (BeanUtil.isTenser(a.getOutput())) {
                 Tenser<None> output = a.getOutput();
-                output.forEach(out -> TensorCore.inxMap.put(out.getValId().trim(), TensorCore.inxMap.size()));
+                output.forEach(out -> core.inxMap.put(out.getValId().trim(), core.inxMap.size()));
             } else {
                 None out = a.getOutput();
-                TensorCore.inxMap.put(out.getValId().trim(), TensorCore.inxMap.size());
+                core.inxMap.put(out.getValId().trim(), core.inxMap.size());
             }
         });
 
@@ -131,22 +133,19 @@ public class CudaExecutor implements Serializable {
         if (BeanUtil.isTenser(tensor.getFunction())) {
             Tenser<Tensor> tenser = (Tenser<Tensor>) tensor.getFunction();
             if (tensor.isParallel()) {
-                TensorCore.forwardClear();
-                TensorCore.forward(tenser.first());
-                code = TensorCore.code.replace("compute", name);
+                core.forward(tenser.first());
+                code = core.code.replace("compute", name);
             } else {
-                TensorCore.forwardClear();
-                tenser.forEach(TensorCore::forward);
-                code = TensorCore.code.replace("compute", name);
+                tenser.forEach(core::forward);
+                code = core.code.replace("compute", name);
             }
         } else {
-            TensorCore.forwardClear();
-            TensorCore.forward((Tensor) tensor.getFunction());
-            code = TensorCore.code.replace("compute", name);
+            core.forward((Tensor) tensor.getFunction());
+            code = core.code.replace("compute", name);
         }
 
-        tensor.setOutParams(String.join(",", TensorCore.getParam(TensorCore.outParams)));
-        tensor.setInParams(String.join(",", TensorCore.getParam(TensorCore.inParams)));
+        tensor.setOutParams(String.join(",", core.getParam(core.outParams)));
+        tensor.setInParams(String.join(",", core.getParam(core.inParams)));
         System.out.println(code);
         function = createFunction(name, code);
         parallels.put(name, tensor);
@@ -170,15 +169,15 @@ public class CudaExecutor implements Serializable {
         CUfunction function = functions.get(name);
         if (Objects.nonNull(function)) return function;
 
-        TensorCore.outGradParams = getGradOutParam(tensor);
-        TensorCore.inxGradMap = new HashMap<>();
+        core.outGradParams = getGradOutParam(tensor);
+        core.inxGradMap = new HashMap<>();
         Arrays.stream(tensor.getInput()).forEach(a -> {
             if (BeanUtil.isTenser(a.getOutput())) {
                 Tenser<None> output = a.getOutput();
-                output.forEach(out -> TensorCore.inxGradMap.put(out.getGradId().trim(), TensorCore.inxGradMap.size()));
+                output.forEach(out -> core.inxGradMap.put(out.getGradId().trim(), core.inxGradMap.size()));
             } else {
                 None out = a.getOutput();
-                TensorCore.inxGradMap.put(out.getGradId().trim(), TensorCore.inxGradMap.size());
+                core.inxGradMap.put(out.getGradId().trim(), core.inxGradMap.size());
             }
         });
 
@@ -186,18 +185,15 @@ public class CudaExecutor implements Serializable {
         if (BeanUtil.isTenser(tensor.getFunction())) {
             Tenser<Tensor> tenser = (Tenser<Tensor>) tensor.getFunction();
             if (tensor.isParallel()) {
-                TensorCore.backwardClear();
-                TensorCore.backward(tenser.first());
-                code = TensorCore.code.replace("gradient", name);
+                core.backward(tenser.first());
+                code = core.code.replace("gradient", name);
             } else {
-                TensorCore.backwardClear();
-                tenser.forEach(TensorCore::backward);
-                code = TensorCore.code.replace("gradient", name);
+                tenser.forEach(core::backward);
+                code = core.code.replace("gradient", name);
             }
         } else {
-            TensorCore.backwardClear();
-            TensorCore.backward((Tensor) tensor.getFunction());
-            code = TensorCore.code.replace("gradient", name);
+            core.backward((Tensor) tensor.getFunction());
+            code = core.code.replace("gradient", name);
         }
 
         System.out.println(code);
@@ -210,18 +206,15 @@ public class CudaExecutor implements Serializable {
         if (BeanUtil.isTenser(tensor.getFunction())) {
             Tenser<Tensor> tenser = (Tenser<Tensor>) tensor.getFunction();
             if (!Objects.equals(tenser.size(), 1)) {
-                TensorCore.inxMap = null;
                 Tensor m = tenser.data(0), n = tenser.data(1);
 
-                TensorCore.forwardClear();
-                TensorCore.forward(m);
-                String codem = TensorCore.code;
+                TensorCore corem = new TensorCore();
+                corem.forward(m);
 
-                TensorCore.forwardClear();
-                TensorCore.forward(n);
-                String coden = TensorCore.code;
+                TensorCore  coren = new TensorCore();
+                coren.forward(n);
 
-                tensor.setParallel(codem.equals(coden));
+                tensor.setParallel(corem.code.equals(coren.code));
             }
         }
         return tensor.isParallel();

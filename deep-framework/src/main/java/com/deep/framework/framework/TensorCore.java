@@ -14,12 +14,12 @@ import java.util.stream.Stream;
 import static com.deep.framework.lang.ForEach.forEach;
 
 public class TensorCore implements Serializable {
-    public static Map<String, TensorFunctor> map = new HashMap<>();
-    public static String func = "", grad = "", inParams = "", outParams = "", gradParams = "", code = "";
-    public static String inGradParams = "", outGradParams;
-    public static Map<String, Integer> inxMap, inxGradMap;
+    public Map<String, TensorFunctor> map = new HashMap<>();
+    public String func = "", grad = "", inParams = "", outParams = "", gradParams = "", code = "";
+    public String inGradParams = "", outGradParams;
+    public Map<String, Integer> inxMap, inxGradMap;
 
-    static {
+    public TensorCore(){
         TensorCompiler tc = new TensorCompiler();
         Method[] methods = tc.getClass().getDeclaredMethods();
         Arrays.stream(methods).forEach(method -> {
@@ -27,19 +27,19 @@ public class TensorCore implements Serializable {
                 Class type = (Class) method.getGenericParameterTypes()[0];
                 Tensor[] args = IntStream.range(0, method.getParameterCount()).mapToObj(a -> new Tensor(new int[]{1})).toArray(Tensor[]::new);
                 TensorFunctor tensor = (TensorFunctor) method.invoke(tc, type.isArray() ? new Object[]{args} : args);
-                TensorCore.map.put(tensor.getName(), tensor);
+                map.put(tensor.getName(), tensor);
             } catch (Exception e) {
                 e.printStackTrace();
             }
         });
     }
 
-    public static void forward(Tensor tensor) {
+    public void forward(Tensor tensor) {
         if (tensor instanceof TensorFunction) {
             for (Tensor o : tensor.getInput()) {
                 forward(o);
             }
-            forEach(tensor.getFunction(), TensorCore::forward);
+            forEach(tensor.getFunction(), this::forward);
         } else if (tensor instanceof TensorOperator) {
             for (Tensor o : tensor.getInput()) {
                 forward(o);
@@ -48,9 +48,9 @@ public class TensorCore implements Serializable {
         }
     }
 
-    public static void backward(Tensor tensor) {
+    public void backward(Tensor tensor) {
         if (tensor instanceof TensorFunction) {
-            forEach(tensor.getFunction(), TensorCore::backward);
+            forEach(tensor.getFunction(), this::backward);
             for (Tensor o : tensor.getInput()) {
                 backward(o);
             }
@@ -62,7 +62,7 @@ public class TensorCore implements Serializable {
         }
     }
 
-    public static void compute(Tensor tensor) {
+    public void compute(Tensor tensor) {
         TensorFunctor functor = map.get(tensor.getName());
         None output = tensor.getOutput();
         functor.setId(output.getId());
@@ -75,7 +75,7 @@ public class TensorCore implements Serializable {
         code = getFuncCode(tensor, outParams);
     }
 
-    public static void gradient(Tensor tensor) {
+    public void gradient(Tensor tensor) {
         TensorFunctor functor = map.get(tensor.getName());
         None output = tensor.getOutput();
         functor.setId(output.getId());
@@ -88,7 +88,7 @@ public class TensorCore implements Serializable {
         code = getGradCode(tensor, outParams, gradParams, inGradParams);
     }
 
-    private static String getFuncCode(Tensor tensor, String outParams) {
+    private String getFuncCode(Tensor tensor, String outParams) {
         String[] inParam = getParam(inParams);
         Map<String, String> inMap = new HashMap<>();
         IntStream.range(0, inParam.length).forEach(i -> inMap.put(inParam[i], String.valueOf(i)));
@@ -106,7 +106,7 @@ public class TensorCore implements Serializable {
         }).collect(Collectors.joining(""));
     }
 
-    private static String getGradCode(Tensor tensor, String outParams, String gradParams, String inGradParams) {
+    private String getGradCode(Tensor tensor, String outParams, String gradParams, String inGradParams) {
         String[] outParam = getParam(outParams);
         Map<String, String> outMap = new HashMap<>();
         IntStream.range(0, outParam.length).forEach(i -> outMap.put(outParam[i], String.valueOf(i)));
@@ -126,7 +126,7 @@ public class TensorCore implements Serializable {
         }).collect(Collectors.joining(""));
     }
 
-    private static String getInputParam(Tensor tensor) {
+    private String getInputParam(Tensor tensor) {
         List<String> list = Arrays.stream(tensor.getInput()).filter(BeanUtil::isNone).flatMap(a -> {
             if (BeanUtil.isTenser(a.getOutput())) {
                 Tenser<None> output = a.getOutput();
@@ -139,7 +139,7 @@ public class TensorCore implements Serializable {
         return list.isEmpty() ? "" : String.join(",", list).concat(",");
     }
 
-    private static String getGradParam(Tensor tensor) {
+    private String getGradParam(Tensor tensor) {
         List<String> list = Arrays.stream(tensor.getInput()).filter(BeanUtil::isNone).flatMap(a -> {
             if (BeanUtil.isTenser(a.getOutput())) {
                 Tenser<None> output = a.getOutput();
@@ -152,19 +152,11 @@ public class TensorCore implements Serializable {
         return list.isEmpty() ? "" : String.join(",", list).concat(",");
     }
 
-    public static String[] getParam(String param) {
+    public String[] getParam(String param) {
         return Arrays.stream(param.split(",")).map(String::trim).distinct().toArray(String[]::new);
     }
 
-    public static void forwardClear() {
-        func = code = inParams = outParams = "";
-    }
-
-    public static void backwardClear() {
-        grad = code = gradParams = "";
-    }
-
-    private static String getFuncCode(Tensor tensor, String[] param) {
+    private String getFuncCode(Tensor tensor, String[] param) {
         return "extern \"C\" __global__ void compute(double* in, double* out){" +
             "int idx = blockDim.x * blockIdx.x + threadIdx.x;" +
             "int M = " + param.length + ";" +
@@ -172,7 +164,7 @@ public class TensorCore implements Serializable {
         "}";
     }
 
-    private static String getGradCode(Tensor tensor, String[] param, String[] outParam) {
+    private String getGradCode(Tensor tensor, String[] param, String[] outParam) {
         String params = String.join(",", param);
         params = params.isEmpty() ? "" : "double " + params + ";";
         return "extern \"C\" __global__ void gradient(double* in, double* out, double* outGrad, double* inGrad){" +
