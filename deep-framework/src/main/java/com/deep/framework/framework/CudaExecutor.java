@@ -34,7 +34,7 @@ public class CudaExecutor implements Serializable {
 
         CUfunction function = getFunction(tensor);
         double[] input = Arrays.stream(tensor.getInput()).flatMapToDouble(a -> Arrays.stream(a.getValue())).toArray();
-        String[] param = tensor.getOutParams().split(",");
+        String[] param = tensor.getOutParams();
         int length = param.length;
 
         if (BeanUtil.isTenser(tensor.getFunction())) {
@@ -42,7 +42,8 @@ public class CudaExecutor implements Serializable {
             Map<String, None> map = tenser.stream().collect(Collectors.toMap(a -> a.getValId().trim(), a -> a));
             int size = tenser.size();
             if (tensor.isParallel()) {
-                double[] output = new double[size * length];
+                tensor.setDataSize(size * length);
+                double[] output = tensor.getData();
                 run(function, new Dim(size), new Dim(1), input, output);
                 tensor.setData(output);
                 tensor.setValue(IntStream.range(0, size).mapToDouble(i -> output[i * length + length - 1]).toArray());
@@ -144,10 +145,10 @@ public class CudaExecutor implements Serializable {
             code = core.code.replace("compute", name);
         }
 
-        tensor.setOutParams(String.join(",", core.getParam(core.outParams)));
-        tensor.setInParams(String.join(",", core.getParam(core.inParams)));
+        tensor.setOutParams(core.getParam(core.outParams));
+        tensor.setInParams(core.getParam(core.inParams));
         System.out.println(code);
-        function = createFunction(name, code);
+        //function = createFunction(name, code);
         parallels.put(name, tensor);
         functions.put(name, function);
 

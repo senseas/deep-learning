@@ -41,10 +41,17 @@ public class TensorCore implements Serializable {
             }
             forEach(tensor.getFunction(), this::forward);
         } else if (tensor instanceof TensorOperator) {
-            for (Tensor o : tensor.getInput()) {
-                forward(o);
+            if (tensor.getName().equals("Tensor::Add")) {
+                if (isSame(tensor.getInput())) {
+                    forward(tensor.getInput()[0]);
+                    computes(tensor);
+                }
+            } else {
+                for (Tensor o : tensor.getInput()) {
+                    forward(o);
+                }
+                compute(tensor);
             }
-            compute(tensor);
         }
     }
 
@@ -55,9 +62,14 @@ public class TensorCore implements Serializable {
                 backward(o);
             }
         } else if (tensor instanceof TensorOperator) {
-            gradient(tensor);
-            for (Tensor o : tensor.getInput()) {
-                backward(o);
+            if (tensor.getName().equals("Tensor::Add")) {
+                gradients(tensor);
+                backward(tensor.getInput()[0]);
+            } else {
+                gradient(tensor);
+                for (Tensor o : tensor.getInput()) {
+                    backward(o);
+                }
             }
         }
     }
@@ -75,6 +87,13 @@ public class TensorCore implements Serializable {
         code = getFuncCode(tensor, outParams);
     }
 
+    public void computes(Tensor tensor) {
+        TensorFunctor functor = map.get(tensor.getName());
+        None output = tensor.getOutput();
+
+        code = getFuncCodes(tensor, outParams);
+    }
+
     public void gradient(Tensor tensor) {
         TensorFunctor functor = map.get(tensor.getName());
         None output = tensor.getOutput();
@@ -86,6 +105,19 @@ public class TensorCore implements Serializable {
         gradParams = gradParams.concat(output.getGradId().trim()).concat(",");
 
         code = getGradCode(tensor, outParams, gradParams, inGradParams);
+    }
+
+    public void gradients(Tensor tensor) {
+        TensorFunctor functor = map.get(tensor.getName());
+        None output = tensor.getOutput();
+        functor.setId(output.getId());
+        functor.setInput(tensor.getInput());
+
+        grad = grad.concat(Arrays.stream(tensor.getInput()).filter(a -> !(a instanceof TensorConst)).limit(1).map(a -> (None) a.getOutput()).map(a -> a.getGradId() + "=" + output.getGradId() + ";").collect(Collectors.joining()));
+        inGradParams = inGradParams.concat(getGradParam(tensor));
+        gradParams = gradParams.concat(output.getGradId().trim()).concat(",");
+
+        code = getGradCodes(tensor, outParams, gradParams, inGradParams);
     }
 
     private String getFuncCode(Tensor tensor, String outParams) {
@@ -106,7 +138,35 @@ public class TensorCore implements Serializable {
         }).collect(Collectors.joining(""));
     }
 
+    private String getFuncCodes(Tensor tensor, String outParams) {
+        String[] outParam = getParam(outParams);
+        Map<String, String> outMap = new HashMap<>();
+        IntStream.range(0, outParam.length).forEach(i -> outMap.put(outParam[i], String.valueOf(i)));
+
+        return getFuncCodes(tensor, outParam, outMap);
+    }
+
     private String getGradCode(Tensor tensor, String outParams, String gradParams, String inGradParams) {
+        String[] outParam = getParam(outParams);
+        Map<String, String> outMap = new HashMap<>();
+        IntStream.range(0, outParam.length).forEach(i -> outMap.put(outParam[i], String.valueOf(i)));
+
+        String[] outGradParam = getParam(outGradParams);
+        Map<String, String> outGradMap = new HashMap<>();
+        IntStream.range(0, outGradParam.length).forEach(i -> outGradMap.put(outGradParam[i], String.valueOf(i)));
+
+        String[] param = Arrays.stream(getParam(gradParams)).filter(a -> code.contains(a)).toArray(String[]::new);
+        String codes = getGradCode(tensor, param, outParam);
+        return Arrays.stream(codes.split("  ")).map(a -> {
+            if (Objects.nonNull(inxMap.get(a))) return "in[idx+" + inxMap.get(a) + "]";
+            if (Objects.nonNull(inxGradMap.get(a))) return "inGrad[idx +" + inxGradMap.get(a) + "]+";
+            if (Objects.nonNull(outMap.get(a))) return "out[idx * M +" + outMap.get(a) + "]";
+            if (Objects.nonNull(outGradMap.get(a))) return "outGrad[idx + " + outGradMap.get(a) + "]";
+            return a;
+        }).collect(Collectors.joining(""));
+    }
+
+    private String getGradCodes(Tensor tensor, String outParams, String gradParams, String inGradParams) {
         String[] outParam = getParam(outParams);
         Map<String, String> outMap = new HashMap<>();
         IntStream.range(0, outParam.length).forEach(i -> outMap.put(outParam[i], String.valueOf(i)));
@@ -156,23 +216,63 @@ public class TensorCore implements Serializable {
         return Arrays.stream(param.split(",")).map(String::trim).distinct().toArray(String[]::new);
     }
 
+    public static boolean isSame(Tensor[] tensor) {
+        Tensor m = tensor[0], n = tensor[1];
+        TensorCore corem = new TensorCore();
+        corem.forward(m);
+
+        TensorCore coren = new TensorCore();
+        coren.forward(n);
+
+        return corem.code.equals(coren.code);
+    }
+
+    private String getFuncCodes(Tensor tensor, String[] outParam, Map<String, String> outMap) {
+        int length = outParam.length, size = tensor.getInput().length;
+        String valId = ((None) tensor.getInput()[0].getOutput()).getValId().trim();
+        tensor.setDataSize(size * length + 1);
+        return new StringBuilder(code)
+            .append("extern \"C\" __global__ void compute(double* in, double* out){")
+            .append("int idx = blockDim.x * blockIdx.x + threadIdx.x;")
+            .append("int M = ").append(length).append(";")
+            .append("compute<<<").append(1).append(",").append(size).append(">>>(in, out);")
+            .append("for (int i = 0; i < ").append(size).append("; i++) {")
+            .append("out[").append(size * length + 1).append("]+=out[i * M +").append(outMap.get(valId)).append("];")
+            .append("}")
+        .append("}")
+        .toString();
+    }
+
     private String getFuncCode(Tensor tensor, String[] param) {
-        return "extern \"C\" __global__ void compute(double* in, double* out){" +
-            "int idx = blockDim.x * blockIdx.x + threadIdx.x;" +
-            "int M = " + param.length + ";" +
-            func +
-        "}";
+        return new StringBuilder()
+        .append("extern \"C\" __global__ void compute(double* in, double* out){")
+            .append("int idx = blockDim.x * blockIdx.x + threadIdx.x;")
+            .append("int M = ").append(param.length).append(";")
+            .append(func)
+        .append("}")
+        .toString();
     }
 
     private String getGradCode(Tensor tensor, String[] param, String[] outParam) {
-        String params = String.join(",", param);
-        params = params.isEmpty() ? "" : "double " + params + ";";
-        return "extern \"C\" __global__ void gradient(double* in, double* out, double* outGrad, double* inGrad){" +
-            "int idx = blockDim.x * blockIdx.x + threadIdx.x;" +
-            "int M = " + outParam.length + ";" +
-            params +
-            grad +
-        "}";
+        return new StringBuilder()
+        .append("extern \"C\" __global__ void gradient(double* in, double* out, double* outGrad, double* inGrad){")
+            .append("int idx = blockDim.x * blockIdx.x + threadIdx.x;")
+            .append("int M = ").append(outParam.length).append(";")
+            .append(param.length == 0 ? "" : "double " + String.join(",", param) + ";")
+            .append(grad)
+        .append("}")
+        .toString();
+    }
+
+    private String getGradCodes(Tensor tensor, String[] param, String[] outParam) {
+        return new StringBuilder()
+        .append("extern \"C\" __global__ void gradient(double* in, double* out, double* outGrad, double* inGrad){")
+            .append("int idx = blockDim.x * blockIdx.x + threadIdx.x;")
+            .append("int M = ").append(outParam.length).append(";")
+            .append(param.length == 0 ? "" : "double " + String.join(",", param) + ";")
+            .append(grad)
+        .append("}")
+        .toString();
     }
 
 }
