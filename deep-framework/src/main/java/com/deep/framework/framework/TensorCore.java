@@ -80,11 +80,11 @@ public class TensorCore implements Serializable {
     }
 
     private String getFuncCode(Tensor tensor) {
-        Map<String, String> inMap = new HashMap<>();
-        IntStream.range(0, inParams.size()).forEach(i -> inMap.put(inParams.get(i), String.valueOf(i)));
+        Map<String, Integer> inMap = new HashMap<>();
+        IntStream.range(0, inParams.size()).forEach(i -> inMap.put(inParams.get(i), i));
 
-        Map<String, String> outMap = new HashMap<>();
-        IntStream.range(0, outParams.size()).forEach(i -> outMap.put(outParams.get(i), String.valueOf(i)));
+        Map<String, Integer> outMap = new HashMap<>();
+        IntStream.range(0, outParams.size()).forEach(i -> outMap.put(outParams.get(i), i));
 
         String codes = getFuncCode();
         return getFuncCodex(inMap, outMap, codes);
@@ -99,10 +99,10 @@ public class TensorCore implements Serializable {
         .append("}").toString();
     }
 
-    private String getFuncCodex(Map<String, String> inMap, Map<String, String> outMap, String codes) {
+    private String getFuncCodex(Map<String, Integer> inMap, Map<String, Integer> outMap, String codes) {
+        Map<String, Integer> inMapx = Optional.ofNullable(inxMap).orElse(inMap);
         return Arrays.stream(codes.split("  ")).map(a -> {
-            if (Objects.nonNull(inxMap) && Objects.nonNull(inxMap.get(a))) return "in[idx+" + inxMap.get(a) + "]";
-            if (Objects.isNull(inxMap) && Objects.nonNull(inMap.get(a))) return "in[idx+" + inMap.get(a) + "]";
+            if (Objects.nonNull(inMapx.get(a))) return "in[idx+" + inMapx.get(a) + "]";
             if (Objects.nonNull(outMap.get(a))) return "out[idx * M +" + outMap.get(a) + "]";
             return a;
         }).collect(Collectors.joining(""));
