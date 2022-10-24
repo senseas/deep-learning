@@ -222,7 +222,7 @@ public class CudaExecutor implements Serializable {
             return output.stream().map(None::getGradId).map(String::trim).toList();
         } else {
             None output = tensor.getOutput();
-            return Arrays.asList(output.getGradId().trim());
+            return List.of(output.getGradId().trim());
         }
     }
 
