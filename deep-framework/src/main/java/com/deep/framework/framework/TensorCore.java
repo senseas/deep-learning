@@ -15,12 +15,14 @@ import static com.deep.framework.lang.ForEach.forEach;
 
 public class TensorCore implements Serializable {
     public Map<String, TensorFunctor> map = new HashMap<>();
+    public Integer N = 1;
     public String func = "", grad = "", code = "";
     public List<String> inParams = new ArrayList<>(), outParams = new ArrayList<>(), gradParams = new ArrayList<>();
     public List<String> inGradParams = new ArrayList<>(), outGradParams = new ArrayList<>();
     public Map<String, Integer> inxMap, inxGradMap;
 
-    public TensorCore() {
+    public TensorCore(Integer... inputSize) {
+        if (Objects.equals(inputSize.length, 1)) this.N = inputSize[0];
         TensorCompiler tc = new TensorCompiler();
         Method[] methods = tc.getClass().getDeclaredMethods();
         Arrays.stream(methods).forEach(method -> {
@@ -90,19 +92,10 @@ public class TensorCore implements Serializable {
         return getFuncCodex(inMap, outMap, codes);
     }
 
-    private String getFuncCode() {
-        return new StringBuilder()
-        .append("extern \"C\" __global__ void compute(double* in, double* out){")
-            .append("int idx = blockDim.x * blockIdx.x + threadIdx.x;")
-            .append("int M = ").append(outParams.size()).append(";")
-            .append(func)
-        .append("}").toString();
-    }
-
     private String getFuncCodex(Map<String, Integer> inMap, Map<String, Integer> outMap, String codes) {
         Map<String, Integer> inMapx = Optional.ofNullable(inxMap).orElse(inMap);
         return Arrays.stream(codes.split("  ")).map(a -> {
-            if (Objects.nonNull(inMapx.get(a))) return "in[idx+" + inMapx.get(a) + "]";
+            if (Objects.nonNull(inMapx.get(a))) return "in[idx *" + N + "+" + inMapx.get(a) + "]";
             if (Objects.nonNull(outMap.get(a))) return "out[idx * M +" + outMap.get(a) + "]";
             return a;
         }).collect(Collectors.joining(""));
@@ -135,26 +128,34 @@ public class TensorCore implements Serializable {
         return getGradCodex(outMap, outGradMap, codes);
     }
 
-    private String getGradCode(List<String> gradParams) {
-        String params = gradParams.stream().filter(a -> code.contains(a)).collect(Collectors.joining(","));
-        return new StringBuilder()
-        .append("extern \"C\" __global__ void gradient(double* in, double* out, double* outGrad, double* inGrad){")
-            .append("int idx = blockDim.x * blockIdx.x + threadIdx.x;")
-            .append("int M = ").append(outParams.size()).append(";")
-            .append(params.isEmpty() ? "" : "double " + params + ";")
-            .append(grad)
-        .append("}")
-        .toString();
-    }
-
     private String getGradCodex(Map<String, String> outMap, Map<String, String> outGradMap, String codes) {
         return Arrays.stream(codes.split("  ")).map(a -> {
-            if (Objects.nonNull(inxMap.get(a))) return "in[idx+" + inxMap.get(a) + "]";
-            if (Objects.nonNull(inxGradMap.get(a))) return "inGrad[idx +" + inxGradMap.get(a) + "]+";
+            if (Objects.nonNull(inxMap.get(a))) return "in[idx *" + N + "+" + inxMap.get(a) + "]";
+            if (Objects.nonNull(inxGradMap.get(a))) return "inGrad[idx *" + N + "+" + inxGradMap.get(a) + "]+";
             if (Objects.nonNull(outMap.get(a))) return "out[idx * M +" + outMap.get(a) + "]";
             if (Objects.nonNull(outGradMap.get(a))) return "outGrad[idx + " + outGradMap.get(a) + "]";
             return a;
         }).collect(Collectors.joining(""));
+    }
+
+    private String getFuncCode() {
+        return new StringBuilder()
+            .append("extern \"C\" __global__ void compute(double* in, double* out){")
+            .append("int idx = blockDim.x * blockIdx.x + threadIdx.x;")
+            .append("int M = ").append(outParams.size()).append(";")
+            .append(func)
+            .append("}").toString();
+    }
+
+    private String getGradCode(List<String> gradParams) {
+        String params = gradParams.stream().filter(a -> code.contains(a)).collect(Collectors.joining(","));
+        return new StringBuilder()
+            .append("extern \"C\" __global__ void gradient(double* in, double* out, double* outGrad, double* inGrad){")
+            .append("int idx = blockDim.x * blockIdx.x + threadIdx.x;")
+            .append("int M = ").append(outParams.size()).append(";")
+            .append(params.isEmpty() ? "" : "double " + params + ";")
+            .append(grad)
+            .append("}").toString();
     }
 
     private List<String> getInputParam(Tensor tensor) {
