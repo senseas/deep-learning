@@ -2,7 +2,6 @@ package com.deep.framework.framework;
 
 import com.deep.framework.graph.None;
 import com.deep.framework.graph.Tensor;
-import com.deep.framework.lang.annotation.Cuda;
 import com.deep.framework.lang.util.BeanUtil;
 import lombok.SneakyThrows;
 
@@ -17,29 +16,16 @@ public class TensorFlux implements Serializable {
 
     @SneakyThrows
     public static void forward(Tensor tensor) {
-        if (tensor.getClass().getMethod("compute").isAnnotationPresent(Cuda.class)) {
-            if (TensorExecutor.status) {
-                forEach(tensor.getFunction(), Tensor::forward);
-            }
-            forwards(tensor);
-            CudaExecutor.compute(tensor);
-        } else {
-            forEach(tensor.getFunction(), Tensor::forward);
-            forwards(tensor);
-        }
+        forEach(tensor.getFunction(), Tensor::forward);
+        forwards(tensor);
+        CudaExecutor.compute(tensor);
     }
 
     @SneakyThrows
     public static void backward(Tensor tensor) {
         backwards(tensor);
-        if (tensor.getClass().getMethod("compute").isAnnotationPresent(Cuda.class)) {
-            if (TensorExecutor.status) {
-                forEach(tensor.getFunction(), Tensor::backward);
-            }
-            CudaExecutor.gradient(tensor);
-        } else {
-            forEach(tensor.getFunction(), Tensor::backward);
-        }
+        forEach(tensor.getFunction(), Tensor::backward);
+        CudaExecutor.gradient(tensor);
         forEach(tensor.getOutput(), None::reset);
     }
 

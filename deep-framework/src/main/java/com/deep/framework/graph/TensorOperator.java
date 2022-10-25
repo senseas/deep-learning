@@ -1,9 +1,13 @@
 package com.deep.framework.graph;
 
+import com.deep.framework.framework.CudaExecutor;
+import com.deep.framework.framework.TensorExecutor;
 import com.deep.framework.framework.TensorFlux;
 
 import java.util.Arrays;
 import java.util.stream.Stream;
+
+import static com.deep.framework.framework.CudaExecutor.isSame;
 
 public class TensorOperator extends Tensor {
 
@@ -46,13 +50,27 @@ public class TensorOperator extends Tensor {
     }
 
     public void forward() {
-        for (Tensor o : getInput()) TensorFlux.computer(o);
-        TensorFlux.compute(this);
+        if (TensorExecutor.status) {
+            for (Tensor o : getInput()) TensorFlux.computer(o);
+            TensorFlux.compute(this);
+        } else if (isSame(getInput())) {
+            CudaExecutor.computes(this);
+        } else {
+            for (Tensor o : getInput()) TensorFlux.computer(o);
+            TensorFlux.compute(this);
+        }
     }
 
     public void backward() {
-        TensorFlux.gradient(this);
-        for (Tensor o : getInput()) o.backward();
+        if (TensorExecutor.status) {
+            TensorFlux.gradient(this);
+            for (Tensor o : getInput()) o.backward();
+        } else if (isIparallel()) {
+            CudaExecutor.gradients(this);
+        } else {
+            TensorFlux.gradient(this);
+            for (Tensor o : getInput()) o.backward();
+        }
     }
 
     public void reduce() {

@@ -1,5 +1,6 @@
 package com.deep.framework.framework;
 
+import com.alibaba.fastjson.JSONObject;
 import com.deep.framework.cuda.Dim;
 import com.deep.framework.graph.None;
 import com.deep.framework.graph.Tensor;
@@ -28,7 +29,7 @@ public class CudaExecutor implements Serializable {
     @SneakyThrows
     public static void compute(Tensor tensor) {
         if (!tensor.getClass().getMethod("compute").isAnnotationPresent(Cuda.class)) return;
-
+        core = new TensorCore();
         CUfunction function = getFunction(tensor);
         double[] input = Arrays.stream(tensor.getInput()).flatMapToDouble(a -> Arrays.stream(a.getValue())).toArray();
         int length = tensor.getOutParams().size();
@@ -55,6 +56,27 @@ public class CudaExecutor implements Serializable {
             None out = tensor.getOutput();
             out.setValue(output[length - 1]);
         }
+    }
+
+    public static void computes(Tensor tensor) {
+        Tensor[] tensors = tensor.getInput();
+        int size = tensors.length;
+        core = new TensorCore(size);
+        CUfunction function = getFunction(tensors[0]);
+        tensor.setIparallel(true);
+
+        double[] input = Arrays.stream(tensors).flatMap(a -> Arrays.stream(a.getInput()).map(b -> ((None) b.getOutput()).getValue())).mapToDouble(a -> a).toArray();
+        int length = tensors[0].getOutParams().size();
+
+        double[] output = new double[size * length];
+        run(function, new Dim(size), new Dim(1), input, output);
+        IntStream.range(0, size).forEach(i -> {
+            Tensor in = tensors[i];
+            in.setData(Arrays.copyOfRange(output, i * length, i * length + length));
+            in.getValue()[0] = in.getData()[length - 1];
+        });
+
+        compute(tensor);
     }
 
     @SneakyThrows
@@ -93,6 +115,27 @@ public class CudaExecutor implements Serializable {
         }
     }
 
+    @SneakyThrows
+    public static void gradients(Tensor tensor) {
+        if (!tensor.getClass().getMethod("compute").isAnnotationPresent(Cuda.class)) return;
+
+        gradient(tensor);
+
+        Tensor[] tensors = tensor.getInput();
+        int size = tensors.length;
+        core = new TensorCore(size);
+        CUfunction function = getGradient(tensors[0]);
+
+        double[] input = Arrays.stream(tensors).flatMap(a -> Arrays.stream(a.getInput()).map(b -> ((None) b.getOutput()).getValue())).mapToDouble(a -> a).toArray();
+        double[] inGrad = new double[input.length];
+        double[] data = Arrays.stream(tensors).flatMapToDouble(a -> Arrays.stream(a.getData())).toArray();
+
+        double[] grad = Arrays.stream(tensors).flatMapToDouble(a -> Arrays.stream(a.getGrad())).toArray();
+
+        run(function, new Dim(size), new Dim(1), input, data, grad, inGrad);
+        System.out.println(JSONObject.toJSONString(inGrad));
+    }
+
     /**
      * Create a CUDA kernel function by compiling the given code using the
      * NVRTC, and obtaining the function with the given name
@@ -112,7 +155,6 @@ public class CudaExecutor implements Serializable {
         }
 
         isSame(tensor);
-        core = new TensorCore();
 
         core.inxMap = new HashMap<>();
         Arrays.stream(tensor.getInput()).forEach(a -> {
@@ -135,8 +177,11 @@ public class CudaExecutor implements Serializable {
                 tenser.forEach(core::forward);
                 code = core.code.replace("compute", name);
             }
-        } else {
+        } else if (Objects.nonNull(tensor.getFunction())) {
             core.forward((Tensor) tensor.getFunction());
+            code = core.code.replace("compute", name);
+        } else {
+            core.forward(tensor);
             code = core.code.replace("compute", name);
         }
 
@@ -187,8 +232,11 @@ public class CudaExecutor implements Serializable {
                 tenser.forEach(core::backward);
                 code = core.code.replace("gradient", name);
             }
-        } else {
+        } else if (Objects.nonNull(tensor.getFunction())) {
             core.backward((Tensor) tensor.getFunction());
+            code = core.code.replace("gradient", name);
+        } else {
+            core.backward(tensor);
             code = core.code.replace("gradient", name);
         }
 
@@ -214,6 +262,19 @@ public class CudaExecutor implements Serializable {
             }
         }
         return tensor.isParallel();
+    }
+
+    public static boolean isSame(Tensor[] tensor) {
+        if (!Objects.equals(tensor.length, 1)) {
+            Tensor m = tensor[0], n = tensor[1];
+            TensorCore corem = new TensorCore();
+            corem.forward(m);
+
+            TensorCore coren = new TensorCore();
+            coren.forward(n);
+            return corem.code.equals(coren.code);
+        }
+        return false;
     }
 
     public static List<String> getGradOutParam(Tensor tensor) {
