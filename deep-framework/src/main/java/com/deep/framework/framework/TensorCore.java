@@ -118,17 +118,17 @@ public class TensorCore implements Serializable {
     }
 
     private String getGradCode(Tensor tensor) {
-        Map<String, String> outMap = new HashMap<>();
-        IntStream.range(0, outParams.size()).forEach(i -> outMap.put(outParams.get(i), String.valueOf(i)));
+        Map<String, Integer> outMap = new HashMap<>();
+        IntStream.range(0, outParams.size()).forEach(i -> outMap.put(outParams.get(i), i));
 
-        Map<String, String> outGradMap = new HashMap<>();
-        IntStream.range(0, outGradParams.size()).forEach(i -> outGradMap.put(outGradParams.get(i), String.valueOf(i)));
+        Map<String, Integer> outGradMap = new HashMap<>();
+        IntStream.range(0, outGradParams.size()).forEach(i -> outGradMap.put(outGradParams.get(i), i));
 
         String codes = getGradCode(gradParams);
         return getGradCodex(outMap, outGradMap, codes);
     }
 
-    private String getGradCodex(Map<String, String> outMap, Map<String, String> outGradMap, String codes) {
+    private String getGradCodex(Map<String, Integer> outMap, Map<String, Integer> outGradMap, String codes) {
         return Arrays.stream(codes.split("  ")).map(a -> {
             if (Objects.nonNull(inxMap.get(a))) return "in[idx *" + N + "+" + inxMap.get(a) + "]";
             if (Objects.nonNull(inxGradMap.get(a))) return "inGrad[idx *" + N + "+" + inxGradMap.get(a) + "]+";
