@@ -14,24 +14,20 @@ public class TensorFlux implements Serializable {
     static final double EX = 0.0000000001;
 
     public static void forward(Tensor tensor) {
-        TensorExecutor.deep.getAndIncrement();
         forEach(tensor.getFunction(), (Tensor a) -> {
             a.forward();
         });
         forwards(tensor);
         CudaExecutor.compute(tensor);
-        TensorExecutor.deep.getAndDecrement();
     }
 
     public static void backward(Tensor tensor) {
-        TensorExecutor.deep.getAndIncrement();
         backwards(tensor);
         forEach(tensor.getFunction(), (Tensor a) -> {
             a.backward();
         });
         CudaExecutor.gradient(tensor);
         forEach(tensor.getOutput(), None::reset);
-        TensorExecutor.deep.getAndDecrement();
     }
 
     public static void reduce(Tensor tensor) {
