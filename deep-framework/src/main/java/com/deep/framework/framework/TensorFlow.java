@@ -16,6 +16,7 @@ public class TensorFlow implements Serializable {
     public Tensor add(Tensor... input) {
         return new TensorOperator("Add", input) {
 
+            @Cuda
             public None compute() {
                 double value = inputStream().mapToDouble(a -> ((None) a).getValue()).sum();
                 return new None(value);
@@ -621,7 +622,6 @@ public class TensorFlow implements Serializable {
     public Tensor softmaxCrossx(Tensor... input) {
         return new TensorFunction("SoftmaxCrossx", input) {
 
-            @Cuda
             public Tensor compute() {
                 Object A = getInput(0), B = getInput(1);
                 Tensor[] C = {new TensorConst(0d)};

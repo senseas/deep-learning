@@ -53,7 +53,7 @@ public class TensorOperator extends Tensor {
         if (TensorExecutor.status) {
             for (Tensor o : getInput()) TensorFlux.computer(o);
             TensorFlux.compute(this);
-        } else if (isSame(getInput())) {
+        } else if (getName().equals("Tensor::Add") && isSame(getInput())) {
             CudaExecutor.computes(this);
         } else {
             for (Tensor o : getInput()) TensorFlux.computer(o);

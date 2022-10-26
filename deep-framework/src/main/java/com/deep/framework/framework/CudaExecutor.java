@@ -1,6 +1,5 @@
 package com.deep.framework.framework;
 
-import com.alibaba.fastjson.JSONObject;
 import com.deep.framework.cuda.Dim;
 import com.deep.framework.graph.None;
 import com.deep.framework.graph.Tensor;
@@ -60,8 +59,11 @@ public class CudaExecutor implements Serializable {
 
     public static void computes(Tensor tensor) {
         Tensor[] tensors = tensor.getInput();
+        IntStream.range(0, tensor.getGrad().length).forEach(i -> tensor.getGrad()[i] = 0);
+        Arrays.stream(tensors).flatMap(a -> Arrays.stream(a.getInput())).forEach(b -> ((None) b.getOutput()).setGradx(0.0));
+
         int size = tensors.length;
-        core = new TensorCore(size);
+        core = new TensorCore(tensors[0].getInput().length);
         CUfunction function = getFunction(tensors[0]);
         tensor.setIparallel(true);
 
@@ -123,17 +125,22 @@ public class CudaExecutor implements Serializable {
 
         Tensor[] tensors = tensor.getInput();
         int size = tensors.length;
-        core = new TensorCore(size);
+        core = new TensorCore(tensors[0].getInput().length);
         CUfunction function = getGradient(tensors[0]);
 
         double[] input = Arrays.stream(tensors).flatMap(a -> Arrays.stream(a.getInput()).map(b -> ((None) b.getOutput()).getValue())).mapToDouble(a -> a).toArray();
         double[] inGrad = new double[input.length];
-        double[] data = Arrays.stream(tensors).flatMapToDouble(a -> Arrays.stream(a.getData())).toArray();
+        double[] output = Arrays.stream(tensors).flatMapToDouble(a -> Arrays.stream(a.getData())).toArray();
+        double[] outGrad = Arrays.stream(tensors).flatMapToDouble(a -> Arrays.stream(a.getGrad())).toArray();
 
-        double[] grad = Arrays.stream(tensors).flatMapToDouble(a -> Arrays.stream(a.getGrad())).toArray();
-
-        run(function, new Dim(size), new Dim(1), input, data, grad, inGrad);
-        System.out.println(JSONObject.toJSONString(inGrad));
+        run(function, new Dim(size), new Dim(1), input, output, outGrad, inGrad);
+        IntStream.range(0, size).forEach(i -> {
+            Tensor[] in = tensors[i].getInput();
+            IntStream.range(0, in.length).forEach(l -> {
+                None none = in[l].getOutput();
+                none.setGradx(inGrad[i * in.length + l]);
+            });
+        });
     }
 
     /**
