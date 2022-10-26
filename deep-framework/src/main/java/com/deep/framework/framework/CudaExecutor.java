@@ -3,6 +3,7 @@ package com.deep.framework.framework;
 import com.deep.framework.cuda.Dim;
 import com.deep.framework.graph.None;
 import com.deep.framework.graph.Tensor;
+import com.deep.framework.graph.TensorFunction;
 import com.deep.framework.lang.Tenser;
 import com.deep.framework.lang.annotation.Cuda;
 import com.deep.framework.lang.util.BeanUtil;
@@ -60,16 +61,14 @@ public class CudaExecutor implements Serializable {
     public static void computes(Tensor tensor) {
         Tensor[] tensors = tensor.getInput();
         IntStream.range(0, tensor.getGrad().length).forEach(i -> tensor.getGrad()[i] = 0);
-        Arrays.stream(tensors).flatMap(a -> Arrays.stream(a.getInput())).forEach(b -> ((None) b.getOutput()).setGradx(0.0));
+        Arrays.stream(tensors).forEach(a -> Arrays.stream(a.getInput()).forEach(b -> ((None) b.getOutput()).setGradx(0.0)));
 
-        int size = tensors.length;
         core = new TensorCore(tensors[0].getInput().length);
         CUfunction function = getFunction(tensors[0]);
+        int size = tensors.length, length = tensors[0].getOutParams().size();
         tensor.setIparallel(true);
 
-        double[] input = Arrays.stream(tensors).flatMap(a -> Arrays.stream(a.getInput()).map(b -> ((None) b.getOutput()).getValue())).mapToDouble(a -> a).toArray();
-        int length = tensors[0].getOutParams().size();
-
+        double[] input = Arrays.stream(tensors).flatMapToDouble(a -> Arrays.stream(a.getInput()).mapToDouble(b -> ((None) b.getOutput()).getValue())).toArray();
         double[] output = new double[size * length];
         run(function, new Dim(size), new Dim(1), input, output);
         IntStream.range(0, size).forEach(i -> {
@@ -128,7 +127,7 @@ public class CudaExecutor implements Serializable {
         core = new TensorCore(tensors[0].getInput().length);
         CUfunction function = getGradient(tensors[0]);
 
-        double[] input = Arrays.stream(tensors).flatMap(a -> Arrays.stream(a.getInput()).map(b -> ((None) b.getOutput()).getValue())).mapToDouble(a -> a).toArray();
+        double[] input = Arrays.stream(tensors).flatMapToDouble(a -> Arrays.stream(a.getInput()).mapToDouble(b -> ((None) b.getOutput()).getValue())).toArray();
         double[] inGrad = new double[input.length];
         double[] output = Arrays.stream(tensors).flatMapToDouble(a -> Arrays.stream(a.getData())).toArray();
         double[] outGrad = Arrays.stream(tensors).flatMapToDouble(a -> Arrays.stream(a.getGrad())).toArray();
@@ -175,18 +174,20 @@ public class CudaExecutor implements Serializable {
         });
 
         String code;
-        if (BeanUtil.isTenser(tensor.getFunction())) {
-            Tenser<Tensor> tenser = (Tenser<Tensor>) tensor.getFunction();
-            if (tensor.isParallel()) {
-                core.forward(tenser.first());
-                code = core.code.replace("compute", name);
+        if (tensor instanceof TensorFunction) {
+            if (BeanUtil.isTenser(tensor.getFunction())) {
+                Tenser<Tensor> tenser = (Tenser<Tensor>) tensor.getFunction();
+                if (tensor.isParallel()) {
+                    core.forward(tenser.first());
+                    code = core.code.replace("compute", name);
+                } else {
+                    tenser.forEach(core::forward);
+                    code = core.code.replace("compute", name);
+                }
             } else {
-                tenser.forEach(core::forward);
+                core.forward((Tensor) tensor.getFunction());
                 code = core.code.replace("compute", name);
             }
-        } else if (Objects.nonNull(tensor.getFunction())) {
-            core.forward((Tensor) tensor.getFunction());
-            code = core.code.replace("compute", name);
         } else {
             core.forward(tensor);
             code = core.code.replace("compute", name);
@@ -230,18 +231,20 @@ public class CudaExecutor implements Serializable {
         });
 
         String code;
-        if (BeanUtil.isTenser(tensor.getFunction())) {
-            Tenser<Tensor> tenser = (Tenser<Tensor>) tensor.getFunction();
-            if (tensor.isParallel()) {
-                core.backward(tenser.first());
-                code = core.code.replace("gradient", name);
+        if (tensor instanceof TensorFunction) {
+            if (BeanUtil.isTenser(tensor.getFunction())) {
+                Tenser<Tensor> tenser = (Tenser<Tensor>) tensor.getFunction();
+                if (tensor.isParallel()) {
+                    core.backward(tenser.first());
+                    code = core.code.replace("gradient", name);
+                } else {
+                    tenser.forEach(core::backward);
+                    code = core.code.replace("gradient", name);
+                }
             } else {
-                tenser.forEach(core::backward);
+                core.backward((Tensor) tensor.getFunction());
                 code = core.code.replace("gradient", name);
             }
-        } else if (Objects.nonNull(tensor.getFunction())) {
-            core.backward((Tensor) tensor.getFunction());
-            code = core.code.replace("gradient", name);
         } else {
             core.backward(tensor);
             code = core.code.replace("gradient", name);
