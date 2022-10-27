@@ -18,6 +18,7 @@ import java.util.stream.IntStream;
 
 import static com.deep.framework.cuda.Cuda.createFunction;
 import static com.deep.framework.cuda.Cuda.run;
+import static com.deep.framework.lang.ForEach.forEach;
 
 @Data
 public class CudaExecutor implements Serializable {
@@ -29,6 +30,8 @@ public class CudaExecutor implements Serializable {
     @SneakyThrows
     public static void compute(Tensor tensor) {
         if (!tensor.getClass().getMethod("compute").isAnnotationPresent(Cuda.class)) return;
+        computes(tensor);
+
         core = new TensorCore();
         CUfunction function = getFunction(tensor);
         double[] input = Arrays.stream(tensor.getInput()).flatMapToDouble(a -> Arrays.stream(a.getValue())).toArray();
@@ -59,30 +62,30 @@ public class CudaExecutor implements Serializable {
     }
 
     public static void computes(Tensor tensor) {
-        Tensor[] tensors = tensor.getInput();
-        IntStream.range(0, tensor.getGrad().length).forEach(i -> tensor.getGrad()[i] = 0);
-        Arrays.stream(tensors).forEach(a -> Arrays.stream(a.getInput()).forEach(b -> ((None) b.getOutput()).setGradx(0.0)));
+        if (tensor.isIparallel()) {
+            Tensor[] tensors = tensor.getInput();
+            forEach(tensor.getOutput(), None::reset);
+            Arrays.stream(tensors).forEach(a -> Arrays.stream(a.getInput()).forEach(b -> ((None) b.getOutput()).reset()));
 
-        core = new TensorCore(tensors[0].getInput().length);
-        CUfunction function = getFunction(tensors[0]);
-        int size = tensors.length, length = tensors[0].getOutParams().size();
-        tensor.setIparallel(true);
+            core = new TensorCore(tensors[0].getInput().length);
+            CUfunction function = getFunction(tensors[0]);
+            int size = tensors.length, length = tensors[0].getOutParams().size();
 
-        double[] input = Arrays.stream(tensors).flatMapToDouble(a -> Arrays.stream(a.getInput()).mapToDouble(b -> ((None) b.getOutput()).getValue())).toArray();
-        double[] output = new double[size * length];
-        run(function, new Dim(size), new Dim(1), input, output);
-        IntStream.range(0, size).forEach(i -> {
-            Tensor in = tensors[i];
-            in.setData(Arrays.copyOfRange(output, i * length, i * length + length));
-            in.getValue()[0] = in.getData()[length - 1];
-        });
-
-        compute(tensor);
+            double[] input = Arrays.stream(tensors).flatMapToDouble(a -> Arrays.stream(a.getInput()).mapToDouble(b -> ((None) b.getOutput()).getValue())).toArray();
+            double[] output = new double[size * length];
+            run(function, new Dim(size), new Dim(1), input, output);
+            IntStream.range(0, size).forEach(i -> {
+                Tensor in = tensors[i];
+                in.setData(Arrays.copyOfRange(output, i * length, i * length + length));
+                in.getValue()[0] = in.getData()[length - 1];
+            });
+        }
     }
 
     @SneakyThrows
     public static void gradient(Tensor tensor) {
         if (!tensor.getClass().getMethod("compute").isAnnotationPresent(Cuda.class)) return;
+        gradients(tensor);
 
         CUfunction function = getGradient(tensor);
         double[] input = Arrays.stream(tensor.getInput()).flatMapToDouble(a -> Arrays.stream(a.getValue())).toArray();
@@ -118,28 +121,26 @@ public class CudaExecutor implements Serializable {
 
     @SneakyThrows
     public static void gradients(Tensor tensor) {
-        if (!tensor.getClass().getMethod("compute").isAnnotationPresent(Cuda.class)) return;
+        if (tensor.isIparallel()) {
+            Tensor[] tensors = tensor.getInput();
+            int size = tensors.length;
+            core = new TensorCore(tensors[0].getInput().length);
+            CUfunction function = getGradient(tensors[0]);
 
-        gradient(tensor);
+            double[] input = Arrays.stream(tensors).flatMapToDouble(a -> Arrays.stream(a.getInput()).mapToDouble(b -> ((None) b.getOutput()).getValue())).toArray();
+            double[] inGrad = new double[input.length];
+            double[] output = Arrays.stream(tensors).flatMapToDouble(a -> Arrays.stream(a.getData())).toArray();
+            double[] outGrad = Arrays.stream(tensors).flatMapToDouble(a -> Arrays.stream(a.getGrad())).toArray();
 
-        Tensor[] tensors = tensor.getInput();
-        int size = tensors.length;
-        core = new TensorCore(tensors[0].getInput().length);
-        CUfunction function = getGradient(tensors[0]);
-
-        double[] input = Arrays.stream(tensors).flatMapToDouble(a -> Arrays.stream(a.getInput()).mapToDouble(b -> ((None) b.getOutput()).getValue())).toArray();
-        double[] inGrad = new double[input.length];
-        double[] output = Arrays.stream(tensors).flatMapToDouble(a -> Arrays.stream(a.getData())).toArray();
-        double[] outGrad = Arrays.stream(tensors).flatMapToDouble(a -> Arrays.stream(a.getGrad())).toArray();
-
-        run(function, new Dim(size), new Dim(1), input, output, outGrad, inGrad);
-        IntStream.range(0, size).forEach(i -> {
-            Tensor[] in = tensors[i].getInput();
-            IntStream.range(0, in.length).forEach(l -> {
-                None none = in[l].getOutput();
-                none.setGradx(inGrad[i * in.length + l]);
+            run(function, new Dim(size), new Dim(1), input, output, outGrad, inGrad);
+            IntStream.range(0, size).forEach(i -> {
+                Tensor[] in = tensors[i].getInput();
+                IntStream.range(0, in.length).forEach(l -> {
+                    None none = in[l].getOutput();
+                    none.setGradx(inGrad[i * in.length + l]);
+                });
             });
-        });
+        }
     }
 
     /**
@@ -269,17 +270,18 @@ public class CudaExecutor implements Serializable {
         return tensor.isParallel();
     }
 
-    public static boolean isSame(Tensor[] tensor) {
-        if (!Objects.equals(tensor.length, 1)) {
-            Tensor m = tensor[0], n = tensor[1];
+    public static boolean isSamex(Tensor tensor) {
+        Tensor[] input = tensor.getInput();
+        if (!Objects.equals(input.length, 1)) {
+            Tensor m = input[0], n = input[1];
             TensorCore corem = new TensorCore();
             corem.forward(m);
 
             TensorCore coren = new TensorCore();
             coren.forward(n);
-            return corem.code.equals(coren.code);
+            tensor.setIparallel(corem.code.equals(coren.code));
         }
-        return false;
+        return tensor.isIparallel();
     }
 
     public static List<String> getGradOutParam(Tensor tensor) {

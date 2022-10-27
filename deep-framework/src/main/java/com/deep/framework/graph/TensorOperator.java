@@ -7,7 +7,7 @@ import com.deep.framework.framework.TensorFlux;
 import java.util.Arrays;
 import java.util.stream.Stream;
 
-import static com.deep.framework.framework.CudaExecutor.isSame;
+import static com.deep.framework.framework.CudaExecutor.isSamex;
 
 public class TensorOperator extends Tensor {
 
@@ -53,8 +53,8 @@ public class TensorOperator extends Tensor {
         if (TensorExecutor.status) {
             for (Tensor o : getInput()) TensorFlux.computer(o);
             TensorFlux.compute(this);
-        } else if (getName().equals("Tensor::Add") && isSame(getInput())) {
-            CudaExecutor.computes(this);
+        } else if (getName().equals("Tensor::Add") && isSamex(this)) {
+            CudaExecutor.compute(this);
         } else {
             for (Tensor o : getInput()) TensorFlux.computer(o);
             TensorFlux.compute(this);
@@ -66,7 +66,7 @@ public class TensorOperator extends Tensor {
             TensorFlux.gradient(this);
             for (Tensor o : getInput()) o.backward();
         } else if (isIparallel()) {
-            CudaExecutor.gradients(this);
+            CudaExecutor.gradient(this);
         } else {
             TensorFlux.gradient(this);
             for (Tensor o : getInput()) o.backward();
