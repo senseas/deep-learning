@@ -30,7 +30,7 @@ public class CudaExecutor implements Serializable {
     @SneakyThrows
     public static void compute(Tensor tensor) {
         if (!tensor.getClass().getMethod("compute").isAnnotationPresent(Cuda.class)) return;
-        computes(tensor);
+        inputCompute(tensor);
 
         core = new TensorCore();
         CUfunction function = getFunction(tensor);
@@ -61,7 +61,7 @@ public class CudaExecutor implements Serializable {
         }
     }
 
-    public static void computes(Tensor tensor) {
+    private static void inputCompute(Tensor tensor) {
         if (tensor.isIparallel()) {
             Tensor[] tensors = tensor.getInput();
             forEach(tensor.getOutput(), None::reset);
@@ -85,7 +85,7 @@ public class CudaExecutor implements Serializable {
     @SneakyThrows
     public static void gradient(Tensor tensor) {
         if (!tensor.getClass().getMethod("compute").isAnnotationPresent(Cuda.class)) return;
-        gradients(tensor);
+        inoutGradient(tensor);
 
         CUfunction function = getGradient(tensor);
         double[] input = Arrays.stream(tensor.getInput()).flatMapToDouble(a -> Arrays.stream(a.getValue())).toArray();
@@ -119,8 +119,7 @@ public class CudaExecutor implements Serializable {
         }
     }
 
-    @SneakyThrows
-    public static void gradients(Tensor tensor) {
+    private static void inoutGradient(Tensor tensor) {
         if (tensor.isIparallel()) {
             Tensor[] tensors = tensor.getInput();
             core = new TensorCore(tensors[0].getInput().length);
