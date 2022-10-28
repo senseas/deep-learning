@@ -130,16 +130,14 @@ public class CudaExecutor implements Serializable {
             Tenser<Tensor> tenser = (Tenser<Tensor>) tensor.getFunction();
             if (tensor.isParallel()) {
                 core.forward(tenser.first());
-                code = core.code.replace("compute", name);
             } else {
                 tenser.forEach(core::forward);
-                code = core.code.replace("compute", name);
             }
         } else {
             core.forward((Tensor) tensor.getFunction());
-            code = core.code.replace("compute", name);
         }
 
+        code = core.code.replace("compute", name);
         tensor.setOutParams(core.outParams);
         tensor.setInParams(core.inParams);
         System.out.println(code);
@@ -182,16 +180,14 @@ public class CudaExecutor implements Serializable {
             Tenser<Tensor> tenser = (Tenser<Tensor>) tensor.getFunction();
             if (tensor.isParallel()) {
                 core.backward(tenser.first());
-                code = core.code.replace("gradient", name);
             } else {
                 tenser.forEach(core::backward);
-                code = core.code.replace("gradient", name);
             }
         } else {
             core.backward((Tensor) tensor.getFunction());
-            code = core.code.replace("gradient", name);
         }
 
+        code = core.code.replace("gradient", name);
         System.out.println(code);
         function = createFunction(name, code);
         functions.put(name, function);
