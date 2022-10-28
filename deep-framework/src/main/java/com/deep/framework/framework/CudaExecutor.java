@@ -40,18 +40,18 @@ public class CudaExecutor implements Serializable {
             if (tensor.isParallel()) {
                 double[] output = new double[size * length];
                 run(function, new Dim(size), new Dim(1), input, output);
-                tensor.setData(output);
+                tensor.setValues(output);
                 tensor.setValue(IntStream.range(0, size).mapToDouble(i -> output[i * length + length - 1]).toArray());
             } else {
                 double[] output = new double[length];
                 run(function, new Dim(1), new Dim(1), input, output);
-                tensor.setData(output);
+                tensor.setValues(output);
                 tensor.setValue(IntStream.range(0, length).filter(i -> Objects.nonNull(map.get(tensor.getOutParams().get(i)))).mapToDouble(i -> output[i]).toArray());
             }
         } else {
             double[] output = new double[length];
             run(function, input, output);
-            tensor.setData(output);
+            tensor.setValues(output);
             None out = tensor.getOutput();
             out.setValue(output[length - 1]);
         }
@@ -69,14 +69,14 @@ public class CudaExecutor implements Serializable {
         if (BeanUtil.isTenser(tensor.getFunction())) {
             if (tensor.isParallel()) {
                 int size = ((Tenser<None>) tensor.getOutput()).size();
-                run(function, new Dim(size), new Dim(1), input, tensor.getData(), tensor.getGrad(), inGrad);
+                run(function, new Dim(size), new Dim(1), input, tensor.getValues(), tensor.getGrad(), inGrad);
                 IntStream.range(0, length).forEach(i -> {
                     int from = i * l;
                     Tensor in = tensor.getInput()[i];
                     in.setGrad(Arrays.copyOfRange(inGrad, from, from + l));
                 });
             } else {
-                run(function, input, tensor.getData(), tensor.getGrad(), inGrad);
+                run(function, input, tensor.getValues(), tensor.getGrad(), inGrad);
                 IntStream.range(0, length).forEach(i -> {
                     int from = i * l;
                     Tensor in = tensor.getInput()[i];
@@ -84,7 +84,7 @@ public class CudaExecutor implements Serializable {
                 });
             }
         } else {
-            run(function, input, tensor.getData(), tensor.getGrad(), inGrad);
+            run(function, input, tensor.getValues(), tensor.getGrad(), inGrad);
             IntStream.range(0, length).forEach(i -> {
                 int from = i * l;
                 Tensor in = tensor.getInput()[i];
