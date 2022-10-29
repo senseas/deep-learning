@@ -4,6 +4,7 @@ import com.deep.framework.cuda.Dim;
 import com.deep.framework.graph.None;
 import com.deep.framework.graph.Tensor;
 import com.deep.framework.graph.TensorFunction;
+import com.deep.framework.lang.ForEach;
 import com.deep.framework.lang.Tenser;
 import com.deep.framework.lang.annotation.Cuda;
 import com.deep.framework.lang.util.BeanUtil;
@@ -75,15 +76,13 @@ public class CudaExecutor implements Serializable {
             double[] output = new double[tensors.length * length];
             run(function, new Dim(tensors.length), new Dim(1), input, output);
             tensor.setValuex(output);
-            IntStream.range(0, tensors.length).forEach(i -> tensors[i].getValue()[0] = output[i * length + length - 1]);
+            ForEach.forEach(tensors.length, i -> tensors[i].getValue()[0] = output[i * length + length - 1]);
         }
     }
 
     @SneakyThrows
     public static void gradient(Tensor tensor) {
         if (!tensor.getClass().getMethod("compute").isAnnotationPresent(Cuda.class)) return;
-        inoutGradient(tensor);
-
         CUfunction function = getGradient(tensor);
         double[] input = Arrays.stream(tensor.getInput()).flatMapToDouble(a -> Arrays.stream(a.getValue())).toArray();
         double[] inGrad = new double[input.length];
@@ -114,22 +113,24 @@ public class CudaExecutor implements Serializable {
                 in.setGrad(Arrays.copyOfRange(inGrad, from, from + l));
             });
         }
+
+        inoutGradient(tensor);
     }
 
     private static void inoutGradient(Tensor tensor) {
         if (tensor.isIparallel()) {
             Tensor[] tensors = tensor.getInput();
-            core = new TensorCore(tensors[0].getInput().length);
+            int length = tensors[0].getInput().length;
+            core = new TensorCore(length);
             CUfunction function = getGradient(tensors[0]);
 
             double[] input = Arrays.stream(tensors).flatMapToDouble(a -> Arrays.stream(a.getInput()).mapToDouble(b -> ((None) b.getOutput()).getValue())).toArray();
             double[] inGrad = new double[input.length];
             double[] output = tensor.getValuex();
             double[] outGrad = Arrays.stream(tensors).flatMapToDouble(a -> Arrays.stream(a.getGrad())).toArray();
-            int length = tensors[0].getInput().length;
 
             run(function, new Dim(tensors.length), new Dim(1), input, output, outGrad, inGrad);
-            IntStream.range(0, tensors.length).forEach(i -> IntStream.range(0, length).forEach(l -> tensors[i].getInput()[l].<None>getOutput().setGradx(inGrad[i * length + l])));
+            ForEach.forEach(tensors.length, length, (i, l) -> tensors[i].getInput()[l].<None>getOutput().setGradx(inGrad[i * length + l]));
         }
     }
 
