@@ -7,24 +7,43 @@ import com.deep.framework.lang.util.BeanUtil;
 
 import java.io.Serializable;
 import java.lang.reflect.Array;
-import java.util.stream.IntStream;
 
 public class ForEach implements Serializable {
 
     public static void forEach(int a, Range1 r) {
-        IntStream.range(0, a).forEach(i -> r.apply(i));
+        for (int i = 0; i < a; i++) {
+            r.apply(i);
+        }
     }
 
     public static void forEach(int a, int b, Range2 r) {
-        forEach(a, i -> forEach(b, l -> r.apply(i, l)));
+        for (int i = 0; i < a; i++) {
+            for (int l = 0; l < b; l++) {
+                r.apply(i, l);
+            }
+        }
     }
 
     public static void forEach(int a, int b, int c, Range3 r) {
-        forEach(a, i -> forEach(b, l -> forEach(c, m -> r.apply(i, l, m))));
+        for (int i = 0; i < a; i++) {
+            for (int l = 0; l < b; l++) {
+                for (int m = 0; m < c; m++) {
+                    r.apply(i, l, m);
+                }
+            }
+        }
     }
 
     public static void forEach(int a, int b, int c, int e, Range4 r) {
-        forEach(a, i -> forEach(b, l -> forEach(c, m -> forEach(e, n -> r.apply(i, l, m, n)))));
+        for (int i = 0; i < a; i++) {
+            for (int l = 0; l < b; l++) {
+                for (int m = 0; m < c; m++) {
+                    for (int n = 0; n < e; n++) {
+                        r.apply(i, l, m, n);
+                    }
+                }
+            }
+        }
     }
 
     public static Object fill(Object a, Func func) {

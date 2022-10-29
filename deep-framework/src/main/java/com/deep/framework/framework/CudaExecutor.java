@@ -74,11 +74,8 @@ public class CudaExecutor implements Serializable {
             double[] input = Arrays.stream(tensors).flatMapToDouble(a -> Arrays.stream(a.getInput()).mapToDouble(b -> ((None) b.getOutput()).getValue())).toArray();
             double[] output = new double[tensors.length * length];
             run(function, new Dim(tensors.length), new Dim(1), input, output);
-            IntStream.range(0, tensors.length).forEach(i -> {
-                Tensor in = tensors[i];
-                in.setValues(Arrays.copyOfRange(output, i * length, i * length + length));
-                in.getValue()[0] = in.getValues()[length - 1];
-            });
+            tensor.setValuex(output);
+            IntStream.range(0, tensors.length).forEach(i -> tensors[i].getValue()[0] = output[i * length + length - 1]);
         }
     }
 
@@ -127,17 +124,12 @@ public class CudaExecutor implements Serializable {
 
             double[] input = Arrays.stream(tensors).flatMapToDouble(a -> Arrays.stream(a.getInput()).mapToDouble(b -> ((None) b.getOutput()).getValue())).toArray();
             double[] inGrad = new double[input.length];
-            double[] output = Arrays.stream(tensors).flatMapToDouble(a -> Arrays.stream(a.getValues())).toArray();
+            double[] output = tensor.getValuex();
             double[] outGrad = Arrays.stream(tensors).flatMapToDouble(a -> Arrays.stream(a.getGrad())).toArray();
+            int length = tensors[0].getInput().length;
 
             run(function, new Dim(tensors.length), new Dim(1), input, output, outGrad, inGrad);
-            IntStream.range(0, tensors.length).forEach(i -> {
-                Tensor[] in = tensors[i].getInput();
-                IntStream.range(0, in.length).forEach(l -> {
-                    None none = in[l].getOutput();
-                    none.setGradx(inGrad[i * in.length + l]);
-                });
-            });
+            IntStream.range(0, tensors.length).forEach(i -> IntStream.range(0, length).forEach(l -> tensors[i].getInput()[l].<None>getOutput().setGradx(inGrad[i * length + l])));
         }
     }
 
