@@ -109,7 +109,7 @@ public class Cuda {
     public static CUfunction createFunction(String name, String code) {
         nvrtcProgram program = new nvrtcProgram();
         nvrtcCreateProgram(program, code, null, 0, null, null);
-        nvrtcCompileProgram(program, 0, null);
+        nvrtcCompileProgram(program, 1, new String[]{"--gpu-architecture=compute_61"});
 
         String[] programLog = new String[1];
         nvrtcGetProgramLog(program, programLog);
