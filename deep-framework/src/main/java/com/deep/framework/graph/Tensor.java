@@ -103,7 +103,7 @@ public class Tensor implements Serializable {
     protected int[] shape;
     protected double[] value, grad;
     protected transient boolean[] reduce;
-    private transient double[] data;
+    private transient double[] values;
     private Integer dataSize;
     private transient List<String> outParams, inParams;
     private transient boolean gradre, parallel;
