@@ -17,9 +17,9 @@ public abstract class TensorFunctor {
         return input.getOutput();
     }
 
-    public abstract <M> M compute();
+    public abstract String compute();
 
-    public abstract <M> M gradient(String grad);
+    public abstract String gradient(String grad);
 
     public String getGradId() {
         return "  e" + id + "  ";
