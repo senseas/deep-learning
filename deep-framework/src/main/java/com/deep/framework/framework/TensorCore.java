@@ -136,13 +136,26 @@ public class TensorCore implements Serializable {
     }
 
     private String getGradCode(Map<String, Integer> outMap, Map<String, Integer> outGradMap, String codes) {
-        return Arrays.stream(codes.split("  ")).map(a -> {
+        codes =Arrays.stream(codes.split("  ")).map(a -> {
+            if (Objects.nonNull(inxMap.get(a))) return "in[idx *" + N + "+" + inxMap.get(a) + "]";
+            if (Objects.nonNull(inxGradMap.get(a))) return "atomicAdd(&inGrad[idx *" + N + "+" + inxGradMap.get(a) + "]+";
+            if (Objects.nonNull(outMap.get(a))) return "out[idx * M +" + outMap.get(a) + "]";
+            if (Objects.nonNull(outGradMap.get(a))) return "outGrad[idx + " + outGradMap.get(a) + "]";
+            return a;
+        }).collect(Collectors.joining(""));
+
+        return Arrays.stream(codes.split(";")).map(a->{
+            if(a.contains("atomicAdd")) return a.replaceFirst("\\+=",",").concat(");");
+            return a.concat(";");
+        }).collect(Collectors.joining(""));
+
+        /*return Arrays.stream(codes.split("  ")).map(a -> {
             if (Objects.nonNull(inxMap.get(a))) return "in[idx *" + N + "+" + inxMap.get(a) + "]";
             if (Objects.nonNull(inxGradMap.get(a))) return "inGrad[idx *" + N + "+" + inxGradMap.get(a) + "]+";
             if (Objects.nonNull(outMap.get(a))) return "out[idx * M +" + outMap.get(a) + "]";
             if (Objects.nonNull(outGradMap.get(a))) return "outGrad[idx + " + outGradMap.get(a) + "]";
             return a;
-        }).collect(Collectors.joining(""));
+        }).collect(Collectors.joining(""));*/
     }
 
     private String getGradCode() {

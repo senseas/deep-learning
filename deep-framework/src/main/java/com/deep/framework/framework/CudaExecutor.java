@@ -33,27 +33,40 @@ public class CudaExecutor implements Serializable {
         if (!tensor.getClass().getMethod("compute").isAnnotationPresent(Cuda.class)) return;
         inputCompute(tensor);
 
-        core = new TensorCore();
-        CUfunction function = getFunction(tensor);
-        double[] input = Arrays.stream(tensor.getInput()).flatMapToDouble(a -> Arrays.stream(a.getValue())).toArray();
-        int length = tensor.getOutParams().size();
+        isSame(tensor);
 
         if (BeanUtil.isTenser(tensor.getFunction())) {
             Tenser<None> tenser = tensor.getOutput();
             Map<String, None> map = tenser.stream().collect(Collectors.toMap(a -> a.getValId().trim(), a -> a));
             int size = tenser.size();
             if (tensor.isParallel()) {
+                core = new TensorCore();
+                CUfunction function = getFunction(tensor);
+                double[] input = Arrays.stream(tensor.getInput()).flatMapToDouble(a -> Arrays.stream(a.getValue())).toArray();
+                int length = tensor.getOutParams().size();
+
                 double[] output = new double[size * length];
                 run(function, new Dim(size), new Dim(1), input, output);
                 tensor.setValues(output);
                 tensor.setValue(IntStream.range(0, size).mapToDouble(i -> output[i * length + length - 1]).toArray());
             } else {
-                double[] output = new double[length];
+                TensorCorex corex = new TensorCorex();
+                double[] input = corex.getInput(tensor);
+                core = new TensorCore(input.length / size);
+                CUfunction function = getFunction(tensor);
+                int length = tensor.getOutParams().size();
+
+                double[] output = new double[size * length];
                 run(function, new Dim(1), new Dim(1), input, output);
                 tensor.setValues(output);
-                tensor.setValue(IntStream.range(0, length).filter(i -> Objects.nonNull(map.get(tensor.getOutParams().get(i)))).mapToDouble(i -> output[i]).toArray());
+                tensor.setValue(IntStream.range(0, size).mapToDouble(i -> output[i * length + length - 1]).toArray());
             }
         } else {
+            core = new TensorCore();
+            CUfunction function = getFunction(tensor);
+            double[] input = Arrays.stream(tensor.getInput()).flatMapToDouble(a -> Arrays.stream(a.getValue())).toArray();
+            int length = tensor.getOutParams().size();
+
             double[] output = new double[length];
             run(function, input, output);
             tensor.setValues(output);
@@ -83,14 +96,13 @@ public class CudaExecutor implements Serializable {
     @SneakyThrows
     public static void gradient(Tensor tensor) {
         if (!tensor.getClass().getMethod("compute").isAnnotationPresent(Cuda.class)) return;
-        CUfunction function = getGradient(tensor);
-        double[] input = Arrays.stream(tensor.getInput()).flatMapToDouble(a -> Arrays.stream(a.getValue())).toArray();
-        double[] inGrad = new double[input.length];
-        int length = tensor.getInput().length, l = input.length / length;
-
         if (BeanUtil.isTenser(tensor.getFunction())) {
+            int size = ((Tenser<None>) tensor.getOutput()).size();
             if (tensor.isParallel()) {
-                int size = ((Tenser<None>) tensor.getOutput()).size();
+                CUfunction function = getGradient(tensor);
+                double[] input = Arrays.stream(tensor.getInput()).flatMapToDouble(a -> Arrays.stream(a.getValue())).toArray();
+                double[] inGrad = new double[input.length];
+                int length = tensor.getInput().length, l = input.length / length;
                 run(function, new Dim(size), new Dim(1), input, tensor.getValues(), tensor.getGrad(), inGrad);
                 IntStream.range(0, length).forEach(i -> {
                     int from = i * l;
@@ -98,7 +110,13 @@ public class CudaExecutor implements Serializable {
                     in.setGrad(Arrays.copyOfRange(inGrad, from, from + l));
                 });
             } else {
-                run(function, input, tensor.getValues(), tensor.getGrad(), inGrad);
+                TensorCorex corex = new TensorCorex();
+                double[] input = corex.getInput(tensor);
+                core = new TensorCore(input.length / size);
+                CUfunction function = getGradient(tensor);
+                double[] inGrad = new double[input.length];
+                int length = tensor.getInput().length, l = input.length / length;
+                run(function, new Dim(size), new Dim(1), input, tensor.getValues(), tensor.getGrad(), inGrad);
                 IntStream.range(0, length).forEach(i -> {
                     int from = i * l;
                     Tensor in = tensor.getInput()[i];
@@ -106,6 +124,10 @@ public class CudaExecutor implements Serializable {
                 });
             }
         } else {
+            CUfunction function = getGradient(tensor);
+            double[] input = Arrays.stream(tensor.getInput()).flatMapToDouble(a -> Arrays.stream(a.getValue())).toArray();
+            double[] inGrad = new double[input.length];
+            int length = tensor.getInput().length, l = input.length / length;
             run(function, input, tensor.getValues(), tensor.getGrad(), inGrad);
             IntStream.range(0, length).forEach(i -> {
                 int from = i * l;
@@ -168,11 +190,7 @@ public class CudaExecutor implements Serializable {
         if (tensor instanceof TensorFunction) {
             if (BeanUtil.isTenser(tensor.getFunction())) {
                 Tenser<Tensor> tenser = (Tenser<Tensor>) tensor.getFunction();
-                if (tensor.isParallel()) {
-                    core.forward(tenser.first());
-                } else {
-                    tenser.forEach(core::forward);
-                }
+                core.forward(tenser.first());
             } else {
                 core.forward((Tensor) tensor.getFunction());
             }
@@ -223,11 +241,7 @@ public class CudaExecutor implements Serializable {
         if (tensor instanceof TensorFunction) {
             if (BeanUtil.isTenser(tensor.getFunction())) {
                 Tenser<Tensor> tenser = (Tenser<Tensor>) tensor.getFunction();
-                if (tensor.isParallel()) {
-                    core.backward(tenser.first());
-                } else {
-                    tenser.forEach(core::backward);
-                }
+                core.backward(tenser.first());
             } else {
                 core.backward((Tensor) tensor.getFunction());
             }
