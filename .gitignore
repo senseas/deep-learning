@@ -1,0 +1,8 @@
+*.class
+Maven__*
+.iml
+.idea
+*.obj
+/deep-framework/target/classes
+*.log
+*.iml
