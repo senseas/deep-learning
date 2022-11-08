@@ -5,6 +5,8 @@ package com.deep.framework.ast.lexer;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import static com.deep.framework.ast.lexer.TokenKind.*;
 
@@ -117,7 +119,7 @@ public enum TokenType {
     LSHIFT_ASSIGN  (BINARY, "<<="),
     RSHIFT_ASSIGN  (BINARY, ">>="),
     URSHIFT_ASSIGN (BINARY, ">>>="),
-    IDENT          (LITERAL,      null);
+    IDENT          (LITERAL,      "");
 
     //@formatter:on
 
@@ -207,8 +209,9 @@ public enum TokenType {
         return version;
     }
 
-    boolean startsWith(final char c) {
-        return name != null && name.length() > 0 && name.charAt(0) == c;
+    public static boolean startsWith(final String index) {
+        Set<String> collect = map.keySet().stream().filter(a -> a.startsWith(index)).collect(Collectors.toSet());
+        return collect.size()>0;
     }
 
     static TokenType[] getValues() {
@@ -233,3 +236,5 @@ public enum TokenType {
     }
 
 }
+
+

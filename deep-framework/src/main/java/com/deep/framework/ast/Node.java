@@ -2,6 +2,8 @@ package com.deep.framework.ast;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 public class Node {
     private Node prarent;
@@ -26,5 +28,13 @@ public class Node {
 
     public void setChildrens(List<Object> childrens) {
         this.childrens = childrens;
+    }
+
+    @Override
+    public String toString() {
+        if (childrens.isEmpty()) return "";
+        String collect = childrens.stream().map(Objects::toString).collect(Collectors.joining(" "));
+        if(collect.endsWith(";"))return collect;
+        return collect.concat(";");
     }
 }
