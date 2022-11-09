@@ -1,7 +1,10 @@
 package com.deep.framework.ast;
 
+import com.deep.framework.ast.declaration.ClassOrInterfaceDeclaration;
+import com.deep.framework.ast.declaration.MethodDeclaration;
 import com.deep.framework.ast.expression.ArrayExpression;
-import com.deep.framework.ast.expression.ParamExpression;
+import com.deep.framework.ast.expression.Name;
+import com.deep.framework.ast.expression.ParametersExpression;
 import com.deep.framework.ast.lexer.BlockLexer;
 import com.deep.framework.ast.lexer.Lexer;
 import com.deep.framework.ast.lexer.StringLexer;
@@ -14,6 +17,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Stream;
 
+import static com.deep.framework.ast.lexer.TokenType.*;
 import static javax.lang.model.SourceVersion.isIdentifier;
 
 public class Parser {
@@ -57,12 +61,15 @@ public class Parser {
             }
         });
 
-        Node node = parserBlockStatement();
-        parserStatement(node);
+        CompilationUnit compilationUnit = new CompilationUnit();
+        parserBlockStatement(compilationUnit);
+        parserStatement(compilationUnit);
+        reduce(compilationUnit);
     }
 
-    private Node parserBlockStatement() {
-        Node node = new Node();
+    private void parserBlockStatement(CompilationUnit compilationUnit) {
+        Node node = new Node(compilationUnit);
+        compilationUnit.getChildrens().add(node);
         for (Object o : list) {
             if (o.equals(TokenType.RBRACE)) {
                 node = node.getPrarent();
@@ -73,7 +80,7 @@ public class Parser {
             } else if (o.equals(TokenType.RPAREN)) {
                 node = node.getPrarent();
             } else if (o.equals(TokenType.LPAREN)) {
-                Node child = new ParamExpression(node);
+                Node child = new ParametersExpression(node);
                 node.getChildrens().add(child);
                 node = child;
             } else if (o.equals(TokenType.RBRACK)) {
@@ -82,11 +89,13 @@ public class Parser {
                 Node child = new ArrayExpression(node);
                 node.getChildrens().add(child);
                 node = child;
+            } else if (o instanceof String) {
+                Name child = new Name((String) o);
+                node.getChildrens().add(child);
             } else {
                 node.getChildrens().add(o);
             }
         }
-        return node;
     }
 
     public void parserStatement(Node node) {
@@ -108,20 +117,65 @@ public class Parser {
                 a.getChildrens().add(n);
             }
         }
+        if (list.isEmpty()) return;
         node.setChildrens(list);
     }
+
+    public void reduce(Node node) {
+        parserClass(node);
+        for (Object n : node.getChildrens()) {
+            if (n instanceof Node) {
+                reduce((Node) n);
+            }
+        }
+    }
+
+    public void parserClass(Node node) {
+        List.copyOf(node.getChildrens()).stream().reduce((m, n) -> {
+            if (m.equals(CLASS)) {
+                ClassOrInterfaceDeclaration classDeclare = new ClassOrInterfaceDeclaration(node.getPrarent());
+                List<Object> prarentChildrens = node.getPrarent().getChildrens();
+                int index = prarentChildrens.indexOf(node);
+                prarentChildrens.set(index, classDeclare);
+                List.copyOf(node.getChildrens()).stream().reduce((a, b) -> {
+                    if (a.equals(CLASS)) {
+                        classDeclare.setName((Name) b);
+                        node.getChildrens().remove(a);
+                    } else if (List.of(PUBLIC, PRIVATE, PROTECTED).contains(a)) {
+                        classDeclare.setModifier((TokenType) a);
+                        node.getChildrens().remove(a);
+                    }
+                    return b;
+                });
+                BlockStatement body = (BlockStatement) prarentChildrens.get(index + 1);
+                classDeclare.setBody(body);
+                prarentChildrens.remove(body);
+                classDeclare.setChildrens(node.getChildrens());
+                classDeclare.getChildrens().add(body);
+                parserMethod(body);
+            }
+            return n;
+        });
+    }
+
+    public void parserMethod(Node node) {
+        if (node instanceof MethodDeclaration) return;
+        List.copyOf(node.getChildrens()).stream().map(a -> (Node) a).reduce((m, n) -> {
+            if (m.getChildrens().size() > 2) {
+                Object c = m.getChildrens().get(m.getChildrens().size() - 2);
+                Object d = m.getChildrens().get(m.getChildrens().size() - 1);
+                if (c instanceof Name && d instanceof ParametersExpression && n instanceof BlockStatement) {
+                    MethodDeclaration methodDeclare = new MethodDeclaration(node.getPrarent());
+                    methodDeclare.setName((Name) c);
+                    methodDeclare.setParameters((ParametersExpression) d);
+                    int index = node.getChildrens().indexOf(m);
+                    node.getChildrens().set(index, methodDeclare);
+                    node.getChildrens().remove(n);
+                    m.getChildrens().add(n);
+                    methodDeclare.setBody((BlockStatement) n);
+                }
+            }
+            return n;
+        });
+    }
 }
-
-
-/*
-else if (n instanceof ParamExpression) {
-        list.add(a);
-        list.add(n);
-        a = new Statement(node);
-        parserStatement((Node) n);
-        }else if (n instanceof ArrayExpression) {
-        list.add(a);
-        list.add(n);
-        a = new Statement(node);
-        parserStatement((Node) n);
-        } */

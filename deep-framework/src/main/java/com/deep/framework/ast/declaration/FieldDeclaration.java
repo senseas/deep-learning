@@ -1,11 +1,13 @@
 package com.deep.framework.ast.declaration;
 
-import com.deep.framework.ast.statement.BlockStatement;
-import com.deep.framework.ast.type.Type;
+import com.deep.framework.ast.Node;
+import com.deep.framework.ast.expression.Name;
 
 public class FieldDeclaration extends Declaration {
-    private String name;
     private String modifier;
-    private Type type;
-    private BlockStatement body;
+    public Name name;
+
+    public FieldDeclaration(Node prarent) {
+        super(prarent);
+    }
 }
