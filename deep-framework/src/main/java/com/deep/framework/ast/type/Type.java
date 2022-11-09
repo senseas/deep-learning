@@ -1,8 +1,13 @@
 package com.deep.framework.ast.type;
 
 import com.deep.framework.ast.Node;
+import com.deep.framework.ast.expression.Name;
 
 public class Type extends Node {
-    private String name;
+    private Name name;
     private String modifier;
+
+    public Type(Name name) {
+        this.name = name;
+    }
 }

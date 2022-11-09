@@ -8,9 +8,11 @@ import com.deep.framework.ast.statement.BlockStatement;
 import com.deep.framework.ast.type.Type;
 import lombok.Data;
 
+import java.util.List;
+
 @Data
 public class MethodDeclaration extends Declaration {
-    public TokenType modifier;
+    public List<TokenType> modifiers;
     public Type returnValue;
     public ParametersExpression parameters;
     public Name name;

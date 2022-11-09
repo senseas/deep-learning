@@ -30,11 +30,22 @@ public class Node {
         this.childrens = childrens;
     }
 
+    public void replaceAndRemove(Node node, Node replaceNode, Node removeNode) {
+        int index = getChildrens().indexOf(node);
+        childrens.set(index, replaceNode);
+        childrens.remove(removeNode);
+    }
+
+    public void replace(Object node, Node replaceNode) {
+        int index = getChildrens().indexOf(node);
+        childrens.set(index, replaceNode);
+    }
+
     @Override
     public String toString() {
         if (childrens.isEmpty()) return "";
         String collect = childrens.stream().map(Objects::toString).collect(Collectors.joining(" "));
-        if(collect.endsWith(";"))return collect;
+        if (collect.endsWith(";")) return collect;
         return collect.concat(";");
     }
 }

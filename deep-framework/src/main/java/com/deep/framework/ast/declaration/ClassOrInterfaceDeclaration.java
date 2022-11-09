@@ -14,7 +14,7 @@ public class ClassOrInterfaceDeclaration extends Declaration {
     private List<ClassOrInterfaceDeclaration> extendedTypes;
     private List<ClassOrInterfaceDeclaration> implementedTypes;
 
-    private TokenType modifier;
+    private List<TokenType>  modifiers;
     public Name name;
     public ParametersExpression parameters;
     private BlockStatement body;
