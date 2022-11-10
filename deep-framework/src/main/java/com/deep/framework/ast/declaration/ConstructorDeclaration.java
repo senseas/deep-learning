@@ -7,11 +7,9 @@ import com.deep.framework.ast.statement.BlockStatement;
 
 public class ConstructorDeclaration extends Declaration {
     private String modifier;
-    public Name name;
-    public ParametersExpression parameters;
+    private Name name;
+    private ParametersExpression parameters;
     private BlockStatement body;
 
-    public ConstructorDeclaration(Node prarent) {
-        super(prarent);
-    }
+    public ConstructorDeclaration(Node prarent) { super(prarent); }
 }

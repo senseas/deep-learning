@@ -11,8 +11,8 @@ import java.util.List;
 @Data
 public class FieldDeclaration extends Declaration {
     private List<TokenType> modifiers;
-    public Type type;
-    public Name name;
+    private Type type;
+    private Name name;
 
     public FieldDeclaration(Node prarent) {
         super(prarent);

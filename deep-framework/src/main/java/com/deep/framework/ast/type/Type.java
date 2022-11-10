@@ -10,4 +10,9 @@ public class Type extends Node {
     public Type(Name name) {
         this.name = name;
     }
+
+    @Override
+    public String toString() {
+        return name.toString();
+    }
 }

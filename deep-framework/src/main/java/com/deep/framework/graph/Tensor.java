@@ -5,7 +5,7 @@ import lombok.Data;
 
 import java.io.Serializable;
 
-@Data
+@Data()
 public class Tensor<N> implements Serializable {
 
     public Tensor(double input) {

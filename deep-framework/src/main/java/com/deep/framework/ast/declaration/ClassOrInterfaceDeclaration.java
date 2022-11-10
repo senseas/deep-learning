@@ -11,12 +11,12 @@ import java.util.List;
 
 @Data
 public class ClassOrInterfaceDeclaration extends Declaration {
-    private List<ClassOrInterfaceDeclaration> extendedTypes;
-    private List<ClassOrInterfaceDeclaration> implementedTypes;
+    private List<Object> extendedTypes;
+    private List<Object> implementedTypes;
 
-    private List<TokenType>  modifiers;
-    public Name name;
-    public ParametersExpression parameters;
+    private List<TokenType> modifiers;
+    private Name name;
+    private ParametersExpression parameters;
     private BlockStatement body;
 
     public ClassOrInterfaceDeclaration(Node prarent) {super(prarent);}

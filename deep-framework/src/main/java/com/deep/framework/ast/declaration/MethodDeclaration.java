@@ -12,10 +12,10 @@ import java.util.List;
 
 @Data
 public class MethodDeclaration extends Declaration {
-    public List<TokenType> modifiers;
-    public Type returnValue;
-    public ParametersExpression parameters;
-    public Name name;
+    private List<TokenType> modifiers;
+    private Type returnValue;
+    private ParametersExpression parameters;
+    private Name name;
     private BlockStatement body;
 
     public MethodDeclaration(Node prarent) {

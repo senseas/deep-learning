@@ -23,10 +23,6 @@ import static com.deep.framework.ast.lexer.TokenType.*;
 import static javax.lang.model.SourceVersion.isIdentifier;
 
 public class Parser {
-    {
-        new Name(null);
-    }
-
     List<TokenType> Method_Modifiers = List.of(PUBLIC, PROTECTED, PRIVATE, STATIC, FINAL, ABSTRACT, DEFAULT, SYNCHRONIZED);
     List<TokenType> Field_Modifiers = List.of(PUBLIC, PROTECTED, PRIVATE, STATIC, FINAL, VOLATILE, TRANSIENT);
     Lexer lexer = new BlockLexer(null);
@@ -130,6 +126,7 @@ public class Parser {
     }
 
     public void reduce(Node node) {
+        parserAnnotation(node);
         parserPackage(node);
         parserImport(node);
         parserClass(node);
@@ -156,6 +153,8 @@ public class Parser {
                     node.replaceAndRemove(m, classDeclare, n);
 
                     parserTypeParameters(classDeclare);
+                    parserImplements(classDeclare);
+                    parserExtends(classDeclare);
 
                     parserMethod(n);
                     parserField(n);
@@ -212,18 +211,18 @@ public class Parser {
         if (!(node instanceof MethodDeclaration || node instanceof ClassOrInterfaceDeclaration)) return;
         if (node.getChildrens().contains(LT)) {
             TypeParametersExpression m = null;
-            for (Object a : node.getChildrens()) {
+            for (Object a : List.copyOf(node.getChildrens())) {
                 if (a.equals(GT)) {
                     node.getChildrens().remove(a);
+                    node.getChildrens().removeAll(m.getChildrens());
+                    return;
                 } else if (a.equals(LT)) {
                     m = new TypeParametersExpression(node);
                     node.replace(a, m);
-                    node = m;
                 } else if (Objects.nonNull(m)) {
                     m.getChildrens().add(a);
                 }
             }
-            node.getChildrens().removeAll(m.getChildrens());
         }
     }
 
@@ -249,6 +248,67 @@ public class Parser {
         if (importDeclaration.getChildrens().isEmpty()) return;
         node.replace(importDeclaration.getChildrens().stream().findFirst().get(), importDeclaration);
         node.getChildrens().removeAll(importDeclaration.getChildrens());
+    }
+
+    public void parserAnnotation(Node node) {
+        if (node instanceof AnnotationDeclaration) return;
+        List.copyOf(node.getChildrens()).stream().reduce((a, b) -> {
+            if (a.equals(AT) && b instanceof Name) {
+                AnnotationDeclaration annotationDeclare = new AnnotationDeclaration(node.getPrarent());
+                annotationDeclare.setName((Name) b);
+                int index = node.getChildrens().indexOf(b);
+                if (index < node.getChildrens().size()) {
+                    Object n = node.getChildrens().get(index + 1);
+                    if (n instanceof ParametersExpression) {
+                        annotationDeclare.setParameters((ParametersExpression) n);
+                        node.getChildrens().remove(n);
+                    }
+                }
+                node.getChildrens().remove(b);
+                node.replace(a, annotationDeclare);
+            }
+            return b;
+        });
+    }
+
+    public void parserImplements(ClassOrInterfaceDeclaration classDeclare) {
+        if (classDeclare.getChildrens().contains(IMPLEMENTS)) {
+            List<Object> list = null;
+            for (Object a : List.copyOf(classDeclare.getChildrens())) {
+                if (a instanceof BlockStatement) {
+                    classDeclare.setImplementedTypes(list);
+                    classDeclare.getChildrens().removeAll(list);
+                    return;
+                } else if (a.equals(IMPLEMENTS)) {
+                    list = new ArrayList<>();
+                    classDeclare.getChildrens().remove(a);
+                } else if (Objects.nonNull(list)) {
+                    list.add(a);
+                }
+            }
+        }
+    }
+
+    public void parserExtends(ClassOrInterfaceDeclaration classDeclare) {
+        if (classDeclare.getChildrens().contains(EXTENDS)) {
+            List<Object> list = null;
+            for (Object a : List.copyOf(classDeclare.getChildrens())) {
+                if (a.equals(IMPLEMENTS)) {
+                    classDeclare.setExtendedTypes(list);
+                    classDeclare.getChildrens().removeAll(list);
+                    return;
+                } else if (a instanceof BlockStatement) {
+                    classDeclare.setExtendedTypes(list);
+                    classDeclare.getChildrens().removeAll(list);
+                    return;
+                } else if (a.equals(EXTENDS)) {
+                    list = new ArrayList<>();
+                    classDeclare.getChildrens().remove(a);
+                } else if (Objects.nonNull(list)) {
+                    list.add(a);
+                }
+            }
+        }
     }
 
 }
