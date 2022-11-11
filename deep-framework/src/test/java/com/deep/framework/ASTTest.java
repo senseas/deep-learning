@@ -8,7 +8,7 @@ public class ASTTest {
     @Test
     public void arrayTest() {
         Parser parser = new Parser();
-        parser.parser("/Users/chengdong/GitHub/deep-learning/deep-framework/src/main/java/com/deep/framework/graph/Tensor.java");
+        parser.parser("/Users/chengdong/GitHub/deep-learning/deep-framework/src/main/java/com/deep/framework/graph/TensorOparetor.java");
     }
 
 }

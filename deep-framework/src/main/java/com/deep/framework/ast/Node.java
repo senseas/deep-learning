@@ -1,10 +1,13 @@
 package com.deep.framework.ast;
 
+import lombok.Data;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+@Data
 public class Node {
     private Node prarent;
     private List<Object> childrens;

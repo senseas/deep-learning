@@ -5,11 +5,9 @@ import com.deep.framework.ast.expression.ArrayExpression;
 import com.deep.framework.ast.expression.Name;
 import com.deep.framework.ast.expression.ParametersExpression;
 import com.deep.framework.ast.expression.TypeParametersExpression;
-import com.deep.framework.ast.lexer.BlockLexer;
-import com.deep.framework.ast.lexer.Lexer;
-import com.deep.framework.ast.lexer.StringLexer;
 import com.deep.framework.ast.lexer.TokenType;
 import com.deep.framework.ast.statement.BlockStatement;
+import com.deep.framework.ast.statement.ForStatement;
 import com.deep.framework.ast.statement.Statement;
 import com.deep.framework.ast.type.Type;
 
@@ -25,7 +23,8 @@ import static javax.lang.model.SourceVersion.isIdentifier;
 public class Parser {
     List<TokenType> Method_Modifiers = List.of(PUBLIC, PROTECTED, PRIVATE, STATIC, FINAL, ABSTRACT, DEFAULT, SYNCHRONIZED);
     List<TokenType> Field_Modifiers = List.of(PUBLIC, PROTECTED, PRIVATE, STATIC, FINAL, VOLATILE, TRANSIENT);
-    Lexer lexer = new BlockLexer(null);
+    String string = "\"";
+    String strings = "\\\"";
     List<Object> list = new ArrayList<>();
 
     public void add(String a) {
@@ -42,16 +41,13 @@ public class Parser {
     public void parser(String strFile) {
         Stream<String> stream = FileUtil.readFile(strFile);
         stream.reduce((a, b) -> {
-            if (lexer.getType().equals("string")) {
-                if (a.concat(b).endsWith("\\\"")) return a.concat(b);
-                if (!b.equals(StringLexer.end)) return a.concat(b);
-                lexer = lexer.getLexer();
+            if (a.equals(string)) {
+                return a.concat(b);
+            } else if (a.startsWith(string)) {
+                if (a.concat(b).endsWith(strings)) return a.concat(b);
+                if (!a.concat(b).endsWith(string)) return a.concat(b);
                 add(a.concat(b));
                 return "";
-            } else if (b.equals(StringLexer.start)) {
-                lexer = new StringLexer(lexer);
-                add(a);
-                return a.concat(b);
             } else if (Character.isWhitespace(b.charAt(0))) {
                 add(a);
                 return "";
@@ -130,6 +126,8 @@ public class Parser {
         parserPackage(node);
         parserImport(node);
         parserClass(node);
+        ForStatement forStatement = new ForStatement();
+        forStatement.parser(node);
         for (Object n : node.getChildrens()) {
             if (n instanceof Node) {
                 reduce((Node) n);
