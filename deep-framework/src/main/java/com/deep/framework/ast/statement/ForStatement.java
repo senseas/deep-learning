@@ -1,35 +1,45 @@
 package com.deep.framework.ast.statement;
 
 import com.deep.framework.ast.Node;
+import com.deep.framework.ast.Stream;
 import com.deep.framework.ast.expression.Expression;
 import com.deep.framework.ast.expression.ParametersExpression;
+import lombok.Data;
 
 import java.util.List;
+import java.util.Objects;
 
 import static com.deep.framework.ast.lexer.TokenType.FOR;
 
+@Data
 public class ForStatement extends Statement {
     private List<Expression> initialization;
     private Expression compare;
     private List<Expression> update;
 
     public ParametersExpression parameters;
-    private BlockStatement body;
+    private Statement body;
+    private static ForStatement statement;
 
-    public void parser(Node node) {
-        if (node.getChildrens().contains(FOR)) {
-            setPrarent(node.getPrarent());
-            int index = node.getChildrens().indexOf(FOR);
-            Object a = node.getChildrens().get(index + 1);
-            parameters = (ParametersExpression) a;
-            int index1 = node.getPrarent().getChildrens().indexOf(node);
-            Object b = node.getPrarent().getChildrens().get(index1 + 1);
-            body = (BlockStatement) b;
-            node.getChildrens().add(b);
-            node.getPrarent().getChildrens().set(index1, this);
-            node.getPrarent().getChildrens().remove(b);
-            node.getChildrens().remove(FOR);
-            this.setChildrens(node.getChildrens());
-        }
+    public static void parser(Node node) {
+        Stream.of(node.getChildrens()).reduce((List list, Object m, Object n) -> {
+            if (m instanceof Node a) {
+                if (a.getChildrens().contains(FOR)) {
+                    statement = new ForStatement();
+                    statement.setPrarent(node);
+                    statement.setChildrens(a.getChildrens());
+                    statement.getChildrens().remove(FOR);
+                    if (Objects.nonNull(n) && n instanceof BlockStatement) {
+                        statement.getChildrens().add(n);
+                        statement.setBody((Statement) n);
+                        ((Node) n).setPrarent(statement);
+                        node.replaceAndRemove(a, statement, n);
+                        list.remove(n);
+                    } else {
+                        node.replace(a, statement);
+                    }
+                }
+            }
+        });
     }
 }

@@ -1,13 +1,11 @@
 package com.deep.framework.ast;
 
 import com.deep.framework.ast.declaration.*;
-import com.deep.framework.ast.expression.ArrayExpression;
-import com.deep.framework.ast.expression.Name;
-import com.deep.framework.ast.expression.ParametersExpression;
-import com.deep.framework.ast.expression.TypeParametersExpression;
+import com.deep.framework.ast.expression.*;
 import com.deep.framework.ast.lexer.TokenType;
 import com.deep.framework.ast.statement.BlockStatement;
 import com.deep.framework.ast.statement.ForStatement;
+import com.deep.framework.ast.statement.IfStatement;
 import com.deep.framework.ast.statement.Statement;
 import com.deep.framework.ast.type.Type;
 
@@ -126,8 +124,11 @@ public class Parser {
         parserPackage(node);
         parserImport(node);
         parserClass(node);
-        ForStatement forStatement = new ForStatement();
-        forStatement.parser(node);
+        ForStatement.parser(node);
+        IfStatement.parser(node);
+        Name.parser(node);
+        Name.parser(node);
+        BinaryExpression.parser(node);
         for (Object n : node.getChildrens()) {
             if (n instanceof Node) {
                 reduce((Node) n);

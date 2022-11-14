@@ -10,4 +10,5 @@ public class BlockStatement extends Statement {
     public BlockStatement(Node prarent) {
         super(prarent);
     }
+
 }

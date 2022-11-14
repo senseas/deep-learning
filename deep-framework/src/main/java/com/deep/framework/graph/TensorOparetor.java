@@ -7,6 +7,13 @@ public class TensorOparetor extends Tensor {
 
     public TensorOparetor(String name, Tensor... input) {
         super(name, input);
+        if (true) {
+            System.out.println(1);
+        } else if (true) {
+            System.out.println(2);
+        } else {
+            System.out.println(3);
+        }
         if (Arrays.asList("Add").contains(name)) {
             Stream<Tensor> stream = Stream.of();
             for (Tensor o : input) {
@@ -14,6 +21,7 @@ public class TensorOparetor extends Tensor {
                 stream = Stream.concat(stream, children);
             }
             setInput(stream.toArray(Tensor[]::new));
+            int a =1+2*3*4+5+7*8;
         }
     }
 
@@ -33,6 +41,7 @@ public class TensorOparetor extends Tensor {
 
     public void backward() {
         TensorFlux.gradient(this);
+        for (Tensor o : getInput()) o.backward();
         for (Tensor o : getInput()) o.backward();
     }
 
