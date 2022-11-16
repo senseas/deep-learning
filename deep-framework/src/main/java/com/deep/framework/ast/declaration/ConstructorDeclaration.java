@@ -11,5 +11,5 @@ public class ConstructorDeclaration extends Declaration {
     private ParametersExpression parameters;
     private BlockStatement body;
 
-    public ConstructorDeclaration(Node prarent) { super(prarent); }
+    public ConstructorDeclaration(Node prarent) {super(prarent);}
 }
