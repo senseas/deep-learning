@@ -23,7 +23,7 @@ public class ForEachStatement extends Statement {
                     statement = new ForStatement();
                     statement.setPrarent(node);
                     statement.setChildrens(a.getChildrens());
-                    statement.getChildrens().remove(FOR);
+                    statement.remove(FOR);
                     if (Objects.nonNull(n) && n instanceof BlockStatement) {
                         statement.getChildrens().add(n);
                         statement.setBody((Statement) n);

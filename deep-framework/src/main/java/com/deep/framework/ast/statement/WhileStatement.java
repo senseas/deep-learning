@@ -25,7 +25,7 @@ public class WhileStatement extends Statement {
                 if (a.getChildrens().contains(WHILE)) {
                     statement.setPrarent(node);
                     statement.setChildrens(a.getChildrens());
-                    statement.getChildrens().remove(WHILE);
+                    statement.remove(WHILE);
                     if (Objects.nonNull(n) && n instanceof BlockStatement) {
                         statement.getChildrens().add(n);
                         statement.setBody((Statement) n);

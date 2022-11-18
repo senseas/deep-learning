@@ -27,10 +27,10 @@ public class IfStatement extends Statement {
                     statement = new IfStatement();
                     statement.setPrarent(node);
                     statement.setChildrens(a.getChildrens());
-                    statement.getChildrens().remove(IF);
+                    statement.remove(IF);
                     if (Objects.nonNull(n) && n instanceof BlockStatement) {
                         statement.setBody((Statement) n);
-                        node.getChildrens().remove(n);
+                        node.remove(n);
                         statement.getChildrens().add(n);
                         ((Node) n).setPrarent(statement);
                         node.replaceAndRemove(a, statement, n);
@@ -41,26 +41,26 @@ public class IfStatement extends Statement {
                 } else if (a.getChildrens().contains(ELSE) && a.getChildrens().contains(IF)) {
                     a.setPrarent(statement);
                     statement.getChildrens().add(m);
-                    statement.getChildrens().remove(List.of(ELSE, IF));
+                    statement.remove(List.of(ELSE, IF));
                     if (Objects.nonNull(n) && n instanceof BlockStatement) {
                         a.getChildrens().add(n);
                         ((Node) n).setPrarent(a);
                         node.getChildrens().removeAll(List.of(m, n));
                         list.remove(n);
                     } else {
-                        node.getChildrens().remove(m);
+                        node.remove(m);
                     }
                 } else if (a.getChildrens().contains(ELSE)) {
                     a.setPrarent(statement);
                     statement.getChildrens().add(m);
-                    statement.getChildrens().remove(ELSE);
+                    statement.remove(ELSE);
                     if (Objects.nonNull(n) && n instanceof BlockStatement) {
                         a.getChildrens().add(n);
                         ((Node) n).setPrarent(a);
                         node.getChildrens().removeAll(List.of(m, n));
                         list.remove(n);
                     } else {
-                        node.getChildrens().remove(m);
+                        node.remove(m);
                     }
                     statement = null;
                 }

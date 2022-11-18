@@ -38,8 +38,8 @@ public class BinaryExpression extends Expression {
                     expression.setRight(c);
 
                     node.replace(m, expression);
-                    node.getChildrens().remove(n);
-                    node.getChildrens().remove(o);
+                    node.remove(n);
+                    node.remove(o);
                     list.remove(n);
                     list.remove(o);
                     list.clear();
@@ -66,8 +66,8 @@ public class BinaryExpression extends Expression {
                     expression.setRight(c);
 
                     node.replace(m, expression);
-                    node.getChildrens().remove(n);
-                    node.getChildrens().remove(o);
+                    node.remove(n);
+                    node.remove(o);
                     list.remove(n);
                     list.remove(o);
                     list.clear();

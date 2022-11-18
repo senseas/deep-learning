@@ -38,21 +38,30 @@ public class Node {
     }
 
     public void replaceAndRemove(Node node, Node replaceNode, Object removeNode) {
-        int index = getChildrens().indexOf(node);
-        childrens.set(index, replaceNode);
-        childrens.remove(removeNode);
+        replace(node, replaceNode);
+        remove(removeNode);
     }
 
     public void replaceAndRemove(Node node, Node replaceNode, Object removeNode, Object removeNodeb) {
-        int index = getChildrens().indexOf(node);
-        childrens.set(index, replaceNode);
-        childrens.remove(removeNode);
-        childrens.remove(removeNodeb);
+        replace(node, replaceNode);
+        remove(removeNode);
+        remove(removeNodeb);
     }
 
     public void replace(Object node, Node replaceNode) {
-        int index = getChildrens().indexOf(node);
-        childrens.set(index, replaceNode);
+        for (int index = 0; index < getChildrens().size(); index++) {
+            if (getChildrens().get(index) == node) {
+                childrens.set(index, replaceNode);
+            }
+        }
+    }
+
+    public void remove(Object removeNode) {
+        for (int index = 0; index < getChildrens().size(); index++) {
+            if (getChildrens().get(index) == removeNode) {
+                getChildrens().remove(index);
+            }
+        }
     }
 
     public Node setPrarent(Node prarent) {

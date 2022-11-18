@@ -13,28 +13,33 @@ public class Name extends Expression {
     private Name qualifier;
     private static Name name;
 
+    public Name() {
+        super(null);
+    }
+
     public Name(String identifier) {
         super(null);
         this.identifier = identifier;
     }
 
     public static void parser(Node node) {
-        CallableDeclaration.parser(node);
+        //CallableDeclaration.parser(node);
         Stream.of(node.getChildrens()).reduce((List list, Object m, Object n) -> {
             if (m instanceof Name a && Objects.nonNull(n) && n.equals(TokenType.DOT)) {
                 name = a;
-                node.replace(m, name);
+                node.remove(a);
             } else if (m.equals(TokenType.DOT) && Objects.nonNull(n)) {
-                if (n instanceof Name) {
-                    name.getChildrens().add(n);
-                    node.getChildrens().remove(m);
-                    node.getChildrens().remove(n);
+                if (n instanceof Name b) {
+                    b.setPrarent(node);
+                    b.getChildrens().add(name);
+                    name.setPrarent(b);
+                    node.remove(m);
+                    node.remove(name);
+                    name = b;
                     list.remove(n);
-                } else if (n instanceof CallableDeclaration){
-                    name.getChildrens().add(n);
-                    node.getChildrens().remove(m);
-                    node.getChildrens().remove(n);
-                    list.remove(n);
+                } else {
+                    node.remove(m);
+                    name.setPrarent(node);
                 }
             }
         });

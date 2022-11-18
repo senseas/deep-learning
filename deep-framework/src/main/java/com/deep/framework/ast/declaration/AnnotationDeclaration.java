@@ -29,10 +29,10 @@ public class AnnotationDeclaration extends Declaration {
                     Object n = node.getChildrens().get(index + 1);
                     if (n instanceof ParametersExpression) {
                         annotationDeclare.setParameters((ParametersExpression) n);
-                        node.getChildrens().remove(n);
+                        node.remove(n);
                     }
                 }
-                node.getChildrens().remove(b);
+                node.remove(b);
                 node.replace(a, annotationDeclare);
             }
             return b;

@@ -20,7 +20,7 @@ public class ImportDeclaration extends Declaration {
         node.getChildrens().forEach(a -> {
             if (a instanceof Statement b && b.getChildrens().contains(IMPORT)) {
                 importDeclaration.getChildrens().add(a);
-                importDeclaration.getChildrens().remove(IMPORT);
+                importDeclaration.remove(IMPORT);
             }
         });
 

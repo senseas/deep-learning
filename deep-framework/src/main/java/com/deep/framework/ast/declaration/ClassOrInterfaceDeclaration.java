@@ -43,7 +43,7 @@ public class ClassOrInterfaceDeclaration extends Declaration {
                     classDeclare.getChildrens().add(n);
 
                     m.getChildrens().removeAll(modifiers);
-                    m.getChildrens().remove(CLASS);
+                    m.remove(CLASS);
                     node.replaceAndRemove(m, classDeclare, n);
 
                     TypeParametersExpression.parser(classDeclare);
@@ -69,7 +69,7 @@ public class ClassOrInterfaceDeclaration extends Declaration {
                     return;
                 } else if (a.equals(IMPLEMENTS)) {
                     list = new ArrayList<>();
-                    classDeclare.getChildrens().remove(a);
+                    classDeclare.remove(a);
                 } else if (Objects.nonNull(list)) {
                     list.add(a);
                 }
@@ -91,7 +91,7 @@ public class ClassOrInterfaceDeclaration extends Declaration {
                     return;
                 } else if (a.equals(EXTENDS)) {
                     list = new ArrayList<>();
-                    classDeclare.getChildrens().remove(a);
+                    classDeclare.remove(a);
                 } else if (Objects.nonNull(list)) {
                     list.add(a);
                 }

@@ -18,7 +18,7 @@ public class PackageDeclaration extends Declaration {
         if (node instanceof Statement && node.getChildrens().contains(PACKAGE)) {
             PackageDeclaration packageDeclare = new PackageDeclaration(node);
             packageDeclare.setChildrens(node.getChildrens());
-            packageDeclare.getChildrens().remove(PACKAGE);
+            packageDeclare.remove(PACKAGE);
             node.getPrarent().replace(node, packageDeclare);
         }
     }

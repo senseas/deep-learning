@@ -21,7 +21,7 @@ public class TypeParametersExpression extends Expression {
             TypeParametersExpression m = null;
             for (Object a : List.copyOf(node.getChildrens())) {
                 if (a.equals(GT)) {
-                    node.getChildrens().remove(a);
+                    node.remove(a);
                     node.getChildrens().removeAll(m.getChildrens());
                     return;
                 } else if (a.equals(LT)) {
