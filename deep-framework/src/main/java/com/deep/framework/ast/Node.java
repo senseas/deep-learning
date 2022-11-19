@@ -2,7 +2,6 @@ package com.deep.framework.ast;
 
 import lombok.Data;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -13,12 +12,12 @@ public class Node {
     private List<Object> childrens;
 
     public Node() {
-        this.childrens = new ArrayList<>();
+        this.childrens = new NodeList<>();
     }
 
     public Node(Node prarent) {
         this.prarent = prarent;
-        this.childrens = new ArrayList<>();
+        this.childrens = new NodeList<>();
     }
 
     public Node getPrarent() {
@@ -49,19 +48,12 @@ public class Node {
     }
 
     public void replace(Object node, Node replaceNode) {
-        for (int index = 0; index < getChildrens().size(); index++) {
-            if (getChildrens().get(index) == node) {
-                childrens.set(index, replaceNode);
-            }
-        }
+        int index = childrens.indexOf(node);
+        childrens.set(index, replaceNode);
     }
 
     public void remove(Object removeNode) {
-        for (int index = 0; index < getChildrens().size(); index++) {
-            if (getChildrens().get(index) == removeNode) {
-                getChildrens().remove(index);
-            }
-        }
+        getChildrens().remove(removeNode);
     }
 
     public Node setPrarent(Node prarent) {

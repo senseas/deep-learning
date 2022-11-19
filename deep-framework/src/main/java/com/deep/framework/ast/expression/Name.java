@@ -2,7 +2,6 @@ package com.deep.framework.ast.expression;
 
 import com.deep.framework.ast.Node;
 import com.deep.framework.ast.Stream;
-import com.deep.framework.ast.declaration.CallableDeclaration;
 import com.deep.framework.ast.lexer.TokenType;
 
 import java.util.List;

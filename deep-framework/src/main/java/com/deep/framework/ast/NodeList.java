@@ -1,16 +1,15 @@
 package com.deep.framework.ast;
 
 import java.util.*;
-import java.util.function.UnaryOperator;
 import java.util.stream.IntStream;
 
-public class NodeList<E> implements List<E> {
+public class NodeList<E> extends AbstractList<E> {
     private int size;
-    private int capacity;
-    private E[] data;
+    private int capacity = 10;
+    private E[] array;
 
     public NodeList() {
-        data = (E[]) new Object[capacity];
+        array = (E[]) new Object[capacity];
     }
 
     @Override
@@ -18,140 +17,134 @@ public class NodeList<E> implements List<E> {
         return size;
     }
 
-    @Override
-    public boolean isEmpty() {
-        return size == 0;
+    public E get(int index) {
+        check(index);
+        return array[index];
+    }
+
+    public E set(int index, E e) {
+        check(index);
+        return array[index] = e;
+    }
+
+    private void check(int index) {
+        if (index > size) throw new ArrayIndexOutOfBoundsException(index);
     }
 
     @Override
-    public boolean add(E c) {
+    public void add(int index, E e) {
+        check(index);
         if (size < capacity) {
-            data[size++] = c;
-            return true;
+            if (size == index) {
+                array[size++] = e;
+            } else {
+                Object[] newArray = new Object[capacity];
+                System.arraycopy(array, 0, newArray, 0, index);
+                newArray[index] = e;
+                System.arraycopy(array, index, newArray, index + 1, size - index);
+                size++;
+                array = (E[]) newArray;
+            }
+        } else {
+            capacity += 10;
+            Object[] newArray = new Object[capacity];
+            newArray[index] = e;
+            System.arraycopy(array, 0, newArray, 0, index);
+            size++;
+            array = (E[]) newArray;
         }
-
-        capacity += 10;
-        E[] d = (E[]) new Object[capacity];
-        size = 0;
-        for (E e : data) {
-            d[size++] = e;
-        }
-        d[size++] = c;
-        data = d;
-        return true;
     }
 
     @Override
     public boolean remove(Object o) {
-        if (contains(o)) {
-            E[] d = (E[]) new Object[capacity];
-            size = 0;
-            for (E a : data) {
-                if (a != o) {
-                    d[size++] = a;
+        Iterator<E> it = iterator();
+        if (o == null) {
+            while (it.hasNext()) {
+                if (it.next() == null) {
+                    it.remove();
+                    return true;
                 }
             }
-            data = d;
-            return true;
-        }
-        return false;
-    }
-
-    @Override
-    public boolean addAll(Collection<? extends E> c) {
-        if (size + c.size() < capacity) {
-            for (E e : c) {
-                data[size++] = e;
-            }
         } else {
-            capacity += Math.ceil(c.size() / 10.0) * 10;
-            E[] d = (E[]) new Object[capacity];
-            size = 0;
-            for (E e : data) {
-                d[size++] = e;
+            while (it.hasNext()) {
+                if (o == it.next()) {
+                    it.remove();
+                    return true;
+                }
             }
-            for (E e : c) {
-                d[size++] = e;
-            }
-            data = d;
         }
-        return true;
-    }
-
-    @Override
-    public boolean addAll(int index, Collection<? extends E> c) {
         return false;
     }
 
     @Override
     public boolean removeAll(Collection<?> c) {
-        for (Object e : c) {
-            remove(e);
+        Objects.requireNonNull(c);
+        boolean modified = false;
+        Iterator<?> it = iterator();
+        while (it.hasNext()) {
+            if (c.contains(it.next())) {
+                it.remove();
+                modified = true;
+            }
         }
-        return true;
-    }
-
-
-    public E get(int index) {
-        if (index < size) {
-            return data[index];
-        }
-        throw new ArrayIndexOutOfBoundsException(index);
-    }
-
-    public E set(int index, E e) {
-        if (index < size) {
-            data[index] = e;
-        }
-        throw new ArrayIndexOutOfBoundsException(index);
+        return modified;
     }
 
     @Override
-    public void add(int index, E element) {
-
-    }
-
     public E remove(int index) {
-        if (index < size) {
-            for (int i = 0; i < size; i++) {
-                if (i == index) {
-                    E e = data[i];
-                    remove(e);
-                    return e;
-                }
+        check(index);
+        int l = 0;
+        E c = null;
+        Object[] newArray = new Object[capacity];
+        for (int i = 0; i < size; i++) {
+            if (i == index) {
+                c = array[i];
+            } else {
+                newArray[l++] = array[i];
             }
         }
-        throw new ArrayIndexOutOfBoundsException(index);
-    }
-
-    @Override
-    public boolean contains(Object o) {
-        for (E e : data) {
-            if (e == o) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    @Override
-    public boolean containsAll(Collection<?> c) {
-        for (E e : data) {
-            for (Object o : c) {
-                if (e != o) {
-                    return false;
-                }
-            }
-        }
-        return true;
+        size = l;
+        array = (E[]) newArray;
+        return c;
     }
 
     @Override
     public boolean retainAll(Collection<?> c) {
-        for (E e : data) {
-            for (Object o : c) {
-                if (e != o) {
-                    remove(e);
+        Objects.requireNonNull(c);
+        boolean modified = false;
+        Iterator<E> it = iterator();
+        while (it.hasNext()) {
+            if (!c.contains(it.next())) {
+                it.remove();
+                modified = true;
+            }
+        }
+        return modified;
+    }
+
+    @Override
+    public boolean containsAll(Collection<?> c) {
+        for (Object e : c) {
+            if (!contains(e)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    @Override
+    public boolean contains(Object o) {
+        Iterator<E> it = iterator();
+        if (o == null) {
+            while (it.hasNext()) {
+                if (it.next() == null) {
+                    return true;
+                }
+            }
+        } else {
+            while (it.hasNext()) {
+                if (o == it.next()) {
+                    return true;
                 }
             }
         }
@@ -159,43 +152,19 @@ public class NodeList<E> implements List<E> {
     }
 
     @Override
-    public void replaceAll(UnaryOperator<E> operator) {
-        List.super.replaceAll(operator);
-    }
-
-    @Override
-    public void sort(Comparator<? super E> c) {
-        List.super.sort(c);
-    }
-
-    @Override
-    public void clear() {
-        size = 0;
-        data = (E[]) new Object[10];
-    }
-
-    @Override
-    public Iterator<E> iterator() {
-        return this.iterator();
-    }
-
-    @Override
-    public Object[] toArray() {
-        Object[] d = new Object[size];
-        System.arraycopy(data, 0, d, 0, size);
-        return d;
-    }
-
-    @Override
-    public <T> T[] toArray(T[] a) {
-        System.arraycopy(data, 0, a, 0, size);
-        return a;
-    }
-
     public int indexOf(Object o) {
-        for (int i = 0; i < size; i++) {
-            if (data[i] == o) {
-                return i;
+        ListIterator<E> it = listIterator();
+        if (o == null) {
+            while (it.hasNext()) {
+                if (it.next() == null) {
+                    return it.previousIndex();
+                }
+            }
+        } else {
+            while (it.hasNext()) {
+                if (o == it.next()) {
+                    return it.previousIndex();
+                }
             }
         }
         return -1;
@@ -203,33 +172,29 @@ public class NodeList<E> implements List<E> {
 
     @Override
     public int lastIndexOf(Object o) {
-        return 0;
-    }
-
-    @Override
-    public ListIterator<E> listIterator() {
-        return null;
-    }
-
-    @Override
-    public ListIterator<E> listIterator(int index) {
-        return null;
-    }
-
-    @Override
-    public List<E> subList(int fromIndex, int toIndex) {
-        return null;
-    }
-
-    @Override
-    public Spliterator<E> spliterator() {
-        return List.super.spliterator();
+        ListIterator<E> it = listIterator(size());
+        if (o == null) {
+            while (it.hasPrevious()) {
+                if (it.previous() == null) {
+                    return it.nextIndex();
+                }
+            }
+        } else {
+            while (it.hasPrevious()) {
+                if (o == it.previous()) {
+                    return it.nextIndex();
+                }
+            }
+        }
+        return -1;
     }
 
     public static void main(String[] args) {
         List<Object> objects = new NodeList<Object>();
-        IntStream.range(0, 15).forEach(i -> objects.add(i));
-        IntStream.range(0, 15).forEach(i -> objects.remove(objects.get(i)));
+        IntStream.range(0, 15).forEach(objects::add);
+        objects.add(0, 100);
+        objects.remove(0);
+        objects.remove((Integer) 5);
         System.out.println(1);
     }
 
