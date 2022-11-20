@@ -2,10 +2,7 @@
 package com.deep.framework.ast.lexer;
 
 
-import java.util.HashMap;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.deep.framework.ast.lexer.TokenKind.*;
@@ -124,57 +121,24 @@ public enum TokenType {
     //@formatter:on
 
     /**
-     * Next token kind in token lookup table.
-     */
-    private TokenType next;
-
-    /**
      * Classification of token.
      */
     private final TokenKind kind;
+
+    public Token getToken() {
+        return new Token(this);
+    }
 
     /**
      * Printable name of token.
      */
     private final String name;
 
-    /**
-     * Operator precedence.
-     */
-    private final int precedence;
-
-    /**
-     * Left associativity
-     */
-    private final boolean isLeftAssociative;
-
-    /**
-     * ECMAScript version defining the token.
-     */
-    private final int version;
-
-    /**
-     * Cache values to avoid cloning.
-     */
-    private static final TokenType[] tokenValues;
-
-    private static final Map<String, TokenType> map;
+    private static final Map<String, TokenType> map = Arrays.stream(TokenType.values()).collect(Collectors.toMap(TokenType::getName, a -> a));
 
     TokenType(final TokenKind kind, final String name) {
-        this(kind, name, 0, false);
-    }
-
-    TokenType(final TokenKind kind, final String name, final int precedence, final boolean isLeftAssociative) {
-        this(kind, name, precedence, isLeftAssociative, 5);
-    }
-
-    TokenType(final TokenKind kind, final String name, final int precedence, final boolean isLeftAssociative, final int version) {
-        next = null;
         this.kind = kind;
         this.name = name;
-        this.precedence = precedence;
-        this.isLeftAssociative = isLeftAssociative;
-        this.version = version;
     }
 
     public String getName() {
@@ -185,54 +149,17 @@ public enum TokenType {
         return name == null ? super.name().toLowerCase(Locale.ENGLISH) : name;
     }
 
-    public TokenType getNext() {
-        return next;
+    public static boolean contains(final String name) {
+        return map.containsKey(name);
     }
 
-    void setNext(final TokenType next) {
-        this.next = next;
-    }
-
-    public TokenKind getKind() {
-        return kind;
-    }
-
-    public int getPrecedence() {
-        return precedence;
-    }
-
-    public boolean isLeftAssociative() {
-        return isLeftAssociative;
-    }
-
-    public int getVersion() {
-        return version;
-    }
-
-    public static boolean startsWith(final String index) {
-        Set<String> collect = map.keySet().stream().filter(a -> a.startsWith(index)).collect(Collectors.toSet());
-        return collect.size()>0;
-    }
-
-    static TokenType[] getValues() {
-        return tokenValues;
+    public static TokenType getType(String name) {
+        return map.get(name);
     }
 
     @Override
     public String toString() {
         return getNameOrType();
-    }
-
-    public static TokenType getType(String index) {
-        return map.get(index);
-    }
-
-    static {
-        tokenValues = TokenType.values();
-        map = new HashMap();
-        for (TokenType c : TokenType.values()) {
-            map.put(c.name, c);
-        }
     }
 
 }

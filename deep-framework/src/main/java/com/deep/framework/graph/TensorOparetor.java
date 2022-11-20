@@ -1,12 +1,14 @@
 package com.deep.framework.graph;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.stream.Stream;
 
 public class TensorOparetor extends Tensor {
 
     public TensorOparetor(String name, Tensor... input) {
         super(name, input);
+        List<List<Object>> list;
         if (true) {
             System.out.println(1);
         } else if (true) {
@@ -21,7 +23,7 @@ public class TensorOparetor extends Tensor {
                 stream = Stream.concat(stream, children);
             }
             setInput(stream.toArray(Tensor[]::new));
-            int a =1+2*3*4+5+7*8;
+            int a = 1 + 2 * 3 * 4 + 5 + 7 * 8;
         }
     }
 

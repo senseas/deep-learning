@@ -1,7 +1,6 @@
 package com.deep.framework.ast;
 
 import java.util.*;
-import java.util.stream.IntStream;
 
 public class NodeList<E> extends AbstractList<E> {
     private int size;
@@ -80,7 +79,7 @@ public class NodeList<E> extends AbstractList<E> {
             }
         } else {
             while (it.hasNext()) {
-                if (o == it.next()) {
+                if (it.next() == o) {
                     it.remove();
                     return true;
                 }
@@ -156,7 +155,7 @@ public class NodeList<E> extends AbstractList<E> {
             }
         } else {
             while (it.hasNext()) {
-                if (o == it.next()) {
+                if (it.next() == o) {
                     return true;
                 }
             }
@@ -175,7 +174,7 @@ public class NodeList<E> extends AbstractList<E> {
             }
         } else {
             while (it.hasNext()) {
-                if (o == it.next()) {
+                if (it.next() == o) {
                     return it.previousIndex();
                 }
             }
@@ -194,21 +193,12 @@ public class NodeList<E> extends AbstractList<E> {
             }
         } else {
             while (it.hasPrevious()) {
-                if (o == it.previous()) {
+                if (it.previous() == o) {
                     return it.nextIndex();
                 }
             }
         }
         return -1;
-    }
-
-    public static void main(String[] args) {
-        List<Object> objects = new NodeList<Object>();
-        IntStream.range(0, 15).forEach(objects::add);
-        objects.add(0, 100);
-        objects.remove(0);
-        objects.remove((Integer) 5);
-        System.out.println(1);
     }
 
 }

@@ -1,6 +1,7 @@
 package com.deep.framework.ast.declaration;
 
 import com.deep.framework.ast.Node;
+import com.deep.framework.ast.Stream;
 import com.deep.framework.ast.expression.Name;
 import com.deep.framework.ast.expression.ParametersExpression;
 import com.deep.framework.ast.expression.TypeParametersExpression;
@@ -25,14 +26,16 @@ public class ClassOrInterfaceDeclaration extends Declaration {
     private ParametersExpression parameters;
     private BlockStatement body;
 
-    public ClassOrInterfaceDeclaration(Node prarent) {super(prarent);}
+    public ClassOrInterfaceDeclaration(Node prarent) {
+        super(prarent);
+    }
 
     public static void parser(Node node) {
         AnnotationDeclaration.parser(node);
         PackageDeclaration.parser(node);
         ImportDeclaration.parser(node);
 
-        List.copyOf(node.getChildrens()).stream().reduce((a, b) -> {
+        Stream.of(node.getChildrens()).reduce((list, a, b) -> {
             if (a instanceof Node m && b instanceof BlockStatement n) {
                 if (m.getChildrens().contains(CLASS)) {
                     ClassOrInterfaceDeclaration classDeclare = new ClassOrInterfaceDeclaration(node.getPrarent());
@@ -55,7 +58,6 @@ public class ClassOrInterfaceDeclaration extends Declaration {
                     FieldDeclaration.parser(n);
                 }
             }
-            return b;
         });
     }
 

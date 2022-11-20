@@ -1,5 +1,6 @@
 package com.deep.framework.ast;
 
+import com.deep.framework.ast.lexer.TokenType;
 import lombok.Data;
 
 import java.util.List;
@@ -47,7 +48,11 @@ public class Node {
         remove(removeNodeb);
     }
 
-    public void replace(Object node, Node replaceNode) {
+    public boolean contains(TokenType tokenType) {
+        return childrens.stream().anyMatch(a -> a.equals(tokenType));
+    }
+
+    public void replace(Object node, Object replaceNode) {
         int index = childrens.indexOf(node);
         childrens.set(index, replaceNode);
     }

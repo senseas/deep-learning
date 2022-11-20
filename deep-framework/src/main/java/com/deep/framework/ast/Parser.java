@@ -25,7 +25,7 @@ public class Parser {
 
         TokenType type = TokenType.getType(a);
         if (Objects.nonNull(type)) {
-            list.add(type);
+            list.add(type.getToken());
         } else {
             list.add(a);
         }
@@ -46,7 +46,7 @@ public class Parser {
                 return "";
             } else if (!a.isEmpty() && isIdentifier(a.concat(b))) {
                 return a.concat(b);
-            } else if (TokenType.startsWith(a.concat(b))) {
+            } else if (TokenType.contains(a.concat(b))) {
                 return a.concat(b);
             } else {
                 add(a);
@@ -115,10 +115,10 @@ public class Parser {
 
     public void reduce(Node node) {
         Name.parser(node);
+        TypeParametersExpression.parser(node);
         ClassOrInterfaceDeclaration.parser(node);
         ForStatement.parser(node);
         IfStatement.parser(node);
-        TypeParametersExpression.parser(node);
         BinaryExpression.parser(node);
         AssignExpression.parser(node);
         for (Object n : node.getChildrens()) {
