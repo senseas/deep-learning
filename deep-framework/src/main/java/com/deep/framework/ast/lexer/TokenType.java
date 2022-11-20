@@ -67,12 +67,12 @@ public enum TokenType {
     UNDER_SCORE   (KEYWORD,"_"),
 
     // Separators
-    LPAREN        (BINARY,"("),
-    RPAREN        (BINARY,")"),
-    LBRACE        (BINARY,"{"),
-    RBRACE        (BINARY,"}"),
-    LBRACK        (BINARY,"["),
-    RBRACK        (BINARY,"]"),
+    LPAREN        (BRACKET,"("),
+    RPAREN        (BRACKET,")"),
+    LBRACE        (BRACKET,"{"),
+    RBRACE        (BRACKET,"}"),
+    LBRACK        (BRACKET,"["),
+    RBRACK        (BRACKET,"]"),
     SEMI          (BINARY,";"),
     COMMA         (BINARY,","),
     DOT           (BINARY,"."),

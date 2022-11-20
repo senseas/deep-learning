@@ -6,10 +6,11 @@ import com.deep.framework.ast.expression.Name;
 import com.deep.framework.ast.expression.ParametersExpression;
 
 import java.util.List;
+
 public class CallableDeclaration extends Declaration {
     private ParametersExpression parameters;
     private Name name;
-    private static CallableDeclaration declaration;
+    private static CallableDeclaration callable;
 
     public CallableDeclaration(Node prarent) {
         super(prarent);
@@ -18,12 +19,13 @@ public class CallableDeclaration extends Declaration {
     public static void parser(Node node) {
         Stream.of(node.getChildrens()).reduce((List list, Object m, Object n) -> {
             if (m instanceof Name a) {
-                if (n instanceof ParametersExpression) {
-                    declaration = new CallableDeclaration(node);
-                    declaration.setName(a);
-                    declaration.setChildrens(a.getChildrens());
-                    declaration.getChildrens().add(n);
-                    node.replaceAndRemove(a, declaration, n);
+                if (n instanceof ParametersExpression b) {
+                    callable = new CallableDeclaration(node);
+                    callable.setName(a);
+                    callable.setParameters(b);
+                    callable.setChildrens(a.getChildrens());
+                    callable.getChildrens().add(n);
+                    node.replaceAndRemove(a, callable, n);
                     list.remove(n);
                 }
             }
@@ -32,5 +34,9 @@ public class CallableDeclaration extends Declaration {
 
     public void setName(Name name) {
         this.name = name;
+    }
+
+    public void setParameters(ParametersExpression parameters) {
+        this.parameters = parameters;
     }
 }

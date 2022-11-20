@@ -60,29 +60,29 @@ public class Parser {
         reduce(compilationUnit);
     }
 
-    private void parserBlockStatement(CompilationUnit compilationUnit) {
-        Node node = new Node(compilationUnit);
-        compilationUnit.getChildrens().add(node);
+    private void parserBlockStatement(Node prarent) {
+        Node node = new Node(prarent);
+        prarent.getChildrens().add(node);
         for (Object o : list) {
-            if (o.equals(TokenType.RBRACE)) {
-                node = node.getPrarent();
-            } else if (o.equals(TokenType.LBRACE)) {
+            if (o.equals(TokenType.LBRACE)) {
                 Node child = new BlockStatement(node);
                 node.getChildrens().add(child);
                 node = child;
-            } else if (o.equals(TokenType.RPAREN)) {
+            } else if (o.equals(TokenType.RBRACE)) {
                 node = node.getPrarent();
             } else if (o.equals(TokenType.LPAREN)) {
                 Node child = new ParametersExpression(node);
                 node.getChildrens().add(child);
                 node = child;
-            } else if (o.equals(TokenType.RBRACK)) {
+            } else if (o.equals(TokenType.RPAREN)) {
                 node = node.getPrarent();
             } else if (o.equals(TokenType.LBRACK)) {
                 Node child = new ArrayExpression(node);
                 node.getChildrens().add(child);
                 node = child;
-            } else if (o instanceof String) {
+            } else if (o.equals(TokenType.RBRACK)) {
+                node = node.getPrarent();
+            } else if (o instanceof String a && !a.startsWith(string)) {
                 Name child = new Name((String) o);
                 node.getChildrens().add(child);
             } else {
@@ -92,22 +92,21 @@ public class Parser {
     }
 
     public void parserStatement(Node node) {
-        List<Object> list = new ArrayList<>();
-        Statement a = new Statement(node);
-        for (Object n : node.getChildrens()) {
-            if (n instanceof BlockStatement) {
-                list.add(a);
-                list.add(n);
-                a = new Statement(node);
-                parserStatement((Node) n);
-            } else if (n.equals(TokenType.SEMI)) {
-                list.add(a);
-                a = new Statement(node);
-            } else if (n instanceof Node) {
-                parserStatement((Node) n);
-                a.getChildrens().add(n);
+        List<Object> list = new NodeList<>();
+        Statement statement = new Statement(node);
+        for (Object o : node.getChildrens()) {
+            if (o instanceof BlockStatement) {
+                list.addAll(List.of(statement, o));
+                statement = new Statement(node);
+                parserStatement((Node) o);
+            } else if (o.equals(TokenType.SEMI)) {
+                list.add(statement);
+                statement = new Statement(node);
+            } else if (o instanceof Node) {
+                parserStatement((Node) o);
+                statement.getChildrens().add(o);
             } else {
-                a.getChildrens().add(n);
+                statement.getChildrens().add(o);
             }
         }
         if (list.isEmpty()) return;
@@ -115,10 +114,11 @@ public class Parser {
     }
 
     public void reduce(Node node) {
+        Name.parser(node);
         ClassOrInterfaceDeclaration.parser(node);
         ForStatement.parser(node);
         IfStatement.parser(node);
-        Name.parser(node);
+        TypeParametersExpression.parser(node);
         BinaryExpression.parser(node);
         AssignExpression.parser(node);
         for (Object n : node.getChildrens()) {

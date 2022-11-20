@@ -1,6 +1,5 @@
 package com.deep.framework.ast.declaration;
 
-
 import com.deep.framework.ast.Node;
 import com.deep.framework.ast.expression.Name;
 import com.deep.framework.ast.statement.Statement;

@@ -15,7 +15,7 @@ public class VariableDeclarator extends Node {
 
     private Type type;
 
-    public void parser(Node node) {
+    public static void parser(Node node) {
         for (Object o : node.getChildrens()) {
             if (o.equals(INT)) {
 

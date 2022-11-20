@@ -12,6 +12,19 @@ public class NodeList<E> extends AbstractList<E> {
         array = (E[]) new Object[capacity];
     }
 
+    public NodeList(Collection<? extends E> c) {
+        Object[] a = c.toArray();
+        if ((size = a.length) != 0) {
+            if (c.getClass() == ArrayList.class) {
+                array = (E[]) a;
+            } else {
+                array = (E[]) Arrays.copyOf(a, size, Object[].class);
+            }
+        } else {
+            array = (E[]) new Object[capacity];
+        }
+    }
+
     @Override
     public int size() {
         return size;

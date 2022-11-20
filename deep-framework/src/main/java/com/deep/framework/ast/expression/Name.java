@@ -2,6 +2,7 @@ package com.deep.framework.ast.expression;
 
 import com.deep.framework.ast.Node;
 import com.deep.framework.ast.Stream;
+import com.deep.framework.ast.declaration.CallableDeclaration;
 import com.deep.framework.ast.lexer.TokenType;
 
 import java.util.List;
@@ -22,7 +23,6 @@ public class Name extends Expression {
     }
 
     public static void parser(Node node) {
-        //CallableDeclaration.parser(node);
         Stream.of(node.getChildrens()).reduce((List list, Object m, Object n) -> {
             if (m instanceof Name a && Objects.nonNull(n) && n.equals(TokenType.DOT)) {
                 name = a;
@@ -42,6 +42,7 @@ public class Name extends Expression {
                 }
             }
         });
+        CallableDeclaration.parser(node);
     }
 
     public String toString() {
