@@ -2,7 +2,7 @@ package com.deep.framework.ast.expression;
 
 import com.deep.framework.ast.Node;
 import com.deep.framework.ast.Stream;
-import com.deep.framework.ast.declaration.CallableDeclaration;
+import com.deep.framework.ast.lexer.Token;
 import com.deep.framework.ast.lexer.TokenType;
 
 import java.util.List;
@@ -21,7 +21,7 @@ public class BinaryExpression extends Expression {
     }
 
     public static void parser(Node node) {
-        Stream.of(node.getChildrens()).reduce((List list, Object m, Object n, Object o) -> {
+        Stream.of(node.getChildrens()).reduce((list, m, n, o) -> {
             if (Objects.nonNull(m) && Objects.nonNull(n) && Objects.nonNull(o)) {
                 if (List.of(TokenType.MUL, TokenType.DIV).contains(n)) {
                     expression = new BinaryExpression(node);
@@ -34,7 +34,7 @@ public class BinaryExpression extends Expression {
                     c.setPrarent(expression);
 
                     expression.setLeft(a);
-                    expression.setOperator((TokenType) n);
+                    expression.setOperator(((Token) n).getTokenType());
                     expression.setRight(c);
 
                     node.replace(m, expression);
@@ -49,7 +49,7 @@ public class BinaryExpression extends Expression {
             }
         });
 
-        Stream.of(node.getChildrens()).reduce((List list, Object m, Object n, Object o) -> {
+        Stream.of(node.getChildrens()).reduce((list, m, n, o) -> {
             if (Objects.nonNull(m) && Objects.nonNull(n) && Objects.nonNull(o)) {
                 if (List.of(TokenType.ADD, TokenType.SUB).contains(n)) {
                     expression = new BinaryExpression(node);
@@ -62,7 +62,7 @@ public class BinaryExpression extends Expression {
                     c.setPrarent(expression);
 
                     expression.setLeft(a);
-                    expression.setOperator((TokenType) n);
+                    expression.setOperator(((Token) n).getTokenType());
                     expression.setRight(c);
 
                     node.replace(m, expression);

@@ -18,7 +18,7 @@ import static javax.lang.model.SourceVersion.isIdentifier;
 public class Parser {
     String string = "\"";
     String strings = "\\\"";
-    List<Object> list = new ArrayList<>();
+    List<Node> list = new ArrayList<>();
 
     public void add(String a) {
         if (a.isEmpty()) return;
@@ -26,8 +26,10 @@ public class Parser {
         TokenType type = TokenType.getType(a);
         if (Objects.nonNull(type)) {
             list.add(type.getToken());
+        } else if (a.startsWith(strings)) {
+            list.add(new StringExpression(a));
         } else {
-            list.add(a);
+            list.add(new Name(a));
         }
     }
 
@@ -63,7 +65,7 @@ public class Parser {
     private void parserBlockStatement(Node prarent) {
         Node node = new Node(prarent);
         prarent.getChildrens().add(node);
-        for (Object o : list) {
+        for (Node o : list) {
             if (o.equals(TokenType.LBRACE)) {
                 Node child = new BlockStatement(node);
                 node.getChildrens().add(child);
@@ -82,35 +84,32 @@ public class Parser {
                 node = child;
             } else if (o.equals(TokenType.RBRACK)) {
                 node = node.getPrarent();
-            } else if (o instanceof String a && !a.startsWith(string)) {
-                Name child = new Name((String) o);
-                node.getChildrens().add(child);
             } else {
                 node.getChildrens().add(o);
             }
         }
     }
 
-    public void parserStatement(Node node) {
-        List<Object> list = new NodeList<>();
-        Statement statement = new Statement(node);
-        for (Object o : node.getChildrens()) {
+    public void parserStatement(Node prarent) {
+        List<Node> list = new NodeList<>();
+        Node node = new Statement(prarent);
+        for (Node o : prarent.getChildrens()) {
             if (o instanceof BlockStatement) {
-                list.addAll(List.of(statement, o));
-                statement = new Statement(node);
+                list.addAll(List.of(node, o));
+                node = new Statement(prarent);
                 parserStatement((Node) o);
             } else if (o.equals(TokenType.SEMI)) {
-                list.add(statement);
-                statement = new Statement(node);
+                list.add(node);
+                node = new Statement(prarent);
             } else if (o instanceof Node) {
                 parserStatement((Node) o);
-                statement.getChildrens().add(o);
+                node.getChildrens().add(o);
             } else {
-                statement.getChildrens().add(o);
+                node.getChildrens().add(o);
             }
         }
         if (list.isEmpty()) return;
-        node.setChildrens(list);
+        prarent.setChildrens(list);
     }
 
     public void reduce(Node node) {

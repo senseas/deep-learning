@@ -16,9 +16,9 @@ public class Stream implements Serializable {
     }
 
     public void reduce(Func2 func) {
-        List list = new ArrayList(this.list);
+        List<Node> list = new ArrayList(this.list);
         while (0 < list.size()) {
-            Object o = list.get(0);
+            Node o = list.get(0);
             list.remove(o);
             if (0 < list.size()) {
                 func.apply(list, o, list.get(0));
@@ -29,9 +29,9 @@ public class Stream implements Serializable {
     }
 
     public void reduce(Func3 func) {
-        List list = new ArrayList(this.list);
+        List<Node> list = new ArrayList(this.list);
         while (0 < list.size()) {
-            Object o = list.get(0);
+            Node o = list.get(0);
             list.remove(o);
             if (1 < list.size()) {
                 func.apply(list, o, list.get(0), list.get(1));
@@ -45,12 +45,12 @@ public class Stream implements Serializable {
 
     @FunctionalInterface
     public interface Func2 {
-        void apply(List list, Object a, Object b);
+        void apply(List list, Node a, Node b);
     }
 
     @FunctionalInterface
     public interface Func3 {
-        void apply(List list, Object a, Object b, Object c);
+        void apply(List list, Node a, Node b, Node c);
     }
 
 }

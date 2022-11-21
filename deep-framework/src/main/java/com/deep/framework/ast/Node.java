@@ -10,7 +10,7 @@ import java.util.stream.Collectors;
 @Data
 public class Node {
     private Node prarent;
-    private List<Object> childrens;
+    private List<Node> childrens;
 
     public Node() {
         this.childrens = new NodeList<>();
@@ -25,7 +25,7 @@ public class Node {
         return prarent;
     }
 
-    public List<Object> getChildrens() {
+    public List<Node> getChildrens() {
         return childrens;
     }
 
@@ -33,7 +33,7 @@ public class Node {
         return childrens.get(childrens.size() - 1);
     }
 
-    public void setChildrens(List<Object> childrens) {
+    public void setChildrens(List<Node> childrens) {
         this.childrens = childrens;
     }
 
@@ -52,7 +52,7 @@ public class Node {
         return childrens.stream().anyMatch(a -> a.equals(tokenType));
     }
 
-    public void replace(Object node, Object replaceNode) {
+    public void replace(Node node, Node replaceNode) {
         int index = childrens.indexOf(node);
         childrens.set(index, replaceNode);
     }

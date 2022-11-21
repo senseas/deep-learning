@@ -5,6 +5,7 @@ import com.deep.framework.ast.Stream;
 import com.deep.framework.ast.expression.Name;
 import com.deep.framework.ast.expression.ParametersExpression;
 import com.deep.framework.ast.expression.TypeParametersExpression;
+import com.deep.framework.ast.lexer.Token;
 import com.deep.framework.ast.lexer.TokenType;
 import com.deep.framework.ast.statement.BlockStatement;
 import lombok.Data;
@@ -35,11 +36,11 @@ public class ClassOrInterfaceDeclaration extends Declaration {
         PackageDeclaration.parser(node);
         ImportDeclaration.parser(node);
 
-        Stream.of(node.getChildrens()).reduce((list, a, b) -> {
-            if (a instanceof Node m && b instanceof BlockStatement n) {
+        Stream.of(node.getChildrens()).reduce((list, m, b) -> {
+            if (b instanceof BlockStatement n) {
                 if (m.getChildrens().contains(CLASS)) {
                     ClassOrInterfaceDeclaration classDeclare = new ClassOrInterfaceDeclaration(node.getPrarent());
-                    List<TokenType> modifiers = m.getChildrens().stream().filter(e -> Field_Modifiers.contains(e)).map(o -> (TokenType) o).collect(Collectors.toList());
+                    List<TokenType> modifiers = m.getChildrens().stream().filter(e -> Field_Modifiers.contains(e)).map(o -> ((Token) o).getTokenType()).collect(Collectors.toList());
                     classDeclare.setModifiers(modifiers);
                     classDeclare.setBody(n);
                     classDeclare.setChildrens(m.getChildrens());

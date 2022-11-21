@@ -17,22 +17,20 @@ public class ForEachStatement extends Statement {
     private static ForStatement statement;
 
     public static void parser(Node node) {
-        Stream.of(node.getChildrens()).reduce((List list, Object m, Object n) -> {
-            if (m instanceof Node a) {
-                if (a.getChildrens().contains(FOR)) {
-                    statement = new ForStatement();
-                    statement.setPrarent(node);
-                    statement.setChildrens(a.getChildrens());
-                    statement.remove(FOR);
-                    if (Objects.nonNull(n) && n instanceof BlockStatement) {
-                        statement.getChildrens().add(n);
-                        statement.setBody((Statement) n);
-                        ((Node) n).setPrarent(statement);
-                        node.replaceAndRemove(a, statement, n);
-                        list.remove(n);
-                    } else {
-                        node.replace(a, statement);
-                    }
+        Stream.of(node.getChildrens()).reduce((list, m, n) -> {
+            if (m.getChildrens().contains(FOR)) {
+                statement = new ForStatement();
+                statement.setPrarent(node);
+                statement.setChildrens(m.getChildrens());
+                statement.remove(FOR);
+                if (Objects.nonNull(n) && n instanceof BlockStatement) {
+                    statement.getChildrens().add(n);
+                    statement.setBody((Statement) n);
+                    ((Node) n).setPrarent(statement);
+                    node.replaceAndRemove(m, statement, n);
+                    list.remove(n);
+                } else {
+                    node.replace(m, statement);
                 }
             }
         });

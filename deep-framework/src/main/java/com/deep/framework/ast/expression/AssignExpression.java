@@ -2,13 +2,13 @@ package com.deep.framework.ast.expression;
 
 import com.deep.framework.ast.Node;
 import com.deep.framework.ast.Stream;
+import com.deep.framework.ast.lexer.Token;
 import com.deep.framework.ast.lexer.TokenType;
 import lombok.Data;
 
 import java.util.List;
 import java.util.Objects;
 
-import static com.deep.framework.ast.lexer.TokenKind.BINARY;
 import static com.deep.framework.ast.lexer.TokenType.*;
 
 @Data
@@ -26,7 +26,7 @@ public class AssignExpression extends Expression {
     }
 
     public static void parser(Node node) {
-        Stream.of(node.getChildrens()).reduce((List list, Object m, Object n, Object o) -> {
+        Stream.of(node.getChildrens()).reduce((list, m, n, o) -> {
             if (Objects.nonNull(m) && Objects.nonNull(n) && Objects.nonNull(o)) {
                 if (listx.contains(n) && list.size() == 2) {
                     expression = new AssignExpression(node);
@@ -39,7 +39,7 @@ public class AssignExpression extends Expression {
                     c.setPrarent(expression);
 
                     expression.setTarget(a);
-                    expression.setOperator((TokenType) n);
+                    expression.setOperator(((Token) n).getTokenType());
                     expression.setValue(c);
 
                     node.replace(m, expression);

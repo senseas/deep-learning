@@ -19,7 +19,7 @@ public class TypeParametersExpression extends Expression {
 
     public static void parser(Node node) {
         Name.parser(node);
-        Stream.of(node.getChildrens()).reduce((List list, Object m, Object n, Object o) -> {
+        Stream.of(node.getChildrens()).reduce((list, m, n, o) -> {
             if (Objects.nonNull(m) && Objects.nonNull(n) && Objects.nonNull(o)) {
                 if (m.equals(LT)) {
                     if (o.equals(GT)) {

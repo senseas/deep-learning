@@ -4,6 +4,7 @@ import com.deep.framework.ast.Node;
 import com.deep.framework.ast.expression.Name;
 import com.deep.framework.ast.expression.ParametersExpression;
 import com.deep.framework.ast.expression.TypeParametersExpression;
+import com.deep.framework.ast.lexer.Token;
 import com.deep.framework.ast.lexer.TokenType;
 import com.deep.framework.ast.statement.BlockStatement;
 import com.deep.framework.ast.type.Type;
@@ -32,7 +33,7 @@ public class MethodDeclaration extends Declaration {
                 Object n = a.getChildrens().get(a.getChildrens().size() - 1);
                 if (m instanceof Name && n instanceof ParametersExpression && b instanceof BlockStatement) {
                     MethodDeclaration methodDeclare = new MethodDeclaration(node.getPrarent());
-                    List<TokenType> modifiers = a.getChildrens().stream().filter(e -> Method_Modifiers.contains(e)).map(o -> (TokenType) o).collect(Collectors.toList());
+                    List<TokenType> modifiers = a.getChildrens().stream().filter(e -> Method_Modifiers.contains(e)).map(o -> ((Token) o).getTokenType()).collect(Collectors.toList());
                     a.getChildrens().removeAll(modifiers);
 
                     methodDeclare.setModifiers(modifiers);

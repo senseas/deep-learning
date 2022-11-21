@@ -2,6 +2,7 @@ package com.deep.framework.ast.declaration;
 
 import com.deep.framework.ast.Node;
 import com.deep.framework.ast.expression.Name;
+import com.deep.framework.ast.lexer.Token;
 import com.deep.framework.ast.lexer.TokenType;
 import com.deep.framework.ast.statement.Statement;
 import com.deep.framework.ast.type.Type;
@@ -25,7 +26,7 @@ public class FieldDeclaration extends Declaration {
         List.copyOf(node.getChildrens()).stream().map(a -> (Node) a).forEach((a) -> {
             if (a instanceof Statement) {
                 FieldDeclaration fieldDeclare = new FieldDeclaration(node.getPrarent());
-                List<TokenType> modifiers = a.getChildrens().stream().filter(e -> Field_Modifiers.contains(e)).map(o -> (TokenType) o).collect(Collectors.toList());
+                List<TokenType> modifiers = a.getChildrens().stream().filter(e -> Field_Modifiers.contains(e)).map(o -> ((Token) o).getTokenType()).collect(Collectors.toList());
                 a.getChildrens().removeAll(modifiers);
 
                 fieldDeclare.setModifiers(modifiers);

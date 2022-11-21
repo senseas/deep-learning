@@ -17,7 +17,7 @@ public class CallableDeclaration extends Declaration {
     }
 
     public static void parser(Node node) {
-        Stream.of(node.getChildrens()).reduce((List list, Object m, Object n) -> {
+        Stream.of(node.getChildrens()).reduce((list, m, n) -> {
             if (m instanceof Name a) {
                 if (n instanceof ParametersExpression b) {
                     callable = new CallableDeclaration(node);
