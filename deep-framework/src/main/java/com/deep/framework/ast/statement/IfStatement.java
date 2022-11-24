@@ -3,7 +3,6 @@ package com.deep.framework.ast.statement;
 import com.deep.framework.ast.Node;
 import com.deep.framework.ast.NodeList;
 import com.deep.framework.ast.Stream;
-import com.deep.framework.ast.expression.Expression;
 import com.deep.framework.ast.expression.ParametersExpression;
 import lombok.Data;
 
@@ -62,7 +61,7 @@ public class IfStatement extends Statement {
                     }
                 } else if (m.equals(ELSE)) {
                     a.setPrarent(statement);
-                    a.getChildrens().removeAll(List.of(m));
+                    a.getChildrens().remove(m);
                     statement.getChildrens().add(a);
 
                     if (Objects.nonNull(b) && b instanceof BlockStatement) {

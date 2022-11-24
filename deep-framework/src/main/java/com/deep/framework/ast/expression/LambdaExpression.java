@@ -35,8 +35,7 @@ public class LambdaExpression extends Expression {
                     } else {
                         BlockStatement block = new BlockStatement(expression);
                         block.setChildrens(a.getChildrens());
-                        block.getChildrens().remove(m);
-                        block.getChildrens().remove(n);
+                        block.getChildrens().removeAll(List.of(m, n));
 
                         node.replace(a, expression);
                         expression.setBody(block);
@@ -55,8 +54,7 @@ public class LambdaExpression extends Expression {
                     } else {
                         BlockStatement block = new BlockStatement(expression);
                         block.setChildrens(a.getChildrens());
-                        block.getChildrens().remove(m);
-                        block.getChildrens().remove(n);
+                        block.getChildrens().removeAll(List.of(m, n));
 
                         node.replace(a, expression);
                         expression.setBody(block);

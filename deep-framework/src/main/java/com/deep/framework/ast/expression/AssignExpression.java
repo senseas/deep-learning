@@ -41,10 +41,8 @@ public class AssignExpression extends Expression {
                     expression.setValue(c);
 
                     node.replace(m, expression);
-                    node.getChildrens().remove(n);
-                    node.getChildrens().remove(o);
-                    list.remove(n);
-                    list.remove(o);
+                    node.getChildrens().removeAll(List.of(n, o));
+                    list.remove(List.of(n, o));
                 }
             }
         });

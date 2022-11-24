@@ -8,7 +8,6 @@ import com.deep.framework.ast.expression.Name;
 import com.deep.framework.ast.expression.ParametersExpression;
 import lombok.Data;
 
-
 @Data
 public class CallableDeclaration extends Declaration {
     private Expression parameters;
