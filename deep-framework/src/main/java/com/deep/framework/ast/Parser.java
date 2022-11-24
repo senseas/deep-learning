@@ -46,9 +46,7 @@ public class Parser {
                 return "";
             } else if (!a.isEmpty() && isIdentifier(a.concat(b))) {
                 return a.concat(b);
-            } else if (TokenType.contains(a.concat(b))) {
-                return a.concat(b);
-            }else if (a.concat(b).equals("..")) {
+            } if (TokenType.startsWith(a.concat(b))) {
                 return a.concat(b);
             } else {
                 add(a);

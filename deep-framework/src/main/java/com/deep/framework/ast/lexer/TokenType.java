@@ -155,6 +155,10 @@ public enum TokenType {
         return map.containsKey(name);
     }
 
+    public static boolean startsWith(final String name) {
+        return map.keySet().stream().anyMatch(a -> a.startsWith(name));
+    }
+
     public static TokenType getType(String name) {
         return map.get(name);
     }
