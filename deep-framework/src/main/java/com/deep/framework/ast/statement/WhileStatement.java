@@ -20,20 +20,33 @@ public class WhileStatement extends Statement {
     private static WhileStatement statement;
 
     public static void parser(Node node) {
-        Stream.of(node.getChildrens()).reduce((list, m, n) -> {
-            if (m.getChildrens().contains(WHILE)) {
-                statement.setPrarent(node);
-                statement.setChildrens(m.getChildrens());
-                statement.remove(WHILE);
-                if (Objects.nonNull(n) && n instanceof BlockStatement) {
-                    statement.getChildrens().add(n);
-                    statement.setBody((Statement) n);
-                    node.replaceAndRemove(m, statement, n);
-                    list.remove(n);
-                } else {
-                    node.replace(m, statement);
+        if (node instanceof WhileStatement) return;
+        Stream.of(node.getChildrens()).reduce((list, a, b) -> {
+            Stream.of(a.getChildrens()).reduce((c, m, n) -> {
+                if (m.equals(WHILE) && n instanceof ParametersExpression) {
+                    //create WhileNode and set Prarent，Parameters
+                    statement = new WhileStatement();
+                    statement.setPrarent(node);
+                    statement.setParameters((ParametersExpression) n);
+
+                    //remove WhileNode and Parameters
+                    a.getChildrens().removeAll(List.of(m, n));
+                    node.replace(a, statement);
+
+                    if (Objects.nonNull(b) && b instanceof BlockStatement) {
+                        b.setPrarent(statement);
+                        statement.setBody((BlockStatement) b);
+                        statement.getChildrens().addAll(List.of(n, b));
+                        node.remove(b);
+                        list.remove(b);
+                    } else {
+                        BlockStatement block = new BlockStatement(statement);
+                        block.setChildrens(a.getChildrens());
+                        statement.setBody(block);
+                        statement.getChildrens().addAll(List.of(n, block));
+                    }
                 }
-            }
+            });
         });
     }
 }

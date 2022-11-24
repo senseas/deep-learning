@@ -9,13 +9,14 @@ public class TensorOparetor extends Tensor {
     public TensorOparetor(String name, Tensor... input) {
         super(name, input);
         List<List<Object>> list;
-        if (true) {
+        if (1>1) {
             System.out.println(1);
-        } else if (true) {
+        } else if (1>2) {
             System.out.println(2);
         } else {
             System.out.println(3);
         }
+
         if (Arrays.asList("Add").contains(name)) {
             Stream<Tensor> stream = Stream.of();
             for (Tensor o : input) {
@@ -25,6 +26,11 @@ public class TensorOparetor extends Tensor {
             setInput(stream.toArray(Tensor[]::new));
             int a = 1 + 2 * 3 * 4 + 5 + 7 * 8;
         }
+
+        while (true){
+            System.out.println("while");
+        }
+
     }
 
     public None getInput(int i) {

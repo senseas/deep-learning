@@ -1,6 +1,7 @@
 package com.deep.framework.ast.declaration;
 
 import com.deep.framework.ast.Node;
+import com.deep.framework.ast.Stream;
 import com.deep.framework.ast.expression.Name;
 import com.deep.framework.ast.expression.ParametersExpression;
 import com.deep.framework.ast.expression.TypeParametersExpression;
@@ -27,7 +28,7 @@ public class MethodDeclaration extends Declaration {
 
     public static void parser(Node node) {
         if (node instanceof MethodDeclaration) return;
-        List.copyOf(node.getChildrens()).stream().map(a -> (Node) a).reduce((a, b) -> {
+        Stream.of(node.getChildrens()).reduce((list, a, b) -> {
             if (b instanceof BlockStatement) {
                 Object m = a.getChildrens().get(a.getChildrens().size() - 2);
                 Object n = a.getChildrens().get(a.getChildrens().size() - 1);
@@ -46,7 +47,6 @@ public class MethodDeclaration extends Declaration {
                     node.replaceAndRemove(a, methodDeclare, b);
                 }
             }
-            return b;
         });
     }
 }

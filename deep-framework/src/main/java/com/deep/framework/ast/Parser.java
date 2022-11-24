@@ -1,18 +1,15 @@
 package com.deep.framework.ast;
 
-import com.deep.framework.ast.declaration.ClassOrInterfaceDeclaration;
 import com.deep.framework.ast.expression.*;
 import com.deep.framework.ast.lexer.TokenType;
-import com.deep.framework.ast.statement.BlockStatement;
-import com.deep.framework.ast.statement.ForStatement;
-import com.deep.framework.ast.statement.IfStatement;
-import com.deep.framework.ast.statement.Statement;
+import com.deep.framework.ast.statement.*;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Stream;
 
+import static com.deep.framework.ast.lexer.TokenType.*;
 import static javax.lang.model.SourceVersion.isIdentifier;
 
 public class Parser {
@@ -50,6 +47,8 @@ public class Parser {
                 return a.concat(b);
             } else if (TokenType.contains(a.concat(b))) {
                 return a.concat(b);
+            }else if (a.concat(b).equals("..")) {
+                return a.concat(b);
             } else {
                 add(a);
                 return b;
@@ -66,23 +65,23 @@ public class Parser {
         Node node = new Node(prarent);
         prarent.getChildrens().add(node);
         for (Node o : list) {
-            if (o.equals(TokenType.LBRACE)) {
+            if (o.equals(LBRACE)) {
                 Node child = new BlockStatement(node);
                 node.getChildrens().add(child);
                 node = child;
-            } else if (o.equals(TokenType.RBRACE)) {
+            } else if (o.equals(RBRACE)) {
                 node = node.getPrarent();
-            } else if (o.equals(TokenType.LPAREN)) {
+            } else if (o.equals(LPAREN)) {
                 Node child = new ParametersExpression(node);
                 node.getChildrens().add(child);
                 node = child;
-            } else if (o.equals(TokenType.RPAREN)) {
+            } else if (o.equals(RPAREN)) {
                 node = node.getPrarent();
-            } else if (o.equals(TokenType.LBRACK)) {
+            } else if (o.equals(LBRACK)) {
                 Node child = new ArrayExpression(node);
                 node.getChildrens().add(child);
                 node = child;
-            } else if (o.equals(TokenType.RBRACK)) {
+            } else if (o.equals(RBRACK)) {
                 node = node.getPrarent();
             } else {
                 node.getChildrens().add(o);
@@ -91,20 +90,18 @@ public class Parser {
     }
 
     public void parserStatement(Node prarent) {
-        List<Node> list = new NodeList<>();
+        NodeList<Node> list = new NodeList<>();
         Node node = new Statement(prarent);
         for (Node o : prarent.getChildrens()) {
             if (o instanceof BlockStatement) {
                 list.addAll(List.of(node, o));
                 node = new Statement(prarent);
-                parserStatement((Node) o);
-            } else if (o.equals(TokenType.SEMI)) {
+                parserStatement(o);
+            } else if (o.equals(SEMI)) {
                 list.add(node);
                 node = new Statement(prarent);
-            } else if (o instanceof Node) {
-                parserStatement((Node) o);
-                node.getChildrens().add(o);
             } else {
+                parserStatement(o);
                 node.getChildrens().add(o);
             }
         }
@@ -113,13 +110,14 @@ public class Parser {
     }
 
     public void reduce(Node node) {
-        Name.parser(node);
         TypeParametersExpression.parser(node);
-        ClassOrInterfaceDeclaration.parser(node);
+        Name.parser(node);
         ForStatement.parser(node);
+        WhileStatement.parser(node);
         IfStatement.parser(node);
+        /*ClassOrInterfaceDeclaration.parser(node);
         BinaryExpression.parser(node);
-        AssignExpression.parser(node);
+        AssignExpression.parser(node);*/
         for (Object n : node.getChildrens()) {
             if (n instanceof Node) {
                 reduce((Node) n);

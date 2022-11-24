@@ -1,16 +1,13 @@
 package com.deep.framework.ast;
 
 import com.deep.framework.ast.lexer.TokenType;
-import lombok.Data;
 
-import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-@Data
 public class Node {
     private Node prarent;
-    private List<Node> childrens;
+    private NodeList<Node> childrens;
 
     public Node() {
         this.childrens = new NodeList<>();
@@ -25,15 +22,11 @@ public class Node {
         return prarent;
     }
 
-    public List<Node> getChildrens() {
+    public NodeList<Node> getChildrens() {
         return childrens;
     }
 
-    public Object getLastChild() {
-        return childrens.get(childrens.size() - 1);
-    }
-
-    public void setChildrens(List<Node> childrens) {
+    public void setChildrens(NodeList<Node> childrens) {
         this.childrens = childrens;
     }
 
@@ -42,14 +35,8 @@ public class Node {
         remove(removeNode);
     }
 
-    public void replaceAndRemove(Node node, Node replaceNode, Object removeNode, Object removeNodeb) {
-        replace(node, replaceNode);
-        remove(removeNode);
-        remove(removeNodeb);
-    }
-
-    public boolean contains(TokenType tokenType) {
-        return childrens.stream().anyMatch(a -> a.equals(tokenType));
+    public Node get(TokenType tokenType) {
+        return childrens.stream().filter(a -> a.equals(tokenType)).findFirst().get();
     }
 
     public void replace(Node node, Node replaceNode) {

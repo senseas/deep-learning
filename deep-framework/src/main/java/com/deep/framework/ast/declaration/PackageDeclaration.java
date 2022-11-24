@@ -16,11 +16,11 @@ public class PackageDeclaration extends Declaration {
     public static void parser(Node node) {
         Stream.of(node.getChildrens()).reduce(((list, a, b) -> {
             if (a.equals(PACKAGE)) {
-                PackageDeclaration packageDeclare = new PackageDeclaration(node);
-                packageDeclare.setName((Name) b);
-                packageDeclare.setChildrens(node.getChildrens());
-                packageDeclare.remove(a);
-                node.getPrarent().replace(node, packageDeclare);
+                PackageDeclaration declare = new PackageDeclaration(node);
+                declare.setName((Name) b);
+                declare.setChildrens(node.getChildrens());
+                declare.remove(a);
+                node.getPrarent().replace(node, declare);
                 list.clear();
             }
         }));

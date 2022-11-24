@@ -1,11 +1,13 @@
 package com.deep.framework.ast;
 
+import com.deep.framework.ast.lexer.TokenType;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
 public class Stream implements Serializable {
-    private final List list;
+    private final List<Node> list;
 
     private Stream(List list) {
         this.list = list;
@@ -13,6 +15,10 @@ public class Stream implements Serializable {
 
     public static Stream of(List list) {
         return new Stream(list);
+    }
+
+    public void contains(TokenType type, Func1 func) {
+        func.apply(list.stream().filter(a -> a.equals(type)).findFirst().get());
     }
 
     public void reduce(Func2 func) {
@@ -41,6 +47,11 @@ public class Stream implements Serializable {
                 func.apply(list, o, null, null);
             }
         }
+    }
+
+    @FunctionalInterface
+    public interface Func1 {
+        void apply(Node a);
     }
 
     @FunctionalInterface

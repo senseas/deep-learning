@@ -38,7 +38,8 @@ public class ClassOrInterfaceDeclaration extends Declaration {
 
         Stream.of(node.getChildrens()).reduce((list, m, b) -> {
             if (b instanceof BlockStatement n) {
-                if (m.getChildrens().contains(CLASS)) {
+                Node clas = m.get(CLASS);
+                if (Objects.nonNull(clas)) {
                     ClassOrInterfaceDeclaration classDeclare = new ClassOrInterfaceDeclaration(node.getPrarent());
                     List<TokenType> modifiers = m.getChildrens().stream().filter(e -> Field_Modifiers.contains(e)).map(o -> ((Token) o).getTokenType()).collect(Collectors.toList());
                     classDeclare.setModifiers(modifiers);
@@ -47,7 +48,7 @@ public class ClassOrInterfaceDeclaration extends Declaration {
                     classDeclare.getChildrens().add(n);
 
                     m.getChildrens().removeAll(modifiers);
-                    m.remove(CLASS);
+                    m.remove(clas);
                     node.replaceAndRemove(m, classDeclare, n);
 
                     TypeParametersExpression.parser(classDeclare);

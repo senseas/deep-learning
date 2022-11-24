@@ -19,36 +19,35 @@ public class TypeParametersExpression extends Expression {
 
     public static void parser(Node node) {
         Name.parser(node);
+        if(node instanceof TypeParametersExpression) return;
         Stream.of(node.getChildrens()).reduce((list, m, n, o) -> {
             if (Objects.nonNull(m) && Objects.nonNull(n) && Objects.nonNull(o)) {
-                if (m.equals(LT)) {
-                    if (o.equals(GT)) {
-                        parameters = new TypeParametersExpression(node);
-                        parameters.setExpression((Expression) n);
-                        parameters.getChildrens().add((Expression) n);
-                        node.replace(n, parameters);
-                        node.getChildrens().removeAll(List.of(m, o));
-                        list.clear();
-                        parser(node);
-                    } else if (o.equals(RSHIFT)) {
-                        parameters = new TypeParametersExpression(node);
-                        parameters.setExpression((Expression) n);
-                        parameters.getChildrens().add((Expression) n);
-                        node.replace(n, parameters);
-                        node.replace(o, GT.getToken());
-                        node.getChildrens().remove(m);
-                        list.clear();
-                        parser(node);
-                    } else if (o.equals(URSHIFT)) {
-                        parameters = new TypeParametersExpression(node);
-                        parameters.setExpression((Expression) n);
-                        parameters.getChildrens().add((Expression) n);
-                        node.replace(n, parameters);
-                        node.replace(o, RSHIFT.getToken());
-                        node.getChildrens().remove(m);
-                        list.clear();
-                        parser(node);
-                    }
+                if (m.equals(LT) && o.equals(GT)) {
+                    parameters = new TypeParametersExpression(node);
+                    parameters.setExpression((Expression) n);
+                    parameters.getChildrens().add((Expression) n);
+                    node.replace(n, parameters);
+                    node.getChildrens().removeAll(List.of(m, o));
+                    list.clear();
+                    parser(node);
+                } else if (m.equals(LT) && o.equals(RSHIFT)) {
+                    parameters = new TypeParametersExpression(node);
+                    parameters.setExpression((Expression) n);
+                    parameters.getChildrens().add((Expression) n);
+                    node.replace(n, parameters);
+                    node.replace(o, GT.getToken());
+                    node.getChildrens().remove(m);
+                    list.clear();
+                    parser(node);
+                } else if (m.equals(LT) && o.equals(URSHIFT)) {
+                    parameters = new TypeParametersExpression(node);
+                    parameters.setExpression((Expression) n);
+                    parameters.getChildrens().add(n);
+                    node.replace(n, parameters);
+                    node.replace(o, RSHIFT.getToken());
+                    node.getChildrens().remove(m);
+                    list.clear();
+                    parser(node);
                 }
             }
         });

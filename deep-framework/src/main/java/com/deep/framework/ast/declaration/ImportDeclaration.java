@@ -15,11 +15,11 @@ public class ImportDeclaration extends Declaration {
     public static void parser(Node node) {
         Stream.of(node.getChildrens()).reduce(((list, a, b) -> {
             if (a.equals(IMPORT)) {
-                ImportDeclaration importDeclaration = new ImportDeclaration(node);
-                importDeclaration.setName((Name) b);
-                importDeclaration.setChildrens(node.getChildrens());
-                importDeclaration.remove(a);
-                node.getPrarent().replace(node, importDeclaration);
+                ImportDeclaration declare = new ImportDeclaration(node);
+                declare.setName((Name) b);
+                declare.setChildrens(node.getChildrens());
+                declare.remove(a);
+                node.getPrarent().replace(node, declare);
                 list.clear();
             }
         }));
