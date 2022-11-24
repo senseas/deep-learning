@@ -15,7 +15,8 @@ public class Name extends Expression {
     private String identifier;
     private Name qualifier;
     private TypeParametersExpression typeParameters;
-    private static Name name;
+
+    private static Expression name;
 
     public Name() {
         super(null);
@@ -27,6 +28,7 @@ public class Name extends Expression {
     }
 
     public static void parser(Node node) {
+        CallableDeclaration.parser(node);
         Stream.of(node.getChildrens()).reduce((list, m, n) -> {
             if (Objects.nonNull(n)) {
                 if (m instanceof Name a && n instanceof TypeParametersExpression b) {
@@ -41,12 +43,19 @@ public class Name extends Expression {
                     n.getChildrens().add(name);
                     name.setPrarent(n);
                     node.getChildrens().removeAll(List.of(m, name));
-                    name = (Name) n;
+                    name = (Expression) n;
+                    list.remove(n);
+                } else if (m.equals(DOT) && n instanceof CallableDeclaration c) {
+                    n.setPrarent(node);
+                    n.getChildrens().add(name);
+                    name.setPrarent(n);
+                    c.getName().getChildrens().add(name);
+                    node.getChildrens().removeAll(List.of(m, name));
+                    name = (Expression) n;
                     list.remove(n);
                 }
             }
         });
-        CallableDeclaration.parser(node);
     }
 
     public String toString() {

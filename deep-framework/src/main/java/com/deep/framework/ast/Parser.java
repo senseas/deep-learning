@@ -119,6 +119,7 @@ public class Parser {
         BinaryExpression.parser(node);
         AssignExpression.parser(node);
         VariableDeclarator.parser(node);
+        LambdaExpression.parser(node);
         for (Object n : node.getChildrens()) {
             if (n instanceof Node) {
                 reduce((Node) n);

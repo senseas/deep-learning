@@ -6,14 +6,14 @@ import java.util.stream.Stream;
 
 public class TensorOparetor extends Tensor {
 
-    public  String x="xxxxx";
+    public String x = "xxxxx";
 
     public TensorOparetor(String name, Tensor... input) {
         super(name, input);
         List<List<Object>> list;
-        if (1>1) {
+        if (1 > 1) {
             System.out.println(1);
-        } else if (1>2) {
+        } else if (1 > 2) {
             System.out.println(2);
         } else {
             System.out.println(3);
@@ -25,11 +25,15 @@ public class TensorOparetor extends Tensor {
                 Stream<Tensor> children = o.getName().equals(getName()) ? Arrays.stream(o.getInput()) : Stream.of(o);
                 stream = Stream.concat(stream, children);
             }
+            Stream.of(1, 1, 1).map((Integer a) -> {
+                return a;
+            });
+            Stream.of(1, 1, 1).map(a -> a);
             setInput(stream.toArray(Tensor[]::new));
             int a = 1 + 2 * 3 * 4 + 5 + 7 * 8;
         }
 
-        while (true){
+        while (true) {
             System.out.println("while");
         }
 
