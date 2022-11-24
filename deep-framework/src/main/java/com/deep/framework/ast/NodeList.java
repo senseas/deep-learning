@@ -24,6 +24,14 @@ public class NodeList<E> extends AbstractList<E> {
         }
     }
 
+    public NodeList(E... a) {
+        if ((size = a.length) != 0) {
+            array = a;
+        } else {
+            array = (E[]) new Object[capacity];
+        }
+    }
+
     @Override
     public int size() {
         return size;

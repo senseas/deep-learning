@@ -13,12 +13,11 @@ import static com.deep.framework.ast.lexer.TokenType.*;
 @Data
 public class AssignExpression extends Expression {
     private Expression target;
-
     private Expression value;
-
     private TokenType operator;
+
     private static AssignExpression expression;
-    static List listx = List.of(ASSIGN, ADD_ASSIGN, SUB_ASSIGN, MUL_ASSIGN, DIV_ASSIGN, AND_ASSIGN, OR_ASSIGN, XOR_ASSIGN, MOD_ASSIGN, LSHIFT_ASSIGN, RSHIFT_ASSIGN, URSHIFT_ASSIGN);
+    private static List<TokenType> ASSIGN_TYPE = Stream.of(ASSIGN, ADD_ASSIGN, SUB_ASSIGN, MUL_ASSIGN, DIV_ASSIGN, AND_ASSIGN, OR_ASSIGN, XOR_ASSIGN, MOD_ASSIGN, LSHIFT_ASSIGN, RSHIFT_ASSIGN, URSHIFT_ASSIGN);
 
     public AssignExpression(Node prarent) {
         super(prarent);
@@ -27,7 +26,7 @@ public class AssignExpression extends Expression {
     public static void parser(Node node) {
         Stream.of(node.getChildrens()).reduce((list, m, n, o) -> {
             if (Objects.nonNull(m) && Objects.nonNull(n) && Objects.nonNull(o)) {
-                if (Objects.nonNull(n.getTokenType()) && listx.contains(n) && list.size() == 2) {
+                if (ASSIGN_TYPE.contains(n.getTokenType()) && list.size() == 2) {
                     expression = new AssignExpression(node);
                     expression.getChildrens().addAll(List.of(m, o));
 

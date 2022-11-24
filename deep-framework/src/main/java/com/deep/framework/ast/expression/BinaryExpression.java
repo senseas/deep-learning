@@ -7,6 +7,8 @@ import com.deep.framework.ast.lexer.TokenType;
 import java.util.List;
 import java.util.Objects;
 
+import static com.deep.framework.ast.lexer.TokenType.*;
+
 
 public class BinaryExpression extends Expression {
     private Expression left;
@@ -22,7 +24,7 @@ public class BinaryExpression extends Expression {
     public static void parser(Node node) {
         Stream.of(node.getChildrens()).reduce((list, m, n, o) -> {
             if (Objects.nonNull(m) && Objects.nonNull(n) && Objects.nonNull(o)) {
-                if (Objects.nonNull(n.getTokenType()) && List.of(TokenType.MUL, TokenType.DIV).contains(n.getTokenType())) {
+                if (Stream.of(MUL, DIV).contains(n.getTokenType())) {
                     expression = new BinaryExpression(node);
                     expression.getChildrens().addAll(List.of(m, o));
 
@@ -50,7 +52,7 @@ public class BinaryExpression extends Expression {
 
         Stream.of(node.getChildrens()).reduce((list, m, n, o) -> {
             if (Objects.nonNull(m) && Objects.nonNull(n) && Objects.nonNull(o)) {
-                if (Objects.nonNull(n.getTokenType()) && List.of(TokenType.ADD, TokenType.SUB).contains(n.getTokenType())) {
+                if (Stream.of(ADD, SUB).contains(n.getTokenType())) {
                     expression = new BinaryExpression(node);
                     expression.getChildrens().addAll(List.of(m, o));
 

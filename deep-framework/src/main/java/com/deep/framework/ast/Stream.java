@@ -17,6 +17,10 @@ public class Stream implements Serializable {
         return new Stream(list);
     }
 
+    public static <E> NodeList<E> of(E... list) {
+        return new NodeList<E>(list);
+    }
+
     public void contains(TokenType type, Func1 func) {
         func.apply(list.stream().filter(a -> a.equals(type)).findFirst().get());
     }

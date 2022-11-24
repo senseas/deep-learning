@@ -1,6 +1,7 @@
 package com.deep.framework.ast;
 
 import com.deep.framework.ast.declaration.ClassOrInterfaceDeclaration;
+import com.deep.framework.ast.declaration.VariableDeclarator;
 import com.deep.framework.ast.expression.*;
 import com.deep.framework.ast.lexer.TokenType;
 import com.deep.framework.ast.statement.*;
@@ -46,7 +47,7 @@ public class Parser {
                 return "";
             } else if (!a.isEmpty() && isIdentifier(a.concat(b))) {
                 return a.concat(b);
-            } if (TokenType.startsWith(a.concat(b))) {
+            } else if (TokenType.startsWith(a.concat(b))) {
                 return a.concat(b);
             } else {
                 add(a);
@@ -117,6 +118,7 @@ public class Parser {
         ClassOrInterfaceDeclaration.parser(node);
         BinaryExpression.parser(node);
         AssignExpression.parser(node);
+        VariableDeclarator.parser(node);
         for (Object n : node.getChildrens()) {
             if (n instanceof Node) {
                 reduce((Node) n);

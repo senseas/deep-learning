@@ -10,6 +10,7 @@ import static com.deep.framework.ast.lexer.TokenType.*;
 
 public class TypeParametersExpression extends Expression {
     private Expression expression;
+
     private static TypeParametersExpression parameters;
 
     public TypeParametersExpression(Node prarent) {

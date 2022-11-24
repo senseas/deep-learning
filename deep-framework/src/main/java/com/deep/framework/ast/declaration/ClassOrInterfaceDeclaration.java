@@ -20,7 +20,6 @@ import static com.deep.framework.ast.lexer.TokenType.*;
 public class ClassOrInterfaceDeclaration extends Declaration {
     private List<Object> extendedTypes;
     private List<Object> implementedTypes;
-
     private List<TokenType> modifiers;
     private Name name;
     private ParametersExpression parameters;
