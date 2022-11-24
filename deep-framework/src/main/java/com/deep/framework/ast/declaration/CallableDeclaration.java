@@ -6,14 +6,12 @@ import com.deep.framework.ast.expression.Name;
 import com.deep.framework.ast.expression.ParametersExpression;
 import lombok.Data;
 
-import java.util.List;
-
 
 @Data
 public class CallableDeclaration extends Declaration {
     private ParametersExpression parameters;
     private Name name;
-    private static CallableDeclaration callable;
+    private static CallableDeclaration declare;
 
     public CallableDeclaration(Node prarent) {
         super(prarent);
@@ -23,11 +21,11 @@ public class CallableDeclaration extends Declaration {
         if (node instanceof CallableDeclaration) return;
         Stream.of(node.getChildrens()).reduce((list, m, n) -> {
             if (m instanceof Name && n instanceof ParametersExpression) {
-                callable = new CallableDeclaration(node);
-                callable.setName((Name) m);
-                callable.setParameters((ParametersExpression) n);
-                callable.getChildrens().add(n);
-                node.replaceAndRemove(m, callable, n);
+                declare = new CallableDeclaration(node);
+                declare.setName((Name) m);
+                declare.setParameters((ParametersExpression) n);
+                declare.getChildrens().add(n);
+                node.replaceAndRemove(m, declare, n);
                 list.remove(n);
             }
         });

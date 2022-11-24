@@ -2,7 +2,6 @@ package com.deep.framework.ast.expression;
 
 import com.deep.framework.ast.Node;
 import com.deep.framework.ast.Stream;
-import com.deep.framework.ast.lexer.Token;
 import com.deep.framework.ast.lexer.TokenType;
 
 import java.util.List;
@@ -38,8 +37,8 @@ public class BinaryExpression extends Expression {
                     expression.setRight(c);
 
                     node.replace(m, expression);
-                    node.remove(n);
-                    node.remove(o);
+                    node.getChildrens().remove(n);
+                    node.getChildrens().remove(o);
                     list.remove(n);
                     list.remove(o);
                     list.clear();
@@ -66,8 +65,8 @@ public class BinaryExpression extends Expression {
                     expression.setRight(c);
 
                     node.replace(m, expression);
-                    node.remove(n);
-                    node.remove(o);
+                    node.getChildrens().remove(n);
+                    node.getChildrens().remove(o);
                     list.remove(n);
                     list.remove(o);
                     list.clear();

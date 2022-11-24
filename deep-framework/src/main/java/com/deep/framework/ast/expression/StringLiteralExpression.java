@@ -1,9 +1,9 @@
 package com.deep.framework.ast.expression;
 
-public class StringExpression extends Expression {
+public class StringLiteralExpression extends Expression {
     private final String value;
 
-    public StringExpression(String value) {
+    public StringLiteralExpression(String value) {
         super(null);
         this.value = value;
     }

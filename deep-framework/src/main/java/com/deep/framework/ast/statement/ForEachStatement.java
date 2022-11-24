@@ -38,7 +38,7 @@ public class ForEachStatement extends Statement {
                         b.setPrarent(statement);
                         statement.setBody((BlockStatement) b);
                         statement.getChildrens().addAll(List.of(n, b));
-                        node.remove(b);
+                        node.getChildrens().remove(b);
                         list.remove(b);
                     } else {
                         BlockStatement block = new BlockStatement(statement);

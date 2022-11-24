@@ -5,7 +5,6 @@ import com.deep.framework.ast.Stream;
 import com.deep.framework.ast.expression.Name;
 import com.deep.framework.ast.expression.ParametersExpression;
 import com.deep.framework.ast.expression.TypeParametersExpression;
-import com.deep.framework.ast.lexer.Token;
 import com.deep.framework.ast.lexer.TokenType;
 import com.deep.framework.ast.statement.BlockStatement;
 import lombok.Data;
@@ -49,7 +48,7 @@ public class ClassOrInterfaceDeclaration extends Declaration {
                         declare.getChildrens().add(b);
 
                         a.getChildrens().removeAll(modifiers);
-                        a.remove(m);
+                        a.getChildrens().remove(m);
                         node.replaceAndRemove(a, declare, b);
 
                         TypeParametersExpression.parser(declare);
@@ -75,7 +74,7 @@ public class ClassOrInterfaceDeclaration extends Declaration {
                     return;
                 } else if (a.equals(IMPLEMENTS)) {
                     list = new ArrayList<>();
-                    classDeclare.remove(a);
+                    classDeclare.getChildrens().remove(a);
                 } else if (Objects.nonNull(list)) {
                     list.add(a);
                 }
@@ -97,7 +96,7 @@ public class ClassOrInterfaceDeclaration extends Declaration {
                     return;
                 } else if (a.equals(EXTENDS)) {
                     list = new ArrayList<>();
-                    classDeclare.remove(a);
+                    classDeclare.getChildrens().remove(a);
                 } else if (Objects.nonNull(list)) {
                     list.add(a);
                 }

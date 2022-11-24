@@ -34,7 +34,7 @@ public class IfStatement extends Statement {
                         b.setPrarent(statement);
                         statement.setBody((BlockStatement) b);
                         statement.getChildrens().addAll(List.of(n, b));
-                        node.remove(b);
+                        node.getChildrens().remove(b);
                         list.remove(b);
                         c.clear();
                     } else {
@@ -57,7 +57,7 @@ public class IfStatement extends Statement {
                         list.remove(b);
                         c.clear();
                     } else {
-                        node.remove(a);
+                        node.getChildrens().remove(a);
                         c.clear();
                     }
                 } else if (m.equals(ELSE)) {
@@ -72,7 +72,7 @@ public class IfStatement extends Statement {
                         list.remove(b);
                         c.clear();
                     } else {
-                        node.remove(a);
+                        node.getChildrens().remove(a);
                         c.clear();
                     }
                 }

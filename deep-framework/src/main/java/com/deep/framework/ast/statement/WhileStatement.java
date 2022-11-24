@@ -9,7 +9,6 @@ import lombok.Data;
 import java.util.List;
 import java.util.Objects;
 
-import static com.deep.framework.ast.lexer.TokenType.FOR;
 import static com.deep.framework.ast.lexer.TokenType.WHILE;
 
 @Data
@@ -37,7 +36,7 @@ public class WhileStatement extends Statement {
                         b.setPrarent(statement);
                         statement.setBody((BlockStatement) b);
                         statement.getChildrens().addAll(List.of(n, b));
-                        node.remove(b);
+                        node.getChildrens().remove(b);
                         list.remove(b);
                     } else {
                         BlockStatement block = new BlockStatement(statement);

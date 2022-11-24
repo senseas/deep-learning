@@ -6,8 +6,6 @@ import com.deep.framework.ast.expression.Name;
 import com.deep.framework.ast.expression.ParametersExpression;
 import lombok.Data;
 
-import java.util.List;
-
 import static com.deep.framework.ast.lexer.TokenType.AT;
 
 @Data
@@ -23,18 +21,18 @@ public class AnnotationDeclaration extends Declaration {
         if (node instanceof AnnotationDeclaration) return;
         Stream.of(node.getChildrens()).reduce((list, a, b) -> {
             if (a.equals(AT) && b instanceof Name) {
-                AnnotationDeclaration annotationDeclare = new AnnotationDeclaration(node.getPrarent());
-                annotationDeclare.setName((Name) b);
+                AnnotationDeclaration declare = new AnnotationDeclaration(node.getPrarent());
+                declare.setName((Name) b);
                 int index = node.getChildrens().indexOf(b);
                 if (index < node.getChildrens().size()) {
                     Object n = node.getChildrens().get(index + 1);
                     if (n instanceof ParametersExpression) {
-                        annotationDeclare.setParameters((ParametersExpression) n);
-                        node.remove(n);
+                        declare.setParameters((ParametersExpression) n);
+                        node.getChildrens().remove(n);
                     }
                 }
-                node.remove(b);
-                node.replace(a, annotationDeclare);
+                node.getChildrens().remove(b);
+                node.replace(a, declare);
             }
         });
     }

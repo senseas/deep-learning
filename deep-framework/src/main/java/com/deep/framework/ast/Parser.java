@@ -24,8 +24,8 @@ public class Parser {
         TokenType type = TokenType.getType(a);
         if (Objects.nonNull(type)) {
             list.add(type.getToken());
-        } else if (a.startsWith(strings)) {
-            list.add(new StringExpression(a));
+        } else if (a.startsWith(string)) {
+            list.add(new StringLiteralExpression(a));
         } else {
             list.add(new Name(a));
         }
@@ -109,8 +109,8 @@ public class Parser {
     }
 
     public void reduce(Node node) {
-        TypeParametersExpression.parser(node);
         Name.parser(node);
+        TypeParametersExpression.parser(node);
         ForStatement.parser(node);
         WhileStatement.parser(node);
         IfStatement.parser(node);

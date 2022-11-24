@@ -40,20 +40,12 @@ public class Node extends Token {
 
     public void replaceAndRemove(Node node, Node replaceNode, Object removeNode) {
         replace(node, replaceNode);
-        remove(removeNode);
-    }
-
-    public Node get(TokenType tokenType) {
-        return childrens.stream().filter(a -> a.equals(tokenType)).findFirst().get();
+        getChildrens().remove(removeNode);
     }
 
     public void replace(Node node, Node replaceNode) {
         int index = childrens.indexOf(node);
         childrens.set(index, replaceNode);
-    }
-
-    public void remove(Object removeNode) {
-        getChildrens().remove(removeNode);
     }
 
     public Node setPrarent(Node prarent) {

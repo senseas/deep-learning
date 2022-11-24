@@ -31,11 +31,11 @@ public class Name extends Expression {
             if (Objects.nonNull(n)) {
                 if (m instanceof Name a && n instanceof TypeParametersExpression b) {
                     a.setTypeParameters(b);
-                    node.remove(b);
+                    node.getChildrens().remove(b);
                     list.clear();
                 } else if (m instanceof Name a && n.equals(DOT)) {
                     name = a;
-                    node.remove(a);
+                    node.getChildrens().remove(a);
                 } else if (m.equals(DOT) && n instanceof Name) {
                     n.setPrarent(node);
                     n.getChildrens().add(name);

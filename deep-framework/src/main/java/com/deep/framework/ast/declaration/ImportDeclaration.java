@@ -18,7 +18,7 @@ public class ImportDeclaration extends Declaration {
                 ImportDeclaration declare = new ImportDeclaration(node);
                 declare.setName((Name) b);
                 declare.setChildrens(node.getChildrens());
-                declare.remove(a);
+                declare.getChildrens().remove(a);
                 node.getPrarent().replace(node, declare);
                 list.clear();
             }

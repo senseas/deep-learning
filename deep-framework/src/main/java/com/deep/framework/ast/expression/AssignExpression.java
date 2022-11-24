@@ -2,7 +2,6 @@ package com.deep.framework.ast.expression;
 
 import com.deep.framework.ast.Node;
 import com.deep.framework.ast.Stream;
-import com.deep.framework.ast.lexer.Token;
 import com.deep.framework.ast.lexer.TokenType;
 import lombok.Data;
 
@@ -43,8 +42,8 @@ public class AssignExpression extends Expression {
                     expression.setValue(c);
 
                     node.replace(m, expression);
-                    node.remove(n);
-                    node.remove(o);
+                    node.getChildrens().remove(n);
+                    node.getChildrens().remove(o);
                     list.remove(n);
                     list.remove(o);
                 }

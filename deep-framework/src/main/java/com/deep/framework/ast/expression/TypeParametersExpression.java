@@ -9,17 +9,15 @@ import java.util.Objects;
 import static com.deep.framework.ast.lexer.TokenType.*;
 
 public class TypeParametersExpression extends Expression {
+    private Expression expression;
+    private static TypeParametersExpression parameters;
+
     public TypeParametersExpression(Node prarent) {
         super(prarent);
     }
 
-    private Expression expression;
-
-    private static TypeParametersExpression parameters;
-
     public static void parser(Node node) {
         Name.parser(node);
-        if(node instanceof TypeParametersExpression) return;
         Stream.of(node.getChildrens()).reduce((list, m, n, o) -> {
             if (Objects.nonNull(m) && Objects.nonNull(n) && Objects.nonNull(o)) {
                 if (m.equals(LT) && o.equals(GT)) {
