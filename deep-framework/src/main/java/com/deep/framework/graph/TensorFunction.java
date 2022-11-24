@@ -14,7 +14,7 @@ public class TensorFunction extends Tensor {
         Tensor input = getInput()[i];
         if (BeanUtil.isOperation(input)) return (M) input;
         if (BeanUtil.isFunction(input)) return (M) input.getFunction();
-        return (M) TensorFlux.getTensor(input.getOutput());
+        return TensorFlux.getTensor(input.getOutput());
     }
 
     public Object getOutput() {

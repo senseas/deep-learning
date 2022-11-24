@@ -1,7 +1,7 @@
 package com.deep.framework.ast.expression;
 
 public class StringExpression extends Expression {
-    private String value;
+    private final String value;
 
     public StringExpression(String value) {
         super(null);

@@ -23,7 +23,7 @@ public class BinaryExpression extends Expression {
     public static void parser(Node node) {
         Stream.of(node.getChildrens()).reduce((list, m, n, o) -> {
             if (Objects.nonNull(m) && Objects.nonNull(n) && Objects.nonNull(o)) {
-                if (List.of(TokenType.MUL, TokenType.DIV).contains(n)) {
+                if (Objects.nonNull(n.getTokenType()) && List.of(TokenType.MUL, TokenType.DIV).contains(n.getTokenType())) {
                     expression = new BinaryExpression(node);
                     expression.getChildrens().addAll(List.of(m, o));
 
@@ -34,7 +34,7 @@ public class BinaryExpression extends Expression {
                     c.setPrarent(expression);
 
                     expression.setLeft(a);
-                    expression.setOperator(((Token) n).getTokenType());
+                    expression.setOperator(n.getTokenType());
                     expression.setRight(c);
 
                     node.replace(m, expression);
@@ -51,7 +51,7 @@ public class BinaryExpression extends Expression {
 
         Stream.of(node.getChildrens()).reduce((list, m, n, o) -> {
             if (Objects.nonNull(m) && Objects.nonNull(n) && Objects.nonNull(o)) {
-                if (List.of(TokenType.ADD, TokenType.SUB).contains(n)) {
+                if (Objects.nonNull(n.getTokenType()) && List.of(TokenType.ADD, TokenType.SUB).contains(n.getTokenType())) {
                     expression = new BinaryExpression(node);
                     expression.getChildrens().addAll(List.of(m, o));
 
@@ -62,7 +62,7 @@ public class BinaryExpression extends Expression {
                     c.setPrarent(expression);
 
                     expression.setLeft(a);
-                    expression.setOperator(((Token) n).getTokenType());
+                    expression.setOperator(n.getTokenType());
                     expression.setRight(c);
 
                     node.replace(m, expression);

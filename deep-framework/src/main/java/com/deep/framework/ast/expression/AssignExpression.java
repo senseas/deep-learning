@@ -28,7 +28,7 @@ public class AssignExpression extends Expression {
     public static void parser(Node node) {
         Stream.of(node.getChildrens()).reduce((list, m, n, o) -> {
             if (Objects.nonNull(m) && Objects.nonNull(n) && Objects.nonNull(o)) {
-                if (listx.contains(n) && list.size() == 2) {
+                if (Objects.nonNull(n.getTokenType()) && listx.contains(n) && list.size() == 2) {
                     expression = new AssignExpression(node);
                     expression.getChildrens().addAll(List.of(m, o));
 
@@ -39,7 +39,7 @@ public class AssignExpression extends Expression {
                     c.setPrarent(expression);
 
                     expression.setTarget(a);
-                    expression.setOperator(((Token) n).getTokenType());
+                    expression.setOperator(n.getTokenType());
                     expression.setValue(c);
 
                     node.replace(m, expression);

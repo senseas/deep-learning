@@ -25,7 +25,7 @@ public class TypeParametersExpression extends Expression {
                 if (m.equals(LT) && o.equals(GT)) {
                     parameters = new TypeParametersExpression(node);
                     parameters.setExpression((Expression) n);
-                    parameters.getChildrens().add((Expression) n);
+                    parameters.getChildrens().add(n);
                     node.replace(n, parameters);
                     node.getChildrens().removeAll(List.of(m, o));
                     list.clear();
@@ -33,7 +33,7 @@ public class TypeParametersExpression extends Expression {
                 } else if (m.equals(LT) && o.equals(RSHIFT)) {
                     parameters = new TypeParametersExpression(node);
                     parameters.setExpression((Expression) n);
-                    parameters.getChildrens().add((Expression) n);
+                    parameters.getChildrens().add(n);
                     node.replace(n, parameters);
                     node.replace(o, GT.getToken());
                     node.getChildrens().remove(m);

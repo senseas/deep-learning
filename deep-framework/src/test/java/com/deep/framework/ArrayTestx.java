@@ -7,8 +7,8 @@ import java.util.function.IntConsumer;
 public class ArrayTestx {
 
     public class Array<T> {
-        private int[] shape;
-        private T[] data;
+        private final int[] shape;
+        private final T[] data;
 
         private int[] d;
 

@@ -12,6 +12,7 @@ import com.deep.framework.ast.type.Type;
 import lombok.Data;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Data
@@ -30,22 +31,22 @@ public class MethodDeclaration extends Declaration {
         if (node instanceof MethodDeclaration) return;
         Stream.of(node.getChildrens()).reduce((list, a, b) -> {
             if (b instanceof BlockStatement) {
-                Object m = a.getChildrens().get(a.getChildrens().size() - 2);
-                Object n = a.getChildrens().get(a.getChildrens().size() - 1);
-                if (m instanceof Name && n instanceof ParametersExpression && b instanceof BlockStatement) {
-                    MethodDeclaration methodDeclare = new MethodDeclaration(node.getPrarent());
-                    List<TokenType> modifiers = a.getChildrens().stream().filter(e -> Method_Modifiers.contains(e)).map(o -> ((Token) o).getTokenType()).collect(Collectors.toList());
-                    a.getChildrens().removeAll(modifiers);
+                Stream.of(a.getChildrens()).reduce((c, m, n) -> {
+                    if (m instanceof Name && n instanceof ParametersExpression) {
+                        MethodDeclaration declare = new MethodDeclaration(node.getPrarent());
+                        List<Node> modifiers = a.getChildrens().stream().filter(e -> Objects.nonNull(e.getTokenType()) && Method_Modifiers.contains(e.getTokenType())).toList();
+                        a.getChildrens().removeAll(modifiers);
 
-                    methodDeclare.setModifiers(modifiers);
-                    methodDeclare.setName((Name) m);
-                    methodDeclare.setParameters((ParametersExpression) n);
-                    methodDeclare.setBody((BlockStatement) b);
-                    methodDeclare.setChildrens(a.getChildrens());
-                    methodDeclare.getChildrens().add(b);
-                    TypeParametersExpression.parser(methodDeclare);
-                    node.replaceAndRemove(a, methodDeclare, b);
-                }
+                        declare.setModifiers(modifiers.stream().map(Token::getTokenType).collect(Collectors.toList()));
+                        declare.setName((Name) m);
+                        declare.setParameters((ParametersExpression) n);
+                        declare.setBody((BlockStatement) b);
+                        declare.setChildrens(a.getChildrens());
+                        declare.getChildrens().add(b);
+                        TypeParametersExpression.parser(declare);
+                        node.replaceAndRemove(a, declare, b);
+                    }
+                });
             }
         });
     }

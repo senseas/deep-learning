@@ -1,5 +1,6 @@
 package com.deep.framework.ast;
 
+import com.deep.framework.ast.declaration.ClassOrInterfaceDeclaration;
 import com.deep.framework.ast.expression.*;
 import com.deep.framework.ast.lexer.TokenType;
 import com.deep.framework.ast.statement.*;
@@ -115,9 +116,9 @@ public class Parser {
         ForStatement.parser(node);
         WhileStatement.parser(node);
         IfStatement.parser(node);
-        /*ClassOrInterfaceDeclaration.parser(node);
+        ClassOrInterfaceDeclaration.parser(node);
         BinaryExpression.parser(node);
-        AssignExpression.parser(node);*/
+        AssignExpression.parser(node);
         for (Object n : node.getChildrens()) {
             if (n instanceof Node) {
                 reduce((Node) n);

@@ -36,29 +36,31 @@ public class ClassOrInterfaceDeclaration extends Declaration {
         PackageDeclaration.parser(node);
         ImportDeclaration.parser(node);
 
-        Stream.of(node.getChildrens()).reduce((list, m, b) -> {
-            if (b instanceof BlockStatement n) {
-                Node clas = m.get(CLASS);
-                if (Objects.nonNull(clas)) {
-                    ClassOrInterfaceDeclaration classDeclare = new ClassOrInterfaceDeclaration(node.getPrarent());
-                    List<TokenType> modifiers = m.getChildrens().stream().filter(e -> Field_Modifiers.contains(e)).map(o -> ((Token) o).getTokenType()).collect(Collectors.toList());
-                    classDeclare.setModifiers(modifiers);
-                    classDeclare.setBody(n);
-                    classDeclare.setChildrens(m.getChildrens());
-                    classDeclare.getChildrens().add(n);
+        Stream.of(node.getChildrens()).reduce((list, a, b) -> {
+            if (b instanceof BlockStatement) {
+                Stream.of(a.getChildrens()).reduce((c, m, n) -> {
+                    if (m.equals(CLASS)) {
+                        ClassOrInterfaceDeclaration declare = new ClassOrInterfaceDeclaration(node.getPrarent());
+                        List<Node> modifiers = a.getChildrens().stream().filter(e -> Objects.nonNull(e.getTokenType())&&Field_Modifiers.contains(e.getTokenType())).toList();
+                        declare.setModifiers(modifiers.stream().map(Node::getTokenType).collect(Collectors.toList()));
+                        declare.setName((Name) n);
+                        declare.setBody((BlockStatement) b);
+                        declare.setChildrens(a.getChildrens());
+                        declare.getChildrens().add(b);
 
-                    m.getChildrens().removeAll(modifiers);
-                    m.remove(clas);
-                    node.replaceAndRemove(m, classDeclare, n);
+                        a.getChildrens().removeAll(modifiers);
+                        a.remove(m);
+                        node.replaceAndRemove(a, declare, b);
 
-                    TypeParametersExpression.parser(classDeclare);
+                        TypeParametersExpression.parser(declare);
 
-                    parserImplements(classDeclare);
-                    parserExtends(classDeclare);
+                        parserImplements(declare);
+                        parserExtends(declare);
 
-                    MethodDeclaration.parser(n);
-                    FieldDeclaration.parser(n);
-                }
+                        MethodDeclaration.parser(b);
+                        FieldDeclaration.parser(b);
+                    }
+                });
             }
         });
     }

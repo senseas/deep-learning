@@ -6,6 +6,8 @@ import java.util.stream.Stream;
 
 public class TensorOparetor extends Tensor {
 
+    public  String x="xxxxx";
+
     public TensorOparetor(String name, Tensor... input) {
         super(name, input);
         List<List<Object>> list;

@@ -1,8 +1,6 @@
 package com.deep.framework.ast.lexer;
 
-import com.deep.framework.ast.Node;
-
-public class Token extends Node {
+public class Token{
 
     private TokenType tokenType;
 

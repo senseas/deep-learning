@@ -2,6 +2,8 @@
 package com.deep.framework.ast.lexer;
 
 
+import com.deep.framework.ast.Node;
+
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -125,8 +127,8 @@ public enum TokenType {
      */
     private final TokenKind kind;
 
-    public Token getToken() {
-        return new Token(this);
+    public Node getToken() {
+        return new Node(this);
     }
 
     /**

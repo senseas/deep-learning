@@ -4,7 +4,7 @@ import com.deep.framework.ast.Node;
 import com.deep.framework.ast.expression.Name;
 
 public class Type extends Node {
-    private Name name;
+    private final Name name;
     private String modifier;
 
     public Type(Name name) {
