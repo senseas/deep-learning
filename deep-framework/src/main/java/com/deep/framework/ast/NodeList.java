@@ -100,11 +100,16 @@ public class NodeList<E> extends AbstractList<E> {
     public boolean removeAll(Collection<?> c) {
         Objects.requireNonNull(c);
         boolean modified = false;
-        Iterator<?> it = iterator();
-        while (it.hasNext()) {
-            if (c.contains(it.next())) {
-                it.remove();
-                modified = true;
+        Iterator<?> a = iterator();
+        while (a.hasNext()) {
+            Iterator<?> b = c.iterator();
+            Object nex = a.next();
+            while (b.hasNext()) {
+                Object next = b.next();
+                if (next == nex) {
+                    a.remove();
+                    modified = true;
+                }
             }
         }
         return modified;
@@ -115,7 +120,7 @@ public class NodeList<E> extends AbstractList<E> {
         check(index);
         int l = 0;
         E c = null;
-        Object[] newArray = new Object[capacity];
+        Object[] newArray = new Object[size];
         for (int i = 0; i < size; i++) {
             if (i == index) {
                 c = array[i];
@@ -132,11 +137,16 @@ public class NodeList<E> extends AbstractList<E> {
     public boolean retainAll(Collection<?> c) {
         Objects.requireNonNull(c);
         boolean modified = false;
-        Iterator<E> it = iterator();
-        while (it.hasNext()) {
-            if (!c.contains(it.next())) {
-                it.remove();
-                modified = true;
+        Iterator<?> a = iterator();
+        while (a.hasNext()) {
+            Iterator<?> b = c.iterator();
+            Object nex = a.next();
+            while (b.hasNext()) {
+                Object next = b.next();
+                if (next != nex) {
+                    a.remove();
+                    modified = true;
+                }
             }
         }
         return modified;
