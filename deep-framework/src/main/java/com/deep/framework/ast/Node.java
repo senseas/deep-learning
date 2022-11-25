@@ -57,9 +57,7 @@ public class Node extends Token {
     public String toString() {
         if (Objects.nonNull(getTokenType())) return getTokenType().toString();
         if (childrens.isEmpty()) return "";
-        String collect = childrens.stream().map(Objects::toString).collect(Collectors.joining(" "));
-        if (collect.endsWith(";")) return collect;
-        return collect.concat(";");
+        return childrens.stream().map(Objects::toString).collect(Collectors.joining(" "));
     }
 
     @Override

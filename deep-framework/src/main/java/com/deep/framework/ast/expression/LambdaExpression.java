@@ -12,7 +12,7 @@ import static com.deep.framework.ast.lexer.TokenType.ARROW;
 
 @Data
 public class LambdaExpression extends Expression {
-    public ParametersExpression parameters;
+    private ParametersExpression parameters;
     private BlockStatement body;
 
     private static LambdaExpression expression;

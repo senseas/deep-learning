@@ -11,6 +11,8 @@ import lombok.Data;
 import java.util.List;
 import java.util.Objects;
 
+import static com.deep.framework.ast.lexer.TokenType.ELLIPSIS;
+
 @Data
 public class VariableDeclarator extends Declaration {
     private Type type;
@@ -26,7 +28,7 @@ public class VariableDeclarator extends Declaration {
         List<Node> nodes = node.getChildrens().stream().filter(a -> Field_Modifiers.contains(a.getTokenType())).toList();
         node.getChildrens().removeAll(nodes);
 
-        Stream.of(node.getChildrens()).reduce((list, a, b) -> {
+        Stream.of(node.getChildrens()).reduce((list, a, b, c) -> {
             if (a instanceof Name && Objects.nonNull(b) && b instanceof Name) {
                 VariableDeclarator declare = new VariableDeclarator(node);
                 Type type = new Type((Name) a);
@@ -42,6 +44,14 @@ public class VariableDeclarator extends Declaration {
                 declare.setInitializer(d.getValue());
                 node.replaceAndRemove(a, declare, b);
                 list.remove(b);
+            } else if (a instanceof Name && Objects.nonNull(b) && b.equals(ELLIPSIS) && Objects.nonNull(c) && c instanceof Name) {
+                VariableDeclarator declare = new VariableDeclarator(node);
+                Type type = new Type((Name) a);
+                declare.setType(type);
+                declare.setName((Name) c);
+                node.replace(a, declare);
+                node.getChildrens().removeAll(List.of(b, c));
+                list.removeAll(List.of(b, c));
             }
             /*if (a.equals(INT)) {
                 return;

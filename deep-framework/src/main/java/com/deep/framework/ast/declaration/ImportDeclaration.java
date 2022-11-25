@@ -7,6 +7,7 @@ import com.deep.framework.ast.expression.Name;
 import static com.deep.framework.ast.lexer.TokenType.IMPORT;
 
 public class ImportDeclaration extends Declaration {
+    private Name name;
 
     public ImportDeclaration(Node prarent) {
         super(prarent);
@@ -23,5 +24,9 @@ public class ImportDeclaration extends Declaration {
                 list.clear();
             }
         }));
+    }
+
+    public void setName(Name name) {
+        this.name = name;
     }
 }

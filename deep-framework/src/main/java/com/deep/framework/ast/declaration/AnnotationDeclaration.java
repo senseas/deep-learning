@@ -11,7 +11,7 @@ import static com.deep.framework.ast.lexer.TokenType.AT;
 @Data
 public class AnnotationDeclaration extends Declaration {
     private Name name;
-    public ParametersExpression parameters;
+    private ParametersExpression parameters;
 
     public AnnotationDeclaration(Node prarent) {
         super(prarent);

@@ -7,6 +7,7 @@ import com.deep.framework.ast.expression.Name;
 import static com.deep.framework.ast.lexer.TokenType.PACKAGE;
 
 public class PackageDeclaration extends Declaration {
+    private Name name;
 
     public PackageDeclaration(Node prarent) {
         super(prarent);
@@ -25,4 +26,7 @@ public class PackageDeclaration extends Declaration {
         }));
     }
 
+    public void setName(Name name) {
+        this.name = name;
+    }
 }

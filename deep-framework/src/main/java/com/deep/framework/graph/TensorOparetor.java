@@ -5,10 +5,11 @@ import java.util.List;
 import java.util.stream.Stream;
 
 public class TensorOparetor extends Tensor {
-
+    int aa=  100;
     public String x = "xxxxx";
 
     public TensorOparetor(String name, Tensor... input) {
+
         super(name, input);
         List<List<Object>> list;
         if (1 > 1) {
@@ -30,7 +31,11 @@ public class TensorOparetor extends Tensor {
             });
             Stream.of(1, 1, 1).map(a -> a);
             setInput(stream.toArray(Tensor[]::new));
-            int a = 1 + 2 * 3 * 4 + 5 + 7 * 8;
+            final int a = 1 + 2 * 3 * 4 + 5 + 7 * 8;
+        }
+
+        for (int i = 0; i <100 ; i++) {
+            System.out.println("while");
         }
 
         while (true) {
