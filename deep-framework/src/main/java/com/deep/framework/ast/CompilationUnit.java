@@ -1,3 +1,12 @@
 package com.deep.framework.ast;
 
-public class CompilationUnit extends Node { }
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+
+public class CompilationUnit extends Node {
+    public static Set<Class> set = new HashSet<>();
+    public static Set<String> pkg = new HashSet<>();
+    public static Map<String, Class> map = new HashMap<>();
+}

@@ -12,7 +12,6 @@ import com.deep.framework.ast.type.Type;
 import lombok.Data;
 
 import java.util.List;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Data
@@ -28,13 +27,14 @@ public class MethodDeclaration extends Declaration {
     }
 
     public static void parser(Node node) {
+        if (!(node.getPrarent() instanceof ClassOrInterfaceDeclaration)) return;
         if (node instanceof MethodDeclaration) return;
         Stream.of(node.getChildrens()).reduce((list, a, b) -> {
             if (b instanceof BlockStatement) {
                 Stream.of(a.getChildrens()).reduce((c, m, n) -> {
                     if (m instanceof Name && n instanceof ParametersExpression) {
                         MethodDeclaration declare = new MethodDeclaration(node.getPrarent());
-                        List<Node> modifiers = a.getChildrens().stream().filter(e -> Objects.nonNull(e.getTokenType()) && Method_Modifiers.contains(e.getTokenType())).toList();
+                        List<Node> modifiers = a.getChildrens().stream().filter(e -> Method_Modifiers.contains(e.getTokenType())).toList();
                         a.getChildrens().removeAll(modifiers);
 
                         declare.setModifiers(modifiers.stream().map(Token::getTokenType).collect(Collectors.toList()));

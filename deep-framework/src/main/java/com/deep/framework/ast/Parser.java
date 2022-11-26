@@ -12,7 +12,6 @@ import java.util.Objects;
 import java.util.stream.Stream;
 
 import static com.deep.framework.ast.lexer.TokenType.*;
-import static javax.lang.model.SourceVersion.isIdentifier;
 
 public class Parser {
     String string = "\"";
@@ -35,23 +34,27 @@ public class Parser {
     public void parser(String strFile) {
         Stream<String> stream = FileUtil.readFile(strFile);
         stream.reduce((a, b) -> {
+            String c = a.concat(b);
             if (a.equals(string)) {
-                return a.concat(b);
+                return c;
             } else if (a.startsWith(string)) {
-                if (a.concat(b).endsWith(strings)) return a.concat(b);
-                if (!a.concat(b).endsWith(string)) return a.concat(b);
-                add(a.concat(b));
+                if (c.endsWith(strings)) return c;
+                if (!c.endsWith(string)) return c;
+                add(c);
                 return "";
             } else if (Character.isWhitespace(b.charAt(0))) {
                 add(a);
                 return "";
-            } else if (!a.isEmpty() && isIdentifier(a.concat(b))) {
-                return a.concat(b);
-            } else if (TokenType.startsWith(a.concat(b))) {
-                return a.concat(b);
-            } else {
+            } else if (TokenType.startsWith(c)) {
+                return c;
+            }else if (TokenType.contains(a)) {
                 add(a);
                 return b;
+            }else if (TokenType.contains(b)) {
+                add(a);
+                return b;
+            } else {
+                return c;
             }
         });
 

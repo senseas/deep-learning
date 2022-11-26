@@ -11,7 +11,6 @@ import com.deep.framework.ast.type.Type;
 import lombok.Data;
 
 import java.util.List;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Data
@@ -25,12 +24,13 @@ public class FieldDeclaration extends Declaration {
     }
 
     public static void parser(Node node) {
+        if (!(node.getPrarent() instanceof ClassOrInterfaceDeclaration)) return;
         if (node instanceof FieldDeclaration) return;
         Stream.of(node.getChildrens()).reduce((list, a, b) -> {
             if (!(b instanceof BlockStatement)) {
                 if (a instanceof Statement) {
                     FieldDeclaration declare = new FieldDeclaration(node.getPrarent());
-                    List<Node> modifiers = a.getChildrens().stream().filter(e -> Objects.nonNull(e.getTokenType()) && Field_Modifiers.contains(e.getTokenType())).toList();
+                    List<Node> modifiers = a.getChildrens().stream().filter(e -> Field_Modifiers.contains(e.getTokenType())).toList();
                     a.getChildrens().removeAll(modifiers);
 
                     declare.setModifiers(modifiers.stream().map(Token::getTokenType).collect(Collectors.toList()));

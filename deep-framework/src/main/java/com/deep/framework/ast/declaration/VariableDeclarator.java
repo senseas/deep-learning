@@ -53,21 +53,6 @@ public class VariableDeclarator extends Declaration {
                 node.getChildrens().removeAll(List.of(b, c));
                 list.removeAll(List.of(b, c));
             }
-            /*if (a.equals(INT)) {
-                return;
-            } else if (a.equals(LONG)) {
-                return;
-            } else if (a.equals(FLOAT)) {
-                return;
-            } else if (a.equals(DOUBLE)) {
-                return;
-            } else if (a.equals(BYTE)) {
-                return;
-            } else if (a.equals(CHAR)) {
-                return;
-            } else if (a.equals(BOOLEAN)) {
-                return;
-            }*/
         });
     }
 

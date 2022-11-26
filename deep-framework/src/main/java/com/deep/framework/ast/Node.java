@@ -48,9 +48,8 @@ public class Node extends Token {
         childrens.set(index, replaceNode);
     }
 
-    public Node setPrarent(Node prarent) {
+    public void setPrarent(Node prarent) {
         this.prarent = prarent;
-        return this;
     }
 
     @Override

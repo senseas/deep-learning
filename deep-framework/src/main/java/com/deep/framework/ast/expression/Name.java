@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Objects;
 
 import static com.deep.framework.ast.lexer.TokenType.DOT;
+import static com.deep.framework.ast.lexer.TokenType.MUL;
 
 @Data
 public class Name extends Expression {
@@ -52,6 +53,13 @@ public class Name extends Expression {
                     c.getName().getChildrens().add(name);
                     node.getChildrens().removeAll(List.of(m, name));
                     name = (Expression) n;
+                    list.remove(n);
+                } else if (m.equals(DOT) && n.equals(MUL)) {
+                    n.setPrarent(node);
+                    n.getChildrens().add(name);
+                    name.setPrarent(n);
+                    node.getChildrens().removeAll(List.of(m, name));
+                    name = null;
                     list.remove(n);
                 }
             }
