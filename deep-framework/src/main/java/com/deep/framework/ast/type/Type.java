@@ -4,6 +4,8 @@ import com.deep.framework.ast.Node;
 import com.deep.framework.ast.expression.Name;
 import com.deep.framework.ast.lexer.TokenType;
 
+import java.util.Objects;
+
 public class Type extends Node {
     private final String identifier;
 
@@ -16,8 +18,8 @@ public class Type extends Node {
     }
 
     public static Type getType(Node node) {
-        if (node instanceof PrimitiveType) {
-            return (Type) node;
+        if (Objects.nonNull(node.getTokenType())) {
+            return new PrimitiveType(node.getTokenType());
         } else {
             return new ReferenceType((Name) node);
         }

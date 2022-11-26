@@ -34,7 +34,7 @@ public class FieldDeclaration extends Declaration {
                     a.getChildrens().removeAll(modifiers);
 
                     declare.setModifiers(modifiers.stream().map(Token::getTokenType).collect(Collectors.toList()));
-                    declare.setType(new Type((Name) a.getChildrens().stream().findFirst().get()));
+                    declare.setType(Type.getType(a.getChildrens().first()));
                     declare.setChildrens(a.getChildrens());
                     node.replace(a, declare);
                 }

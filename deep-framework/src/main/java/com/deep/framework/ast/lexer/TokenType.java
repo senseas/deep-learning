@@ -3,7 +3,7 @@ package com.deep.framework.ast.lexer;
 
 
 import com.deep.framework.ast.Node;
-import com.deep.framework.ast.type.PrimitiveType;
+import com.deep.framework.ast.expression.Name;
 
 import java.util.Arrays;
 import java.util.Locale;
@@ -131,7 +131,7 @@ public enum TokenType {
     private final TokenKind kind;
 
     public Node getToken() {
-        if (this.kind.equals(PRIMITIVE)) return PrimitiveType.getPrimitiveType(this);
+        if (this.kind.equals(PRIMITIVE)) return new Name(this);
         return new Node(this);
     }
 

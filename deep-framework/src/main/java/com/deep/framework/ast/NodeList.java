@@ -51,6 +51,10 @@ public class NodeList<E> extends AbstractList<E> {
         if (index > size) throw new ArrayIndexOutOfBoundsException(index);
     }
 
+    public E first() {
+        return array[0];
+    }
+
     @Override
     public void add(int index, E e) {
         check(index);

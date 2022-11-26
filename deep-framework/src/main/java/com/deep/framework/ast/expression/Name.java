@@ -3,6 +3,7 @@ package com.deep.framework.ast.expression;
 import com.deep.framework.ast.Node;
 import com.deep.framework.ast.Stream;
 import com.deep.framework.ast.declaration.CallableDeclaration;
+import com.deep.framework.ast.lexer.TokenType;
 import lombok.Data;
 
 import java.util.List;
@@ -26,6 +27,12 @@ public class Name extends Expression {
     public Name(String identifier) {
         super(null);
         this.identifier = identifier;
+    }
+
+    public Name(TokenType type) {
+        super(null);
+        setTokenType(type);
+        this.identifier = type.getName();
     }
 
     public static void parser(Node node) {
