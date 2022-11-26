@@ -31,14 +31,14 @@ public class VariableDeclarator extends Declaration {
         Stream.of(node.getChildrens()).reduce((list, a, b, c) -> {
             if (a instanceof Name && Objects.nonNull(b) && b instanceof Name) {
                 VariableDeclarator declare = new VariableDeclarator(node);
-                Type type = new Type((Name) a);
+                Type type = Type.getType(a);
                 declare.setType(type);
                 declare.setName((Name) b);
                 node.replaceAndRemove(a, declare, b);
                 list.remove(b);
             } else if (a instanceof Name && Objects.nonNull(b) && b instanceof AssignExpression d) {
                 VariableDeclarator declare = new VariableDeclarator(node);
-                Type type = new Type((Name) a);
+                Type type = Type.getType(a);
                 declare.setType(type);
                 declare.setName(d.getTarget());
                 declare.setInitializer(d.getValue());
@@ -46,7 +46,7 @@ public class VariableDeclarator extends Declaration {
                 list.remove(b);
             } else if (a instanceof Name && Objects.nonNull(b) && b.equals(ELLIPSIS) && Objects.nonNull(c) && c instanceof Name) {
                 VariableDeclarator declare = new VariableDeclarator(node);
-                Type type = new Type((Name) a);
+                Type type = Type.getType(a);
                 declare.setType(type);
                 declare.setName((Name) c);
                 node.replace(a, declare);

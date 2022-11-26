@@ -2,9 +2,9 @@ package com.deep.framework.ast.type;
 
 import com.deep.framework.ast.lexer.TokenType;
 
-public class FloatPrimitiveType extends PrimitiveType {
+public class ShortPrimitiveType extends PrimitiveType {
 
-    public FloatPrimitiveType(TokenType type) {
+    public ShortPrimitiveType(TokenType type) {
         super(type);
         setTokenType(type);
     }

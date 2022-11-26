@@ -12,18 +12,15 @@ public class Node extends Token {
 
     public Node() {
         super(null);
-        this.childrens = new NodeList<>();
     }
 
     public Node(TokenType type) {
         super(type);
-        this.childrens = new NodeList<>();
     }
 
     public Node(Node prarent) {
         super(null);
         this.prarent = prarent;
-        this.childrens = new NodeList<>();
     }
 
     public Node getPrarent() {
@@ -31,7 +28,8 @@ public class Node extends Token {
     }
 
     public NodeList<Node> getChildrens() {
-        return childrens;
+        if (Objects.nonNull(childrens)) return childrens;
+        return childrens = new NodeList<>();
     }
 
     public void setChildrens(NodeList<Node> childrens) {

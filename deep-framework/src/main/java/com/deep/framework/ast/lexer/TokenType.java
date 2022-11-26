@@ -3,8 +3,11 @@ package com.deep.framework.ast.lexer;
 
 
 import com.deep.framework.ast.Node;
+import com.deep.framework.ast.type.PrimitiveType;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.Locale;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import static com.deep.framework.ast.lexer.TokenKind.*;
@@ -15,33 +18,33 @@ public enum TokenType {
     // Keywords
     ABSTRACT      (KEYWORD,"abstract"),
     ASSERT        (KEYWORD,"assert"),
-    BOOLEAN       (KEYWORD,"boolean"),
+    BOOLEAN       (PRIMITIVE,"boolean"),
     BREAK         (KEYWORD,"break"),
-    BYTE          (KEYWORD,"byte"),
+    BYTE          (PRIMITIVE,"byte"),
     CASE          (KEYWORD,"case"),
     CATCH         (KEYWORD,"catch"),
-    CHAR          (KEYWORD,"char"),
+    CHAR          (PRIMITIVE,"char"),
     CLASS         (KEYWORD,"class"),
     CONST         (KEYWORD,"const"),
     CONTINUE      (KEYWORD,"continue"),
     DEFAULT       (KEYWORD,"default"),
     DO            (KEYWORD,"do"),
-    DOUBLE        (KEYWORD,"double"),
+    DOUBLE        (PRIMITIVE,"double"),
     ELSE          (KEYWORD,"else"),
     ENUM          (KEYWORD,"enum"),
     EXTENDS       (KEYWORD,"extends"),
     FINAL         (KEYWORD,"final"),
     FINALLY       (KEYWORD,"finally"),
-    FLOAT         (KEYWORD,"float"),
+    FLOAT         (PRIMITIVE,"float"),
     FOR           (KEYWORD,"for"),
     IF            (KEYWORD,"if"),
     GOTO          (KEYWORD,"goto"),
     IMPLEMENTS    (KEYWORD,"implements"),
     IMPORT        (KEYWORD,"import"),
     INSTANCEOF    (KEYWORD,"instanceof"),
-    INT           (KEYWORD,"int"),
+    INT           (PRIMITIVE,"int"),
     INTERFACE     (KEYWORD,"interface"),
-    LONG          (KEYWORD,"long"),
+    LONG          (PRIMITIVE,"long"),
     NATIVE        (KEYWORD,"native"),
     NEW           (KEYWORD,"new"),
     PACKAGE       (KEYWORD,"package"),
@@ -49,7 +52,7 @@ public enum TokenType {
     PROTECTED     (KEYWORD,"protected"),
     PUBLIC        (KEYWORD,"public"),
     RETURN        (KEYWORD,"return"),
-    SHORT         (KEYWORD,"short"),
+    SHORT         (PRIMITIVE,"short"),
     STATIC        (KEYWORD,"static"),
     STRICTFP      (KEYWORD,"strictfp"),
     SUPER         (KEYWORD,"super"),
@@ -128,6 +131,7 @@ public enum TokenType {
     private final TokenKind kind;
 
     public Node getToken() {
+        if (this.kind.equals(PRIMITIVE)) return PrimitiveType.getPrimitiveType(this);
         return new Node(this);
     }
 
@@ -145,6 +149,10 @@ public enum TokenType {
 
     public String getName() {
         return name;
+    }
+
+    public TokenKind getKind() {
+        return kind;
     }
 
     public String getNameOrType() {

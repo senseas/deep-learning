@@ -1,12 +1,12 @@
 package com.deep.framework.ast.type;
 
-import com.deep.framework.ast.expression.Name;
+import com.deep.framework.ast.lexer.TokenType;
 
 public class BooleanPrimitiveType extends PrimitiveType {
 
-    private Type type;
-
-    public BooleanPrimitiveType(Name name) {
-        super(name);
+    public BooleanPrimitiveType(TokenType type) {
+        super(type);
+        setTokenType(type);
     }
+
 }

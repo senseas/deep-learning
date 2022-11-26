@@ -1,12 +1,12 @@
 package com.deep.framework.ast.type;
 
-import com.deep.framework.ast.expression.Name;
+import com.deep.framework.ast.lexer.TokenType;
 
 public class LongPrimitiveType extends PrimitiveType {
 
-    private Type type;
-
-    public LongPrimitiveType(Name name) {
-        super(name);
+    public LongPrimitiveType(TokenType type) {
+        super(type);
+        setTokenType(type);
     }
+
 }
