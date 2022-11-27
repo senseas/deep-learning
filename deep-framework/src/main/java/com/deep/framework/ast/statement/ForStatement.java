@@ -7,7 +7,6 @@ import com.deep.framework.ast.expression.ParametersExpression;
 import lombok.Data;
 
 import java.util.List;
-import java.util.Objects;
 
 import static com.deep.framework.ast.lexer.TokenType.FOR;
 
@@ -35,7 +34,7 @@ public class ForStatement extends Statement {
                     a.getChildrens().removeAll(List.of(m, n));
                     node.replace(a, statement);
 
-                    if (Objects.nonNull(b) && b instanceof BlockStatement) {
+                    if (b instanceof BlockStatement) {
                         b.setPrarent(statement);
                         statement.setBody((BlockStatement) b);
                         statement.getChildrens().addAll(List.of(n, b));

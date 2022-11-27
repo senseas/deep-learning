@@ -44,7 +44,7 @@ public class VariableDeclarator extends Declaration {
                 declare.setInitializer(d.getValue());
                 node.replaceAndRemove(a, declare, b);
                 list.remove(b);
-            } else if (a instanceof Name && Objects.nonNull(b) && b.equals(ELLIPSIS) && Objects.nonNull(c) && c instanceof Name) {
+            } else if (a instanceof Name && Objects.nonNull(b) && b.equals(ELLIPSIS) && c instanceof Name) {
                 VariableDeclarator declare = new VariableDeclarator(node);
                 Type type = Type.getType(a);
                 declare.setType(type);

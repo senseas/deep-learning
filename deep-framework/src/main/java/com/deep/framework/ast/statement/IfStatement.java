@@ -29,7 +29,7 @@ public class IfStatement extends Statement {
                     statement.setParameters((ParametersExpression) n);
                     node.replace(a, statement);
 
-                    if (Objects.nonNull(b) && b instanceof BlockStatement) {
+                    if (b instanceof BlockStatement) {
                         b.setPrarent(statement);
                         statement.setBody((BlockStatement) b);
                         statement.getChildrens().addAll(List.of(n, b));
@@ -49,7 +49,7 @@ public class IfStatement extends Statement {
                     a.getChildrens().removeAll(List.of(m, n));
                     statement.getChildrens().add(a);
 
-                    if (Objects.nonNull(b) && b instanceof BlockStatement) {
+                    if (b instanceof BlockStatement) {
                         a.getChildrens().add(b);
                         b.setPrarent(a);
                         node.getChildrens().removeAll(List.of(a, b));
@@ -64,7 +64,7 @@ public class IfStatement extends Statement {
                     a.getChildrens().remove(m);
                     statement.getChildrens().add(a);
 
-                    if (Objects.nonNull(b) && b instanceof BlockStatement) {
+                    if (b instanceof BlockStatement) {
                         a.getChildrens().add(b);
                         b.setPrarent(a);
                         node.getChildrens().removeAll(List.of(a, b));
