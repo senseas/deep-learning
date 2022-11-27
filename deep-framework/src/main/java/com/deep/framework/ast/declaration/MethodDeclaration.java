@@ -18,8 +18,8 @@ import java.util.stream.Collectors;
 public class MethodDeclaration extends Declaration {
     private List<TokenType> modifiers;
     private Type returnValue;
-    private ParametersExpression parameters;
     private Name name;
+    private ParametersExpression parameters;
     private BlockStatement body;
 
     public MethodDeclaration(Node prarent) {
@@ -32,7 +32,7 @@ public class MethodDeclaration extends Declaration {
         Stream.of(node.getChildrens()).reduce((list, a, b) -> {
             if (b instanceof BlockStatement) {
                 Stream.of(a.getChildrens()).reduce((c, m, n) -> {
-                    if (m instanceof Name && n instanceof ParametersExpression) {
+                    if (m.isName() && n instanceof ParametersExpression) {
                         MethodDeclaration declare = new MethodDeclaration(node.getPrarent());
                         List<Node> modifiers = a.getChildrens().stream().filter(e -> Method_Modifiers.contains(e.getTokenType())).toList();
                         a.getChildrens().removeAll(modifiers);

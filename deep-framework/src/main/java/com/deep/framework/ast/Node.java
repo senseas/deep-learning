@@ -1,8 +1,11 @@
 package com.deep.framework.ast;
 
+import com.deep.framework.ast.expression.Name;
 import com.deep.framework.ast.lexer.Token;
 import com.deep.framework.ast.lexer.TokenType;
+import com.deep.framework.ast.statement.BlockStatement;
 
+import java.lang.reflect.Type;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -44,6 +47,26 @@ public class Node extends Token {
     public void replace(Node node, Node replaceNode) {
         int index = childrens.indexOf(node);
         childrens.set(index, replaceNode);
+    }
+
+    public boolean isName() {
+        return this instanceof Name;
+    }
+
+    public boolean isBlockStatement() {
+        return this instanceof BlockStatement;
+    }
+
+    public boolean endsTypeof(Type clas) {
+        return childrens.get(childrens.size() - 1).getClass().equals(clas);
+    }
+
+    public boolean typeof(Type clas) {
+        return this.getClass().equals(clas);
+    }
+
+    public boolean notTypeof(Type clas) {
+        return !typeof(clas);
     }
 
     public void setPrarent(Node prarent) {

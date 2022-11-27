@@ -46,7 +46,6 @@ public class ForEachStatement extends Statement {
                         statement.setBody(block);
                         statement.getChildrens().addAll(List.of(n, block));
                     }
-
                 }
             });
         });

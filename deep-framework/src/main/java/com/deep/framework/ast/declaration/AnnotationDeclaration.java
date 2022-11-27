@@ -20,7 +20,7 @@ public class AnnotationDeclaration extends Declaration {
     public static void parser(Node node) {
         if (node instanceof AnnotationDeclaration) return;
         Stream.of(node.getChildrens()).reduce((list, a, b) -> {
-            if (a.equals(AT) && b instanceof Name) {
+            if (a.equals(AT) && b.isName()) {
                 AnnotationDeclaration declare = new AnnotationDeclaration(node.getPrarent());
                 declare.setName((Name) b);
                 int index = node.getChildrens().indexOf(b);
