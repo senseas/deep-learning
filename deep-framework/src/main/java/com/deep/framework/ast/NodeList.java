@@ -55,6 +55,10 @@ public class NodeList<E> extends AbstractList<E> {
         return array[0];
     }
 
+    public E last() {
+        return array[size - 1];
+    }
+
     @Override
     public void add(int index, E e) {
         check(index);

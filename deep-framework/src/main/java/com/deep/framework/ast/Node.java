@@ -1,9 +1,11 @@
 package com.deep.framework.ast;
 
+import com.deep.framework.ast.expression.Expression;
 import com.deep.framework.ast.lexer.Token;
 import com.deep.framework.ast.lexer.TokenType;
 
 import java.lang.reflect.Type;
+import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -47,16 +49,45 @@ public class Node extends Token {
         childrens.set(index, replaceNode);
     }
 
+    public NodeList split(Node node) {
+        int index = childrens.indexOf(node);
+        if (index == -1) return null;
+        return split(index);
+    }
+
+    public NodeList split(TokenType type) {
+        Node node = childrens.stream().filter(a -> a.equals(type)).findFirst().orElse(null);
+        int index = childrens.indexOf(node);
+        if (index == -1) return null;
+        return split(index);
+    }
+
+    private NodeList split(int index) {
+        Node a;
+        List<Node> nodea = childrens.subList(0, index);
+        if (nodea.size() == 1) {
+            a = nodea.get(0);
+        } else {
+            a = new Expression(null);
+            a.setChildrens(new NodeList<>(nodea));
+        }
+        Node b;
+        List<Node> nodeb = childrens.subList(index + 1, childrens.size());
+        if (nodeb.size() == 1) {
+            b = nodeb.get(0);
+        } else {
+            b = new Expression(null);
+            b.setChildrens(new NodeList<>(nodeb));
+        }
+        return new NodeList(a, b);
+    }
+
     public boolean endsTypeof(Type clas) {
         return childrens.get(childrens.size() - 1).getClass().equals(clas);
     }
 
     public boolean typeof(Type clas) {
         return this.getClass().equals(clas);
-    }
-
-    public boolean notTypeof(Type clas) {
-        return !typeof(clas);
     }
 
     public void setPrarent(Node prarent) {

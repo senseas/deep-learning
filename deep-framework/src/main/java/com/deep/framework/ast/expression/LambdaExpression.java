@@ -14,7 +14,6 @@ import static com.deep.framework.ast.lexer.TokenType.ARROW;
 public class LambdaExpression extends Expression {
     private ParametersExpression parameters;
     private BlockStatement body;
-
     private static LambdaExpression expression;
 
     public LambdaExpression(Node prarent) {
@@ -37,9 +36,9 @@ public class LambdaExpression extends Expression {
                         block.setChildrens(a.getChildrens());
                         block.getChildrens().removeAll(List.of(m, n));
 
-                        node.replace(a, expression);
                         expression.setBody(block);
                         expression.getChildrens().addAll(List.of(n, block));
+                        node.replace(a, expression);
                     }
                 } else if (m instanceof Name && Objects.nonNull(n) && n.equals(ARROW)) {
                     expression = new LambdaExpression(node);
@@ -56,9 +55,9 @@ public class LambdaExpression extends Expression {
                         block.setChildrens(a.getChildrens());
                         block.getChildrens().removeAll(List.of(m, n));
 
-                        node.replace(a, expression);
                         expression.setBody(block);
                         expression.getChildrens().addAll(List.of(parameters, block));
+                        node.replace(a, expression);
                     }
                 }
             });

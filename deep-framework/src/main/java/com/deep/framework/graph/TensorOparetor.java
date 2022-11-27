@@ -1,16 +1,34 @@
 package com.deep.framework.graph;
 
+import com.deep.framework.ast.Node;
+import com.deep.framework.ast.NodeList;
+
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Stream;
 
 public class TensorOparetor extends Tensor {
-    int aa = 100;
+    Double aa = -100.2;
+    Boolean bb = false;
+    char cc = '1';
     public String x = "xxxxx";
 
     public TensorOparetor(String name, Tensor... input) {
-
         super(name, input);
+        try {
+            System.out.println(1);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }finally {
+            System.out.println(1);
+        }
+        synchronized (this) {
+            System.out.println(1);
+        }
+
+        do {
+            System.out.println("do while");
+        }while (1==2);
         List<List<Object>> list;
         if (1 > 1) {
             System.out.println(1);
@@ -38,9 +56,17 @@ public class TensorOparetor extends Tensor {
             System.out.println("while");
         }
 
-        while (true) {
+        while (aa == 11) {
             System.out.println("while");
         }
+
+        Node node = new Node() {
+            public NodeList split(Node node) {
+                return super.split(node);
+            }
+        };
+
+        throw new RuntimeException("1");
 
     }
 

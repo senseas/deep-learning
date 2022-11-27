@@ -4,6 +4,7 @@ import com.deep.framework.ast.declaration.ClassOrInterfaceDeclaration;
 import com.deep.framework.ast.declaration.VariableDeclarator;
 import com.deep.framework.ast.expression.*;
 import com.deep.framework.ast.lexer.TokenType;
+import com.deep.framework.ast.literal.Literal;
 import com.deep.framework.ast.statement.*;
 
 import java.util.ArrayList;
@@ -12,10 +13,10 @@ import java.util.Objects;
 import java.util.stream.Stream;
 
 import static com.deep.framework.ast.lexer.TokenType.*;
+import static com.deep.framework.ast.literal.Literal.string;
+import static com.deep.framework.ast.literal.Literal.strings;
 
 public class Parser {
-    String string = "\"";
-    String strings = "\\\"";
     List<Node> list = new ArrayList<>();
 
     public void add(String a) {
@@ -24,8 +25,8 @@ public class Parser {
         TokenType type = TokenType.getType(a);
         if (Objects.nonNull(type)) {
             list.add(type.getToken());
-        } else if (a.startsWith(string)) {
-            list.add(new StringLiteralExpression(a));
+        } else if (Literal.isLiteral(a)) {
+            list.add(Literal.getLiteral(a));
         } else {
             list.add(new Name(a));
         }
@@ -45,12 +46,14 @@ public class Parser {
             } else if (Character.isWhitespace(b.charAt(0))) {
                 add(a);
                 return "";
+            } else if (TokenType.isNumber(c)) {
+                return c;
             } else if (TokenType.startsWith(c)) {
                 return c;
-            }else if (TokenType.contains(a)) {
+            } else if (TokenType.contains(a)) {
                 add(a);
                 return b;
-            }else if (TokenType.contains(b)) {
+            } else if (TokenType.contains(b)) {
                 add(a);
                 return b;
             } else {
@@ -123,9 +126,21 @@ public class Parser {
         AssignExpression.parser(node);
         VariableDeclarator.parser(node);
         LambdaExpression.parser(node);
-        for (Object n : node.getChildrens()) {
-            if (n instanceof Node) {
-                reduce((Node) n);
+        SynchronizedStatement.parser(node);
+        ThrowStatement.parser(node);
+        CatchClause.parser(node);
+        TryStatement.parser(node);
+        ObjectCreationExpression.parser(node);
+        for (Node n : node.getChildrens()) {
+            if (!n.getChildrens().isEmpty()) {
+                reduce(n);
+                if (n.getClass().equals(Statement.class) && n.getChildrens().size() == 1) {
+                    if (node.getChildrens().contains(n)) {
+                        Node first = n.getChildrens().first();
+                        first.setPrarent(node);
+                        node.replace(n, first);
+                    }
+                }
             }
         }
     }

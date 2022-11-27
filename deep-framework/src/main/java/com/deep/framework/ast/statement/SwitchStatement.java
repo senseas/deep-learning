@@ -8,27 +8,28 @@ import lombok.Data;
 
 import java.util.List;
 
-import static com.deep.framework.ast.lexer.TokenType.WHILE;
+import static com.deep.framework.ast.lexer.TokenType.FOR;
 
 @Data
-public class WhileStatement extends Statement {
-    private Expression condition;
-    public ParametersExpression parameters;
-    private Statement body;
-    private static WhileStatement statement;
+public class SwitchStatement extends Statement {
+    private List<Expression> initialization;
+    private Expression compare;
+    private List<Expression> update;
+    private BlockStatement body;
+    private ParametersExpression parameters;
+    private static SwitchStatement statement;
 
     public static void parser(Node node) {
-        if (node instanceof WhileStatement) return;
-        DoWhileStatement.parser(node);
+        if (node instanceof ForStatement) return;
         Stream.of(node.getChildrens()).reduce((list, a, b) -> {
             Stream.of(a.getChildrens()).reduce((c, m, n) -> {
-                if (m.equals(WHILE) && n instanceof ParametersExpression) {
-                    //create WhileNode and set Prarent，Parameters
-                    statement = new WhileStatement();
+                if (m.equals(FOR) && n instanceof ParametersExpression) {
+                    //create ForNode and set Prarent，Parameters
+                    statement = new SwitchStatement();
                     statement.setPrarent(node);
                     statement.setParameters((ParametersExpression) n);
 
-                    //remove WhileNode and Parameters
+                    //remove ForNode and Parameters
                     a.getChildrens().removeAll(List.of(m, n));
                     node.replace(a, statement);
 
@@ -48,4 +49,5 @@ public class WhileStatement extends Statement {
             });
         });
     }
+
 }

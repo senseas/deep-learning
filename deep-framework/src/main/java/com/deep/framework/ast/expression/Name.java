@@ -9,8 +9,7 @@ import lombok.Data;
 import java.util.List;
 import java.util.Objects;
 
-import static com.deep.framework.ast.lexer.TokenType.DOT;
-import static com.deep.framework.ast.lexer.TokenType.MUL;
+import static com.deep.framework.ast.lexer.TokenType.*;
 
 @Data
 public class Name extends Expression {

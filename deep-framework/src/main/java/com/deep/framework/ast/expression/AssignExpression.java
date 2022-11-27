@@ -1,6 +1,7 @@
 package com.deep.framework.ast.expression;
 
 import com.deep.framework.ast.Node;
+import com.deep.framework.ast.NodeList;
 import com.deep.framework.ast.Stream;
 import com.deep.framework.ast.lexer.TokenType;
 import lombok.Data;
@@ -15,7 +16,6 @@ public class AssignExpression extends Expression {
     private Name target;
     private Expression value;
     private TokenType operator;
-
     private static AssignExpression expression;
     private static List<TokenType> ASSIGN_TYPE = Stream.of(ASSIGN, ADD_ASSIGN, SUB_ASSIGN, MUL_ASSIGN, DIV_ASSIGN, AND_ASSIGN, OR_ASSIGN, XOR_ASSIGN, MOD_ASSIGN, LSHIFT_ASSIGN, RSHIFT_ASSIGN, URSHIFT_ASSIGN);
 
@@ -26,23 +26,25 @@ public class AssignExpression extends Expression {
     public static void parser(Node node) {
         Stream.of(node.getChildrens()).reduce((list, m, n, o) -> {
             if (Objects.nonNull(m) && Objects.nonNull(n) && Objects.nonNull(o)) {
-                if (ASSIGN_TYPE.contains(n.getTokenType()) && list.size() == 2) {
+                if (ASSIGN_TYPE.contains(n.getTokenType())) {
                     expression = new AssignExpression(node);
-                    expression.getChildrens().addAll(List.of(m, o));
-
-                    Name a = (Name) m;
-                    Expression c = (Expression) o;
-
-                    a.setPrarent(expression);
-                    c.setPrarent(expression);
-
-                    expression.setTarget(a);
+                    expression.setTarget((Name) m);
                     expression.setOperator(n.getTokenType());
-                    expression.setValue(c);
+                    expression.getChildrens().add(m);
 
+                    NodeList<Expression> split = node.split(n);
+                    if (Objects.nonNull(split)) {
+                        Expression c = split.last();
+                        c.setPrarent(expression);
+                        expression.setValue(c);
+                        expression.getChildrens().add(c);
+                        node.getChildrens().remove(c);
+                        node.getChildrens().removeAll(c.getChildrens());
+                    }
+
+                    node.getChildrens().remove(n);
                     node.replace(m, expression);
-                    node.getChildrens().removeAll(List.of(n, o));
-                    list.remove(List.of(n, o));
+                    list.clear();
                 }
             }
         });

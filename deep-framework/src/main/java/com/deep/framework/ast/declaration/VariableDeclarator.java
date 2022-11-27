@@ -24,7 +24,7 @@ public class VariableDeclarator extends Declaration {
     }
 
     public static void parser(Node node) {
-        if (node instanceof FieldDeclaration) return;
+        if (node instanceof VariableDeclarator) return;
         List<Node> nodes = node.getChildrens().stream().filter(a -> Field_Modifiers.contains(a.getTokenType())).toList();
         node.getChildrens().removeAll(nodes);
 
@@ -34,14 +34,17 @@ public class VariableDeclarator extends Declaration {
                 Type type = Type.getType(a);
                 declare.setType(type);
                 declare.setName((Name) b);
+                declare.setChildrens(Stream.of(declare.getType(), declare.getName()));
                 node.replaceAndRemove(a, declare, b);
                 list.remove(b);
             } else if (a instanceof Name && b instanceof AssignExpression d) {
                 VariableDeclarator declare = new VariableDeclarator(node);
+                d.getValue().setPrarent(declare);
                 Type type = Type.getType(a);
                 declare.setType(type);
                 declare.setName(d.getTarget());
                 declare.setInitializer(d.getValue());
+                declare.setChildrens(Stream.of(declare.getType(), declare.getName(), declare.getInitializer()));
                 node.replaceAndRemove(a, declare, b);
                 list.remove(b);
             } else if (a instanceof Name && Objects.nonNull(b) && b.equals(ELLIPSIS) && c instanceof Name) {

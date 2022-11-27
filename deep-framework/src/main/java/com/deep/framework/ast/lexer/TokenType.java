@@ -4,10 +4,12 @@ package com.deep.framework.ast.lexer;
 
 import com.deep.framework.ast.Node;
 import com.deep.framework.ast.expression.Name;
+import com.deep.framework.ast.literal.Literal;
 
 import java.util.Arrays;
 import java.util.Locale;
 import java.util.Map;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static com.deep.framework.ast.lexer.TokenKind.*;
@@ -121,7 +123,7 @@ public enum TokenType {
     LSHIFT_ASSIGN  (BINARY, "<<="),
     RSHIFT_ASSIGN  (BINARY, ">>="),
     URSHIFT_ASSIGN (BINARY, ">>>="),
-    IDENT          (LITERAL,      "");
+    IDENTIFIER     (IDENT,      "");
 
     //@formatter:on
 
@@ -169,6 +171,10 @@ public enum TokenType {
 
     public static TokenType getType(String name) {
         return map.get(name);
+    }
+
+    public static boolean isNumber(String value){
+        return Literal.isNumber(value);
     }
 
     @Override

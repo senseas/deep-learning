@@ -65,6 +65,8 @@ public enum TokenKind {
     FUTURESTRICT,
     /** Identifier or contextual keyword. */
     CONTEXTUAL,
+    /** Identifier. */
+    IDENT,
     /** PRIMITIVE keyword. */
     PRIMITIVE,
 }
