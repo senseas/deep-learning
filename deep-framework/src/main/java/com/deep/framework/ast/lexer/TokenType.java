@@ -177,5 +177,3 @@ public enum TokenType {
     }
 
 }
-
-
