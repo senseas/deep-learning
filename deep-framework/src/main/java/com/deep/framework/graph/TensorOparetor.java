@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.stream.Stream;
 
 public class TensorOparetor extends Tensor {
-    int aa=  100;
+    int aa = 100;
     public String x = "xxxxx";
 
     public TensorOparetor(String name, Tensor... input) {
@@ -34,7 +34,7 @@ public class TensorOparetor extends Tensor {
             final int a = 1 + 2 * 3 * 4 + 5 + 7 * 8;
         }
 
-        for (int i = 0; i <100 ; i++) {
+        for (int i = 0; i < 100; i++) {
             System.out.println("while");
         }
 

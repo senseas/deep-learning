@@ -23,14 +23,14 @@ public class CallableDeclaration extends Declaration {
         if (node instanceof MethodDeclaration) return;
         LambdaExpression.parser(node);
         Stream.of(node.getChildrens()).reduce((list, m, n) -> {
-            if (m.isName() && n instanceof ParametersExpression) {
+            if (m instanceof Name && n instanceof ParametersExpression) {
                 declare = new CallableDeclaration(node);
                 declare.setName((Name) m);
                 declare.setParameters((Expression) n);
                 declare.getChildrens().add(n);
                 node.replaceAndRemove(m, declare, n);
                 list.remove(n);
-            } else if (m.isName() && n instanceof LambdaExpression) {
+            } else if (m instanceof Name && n instanceof LambdaExpression) {
                 declare = new CallableDeclaration(node);
                 declare.setName((Name) m);
                 declare.setParameters((Expression) n);

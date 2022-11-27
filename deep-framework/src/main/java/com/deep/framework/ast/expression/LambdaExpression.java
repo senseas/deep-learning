@@ -41,7 +41,7 @@ public class LambdaExpression extends Expression {
                         expression.setBody(block);
                         expression.getChildrens().addAll(List.of(n, block));
                     }
-                } else if (m.isName() && Objects.nonNull(n) && n.equals(ARROW)) {
+                } else if (m instanceof Name && Objects.nonNull(n) && n.equals(ARROW)) {
                     expression = new LambdaExpression(node);
                     ParametersExpression parameters = new ParametersExpression(expression);
                     parameters.getChildrens().add(m);
