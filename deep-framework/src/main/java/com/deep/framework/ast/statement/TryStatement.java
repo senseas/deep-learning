@@ -6,8 +6,6 @@ import com.deep.framework.ast.expression.Expression;
 import com.deep.framework.ast.expression.ParametersExpression;
 import lombok.Data;
 
-import java.util.List;
-
 import static com.deep.framework.ast.lexer.TokenType.FINALLY;
 import static com.deep.framework.ast.lexer.TokenType.TRY;
 
@@ -21,41 +19,27 @@ public class TryStatement extends Statement {
     private static TryStatement statement;
 
     public static void parser(Node node) {
+        CatchClause.parser(node);
         if (node instanceof TryStatement) return;
         Stream.of(node.getChildrens()).reduce((list, a, b, c) -> {
             Stream.of(a.getChildrens()).reduce((o, m, n) -> {
-                if (m.equals(TRY) && n instanceof ParametersExpression) {
+                if (m.equals(TRY)) {
                     if (b instanceof BlockStatement) {
-                        //create TryNode and set Prarent，Parameters
+                        //create TryNode and set Prarent
+                        b.setPrarent(statement);
                         statement = new TryStatement();
                         statement.setPrarent(node);
-                        statement.setParameters((ParametersExpression) n);
-                        b.setPrarent(statement);
                         statement.setTryBody((BlockStatement) b);
-                        statement.getChildrens().addAll(List.of(n, b));
 
-                        if (c instanceof CatchClause) {
-                            statement.setCatchClause((Statement) c);
-                            node.getChildrens().remove(c);
+                        //set Parameters
+                        if (n instanceof ParametersExpression) {
+                            statement.setParameters((ParametersExpression) n);
+                            statement.getChildrens().add(n);
+                            a.getChildrens().removeAll(m, n);
                         }
-
-                        //remove TryNode and Parameters
-                        a.getChildrens().removeAll(List.of(m, n));
-                        node.replace(a, statement);
-                        node.getChildrens().remove(b);
-                        list.remove(b);
-                    } else {
-                        throw new RuntimeException("TryNode error ".concat(node.toString()));
-                    }
-                } else if (m.equals(TRY)) {
-                    if (b instanceof BlockStatement) {
-                        //create TryNode and set Prarent，Parameters
-                        statement = new TryStatement();
-                        statement.setPrarent(node);
-                        b.setPrarent(statement);
-                        statement.setTryBody((BlockStatement) b);
                         statement.getChildrens().add(b);
 
+                        //set CatchClause
                         if (c instanceof CatchClause) {
                             statement.setCatchClause((Statement) c);
                             node.getChildrens().remove(c);
@@ -68,10 +52,9 @@ public class TryStatement extends Statement {
                     } else {
                         throw new RuntimeException("TryNode error ".concat(node.toString()));
                     }
-                } else if (m.equals(FINALLY)) {
+                } else if (m.equals(FINALLY) && b instanceof BlockStatement) {
                     statement.setFinallyBlock((BlockStatement) b);
-                    node.getChildrens().remove(a);
-                    node.getChildrens().remove(b);
+                    node.getChildrens().removeAll(a, b);
                     list.remove(b);
                 }
             });

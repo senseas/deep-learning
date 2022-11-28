@@ -27,7 +27,7 @@ public class MethodDeclaration extends Declaration {
     }
 
     public static void parser(Node node) {
-        if (!(node.getPrarent() instanceof ClassOrInterfaceDeclaration)) return;
+        if (!(node.getPrarent() instanceof ClassOrInterfaceDeclaration||node.getPrarent() instanceof EnumDeclaration)) return;
         if (node instanceof MethodDeclaration) return;
         Stream.of(node.getChildrens()).reduce((list, a, b) -> {
             if (b instanceof BlockStatement) {

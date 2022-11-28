@@ -31,20 +31,20 @@ public class ForStatement extends Statement {
                     statement.setParameters((ParametersExpression) n);
 
                     //remove ForNode and Parameters
-                    a.getChildrens().removeAll(List.of(m, n));
+                    a.getChildrens().removeAll(m, n);
                     node.replace(a, statement);
 
                     if (b instanceof BlockStatement) {
                         b.setPrarent(statement);
                         statement.setBody((BlockStatement) b);
-                        statement.getChildrens().addAll(List.of(n, b));
+                        statement.getChildrens().addAll(n, b);
                         node.getChildrens().remove(b);
                         list.remove(b);
                     } else {
                         BlockStatement block = new BlockStatement(statement);
                         block.setChildrens(a.getChildrens());
                         statement.setBody(block);
-                        statement.getChildrens().addAll(List.of(n, block));
+                        statement.getChildrens().addAll(n, block);
                     }
                 }
             });

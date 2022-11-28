@@ -123,6 +123,22 @@ public class NodeList<E> extends AbstractList<E> {
         return modified;
     }
 
+    public boolean removeAll(E... arr) {
+        boolean modified = false;
+        for (E e : arr) {
+            modified = remove(e);
+        }
+        return modified;
+    }
+
+    public final boolean addAll(E... arr) {
+        boolean modified = false;
+        for (E o : arr) {
+            modified = add(o);
+        }
+        return modified;
+    }
+
     @Override
     public E remove(int index) {
         check(index);

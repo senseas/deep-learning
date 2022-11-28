@@ -42,7 +42,7 @@ public class FieldDeclaration extends Declaration {
                     declare.setModifiers(modifiers.stream().map(Token::getTokenType).collect(Collectors.toList()));
                     declare.setType(Type.getType(m));
                     declare.setName((Name) n);
-                    declare.getChildrens().addAll(Stream.of(declare.getType(), declare.getName()));
+                    declare.getChildrens().addAll(declare.getType(), declare.getName());
 
                     NodeList<Expression> split = a.split(ASSIGN);
                     if (Objects.nonNull(split)) {

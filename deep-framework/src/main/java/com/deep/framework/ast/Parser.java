@@ -1,6 +1,7 @@
 package com.deep.framework.ast;
 
 import com.deep.framework.ast.declaration.ClassOrInterfaceDeclaration;
+import com.deep.framework.ast.declaration.EnumDeclaration;
 import com.deep.framework.ast.declaration.VariableDeclarator;
 import com.deep.framework.ast.expression.*;
 import com.deep.framework.ast.lexer.TokenType;
@@ -122,13 +123,14 @@ public class Parser {
         WhileStatement.parser(node);
         IfStatement.parser(node);
         ClassOrInterfaceDeclaration.parser(node);
+        EnumDeclaration.parser(node);
         BinaryExpression.parser(node);
         AssignExpression.parser(node);
         VariableDeclarator.parser(node);
         LambdaExpression.parser(node);
         SynchronizedStatement.parser(node);
         ThrowStatement.parser(node);
-        CatchClause.parser(node);
+        SwitchStatement.parser(node);
         TryStatement.parser(node);
         ObjectCreationExpression.parser(node);
         for (Node n : node.getChildrens()) {
