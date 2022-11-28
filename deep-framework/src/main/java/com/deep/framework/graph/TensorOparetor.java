@@ -8,6 +8,34 @@ import java.util.List;
 import java.util.stream.Stream;
 
 public class TensorOparetor extends Tensor {
+
+    public enum Color {
+        RED("RED") {
+            @Override
+            public String toString() {
+                return super.toString();
+            }
+        },
+        BLUE("BLUE"),
+        GREEN("GREEN"),
+        BLACK("BLACK");
+
+        Color(String name) {
+            this.name =name;
+        }
+
+        private String name;
+    }
+
+    public enum Color2 {
+        RED,
+        BLUE,
+        GREEN,
+        BLACK;
+
+        private String name;
+    }
+
     Double aa = -100.2;
     Boolean bb = false;
     char cc = '1';
@@ -15,6 +43,19 @@ public class TensorOparetor extends Tensor {
 
     public TensorOparetor(String name, Tensor... input) {
         super(name, input);
+        switch (name) {
+            case "1":
+                break;
+            case "2":
+                System.out.println(1);
+                break;
+            case "3":
+                System.out.println(1);
+                break;
+            default :
+                System.out.println(1);
+                break;
+        }
         try {
             System.out.println(1);
         } catch (Exception e) {
