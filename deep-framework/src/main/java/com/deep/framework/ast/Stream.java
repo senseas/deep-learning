@@ -128,8 +128,7 @@ public class Stream implements Serializable {
             E o = now;
             next();
             list.remove(o);
-            if (list.isEmpty())
-                now = null;
+            if (list.isEmpty()) now = null;
         }
 
         public void remove(E e) {
@@ -140,8 +139,7 @@ public class Stream implements Serializable {
             } else {
                 list.remove(e);
             }
-            if (list.isEmpty())
-                now = null;
+            if (list.isEmpty()) now = null;
         }
 
         public void removeAll(E... arr) {

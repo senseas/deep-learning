@@ -35,6 +35,7 @@ public class Name extends Expression {
     }
 
     public static void parser(Node node) {
+        name = null;
         CallableDeclaration.parser(node);
         Stream.of(node.getChildrens()).reduce((list, m, n) -> {
             if (Objects.nonNull(n)) {
@@ -52,20 +53,19 @@ public class Name extends Expression {
                     node.getChildrens().removeAll(List.of(m, name));
                     name = (Expression) n;
                     list.remove(n);
-                } else if (m.equals(DOT) && n instanceof CallableDeclaration c) {
-                    n.setPrarent(node);
-                    n.getChildrens().add(name);
-                    name.setPrarent(n);
-                    c.getName().getChildrens().add(name);
-                    node.getChildrens().removeAll(List.of(m, name));
-                    name = (Expression) n;
-                    list.remove(n);
                 } else if (m.equals(DOT) && n.equals(MUL)) {
                     n.setPrarent(node);
                     n.getChildrens().add(name);
                     name.setPrarent(n);
                     node.getChildrens().removeAll(List.of(m, name));
-                    name = null;
+                    list.remove(n);
+                } else if (m.equals(DOT) && n instanceof CallableDeclaration c) {
+                    n.setPrarent(node);
+                    n.getChildrens().add(name);
+                    name.setPrarent(c.getName());
+                    c.getName().getChildrens().add(name);
+                    node.getChildrens().removeAll(List.of(m, name));
+                    name = (Expression) n;
                     list.remove(n);
                 }
             }

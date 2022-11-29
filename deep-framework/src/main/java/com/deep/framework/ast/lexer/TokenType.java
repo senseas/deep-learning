@@ -7,9 +7,9 @@ import com.deep.framework.ast.expression.Name;
 import com.deep.framework.ast.literal.Literal;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static com.deep.framework.ast.lexer.TokenKind.*;
@@ -57,10 +57,10 @@ public enum TokenType {
     SHORT         (PRIMITIVE,"short"),
     STATIC        (KEYWORD,"static"),
     STRICTFP      (KEYWORD,"strictfp"),
-    SUPER         (KEYWORD,"super"),
+    SUPER         (IDENT,"super"),
     SWITCH        (KEYWORD,"switch"),
     SYNCHRONIZED  (KEYWORD,"synchronized"),
-    THIS          (KEYWORD,"this"),
+    THIS          (IDENT,"this"),
     THROW         (KEYWORD,"throw"),
     THROWS        (KEYWORD,"throws"),
     TRANSIENT     (KEYWORD,"transient"),
@@ -133,7 +133,7 @@ public enum TokenType {
     private final TokenKind kind;
 
     public Node getToken() {
-        if (this.kind.equals(PRIMITIVE)) return new Name(this);
+        if (List.of(IDENT, PRIMITIVE).contains(this.kind)) return new Name(this);
         return new Node(this);
     }
 

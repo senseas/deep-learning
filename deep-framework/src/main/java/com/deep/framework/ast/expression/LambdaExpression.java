@@ -28,16 +28,16 @@ public class LambdaExpression extends Expression {
                     expression.setParameters((ParametersExpression) m);
                     if (b instanceof BlockStatement) {
                         expression.setBody((BlockStatement) b);
-                        expression.getChildrens().addAll(List.of(m, b));
+                        expression.getChildrens().addAll(m, b);
                         node.replaceAndRemove(a, expression, b);
                         list.remove(b);
                     } else {
                         BlockStatement block = new BlockStatement(expression);
                         block.setChildrens(a.getChildrens());
-                        block.getChildrens().removeAll(List.of(m, n));
+                        block.getChildrens().removeAll(m, n);
 
                         expression.setBody(block);
-                        expression.getChildrens().addAll(List.of(n, block));
+                        expression.getChildrens().addAll(n, block);
                         node.replace(a, expression);
                     }
                 } else if (m instanceof Name && Objects.nonNull(n) && n.equals(ARROW)) {
@@ -47,16 +47,16 @@ public class LambdaExpression extends Expression {
                     expression.setParameters(parameters);
                     if (b instanceof BlockStatement) {
                         expression.setBody((BlockStatement) b);
-                        expression.getChildrens().addAll(List.of(m, b));
+                        expression.getChildrens().addAll(m, b);
                         node.replaceAndRemove(a, expression, b);
                         list.remove(b);
                     } else {
                         BlockStatement block = new BlockStatement(expression);
                         block.setChildrens(a.getChildrens());
-                        block.getChildrens().removeAll(List.of(m, n));
+                        block.getChildrens().removeAll(m, n);
 
                         expression.setBody(block);
-                        expression.getChildrens().addAll(List.of(parameters, block));
+                        expression.getChildrens().addAll(parameters, block);
                         node.replace(a, expression);
                     }
                 }
