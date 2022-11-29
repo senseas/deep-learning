@@ -8,9 +8,6 @@ import com.deep.framework.ast.lexer.TokenType;
 import com.deep.framework.ast.statement.BlockStatement;
 import lombok.Data;
 
-import java.util.Objects;
-import java.util.Optional;
-
 @Data
 public class EnumConstantDeclaration extends Declaration {
     private Name name;
@@ -30,45 +27,31 @@ public class EnumConstantDeclaration extends Declaration {
                 if (m instanceof Name) {
                     EnumConstantDeclaration declare = new EnumConstantDeclaration(node.getPrarent());
                     declare.setName((Name) m);
-                    Optional<Node> first = a.getChildrens().stream().filter(o -> Objects.nonNull(o.getTokenType()) && o.getTokenType().equals(TokenType.COMMA)).findFirst();
-                    if (!first.isPresent()) {
-                        declare.setChildrens(a.getChildrens());
-                        a.getChildrens().remove(m);
+                    declare.getChildrens().add(m);
+                    a.getChildrens().remove(m);
 
-                        if (n instanceof ParametersExpression) {
-                            declare.setParameters((ParametersExpression) n);
-                            declare.getChildrens().add(n);
-                            a.getChildrens().remove(n);
-                        }
+                    if (n instanceof ParametersExpression) {
+                        declare.setParameters((ParametersExpression) n);
+                        declare.getChildrens().add(n);
+                        a.getChildrens().remove(n);
+                    }
 
-                        if (b instanceof BlockStatement) {
-                            declare.setBody((BlockStatement) b);
-                            declare.getChildrens().add(b);
-                            node.getChildrens().remove(b);
-                            list.remove(b);
-                        }
+                    if (b instanceof BlockStatement) {
+                        declare.setBody((BlockStatement) b);
+                        declare.getChildrens().add(b);
+                        node.getChildrens().remove(b);
+                        list.remove(b);
+                    }
 
+                    if (a.getChildrens().isEmpty()) {
                         node.replace(a, declare);
                         c.clear();
                     } else {
-                        a.getChildrens().remove(m);
-                        if (n instanceof ParametersExpression) {
-                            declare.setParameters((ParametersExpression) n);
-                            declare.getChildrens().add(n);
-                            a.getChildrens().remove(n);
-                        }
-
-                        if (b instanceof BlockStatement) {
-                            declare.setBody((BlockStatement) b);
-                            declare.getChildrens().add(b);
-                            node.getChildrens().remove(b);
-                            list.remove(b);
-                        }
-
                         int index = node.getChildrens().indexOf(a);
                         node.getChildrens().add(index, declare);
-                        c.clear();
+                        list.add(0, a);
                     }
+
                 } else if (m.equals(TokenType.COMMA)) {
                     a.getChildrens().remove(m);
                 }

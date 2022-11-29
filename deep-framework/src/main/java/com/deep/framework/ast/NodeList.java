@@ -83,25 +83,51 @@ public class NodeList<E> extends AbstractList<E> {
         }
     }
 
+
+    @Override
+    public E remove(int index) {
+        check(index);
+        int l = 0;
+        E c = null;
+        Object[] newArray = new Object[size];
+        for (int i = 0; i < size; i++) {
+            if (i == index) {
+                c = array[i];
+            } else {
+                newArray[l++] = array[i];
+            }
+        }
+        size = l;
+        array = (E[]) newArray;
+        return c;
+    }
+
+    public final boolean addAll(E... arr) {
+        boolean modified = false;
+        for (E o : arr) {
+            modified = add(o);
+        }
+        return modified;
+    }
+
     @Override
     public boolean remove(Object o) {
         Iterator<E> it = iterator();
-        if (o == null) {
-            while (it.hasNext()) {
-                if (it.next() == null) {
-                    it.remove();
-                    return true;
-                }
-            }
-        } else {
-            while (it.hasNext()) {
-                if (it.next() == o) {
-                    it.remove();
-                    return true;
-                }
+        while (it.hasNext()) {
+            if (it.next() == o) {
+                it.remove();
+                return true;
             }
         }
         return false;
+    }
+
+    public boolean removeAll(E... arr) {
+        boolean modified = false;
+        for (E e : arr) {
+            modified = remove(e);
+        }
+        return modified;
     }
 
     @Override
@@ -121,40 +147,6 @@ public class NodeList<E> extends AbstractList<E> {
             }
         }
         return modified;
-    }
-
-    public boolean removeAll(E... arr) {
-        boolean modified = false;
-        for (E e : arr) {
-            modified = remove(e);
-        }
-        return modified;
-    }
-
-    public final boolean addAll(E... arr) {
-        boolean modified = false;
-        for (E o : arr) {
-            modified = add(o);
-        }
-        return modified;
-    }
-
-    @Override
-    public E remove(int index) {
-        check(index);
-        int l = 0;
-        E c = null;
-        Object[] newArray = new Object[size];
-        for (int i = 0; i < size; i++) {
-            if (i == index) {
-                c = array[i];
-            } else {
-                newArray[l++] = array[i];
-            }
-        }
-        size = l;
-        array = (E[]) newArray;
-        return c;
     }
 
     @Override
@@ -189,17 +181,9 @@ public class NodeList<E> extends AbstractList<E> {
     @Override
     public boolean contains(Object o) {
         Iterator<E> it = iterator();
-        if (o == null) {
-            while (it.hasNext()) {
-                if (it.next() == null) {
-                    return true;
-                }
-            }
-        } else {
-            while (it.hasNext()) {
-                if (it.next() == o) {
-                    return true;
-                }
+        while (it.hasNext()) {
+            if (it.next() == o) {
+                return true;
             }
         }
         return false;
@@ -208,17 +192,9 @@ public class NodeList<E> extends AbstractList<E> {
     @Override
     public int indexOf(Object o) {
         ListIterator<E> it = listIterator();
-        if (o == null) {
-            while (it.hasNext()) {
-                if (it.next() == null) {
-                    return it.previousIndex();
-                }
-            }
-        } else {
-            while (it.hasNext()) {
-                if (it.next() == o) {
-                    return it.previousIndex();
-                }
+        while (it.hasNext()) {
+            if (it.next() == o) {
+                return it.previousIndex();
             }
         }
         return -1;
@@ -227,17 +203,9 @@ public class NodeList<E> extends AbstractList<E> {
     @Override
     public int lastIndexOf(Object o) {
         ListIterator<E> it = listIterator(size());
-        if (o == null) {
-            while (it.hasPrevious()) {
-                if (it.previous() == null) {
-                    return it.nextIndex();
-                }
-            }
-        } else {
-            while (it.hasPrevious()) {
-                if (it.previous() == o) {
-                    return it.nextIndex();
-                }
+        while (it.hasPrevious()) {
+            if (it.previous() == o) {
+                return it.nextIndex();
             }
         }
         return -1;
