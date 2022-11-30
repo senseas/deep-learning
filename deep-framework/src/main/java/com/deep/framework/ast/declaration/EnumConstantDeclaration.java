@@ -8,11 +8,14 @@ import com.deep.framework.ast.lexer.TokenType;
 import com.deep.framework.ast.statement.BlockStatement;
 import lombok.Data;
 
+import java.util.Objects;
+
 @Data
 public class EnumConstantDeclaration extends Declaration {
     private Name name;
     private ParametersExpression parameters;
     private BlockStatement body;
+    private static Node comma;
 
     public EnumConstantDeclaration(Node prarent) {
         super(prarent);
@@ -21,10 +24,10 @@ public class EnumConstantDeclaration extends Declaration {
     public static void parser(Node node) {
         if (!(node.getPrarent() instanceof EnumDeclaration)) return;
         if (node instanceof EnumConstantDeclaration) return;
-
+        comma = new Node(TokenType.COMMA);
         Stream.of(node.getChildrens()).reduce((list, a, b) -> {
             Stream.of(a.getChildrens()).reduce((c, m, n) -> {
-                if (m instanceof Name) {
+                if (m instanceof Name && Objects.nonNull(comma)) {
                     EnumConstantDeclaration declare = new EnumConstantDeclaration(node.getPrarent());
                     declare.setName((Name) m);
                     declare.getChildrens().add(m);
@@ -51,8 +54,9 @@ public class EnumConstantDeclaration extends Declaration {
                         node.getChildrens().add(index, declare);
                         list.add(0, a);
                     }
-
+                    comma = null;
                 } else if (m.equals(TokenType.COMMA)) {
+                    comma = m;
                     a.getChildrens().remove(m);
                 }
             });

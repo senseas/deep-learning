@@ -11,8 +11,6 @@ import static com.deep.framework.ast.lexer.TokenType.*;
 public class TypeParametersExpression extends Expression {
     private Expression expression;
 
-    private static TypeParametersExpression parameters;
-
     public TypeParametersExpression(Node prarent) {
         super(prarent);
     }
@@ -22,7 +20,7 @@ public class TypeParametersExpression extends Expression {
         Stream.of(node.getChildrens()).reduce((list, m, n, o) -> {
             if (Objects.nonNull(m) && Objects.nonNull(n) && Objects.nonNull(o)) {
                 if (m.equals(LT) && o.equals(GT)) {
-                    parameters = new TypeParametersExpression(node);
+                    TypeParametersExpression parameters = new TypeParametersExpression(node);
                     parameters.setExpression((Expression) n);
                     parameters.getChildrens().add(n);
                     node.replace(n, parameters);
@@ -30,7 +28,7 @@ public class TypeParametersExpression extends Expression {
                     list.clear();
                     parser(node);
                 } else if (m.equals(LT) && o.equals(RSHIFT)) {
-                    parameters = new TypeParametersExpression(node);
+                    TypeParametersExpression parameters = new TypeParametersExpression(node);
                     parameters.setExpression((Expression) n);
                     parameters.getChildrens().add(n);
                     node.replace(n, parameters);
@@ -39,7 +37,7 @@ public class TypeParametersExpression extends Expression {
                     list.clear();
                     parser(node);
                 } else if (m.equals(LT) && o.equals(URSHIFT)) {
-                    parameters = new TypeParametersExpression(node);
+                    TypeParametersExpression parameters = new TypeParametersExpression(node);
                     parameters.setExpression((Expression) n);
                     parameters.getChildrens().add(n);
                     node.replace(n, parameters);

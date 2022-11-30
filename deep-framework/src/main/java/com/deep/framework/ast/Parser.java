@@ -136,13 +136,6 @@ public class Parser {
         for (Node n : node.getChildrens()) {
             if (!n.getChildrens().isEmpty()) {
                 reduce(n);
-                if (n.getClass().equals(Statement.class) && n.getChildrens().size() == 1) {
-                    if (node.getChildrens().contains(n)) {
-                        Node first = n.getChildrens().first();
-                        first.setPrarent(node);
-                        node.replace(n, first);
-                    }
-                }
             }
         }
     }

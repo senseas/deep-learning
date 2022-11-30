@@ -60,10 +60,9 @@ public class Name extends Expression {
                     node.getChildrens().removeAll(List.of(m, name));
                     list.remove(n);
                 } else if (m.equals(DOT) && n instanceof CallableDeclaration c) {
-                    n.setPrarent(node);
-                    n.getChildrens().add(name);
-                    name.setPrarent(c.getName());
+                    c.setPrarent(node);
                     c.getName().getChildrens().add(name);
+                    name.setPrarent(c.getName());
                     node.getChildrens().removeAll(List.of(m, name));
                     name = (Expression) n;
                     list.remove(n);
