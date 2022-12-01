@@ -44,12 +44,14 @@ public class Parser {
                 if (!c.endsWith(string)) return c;
                 add(c);
                 return "";
-            } else if (Character.isWhitespace(b.charAt(0))) {
+            } else if (TokenType.isWhitespace(b)) {
                 add(a);
                 return "";
             } else if (TokenType.isNumber(c)) {
                 return c;
             } else if (TokenType.startsWith(c)) {
+                return c;
+            } else if (TokenType.isIdentifier(c)) {
                 return c;
             } else if (TokenType.contains(a)) {
                 add(a);

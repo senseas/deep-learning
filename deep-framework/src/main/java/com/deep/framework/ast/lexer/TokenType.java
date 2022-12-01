@@ -6,6 +6,7 @@ import com.deep.framework.ast.Node;
 import com.deep.framework.ast.expression.Name;
 import com.deep.framework.ast.literal.Literal;
 
+import javax.lang.model.SourceVersion;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
@@ -175,6 +176,19 @@ public enum TokenType {
 
     public static boolean isNumber(String value){
         return Literal.isNumber(value);
+    }
+
+    public static boolean isIdentifier(CharSequence name) {
+        return SourceVersion.isIdentifier(name);
+    }
+
+    public static boolean isWhitespace(String name) {
+        for (char a : name.toCharArray()) {
+            if (!Character.isWhitespace(a)) {
+                return false;
+            }
+        }
+        return true;
     }
 
     @Override
