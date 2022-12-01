@@ -105,7 +105,7 @@ public class Parser {
                 node = new Statement(prarent);
                 parserStatement(o);
             } else if (o.equals(SEMI)) {
-                list.add(node);
+                if (!node.getChildrens().isEmpty()) list.add(node);
                 node = new Statement(prarent);
             } else {
                 parserStatement(o);
@@ -119,6 +119,7 @@ public class Parser {
     public void reduce(Node node) {
         Name.parser(node);
         TypeParametersExpression.parser(node);
+        ObjectCreationExpression.parser(node);
         ForStatement.parser(node);
         WhileStatement.parser(node);
         IfStatement.parser(node);
@@ -132,7 +133,7 @@ public class Parser {
         ThrowStatement.parser(node);
         SwitchStatement.parser(node);
         TryStatement.parser(node);
-        ObjectCreationExpression.parser(node);
+
         for (Node n : node.getChildrens()) {
             if (!n.getChildrens().isEmpty()) {
                 reduce(n);

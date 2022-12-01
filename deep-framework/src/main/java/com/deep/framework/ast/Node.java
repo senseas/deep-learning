@@ -9,6 +9,9 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+import static com.deep.framework.ast.declaration.Declaration.Field_Modifiers;
+import static com.deep.framework.ast.declaration.Declaration.Method_Modifiers;
+
 public class Node extends Token {
     private Node prarent;
     private NodeList<Node> childrens;
@@ -47,6 +50,18 @@ public class Node extends Token {
     public void replace(Node node, Node replaceNode) {
         int index = childrens.indexOf(node);
         childrens.set(index, replaceNode);
+    }
+
+    public List<TokenType> getFieldModifiers() {
+        List<Node> modifiers = getChildrens().stream().filter(e -> Field_Modifiers.contains(e.getTokenType())).toList();
+        getChildrens().removeAll(modifiers);
+        return modifiers.stream().map(Node::getTokenType).collect(Collectors.toList());
+    }
+
+    public List<TokenType> getMethodModifiers() {
+        List<Node> modifiers = getChildrens().stream().filter(e -> Method_Modifiers.contains(e.getTokenType())).toList();
+        getChildrens().removeAll(modifiers);
+        return modifiers.stream().map(Node::getTokenType).collect(Collectors.toList());
     }
 
     public NodeList split(Node node) {

@@ -11,7 +11,6 @@ import lombok.Data;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 import static com.deep.framework.ast.lexer.TokenType.ENUM;
 import static com.deep.framework.ast.lexer.TokenType.IMPLEMENTS;
@@ -37,16 +36,15 @@ public class EnumDeclaration extends Declaration {
                 Stream.of(a.getChildrens()).reduce((c, m, n) -> {
                     if (m.equals(ENUM)) {
                         EnumDeclaration declare = new EnumDeclaration(node.getPrarent());
-                        List<Node> modifiers = a.getChildrens().stream().filter(e -> Field_Modifiers.contains(e.getTokenType())).toList();
+                        List<TokenType> modifiers = a.getFieldModifiers();
                         b.setPrarent(declare);
-                        declare.setModifiers(modifiers.stream().map(Node::getTokenType).collect(Collectors.toList()));
+                        declare.setModifiers(modifiers);
                         declare.setName((Name) n);
                         declare.setBody((BlockStatement) b);
                         declare.setChildrens(a.getChildrens());
                         declare.getChildrens().add(b);
-
-                        a.getChildrens().removeAll(modifiers);
                         a.getChildrens().remove(m);
+
                         node.replaceAndRemove(a, declare, b);
 
                         parserImplements(declare);

@@ -3,6 +3,8 @@ package com.deep.framework.ast.expression;
 import com.deep.framework.ast.Node;
 import com.deep.framework.ast.Stream;
 import com.deep.framework.ast.declaration.CallableDeclaration;
+import com.deep.framework.ast.declaration.FieldDeclaration;
+import com.deep.framework.ast.declaration.MethodDeclaration;
 import com.deep.framework.ast.lexer.TokenType;
 import com.deep.framework.ast.statement.BlockStatement;
 import lombok.Data;
@@ -22,20 +24,9 @@ public class ObjectCreationExpression extends Expression {
 
     public static void parser(Node node) {
         Stream.of(node.getChildrens()).reduce((list, a, b) -> {
+            CallableDeclaration.parser(a);
             Stream.of(a.getChildrens()).reduce((c, m, n) -> {
-                if (m.equals(TokenType.NEW) && n instanceof ParametersExpression) {
-                    expression = new ObjectCreationExpression(node);
-                    expression.setParameters((ParametersExpression) n);
-                    expression.setName((Name) n);
-                    node.replace(a, expression);
-
-                    if (b instanceof BlockStatement) {
-                        expression.setBody((BlockStatement) b);
-                        expression.getChildrens().addAll(List.of(m, n, b));
-                        node.getChildrens().removeAll(List.of(m, n));
-                        list.remove(b);
-                    }
-                } else if (m.equals(TokenType.NEW) && n instanceof CallableDeclaration o) {
+                if (m.equals(TokenType.NEW) && n instanceof CallableDeclaration o) {
                     expression = new ObjectCreationExpression(node);
                     expression.setParameters(o.getParameters());
                     expression.setName(o.getName());
@@ -43,9 +34,14 @@ public class ObjectCreationExpression extends Expression {
                     a.getChildrens().remove(n);
 
                     if (b instanceof BlockStatement) {
+                        b.setPrarent(expression);
                         expression.setBody((BlockStatement) b);
                         expression.getChildrens().addAll(List.of(m, n, b));
-                        node.replaceAndRemove(a, expression, b);
+
+                        MethodDeclaration.parser(b);
+                        FieldDeclaration.parser(b);
+
+                        node.getChildrens().remove(b);
                         list.remove(b);
                     }
                 }

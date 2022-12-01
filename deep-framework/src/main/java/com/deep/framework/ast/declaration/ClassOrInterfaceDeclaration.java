@@ -39,20 +39,18 @@ public class ClassOrInterfaceDeclaration extends Declaration {
                 Stream.of(a.getChildrens()).reduce((c, m, n) -> {
                     if (m.equals(CLASS)) {
                         ClassOrInterfaceDeclaration declare = new ClassOrInterfaceDeclaration(node.getPrarent());
-                        List<Node> modifiers = a.getChildrens().stream().filter(e -> Field_Modifiers.contains(e.getTokenType())).toList();
+                        List<TokenType> modifiers = a.getFieldModifiers();
+
                         b.setPrarent(declare);
-                        declare.setModifiers(modifiers.stream().map(Node::getTokenType).collect(Collectors.toList()));
+                        declare.setModifiers(modifiers);
                         declare.setName((Name) n);
                         declare.setBody((BlockStatement) b);
                         declare.setChildrens(a.getChildrens());
                         declare.getChildrens().add(b);
-
-                        a.getChildrens().removeAll(modifiers);
                         a.getChildrens().remove(m);
                         node.replaceAndRemove(a, declare, b);
 
                         TypeParametersExpression.parser(declare);
-
                         parserImplements(declare);
                         parserExtends(declare);
 

@@ -21,7 +21,7 @@ public class TensorOparetor extends Tensor {
         BLACK("BLACK");
 
         Color(String name) {
-            this.name =name;
+            this.name = name;
         }
 
         private String name;
@@ -43,6 +43,11 @@ public class TensorOparetor extends Tensor {
 
     public TensorOparetor(String name, Tensor... input) {
         super(name, input);
+        Node node = new Node() {
+            public NodeList split(Node node) {
+                return super.split(node);
+            }
+        };
         switch (name) {
             case "1":
                 break;
@@ -52,7 +57,7 @@ public class TensorOparetor extends Tensor {
             case "3":
                 System.out.println(1);
                 break;
-            default :
+            default:
                 System.out.println(1);
                 break;
         }
@@ -60,7 +65,7 @@ public class TensorOparetor extends Tensor {
             System.out.println(1);
         } catch (Exception e) {
             e.printStackTrace();
-        }finally {
+        } finally {
             System.out.println(1);
         }
         synchronized (this) {
@@ -69,8 +74,9 @@ public class TensorOparetor extends Tensor {
 
         do {
             System.out.println("do while");
-        }while (1==2);
-        List<List<Object>> list;
+        } while (1 == 2);
+
+        List<List<java.lang.Object>> list;
         if (1 > 1) {
             System.out.println(1);
         } else if (1 > 2) {
@@ -94,18 +100,13 @@ public class TensorOparetor extends Tensor {
         }
 
         for (int i = 0; i < 100; i++) {
-            System.out.println("while");
+            System.out.println("int i = 0; i < 100; i++");
         }
 
         while (aa == 11) {
             System.out.println("while");
         }
 
-        Node node = new Node() {
-            public NodeList split(Node node) {
-                return super.split(node);
-            }
-        };
 
         throw new RuntimeException("1");
 

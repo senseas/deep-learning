@@ -10,8 +10,8 @@ import java.util.List;
 import static com.deep.framework.ast.lexer.TokenType.*;
 
 public class Declaration extends Expression {
-    protected static List<TokenType> Method_Modifiers = Stream.of(PUBLIC, PROTECTED, PRIVATE, STATIC, FINAL, ABSTRACT, DEFAULT, SYNCHRONIZED);
-    protected static List<TokenType> Field_Modifiers = Stream.of(PUBLIC, PROTECTED, PRIVATE, STATIC, FINAL, VOLATILE, TRANSIENT);
+    public static List<TokenType> Method_Modifiers = Stream.of(PUBLIC, PROTECTED, PRIVATE, STATIC, FINAL, ABSTRACT, DEFAULT, SYNCHRONIZED);
+    public static List<TokenType> Field_Modifiers = Stream.of(PUBLIC, PROTECTED, PRIVATE, STATIC, FINAL, VOLATILE, TRANSIENT);
 
     public Declaration(Node prarent) {
         super(prarent);

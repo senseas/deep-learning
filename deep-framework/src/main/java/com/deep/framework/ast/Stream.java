@@ -132,13 +132,12 @@ public class Stream implements Serializable {
         }
 
         public void remove(E e) {
-            now = e;
-            if (hasPrevious()) {
-                previous();
-                list.remove(e);
-            } else {
-                list.remove(e);
+            if (now == e) {
+                if (hasPrevious()) {
+                    previous();
+                }
             }
+            list.remove(e);
             if (list.isEmpty()) now = null;
         }
 
@@ -148,10 +147,12 @@ public class Stream implements Serializable {
             }
         }
 
-        public void replace(E node, E replaceNode) {
-            now = replaceNode;
-            int index = list.indexOf(node);
-            list.set(index, replaceNode);
+        public void replace(E e, E r) {
+            int index = list.indexOf(e);
+            if (now == e) {
+                now = r;
+            }
+            list.set(index, r);
         }
 
         @Override
