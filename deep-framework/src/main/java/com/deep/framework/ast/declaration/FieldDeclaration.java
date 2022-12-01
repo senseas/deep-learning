@@ -33,7 +33,7 @@ public class FieldDeclaration extends Declaration {
         if (node instanceof FieldDeclaration) return;
         Stream.of(node.getChildrens()).reduce((list, a, b) -> {
             Stream.of(a.getChildrens()).reduce((c, m, n) -> {
-                if (m instanceof Name && n instanceof Name && !a.endsTypeof(ParametersExpression.class)) {
+                if (m instanceof Name && n instanceof Name && !(a.endsTypeof(ParametersExpression.class)||a.endsTypeof(CallableDeclaration.class))) {
                     List<Node> modifiers = a.getChildrens().stream().filter(e -> Field_Modifiers.contains(e.getTokenType())).toList();
                     a.getChildrens().removeAll(modifiers);
                     a.getChildrens().removeAll(List.of(m, n));
