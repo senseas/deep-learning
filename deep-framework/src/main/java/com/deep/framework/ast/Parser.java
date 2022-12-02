@@ -75,7 +75,7 @@ public class Parser {
         prarent.getChildrens().add(node);
         for (Node o : list) {
             if (o.equals(LBRACE)) {
-                Node child = new BlockStatement(node);
+                Node child = new BlockStatement(node, new NodeList<>());
                 node.getChildrens().add(child);
                 node = child;
             } else if (o.equals(RBRACE)) {
@@ -103,18 +103,20 @@ public class Parser {
         Node node = new Statement(prarent);
         for (Node o : prarent.getChildrens()) {
             if (o instanceof BlockStatement) {
-                list.addAll(List.of(node, o));
+                list.addAll(node, o);
                 node = new Statement(prarent);
                 parserStatement(o);
             } else if (o.equals(SEMI)) {
-                if (!node.getChildrens().isEmpty()) list.add(node);
+                list.add(node);
                 node = new Statement(prarent);
             } else {
                 parserStatement(o);
                 node.getChildrens().add(o);
             }
         }
-        if (list.isEmpty()) return;
+        if (!list.contains(node) && !node.getChildrens().isEmpty()) {
+            list.add(node);
+        }
         prarent.setChildrens(list);
     }
 
@@ -135,7 +137,6 @@ public class Parser {
         ThrowStatement.parser(node);
         SwitchStatement.parser(node);
         TryStatement.parser(node);
-
         for (Node n : node.getChildrens()) {
             if (!n.getChildrens().isEmpty()) {
                 reduce(n);

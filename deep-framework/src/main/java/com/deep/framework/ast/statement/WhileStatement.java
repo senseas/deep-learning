@@ -13,9 +13,18 @@ import static com.deep.framework.ast.lexer.TokenType.WHILE;
 @Data
 public class WhileStatement extends Statement {
     private Expression condition;
-    public ParametersExpression parameters;
     private Statement body;
-    private static WhileStatement statement;
+
+    public WhileStatement(Node prarent, Expression condition, Statement body) {
+        super(prarent);
+        this.condition = condition;
+        this.body = body;
+
+        this.condition.setPrarent(this);
+        this.body.setPrarent(this);
+
+        getChildrens().addAll(condition, body);
+    }
 
     public static void parser(Node node) {
         if (node instanceof WhileStatement) return;
@@ -23,26 +32,23 @@ public class WhileStatement extends Statement {
         Stream.of(node.getChildrens()).reduce((list, a, b) -> {
             Stream.of(a.getChildrens()).reduce((c, m, n) -> {
                 if (m.equals(WHILE) && n instanceof ParametersExpression) {
-                    //create WhileNode and set Prarent，Parameters
-                    statement = new WhileStatement();
-                    statement.setPrarent(node);
-                    statement.setParameters((ParametersExpression) n);
-
-                    //remove WhileNode and Parameters
-                    a.getChildrens().removeAll(List.of(m, n));
-                    node.replace(a, statement);
-
                     if (b instanceof BlockStatement) {
-                        b.setPrarent(statement);
-                        statement.setBody((BlockStatement) b);
-                        statement.getChildrens().addAll(List.of(n, b));
+                        //remove WhileNode and Parameters
+                        a.getChildrens().removeAll(List.of(m, n));
+                        //create WhileNode and set prarent, condition
+                        WhileStatement statement = new WhileStatement(node, (Expression) n, (BlockStatement) b);
+                        //remove WhileNode body
                         node.getChildrens().remove(b);
+                        node.replace(a, statement);
                         list.remove(b);
                     } else {
-                        BlockStatement block = new BlockStatement(statement);
-                        block.setChildrens(a.getChildrens());
-                        statement.setBody(block);
-                        statement.getChildrens().addAll(List.of(n, block));
+                        //remove WhileNode and Parameters
+                        a.getChildrens().removeAll(m, n);
+                        //create BlockNode and set Childrens
+                        BlockStatement block = new BlockStatement(null, a.getChildrens());
+                        WhileStatement statement = new WhileStatement(node, (Expression) n, block);
+                        //replace this node whit WhileNode
+                        node.replace(a, statement);
                     }
                 }
             });

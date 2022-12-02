@@ -11,12 +11,18 @@ import static com.deep.framework.ast.lexer.TokenType.ARROW;
 
 @Data
 public class LambdaExpression extends Expression {
-    private ParametersExpression parameters;
+    private Expression parameters;
     private BlockStatement body;
-    private static LambdaExpression expression;
 
-    public LambdaExpression(Node prarent) {
+    public LambdaExpression(Node prarent, Expression parameters, BlockStatement body) {
         super(prarent);
+        this.parameters = parameters;
+        this.body = body;
+
+        this.parameters.setPrarent(this);
+        this.body.setPrarent(this);
+
+        getChildrens().addAll(parameters, body);
     }
 
     public static void parser(Node node) {
@@ -24,45 +30,31 @@ public class LambdaExpression extends Expression {
         Stream.of(node.getChildrens()).reduce((list, a, b) -> {
             Stream.of(a.getChildrens()).reduce((c, m, n) -> {
                 if (m instanceof ParametersExpression && Objects.nonNull(n) && n.equals(ARROW)) {
-                    expression = new LambdaExpression(node);
-                    expression.setParameters((ParametersExpression) m);
-                    expression.getChildrens().add(m);
                     if (b instanceof BlockStatement) {
-                        expression.setBody((BlockStatement) b);
-                        expression.getChildrens().add(b);
+                        LambdaExpression expression = new LambdaExpression(node, (Expression) m, (BlockStatement) b);
                         node.replaceAndRemove(a, expression, b);
                         list.remove(b);
                     } else {
-                        BlockStatement block = new BlockStatement(expression);
-                        block.getChildrens().addAll(a.getChildrens());
-                        block.getChildrens().removeAll(m, n);
-
-                        expression.setBody(block);
-                        expression.getChildrens().add(block);
+                        a.getChildrens().removeAll(m, n);
+                        BlockStatement block = new BlockStatement(null, a.getChildrens());
+                        LambdaExpression expression = new LambdaExpression(node, (Expression) m, block);
                         a.getChildrens().remove(n);
                         a.getChildrens().removeAll(block.getChildrens());
                         a.replace(m, expression);
                     }
                 } else if (m instanceof Name && Objects.nonNull(n) && n.equals(ARROW)) {
-                    expression = new LambdaExpression(node);
-                    ParametersExpression parameters = new ParametersExpression(expression);
-                    parameters.getChildrens().add(m);
-                    expression.setParameters(parameters);
-                    expression.getChildrens().add(parameters);
                     if (b instanceof BlockStatement) {
-                        expression.setBody((BlockStatement) b);
-                        expression.getChildrens().addAll(m, b);
+                        ParametersExpression parameters = new ParametersExpression(null);
+                        parameters.getChildrens().add(m);
+                        LambdaExpression expression = new LambdaExpression(node, parameters, (BlockStatement) b);
                         node.replaceAndRemove(m, expression, b);
                         list.remove(b);
                     } else {
-                        BlockStatement block = new BlockStatement(expression);
-                        block.getChildrens().addAll(a.getChildrens());
-                        block.getChildrens().removeAll(m, n);
-
-                        expression.setBody(block);
-                        expression.getChildrens().add(block);
-                        a.getChildrens().remove(n);
-                        a.getChildrens().removeAll(block.getChildrens());
+                        a.getChildrens().removeAll(m, n);
+                        ParametersExpression parameters = new ParametersExpression(null);
+                        parameters.getChildrens().add(m);
+                        BlockStatement block = new BlockStatement(null, a.getChildrens());
+                        LambdaExpression expression = new LambdaExpression(node, parameters, block);
                         a.replace(m, expression);
                     }
                 }

@@ -20,10 +20,10 @@ public class Literal extends Expression {
             return new NullLiteral(value);
         } else if (isBoolean(value)) {
             return new BooleanLiteral(value);
-        } else if (isNumber(value)) {
-            return new NumberLiteral(value);
+        } else if (isNumeric(value)) {
+            return new NumericLiteral(value);
         } else if (isString(value)) {
-            return new NumberLiteral(value);
+            return new NumericLiteral(value);
         } else if (isChar(value)) {
             return new CharLiteral(value);
         } else {
@@ -33,7 +33,7 @@ public class Literal extends Expression {
 
     public static boolean isLiteral(String value) {
         if (isString(value)) return true;
-        if (isNumber(value)) return true;
+        if (isNumeric(value)) return true;
         if (isBoolean(value)) return true;
         if (isNull(value)) return true;
         if (isChar(value)) return true;

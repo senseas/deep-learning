@@ -3,6 +3,7 @@ package com.deep.framework.ast.statement;
 import com.deep.framework.ast.Node;
 import com.deep.framework.ast.NodeList;
 import com.deep.framework.ast.Stream;
+import com.deep.framework.ast.expression.Expression;
 import com.deep.framework.ast.expression.ParametersExpression;
 import lombok.Data;
 
@@ -14,62 +15,72 @@ import static com.deep.framework.ast.lexer.TokenType.IF;
 
 @Data
 public class IfStatement extends Statement {
-    private ParametersExpression parameters;
-    private NodeList thenStatement;
+    private Expression condition;
+    private NodeList thenStatement = new NodeList();
     private Statement elseStatement;
     private Statement body;
     private static IfStatement statement;
 
+    public IfStatement(Node prarent, Expression condition, Statement body) {
+        super(prarent);
+        this.condition = condition;
+        this.body = body;
+
+        this.condition.setPrarent(this);
+        this.body.setPrarent(this);
+
+        getChildrens().addAll(condition, body);
+    }
+
     public static void parser(Node node) {
         Stream.of(node.getChildrens()).reduce((list, a, b) -> {
-            Stream.of(a.getChildrens()).reduce((c, m, n) -> {
+            Stream.of(a.getChildrens()).reduce((e, m, n, c) -> {
                 if (m.equals(IF) && n instanceof ParametersExpression) {
-                    statement = new IfStatement();
-                    statement.setPrarent(node);
-                    statement.setParameters((ParametersExpression) n);
-                    n.setPrarent(statement);
-                    node.replace(a, statement);
-                    a.getChildrens().removeAll(List.of(m, n));
-                    c.clear();
-
                     if (b instanceof BlockStatement) {
-                        b.setPrarent(statement);
-                        statement.setBody((BlockStatement) b);
-                        statement.getChildrens().addAll(List.of(n, b));
+                        a.getChildrens().removeAll(m, n);
+                        statement = new IfStatement(node, (Expression) n, (BlockStatement) b);
+                        node.replace(a, statement);
                         node.getChildrens().remove(b);
                         list.remove(b);
+                        e.clear();
                     } else {
-                        BlockStatement block = new BlockStatement(statement);
-                        block.setChildrens(a.getChildrens());
-                        statement.setBody(block);
-                        statement.getChildrens().addAll(List.of(n, block));
+                        a.getChildrens().removeAll(m, n);
+                        BlockStatement block = new BlockStatement(null, a.getChildrens());
+                        statement = new IfStatement(node, (Expression) n, block);
+                        node.replace(a, statement);
+                        e.clear();
                     }
                 } else if (m.equals(ELSE) && Objects.nonNull(n) && n.equals(IF)) {
-                    a.setPrarent(statement);
-                    a.getChildrens().removeAll(List.of(m, n));
-                    statement.getChildrens().add(a);
-                    node.getChildrens().remove(a);
-                    c.clear();
-
                     if (b instanceof BlockStatement) {
-                        b.setPrarent(a);
-                        a.getChildrens().add(b);
-                        node.getChildrens().remove(b);
-                        list.remove(b);
+                        a.getChildrens().removeAll(m, n);
+                        IfStatement elseifStatement = new IfStatement(statement, (Expression) c, (BlockStatement) b);
+                        statement.getThenStatement().add(elseifStatement);
+                        node.getChildrens().removeAll(a, b);
+                        list.removeAll(List.of(a, b));
+                        e.clear();
+                    } else {
+                        a.getChildrens().removeAll(m, n);
+                        BlockStatement block = new BlockStatement(null, a.getChildrens());
+                        IfStatement elseifStatement = new IfStatement(statement, (Expression) c, block);
+                        statement.getThenStatement().add(elseifStatement);
+                        node.getChildrens().remove(a);
+                        list.remove(a);
+                        e.clear();
                     }
                 } else if (m.equals(ELSE)) {
-                    a.setPrarent(statement);
-                    a.getChildrens().remove(m);
-                    statement.getChildrens().add(a);
-                    node.getChildrens().remove(a);
-                    c.clear();
-
                     if (b instanceof BlockStatement) {
-                        b.setPrarent(a);
-                        a.getChildrens().add(b);
-
-                        node.getChildrens().remove(b);
-                        list.remove(b);
+                        a.getChildrens().removeAll(m, n);
+                        statement.setElseStatement((BlockStatement) b);
+                        node.getChildrens().removeAll(a,b);
+                        list.removeAll(List.of(a,b));
+                        e.clear();
+                    } else {
+                        a.getChildrens().removeAll(m, n);
+                        BlockStatement block = new BlockStatement(null, a.getChildrens());
+                        statement.setElseStatement(block);
+                        node.getChildrens().remove(a);
+                        list.remove(a);
+                        e.clear();
                     }
                 }
             });
