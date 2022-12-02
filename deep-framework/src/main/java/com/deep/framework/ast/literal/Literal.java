@@ -40,7 +40,7 @@ public class Literal extends Expression {
         return false;
     }
 
-    public static boolean isNumber(String value) {
+    public static boolean isNumeric(String value) {
         Pattern pattern = Pattern.compile("-?[0-9]+\\.?[0-9]*$");
         return pattern.matcher(value).matches();
     }
