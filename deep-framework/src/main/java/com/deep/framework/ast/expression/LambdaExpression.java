@@ -38,16 +38,14 @@ public class LambdaExpression extends Expression {
                         a.getChildrens().removeAll(m, n);
                         BlockStatement block = new BlockStatement(null, a.getChildrens());
                         LambdaExpression expression = new LambdaExpression(node, (Expression) m, block);
-                        a.getChildrens().remove(n);
-                        a.getChildrens().removeAll(block.getChildrens());
-                        a.replace(m, expression);
+                        node.replace(a, expression);
                     }
                 } else if (m instanceof Name && Objects.nonNull(n) && n.equals(ARROW)) {
                     if (b instanceof BlockStatement) {
                         ParametersExpression parameters = new ParametersExpression(null);
                         parameters.getChildrens().add(m);
                         LambdaExpression expression = new LambdaExpression(node, parameters, (BlockStatement) b);
-                        node.replaceAndRemove(m, expression, b);
+                        node.replaceAndRemove(a, expression, b);
                         list.remove(b);
                     } else {
                         a.getChildrens().removeAll(m, n);
@@ -55,7 +53,7 @@ public class LambdaExpression extends Expression {
                         parameters.getChildrens().add(m);
                         BlockStatement block = new BlockStatement(null, a.getChildrens());
                         LambdaExpression expression = new LambdaExpression(node, parameters, block);
-                        a.replace(m, expression);
+                        node.replace(a, expression);
                     }
                 }
             });

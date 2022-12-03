@@ -8,7 +8,6 @@ import com.deep.framework.ast.lexer.TokenType;
 import lombok.Data;
 
 import java.util.List;
-import java.util.Objects;
 
 import static com.deep.framework.ast.lexer.TokenType.FOR;
 
@@ -38,7 +37,7 @@ public class ForStatement extends Statement {
         if (node instanceof ForStatement) return;
         Stream.of(node.getChildrens()).reduce((list, a, b) -> {
             Stream.of(a.getChildrens()).reduce((c, m, n) -> {
-                if (m.equals(FOR) && (n instanceof ParametersExpression o && !o.getChildrens().get(0).getChildrens().stream().filter(e -> Objects.nonNull(e.getTokenType()) && e.getTokenType().equals(TokenType.COLON)).findFirst().isPresent())) {
+                if (m.equals(FOR) && (n instanceof ParametersExpression && !n.getChildrens().get(0).getChildrens().stream().anyMatch(e -> e.equals(TokenType.COLON)))) {
                     List<Node> nodes = n.getChildrens();
                     if (b instanceof BlockStatement) {
                         //create ForNode and set Prarent，Parameters

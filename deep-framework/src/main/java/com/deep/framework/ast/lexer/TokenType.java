@@ -175,7 +175,7 @@ public enum TokenType {
     }
 
     public static boolean isNumber(String value){
-        return Literal.isNumber(value);
+        return Literal.isNumeric(value);
     }
 
     public static boolean isIdentifier(CharSequence name) {

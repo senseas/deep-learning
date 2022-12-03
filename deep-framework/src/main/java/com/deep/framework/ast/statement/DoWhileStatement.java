@@ -34,7 +34,6 @@ public class DoWhileStatement extends Statement {
                     //create ForNode and set Prarent , Parameters
                     DoWhileStatement statement = new DoWhileStatement(node, (Expression) condition, (Statement) b);
                     //remove ForNode and Parameters
-                    a.getChildrens().remove(m);
                     node.replace(a, statement);
                     node.getChildrens().removeAll(List.of(b, c));
                     list.removeAll(List.of(b, c));

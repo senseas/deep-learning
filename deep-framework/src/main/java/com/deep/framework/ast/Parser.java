@@ -124,6 +124,7 @@ public class Parser {
         Name.parser(node);
         TypeParametersExpression.parser(node);
         ObjectCreationExpression.parser(node);
+        ForEachStatement.parser(node);
         ForStatement.parser(node);
         WhileStatement.parser(node);
         IfStatement.parser(node);

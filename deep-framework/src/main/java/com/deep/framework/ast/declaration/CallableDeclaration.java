@@ -12,10 +12,16 @@ import lombok.Data;
 public class CallableDeclaration extends Declaration {
     private Expression parameters;
     private Name name;
-    private static CallableDeclaration declare;
 
-    public CallableDeclaration(Node prarent) {
+    public CallableDeclaration(Node prarent, Name name, Expression parameters) {
         super(prarent);
+        this.parameters = parameters;
+        this.name = name;
+
+        this.parameters.setPrarent(this);
+        this.name.setPrarent(this);
+
+        getChildrens().addAll(parameters, name);
     }
 
     public static void parser(Node node) {
@@ -24,12 +30,7 @@ public class CallableDeclaration extends Declaration {
         LambdaExpression.parser(node);
         Stream.of(node.getChildrens()).reduce2((list, m, n) -> {
             if (m instanceof Name && n instanceof ParametersExpression) {
-                declare = new CallableDeclaration(node);
-                declare.setName((Name) m);
-                declare.setParameters((Expression) n);
-                declare.getChildrens().addAll(m, n);
-                m.setPrarent(declare);
-                n.setPrarent(declare);
+                CallableDeclaration declare = new CallableDeclaration(node, (Name) m, (Expression) n);
                 list.replace(m, declare);
                 list.remove(n);
             }

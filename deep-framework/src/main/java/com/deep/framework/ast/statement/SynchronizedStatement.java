@@ -6,18 +6,22 @@ import com.deep.framework.ast.expression.Expression;
 import com.deep.framework.ast.expression.ParametersExpression;
 import lombok.Data;
 
-import java.util.List;
-
 import static com.deep.framework.ast.lexer.TokenType.SYNCHRONIZED;
 
-@Data
 public class SynchronizedStatement extends Statement {
-    private List<Expression> initialization;
-    private Expression compare;
-    private List<Expression> update;
     private BlockStatement body;
-    private ParametersExpression parameters;
-    private static SynchronizedStatement statement;
+    private Expression expression;
+
+    public SynchronizedStatement(Node prarent, Expression expression, BlockStatement body) {
+        super(prarent);
+        this.expression = expression;
+        this.body = body;
+
+        this.expression.setPrarent(this);
+        this.body.setPrarent(this);
+
+        getChildrens().addAll(expression, body);
+    }
 
     public static void parser(Node node) {
         if (node instanceof SynchronizedStatement) return;
@@ -25,23 +29,11 @@ public class SynchronizedStatement extends Statement {
             Stream.of(a.getChildrens()).reduce((c, m, n) -> {
                 if (m.equals(SYNCHRONIZED) && n instanceof ParametersExpression) {
                     //create SynchronizedNode and set Prarent，Parameters
-                    statement = new SynchronizedStatement();
-                    statement.setPrarent(node);
-                    statement.setParameters((ParametersExpression) n);
-
-                    //remove SynchronizedNode and Parameters
-                    a.getChildrens().removeAll(List.of(m, n));
+                    SynchronizedStatement statement = new SynchronizedStatement(node, (Expression) n, (BlockStatement) b);
+                    //replace this node with SynchronizedNode
                     node.replace(a, statement);
-
-                    if (b instanceof BlockStatement) {
-                        b.setPrarent(statement);
-                        statement.setBody((BlockStatement) b);
-                        statement.getChildrens().addAll(List.of(n, b));
-                        node.getChildrens().remove(b);
-                        list.remove(b);
-                    } else {
-                        throw new RuntimeException("SynchronizedStatement parser error ".concat(node.toString()));
-                    }
+                    node.getChildrens().remove(b);
+                    list.remove(b);
                 }
             });
         });

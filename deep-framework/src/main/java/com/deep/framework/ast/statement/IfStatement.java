@@ -33,6 +33,7 @@ public class IfStatement extends Statement {
     }
 
     public static void parser(Node node) {
+        statement = null;
         Stream.of(node.getChildrens()).reduce((list, a, b) -> {
             Stream.of(a.getChildrens()).reduce((e, m, n, c) -> {
                 if (m.equals(IF) && n instanceof ParametersExpression) {
@@ -71,8 +72,8 @@ public class IfStatement extends Statement {
                     if (b instanceof BlockStatement) {
                         a.getChildrens().removeAll(m, n);
                         statement.setElseStatement((BlockStatement) b);
-                        node.getChildrens().removeAll(a,b);
-                        list.removeAll(List.of(a,b));
+                        node.getChildrens().removeAll(a, b);
+                        list.removeAll(List.of(a, b));
                         e.clear();
                     } else {
                         a.getChildrens().removeAll(m, n);

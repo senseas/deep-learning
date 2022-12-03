@@ -6,7 +6,9 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 public class ParametersExpression extends Expression {
-    public ParametersExpression(Node prarent) {super(prarent);}
+    public ParametersExpression(Node prarent) {
+        super(prarent);
+    }
 
     public String toString() {
         if (Objects.nonNull(getTokenType())) return "(".concat(getTokenType().toString()).concat(")");
