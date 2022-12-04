@@ -2,7 +2,7 @@ package com.deep.framework.ast;
 
 import com.deep.framework.ast.declaration.ClassOrInterfaceDeclaration;
 import com.deep.framework.ast.declaration.EnumDeclaration;
-import com.deep.framework.ast.declaration.VariableDeclarator;
+import com.deep.framework.ast.declaration.VariableDeclaration;
 import com.deep.framework.ast.expression.*;
 import com.deep.framework.ast.lexer.TokenType;
 import com.deep.framework.ast.literal.Literal;
@@ -109,13 +109,14 @@ public class Parser {
             } else if (o.equals(SEMI)) {
                 list.add(node);
                 node = new Statement(prarent);
+            } else if (prarent.isLast(o)) {
+                parserStatement(o);
+                node.getChildrens().add(o);
+                list.add(node);
             } else {
                 parserStatement(o);
                 node.getChildrens().add(o);
             }
-        }
-        if (!list.contains(node) && !node.getChildrens().isEmpty()) {
-            list.add(node);
         }
         prarent.setChildrens(list);
     }
@@ -127,12 +128,18 @@ public class Parser {
         ForEachStatement.parser(node);
         ForStatement.parser(node);
         WhileStatement.parser(node);
+        ConditionalExpression.parser(node);
+        ReturnStatement.parser(node);
+        BreakStatement.parser(node);
+        ContinueStatement.parser(node);
         IfStatement.parser(node);
         ClassOrInterfaceDeclaration.parser(node);
         EnumDeclaration.parser(node);
+        UnaryExpression.parser(node);
         BinaryExpression.parser(node);
+        ConditionalExpression.parser(node);
         AssignExpression.parser(node);
-        VariableDeclarator.parser(node);
+        VariableDeclaration.parser(node);
         LambdaExpression.parser(node);
         SynchronizedStatement.parser(node);
         ThrowStatement.parser(node);

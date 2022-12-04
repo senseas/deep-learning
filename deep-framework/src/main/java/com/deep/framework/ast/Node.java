@@ -101,8 +101,8 @@ public class Node extends Token {
         return childrens.get(childrens.size() - 1).getClass().equals(clas);
     }
 
-    public boolean typeof(Type clas) {
-        return this.getClass().equals(clas);
+    public boolean isLast(Node node) {
+        return getChildrens().last() == node;
     }
 
     public void setPrarent(Node prarent) {

@@ -60,6 +60,23 @@ public class Stream implements Serializable {
         }
     }
 
+    public void reduce(Func4 func) {
+        List<Node> list = new NodeList<>(this.list);
+        while (0 < list.size()) {
+            Node o = list.get(0);
+            list.remove(o);
+            if (2 < list.size()) {
+                func.apply(list, o, list.get(0), list.get(1), list.get(2));
+            } else if (1 < list.size()) {
+                func.apply(list, o, list.get(0), list.get(1), null);
+            } else if (0 < list.size()) {
+                func.apply(list, o, list.get(0), null, null);
+            } else {
+                func.apply(list, o, null, null, null);
+            }
+        }
+    }
+
     @FunctionalInterface
     public interface Func2 {
         void apply(List list, Node a, Node b);
@@ -73,6 +90,11 @@ public class Stream implements Serializable {
     @FunctionalInterface
     public interface Func3 {
         void apply(List list, Node a, Node b, Node c);
+    }
+
+    @FunctionalInterface
+    public interface Func4 {
+        void apply(List list, Node a, Node b, Node c, Node d);
     }
 
     public static class NodeIterator<E> implements ListIterator<E> {
@@ -164,6 +186,10 @@ public class Stream implements Serializable {
         @Override
         public void add(E o) {
             list.set(list.size(), o);
+        }
+
+        public void clear() {
+            list.clear();
         }
     }
 

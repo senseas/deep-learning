@@ -14,23 +14,23 @@ import java.util.Objects;
 import static com.deep.framework.ast.lexer.TokenType.ELLIPSIS;
 
 @Data
-public class VariableDeclarator extends Declaration {
+public class VariableDeclaration extends Declaration {
     private Type type;
     private Name name;
     private Expression initializer;
 
-    public VariableDeclarator(Node prarent) {
+    public VariableDeclaration(Node prarent) {
         super(prarent);
     }
 
     public static void parser(Node node) {
-        if (node instanceof VariableDeclarator) return;
+        if (node instanceof VariableDeclaration) return;
         List<Node> nodes = node.getChildrens().stream().filter(a -> Field_Modifiers.contains(a.getTokenType())).toList();
         node.getChildrens().removeAll(nodes);
 
         Stream.of(node.getChildrens()).reduce((list, a, b, c) -> {
             if (a instanceof Name && b instanceof Name) {
-                VariableDeclarator declare = new VariableDeclarator(node);
+                VariableDeclaration declare = new VariableDeclaration(node);
                 Type type = Type.getType(a);
                 declare.setType(type);
                 declare.setName((Name) b);
@@ -38,7 +38,7 @@ public class VariableDeclarator extends Declaration {
                 node.replaceAndRemove(a, declare, b);
                 list.remove(b);
             } else if (a instanceof Name && b instanceof AssignExpression d) {
-                VariableDeclarator declare = new VariableDeclarator(node);
+                VariableDeclaration declare = new VariableDeclaration(node);
                 d.getValue().setPrarent(declare);
                 Type type = Type.getType(a);
                 declare.setType(type);
@@ -48,7 +48,7 @@ public class VariableDeclarator extends Declaration {
                 node.replaceAndRemove(a, declare, b);
                 list.remove(b);
             } else if (a instanceof Name && Objects.nonNull(b) && b.equals(ELLIPSIS) && c instanceof Name) {
-                VariableDeclarator declare = new VariableDeclarator(node);
+                VariableDeclaration declare = new VariableDeclaration(node);
                 Type type = Type.getType(a);
                 declare.setType(type);
                 declare.setName((Name) c);

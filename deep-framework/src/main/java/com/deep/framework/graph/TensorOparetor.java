@@ -15,10 +15,7 @@ public class TensorOparetor extends Tensor {
             public String toString() {
                 return super.toString();
             }
-        },
-        BLUE("BLUE"),
-        GREEN("GREEN"),
-        BLACK("BLACK");
+        }, BLUE("BLUE"), GREEN("GREEN"), BLACK("BLACK");
 
         Color(String name) {
             this.name = name;
@@ -28,10 +25,7 @@ public class TensorOparetor extends Tensor {
     }
 
     public enum Color2 {
-        RED,
-        BLUE,
-        GREEN,
-        BLACK;
+        RED, BLUE, GREEN, BLACK;
 
         private String name;
     }
@@ -40,6 +34,7 @@ public class TensorOparetor extends Tensor {
     Boolean bb = false;
     char cc = '1';
     public String x = "xxxxx";
+    public int b = cc == 2 ? 1 : 2 + 1 * 7;
 
     public TensorOparetor(String name, Tensor... input) {
         super(name, input);
@@ -73,6 +68,7 @@ public class TensorOparetor extends Tensor {
         }
 
         do {
+            int a = +b;
             System.out.println("do while");
         } while (1 == 2);
 
@@ -106,7 +102,6 @@ public class TensorOparetor extends Tensor {
         while (aa == 11) {
             System.out.println("while");
         }
-
 
         throw new RuntimeException("1");
 

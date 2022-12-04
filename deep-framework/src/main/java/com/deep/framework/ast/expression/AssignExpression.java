@@ -24,6 +24,7 @@ public class AssignExpression extends Expression {
     }
 
     public static void parser(Node node) {
+        ConditionalExpression.parser(node);
         Stream.of(node.getChildrens()).reduce((list, m, n, o) -> {
             if (Objects.nonNull(m) && Objects.nonNull(n) && Objects.nonNull(o)) {
                 if (ASSIGN_TYPE.contains(n.getTokenType())) {
