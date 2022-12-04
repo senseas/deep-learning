@@ -102,6 +102,9 @@ public class TensorOparetor extends Tensor {
         while (aa == 11) {
             System.out.println("while");
         }
+        int[] arr = new int[2];
+        int a = 1;
+        System.out.println(arr[a + 0]);
 
         throw new RuntimeException("1");
 

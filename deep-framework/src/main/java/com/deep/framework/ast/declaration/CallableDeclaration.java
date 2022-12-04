@@ -18,10 +18,10 @@ public class CallableDeclaration extends Declaration {
         this.parameters = parameters;
         this.name = name;
 
-        this.parameters.setPrarent(this);
         this.name.setPrarent(this);
+        this.parameters.setPrarent(this);
 
-        getChildrens().addAll(parameters, name);
+        getChildrens().addAll(name, parameters);
     }
 
     public static void parser(Node node) {

@@ -2,11 +2,13 @@ package com.deep.framework.ast;
 
 import com.deep.framework.ast.declaration.ClassOrInterfaceDeclaration;
 import com.deep.framework.ast.declaration.EnumDeclaration;
+import com.deep.framework.ast.declaration.InstanceOfDeclaration;
 import com.deep.framework.ast.declaration.VariableDeclaration;
 import com.deep.framework.ast.expression.*;
 import com.deep.framework.ast.lexer.TokenType;
 import com.deep.framework.ast.literal.Literal;
 import com.deep.framework.ast.statement.*;
+import com.deep.framework.ast.type.ArrayType;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -124,6 +126,14 @@ public class Parser {
     public void reduce(Node node) {
         Name.parser(node);
         TypeParametersExpression.parser(node);
+        ArrayAccessExpression.parser(node);
+        ArrayType.parser(node);
+        UnaryExpression.parser(node);
+        BinaryExpression.parser(node);
+        ConditionalExpression.parser(node);
+        AssignExpression.parser(node);
+        InstanceOfDeclaration.parser(node);
+        AssertExpression.parser(node);
         ObjectCreationExpression.parser(node);
         ForEachStatement.parser(node);
         ForStatement.parser(node);
@@ -135,10 +145,6 @@ public class Parser {
         IfStatement.parser(node);
         ClassOrInterfaceDeclaration.parser(node);
         EnumDeclaration.parser(node);
-        UnaryExpression.parser(node);
-        BinaryExpression.parser(node);
-        ConditionalExpression.parser(node);
-        AssignExpression.parser(node);
         VariableDeclaration.parser(node);
         LambdaExpression.parser(node);
         SynchronizedStatement.parser(node);

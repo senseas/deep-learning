@@ -1,19 +1,26 @@
 package com.deep.framework.ast.type;
 
 import com.deep.framework.ast.Node;
+import com.deep.framework.ast.expression.Expression;
 import com.deep.framework.ast.expression.Name;
 import com.deep.framework.ast.lexer.TokenType;
+import lombok.Data;
 
 import java.util.Objects;
 
-public class Type extends Node {
+@Data
+public class Type extends Expression {
     private final String identifier;
+    private Name name;
 
     public Type(Name name) {
+        super(null);
         this.identifier = name.getIdentifier();
+        this.name = name;
     }
 
     public Type(TokenType type) {
+        super(null);
         this.identifier = type.getName();
     }
 
