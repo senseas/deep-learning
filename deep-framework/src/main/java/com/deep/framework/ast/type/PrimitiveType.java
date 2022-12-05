@@ -1,5 +1,6 @@
 package com.deep.framework.ast.type;
 
+import com.deep.framework.ast.expression.Name;
 import com.deep.framework.ast.lexer.TokenType;
 
 import static com.deep.framework.ast.lexer.TokenType.*;
@@ -7,7 +8,7 @@ import static com.deep.framework.ast.lexer.TokenType.*;
 public class PrimitiveType extends Type {
 
     public PrimitiveType(TokenType type) {
-        super(type);
+        super(new Name(type));
     }
 
     public static Type getPrimitiveType(TokenType type) {

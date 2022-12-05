@@ -11,20 +11,19 @@ import java.util.Objects;
 
 public class ArrayType extends Type {
 
-    public ArrayType(Node prarent, Name name) {
+    public ArrayType(Name name) {
         super(name);
-        setPrarent(prarent);
     }
 
     public static void parser(Node node) {
         ArrayAccessExpression.parser(node);
         Stream.of(node.getChildrens()).reduce2((list, a, b) -> {
             if (a instanceof Name && b instanceof ArrayExpression) {
-                ArrayType expression = new ArrayType(node, (Name) a);
+                ArrayType expression = new ArrayType((Name) a);
                 list.replace(a, expression);
                 list.remove(b);
             } else if (Objects.nonNull(b) && b.equals(TokenType.ELLIPSIS)) {
-                ArrayType expression = new ArrayType(node, (Name) a);
+                ArrayType expression = new ArrayType((Name) a);
                 list.replace(a, expression);
                 list.remove(b);
             }

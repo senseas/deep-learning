@@ -5,7 +5,6 @@ import com.deep.framework.ast.Stream;
 import com.deep.framework.ast.expression.AssignExpression;
 import com.deep.framework.ast.expression.Expression;
 import com.deep.framework.ast.expression.Name;
-import com.deep.framework.ast.type.ArrayType;
 import com.deep.framework.ast.type.Type;
 import lombok.Data;
 
@@ -52,7 +51,7 @@ public class VariableDeclaration extends Declaration {
                 VariableDeclaration declare = new VariableDeclaration(node, Type.getType(a), (Name) b);
                 node.replaceAndRemove(a, declare, b);
                 list.remove(b);
-            } else if (a instanceof ArrayType && Objects.nonNull(b) && b instanceof Name) {
+            } else if (a instanceof Type && Objects.nonNull(b) && b instanceof Name) {
                 VariableDeclaration declare = new VariableDeclaration(node, (Type) a, (Name) b);
                 node.replaceAndRemove(a, declare, b);
                 list.remove(b);
@@ -61,13 +60,19 @@ public class VariableDeclaration extends Declaration {
                 d.getValue().setPrarent(declare);
                 node.replaceAndRemove(a, declare, b);
                 list.remove(b);
-            } else if (a instanceof Name && Objects.nonNull(b) && b instanceof AssignExpression) {
-                VariableDeclaration declare = new VariableDeclaration(node, Type.getType(a), (Name) b);
-                node.replace(a, declare);
-                node.getChildrens().removeAll(List.of(b, c));
-                list.removeAll(List.of(b, c));
+            } else if (a instanceof Type && b instanceof AssignExpression d) {
+                VariableDeclaration declare = new VariableDeclaration(node, (Type) a, d.getTarget(), d.getValue());
+                d.getValue().setPrarent(declare);
+                node.replaceAndRemove(a, declare, b);
+                list.remove(b);
             }
         });
     }
 
+    @Override
+    public String toString() {
+        String concat = type.toString().concat(" ").concat(name.toString()).concat(" ");
+        if (Objects.nonNull(initializer)) concat = concat.concat("= ").concat(initializer.toString()).concat(";");
+        return concat;
+    }
 }
