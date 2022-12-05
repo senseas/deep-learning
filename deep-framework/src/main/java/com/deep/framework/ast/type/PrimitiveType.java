@@ -32,4 +32,26 @@ public class PrimitiveType extends Type {
             return null;
         }
     }
+
+    public static boolean isPrimitive(TokenType type) {
+        if (type.equals(SHORT)) {
+            return true;
+        } else if (type.equals(INT)) {
+            return true;
+        } else if (type.equals(LONG)) {
+            return true;
+        } else if (type.equals(FLOAT)) {
+            return true;
+        } else if (type.equals(DOUBLE)) {
+            return true;
+        } else if (type.equals(BYTE)) {
+            return true;
+        } else if (type.equals(CHAR)) {
+            return true;
+        } else if (type.equals(BOOLEAN)) {
+            return true;
+        } else {
+            return false;
+        }
+    }
 }

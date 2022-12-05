@@ -18,7 +18,9 @@ public class Type extends Node {
     }
 
     public static Type getType(Node node) {
-        if (Objects.nonNull(node.getTokenType())) {
+        if (node instanceof Type) {
+            return (Type) node;
+        } else if (Objects.nonNull(node.getTokenType())) {
             return new PrimitiveType(node.getTokenType());
         } else {
             return new ReferenceType((Name) node);

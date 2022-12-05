@@ -153,7 +153,7 @@ public class PackageUtil {
     public static void forName(Node node) {
         String pkg = null;
         try {
-            pkg = getPackage(node);
+            pkg = getClassPath(node);
             Class clas = Class.forName(pkg);
             CompilationUnit.map.put(node.toString(), clas);
         } catch (ClassNotFoundException e) {
@@ -175,10 +175,11 @@ public class PackageUtil {
         return Objects.nonNull(packageName) && !packageName.isEmpty();
     }
 
-    public static String getPackage(Node node) {
+    public static String getClassPath(Node node) {
         for (Node n : node.getChildrens()) {
             if (!Stream.of(PACKAGE, IMPORT).contains(n.getTokenType())) {
-                String name = getPackage(n);
+                String name = getClassPath(n);
+                if (node.getChildrens().stream().anyMatch(a -> Stream.of(PACKAGE, IMPORT).contains(a.getTokenType()))) return name;
                 if (node.toString().startsWith("*")) return name;
                 return name.concat(".").concat(node.toString());
             }

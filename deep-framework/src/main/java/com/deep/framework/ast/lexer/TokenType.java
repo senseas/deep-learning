@@ -5,6 +5,7 @@ package com.deep.framework.ast.lexer;
 import com.deep.framework.ast.Node;
 import com.deep.framework.ast.expression.Name;
 import com.deep.framework.ast.literal.Literal;
+import com.deep.framework.ast.type.PrimitiveType;
 
 import javax.lang.model.SourceVersion;
 import java.util.Arrays;
@@ -134,7 +135,8 @@ public enum TokenType {
     private final TokenKind kind;
 
     public Node getToken() {
-        if (List.of(IDENT, PRIMITIVE).contains(this.kind)) return new Name(this);
+        if (PrimitiveType.isPrimitive(this)) return PrimitiveType.getPrimitiveType(this);
+        if (List.of(IDENT).contains(this.kind)) return new Name(this);
         return new Node(this);
     }
 
