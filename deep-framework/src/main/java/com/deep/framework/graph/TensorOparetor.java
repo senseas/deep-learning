@@ -1,17 +1,19 @@
 package com.deep.framework.graph;
 
+import com.deep.framework.ast.CompilationUnit;
 import com.deep.framework.ast.Node;
 import com.deep.framework.ast.NodeList;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Stream;
+import java.lang.*;
 
 public class TensorOparetor extends Tensor {
 
     public enum Color {
         RED("RED") {
-            @Override
+            @java.lang.Override()
             public String toString() {
                 return super.toString();
             }
@@ -38,6 +40,7 @@ public class TensorOparetor extends Tensor {
 
     public TensorOparetor(String name, Tensor... input) {
         super(name, input);
+        System.out.println(CompilationUnit.arr[1]);
         Node node = new Node() {
             public NodeList split(Node node) {
                 return super.split(node);
@@ -103,6 +106,7 @@ public class TensorOparetor extends Tensor {
             System.out.println("while");
         }
         int[] arr = new int[2];
+        int[][][] arx = new int[2][1][22];
         int a = 1;
         System.out.println(arr[a + 0]);
 

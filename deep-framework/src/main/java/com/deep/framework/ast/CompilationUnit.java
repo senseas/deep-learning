@@ -9,4 +9,5 @@ public class CompilationUnit extends Node {
     public static Set<Class> set = new HashSet<>();
     public static Set<String> pkg = new HashSet<>();
     public static Map<String, Class> map = new HashMap<>();
+    public static Object[] arr = new Object[1];
 }

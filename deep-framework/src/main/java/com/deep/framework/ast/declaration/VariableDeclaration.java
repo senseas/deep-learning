@@ -51,7 +51,7 @@ public class VariableDeclaration extends Declaration {
                 VariableDeclaration declare = new VariableDeclaration(node, Type.getType(a), (Name) b);
                 node.replaceAndRemove(a, declare, b);
                 list.remove(b);
-            } else if (a instanceof Type && Objects.nonNull(b) && b instanceof Name) {
+            } else if (a instanceof Type && b instanceof Name) {
                 VariableDeclaration declare = new VariableDeclaration(node, (Type) a, (Name) b);
                 node.replaceAndRemove(a, declare, b);
                 list.remove(b);

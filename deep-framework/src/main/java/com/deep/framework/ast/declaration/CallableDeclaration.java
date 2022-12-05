@@ -10,13 +10,13 @@ import lombok.Data;
 
 @Data
 public class CallableDeclaration extends Declaration {
-    private Expression parameters;
     private Name name;
+    private Expression parameters;
 
     public CallableDeclaration(Node prarent, Name name, Expression parameters) {
         super(prarent);
-        this.parameters = parameters;
         this.name = name;
+        this.parameters = parameters;
 
         this.name.setPrarent(this);
         this.parameters.setPrarent(this);

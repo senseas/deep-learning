@@ -136,6 +136,7 @@ public class Stream implements Serializable {
         public E previous() {
             int index = previousIndex();
             if (hasPrevious()) return now = list.get(index);
+            now = null;
             return null;
         }
 

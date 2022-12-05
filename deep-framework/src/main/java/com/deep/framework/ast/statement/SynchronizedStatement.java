@@ -4,7 +4,6 @@ import com.deep.framework.ast.Node;
 import com.deep.framework.ast.Stream;
 import com.deep.framework.ast.expression.Expression;
 import com.deep.framework.ast.expression.ParametersExpression;
-import lombok.Data;
 
 import static com.deep.framework.ast.lexer.TokenType.SYNCHRONIZED;
 
@@ -38,4 +37,8 @@ public class SynchronizedStatement extends Statement {
         });
     }
 
+    @Override
+    public String toString() {
+        return expression.toString().concat("{ ").concat(body.toString()).concat(" }");
+    }
 }

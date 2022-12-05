@@ -23,7 +23,7 @@ public class Literal extends Expression {
         } else if (isNumeric(value)) {
             return new NumericLiteral(value);
         } else if (isString(value)) {
-            return new NumericLiteral(value);
+            return new StringLiteral(value);
         } else if (isChar(value)) {
             return new CharLiteral(value);
         } else {

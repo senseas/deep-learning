@@ -10,9 +10,15 @@ import com.deep.framework.ast.lexer.TokenType;
 import java.util.Objects;
 
 public class ArrayType extends Type {
+    private Type type;
 
     public ArrayType(Name name) {
         super(name);
+    }
+
+    public ArrayType(Type type) {
+        super(type.getName());
+        this.type = type;
     }
 
     public static void parser(Node node) {
@@ -22,6 +28,11 @@ public class ArrayType extends Type {
                 ArrayType expression = new ArrayType((Name) a);
                 list.replace(a, expression);
                 list.remove(b);
+            } else if (a instanceof Type && b instanceof ArrayExpression) {
+                ArrayType expression = new ArrayType((Type) a);
+                list.replace(a, expression);
+                list.remove(b);
+                list.previous();
             } else if (Objects.nonNull(b) && b.equals(TokenType.ELLIPSIS)) {
                 ArrayType expression = new ArrayType((Name) a);
                 list.replace(a, expression);
@@ -33,7 +44,7 @@ public class ArrayType extends Type {
     @Override
     public String toString() {
         if (Objects.isNull(getName())) return "[]";
-        if (!getChildrens().isEmpty()) return getName().toString().concat("[]");
+        if (Objects.nonNull(type)) return type.toString().concat("[]");
         return getName().toString().concat("[]");
     }
 
