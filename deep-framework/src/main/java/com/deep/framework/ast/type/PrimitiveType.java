@@ -23,7 +23,7 @@ public class PrimitiveType extends Type {
         } else if (type.equals(DOUBLE)) {
             return new DoublePrimitiveType(type);
         } else if (type.equals(BYTE)) {
-            return new BooleanPrimitiveType(type);
+            return new BytePrimitiveType(type);
         } else if (type.equals(CHAR)) {
             return new CharPrimitiveType(type);
         } else if (type.equals(BOOLEAN)) {

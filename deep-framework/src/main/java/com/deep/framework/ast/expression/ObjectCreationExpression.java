@@ -2,9 +2,7 @@ package com.deep.framework.ast.expression;
 
 import com.deep.framework.ast.Node;
 import com.deep.framework.ast.Stream;
-import com.deep.framework.ast.declaration.CallableDeclaration;
-import com.deep.framework.ast.declaration.FieldDeclaration;
-import com.deep.framework.ast.declaration.MethodDeclaration;
+import com.deep.framework.ast.declaration.*;
 import com.deep.framework.ast.lexer.TokenType;
 import com.deep.framework.ast.statement.BlockStatement;
 import lombok.Data;
@@ -12,7 +10,7 @@ import lombok.Data;
 import java.util.List;
 
 @Data
-public class ObjectCreationExpression extends Expression {
+public class ObjectCreationExpression extends TypeDeclaration {
     private Name name;
     private Expression parameters;
     private BlockStatement body;
@@ -38,6 +36,7 @@ public class ObjectCreationExpression extends Expression {
                         expression.setBody((BlockStatement) b);
                         expression.getChildrens().addAll(List.of(m, n, b));
 
+                        ConstructorDeclaration.parser(b);
                         MethodDeclaration.parser(b);
                         FieldDeclaration.parser(b);
 

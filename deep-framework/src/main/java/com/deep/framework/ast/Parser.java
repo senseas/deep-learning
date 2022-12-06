@@ -135,6 +135,7 @@ public class Parser {
         InstanceOfDeclaration.parser(node);
         AssertExpression.parser(node);
         ObjectCreationExpression.parser(node);
+        MethodCallExpression.parser(node);
         ForEachStatement.parser(node);
         ForStatement.parser(node);
         WhileStatement.parser(node);

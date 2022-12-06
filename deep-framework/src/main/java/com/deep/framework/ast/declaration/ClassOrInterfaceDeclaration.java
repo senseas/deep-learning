@@ -17,7 +17,7 @@ import java.util.stream.Collectors;
 import static com.deep.framework.ast.lexer.TokenType.*;
 
 @Data
-public class ClassOrInterfaceDeclaration extends Declaration {
+public class ClassOrInterfaceDeclaration extends TypeDeclaration {
     private List<Object> extendedTypes;
     private List<Object> implementedTypes;
     private List<TokenType> modifiers;
@@ -54,6 +54,7 @@ public class ClassOrInterfaceDeclaration extends Declaration {
                         parserImplements(declare);
                         parserExtends(declare);
 
+                        ConstructorDeclaration.parser(b);
                         MethodDeclaration.parser(b);
                         FieldDeclaration.parser(b);
                     }

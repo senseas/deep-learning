@@ -105,6 +105,10 @@ public class Node extends Token {
         return getChildrens().last() == node;
     }
 
+    public boolean isFirst(Node node) {
+        return getChildrens().first() == node;
+    }
+
     public void setPrarent(Node prarent) {
         this.prarent = prarent;
     }

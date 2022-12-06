@@ -16,4 +16,8 @@ public class Declaration extends Expression {
     public Declaration(Node prarent) {
         super(prarent);
     }
+
+    public static List<TokenType> is() {
+        return Field_Modifiers;
+    }
 }

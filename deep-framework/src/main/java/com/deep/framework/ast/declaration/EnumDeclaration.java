@@ -16,7 +16,7 @@ import static com.deep.framework.ast.lexer.TokenType.ENUM;
 import static com.deep.framework.ast.lexer.TokenType.IMPLEMENTS;
 
 @Data
-public class EnumDeclaration extends Declaration {
+public class EnumDeclaration extends TypeDeclaration {
     private List<Object> implementedTypes;
     private List<TokenType> modifiers;
     private Name name;
@@ -50,6 +50,7 @@ public class EnumDeclaration extends Declaration {
                         parserImplements(declare);
 
                         EnumConstantDeclaration.parser(b);
+                        ConstructorDeclaration.parser(b);
                         MethodDeclaration.parser(b);
                         FieldDeclaration.parser(b);
                     }
