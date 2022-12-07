@@ -14,7 +14,7 @@ import java.util.Objects;
 @Data
 public class VariableDeclaration extends Declaration {
     private Type type;
-    private Name name;
+    private Expression name;
     private Expression initializer;
 
     public VariableDeclaration(Node prarent, Type type, Name name) {
@@ -28,7 +28,7 @@ public class VariableDeclaration extends Declaration {
         getChildrens().addAll(type, name);
     }
 
-    public VariableDeclaration(Node prarent, Type type, Name name, Expression initializer) {
+    public VariableDeclaration(Node prarent, Type type, Expression name, Expression initializer) {
         super(prarent);
         this.type = type;
         this.name = name;
