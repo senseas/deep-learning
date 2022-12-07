@@ -41,6 +41,7 @@ public class TensorOparetor extends Tensor {
     public TensorOparetor(String name, Tensor... input) {
         super(name, input);
         System.out.println(CompilationUnit.arr[1]);
+        int[][][] arx = new int[][][]{{{1}}};
         Node node = new Node() {
             public NodeList split(Node node) {
                 return super.split(node);
@@ -106,12 +107,10 @@ public class TensorOparetor extends Tensor {
             System.out.println("while");
         }
         int[] arr = new int[2];
-        int[][][] arx = new int[2][1][22];
+
         int a = 1;
         System.out.println(arr[a + 0]);
-
         throw new RuntimeException("1");
-
     }
 
     public None getInput(int i) {

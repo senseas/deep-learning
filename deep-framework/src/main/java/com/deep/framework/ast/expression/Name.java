@@ -49,8 +49,8 @@ public class Name extends Expression {
                     node.getChildrens().remove(a);
                 } else if (m.equals(DOT) && n instanceof CallableDeclaration c) {
                     c.setPrarent(node);
-                    c.getName().getChildrens().add(name);
-                    name.setPrarent(c.getName());
+                    c.getExpression().getChildrens().add(name);
+                    name.setPrarent(c.getExpression());
                     node.getChildrens().removeAll(m, name);
                     name = n;
                     list.remove(n);

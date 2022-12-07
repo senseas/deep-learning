@@ -42,7 +42,7 @@ public class ConstructorDeclaration extends Declaration {
                     if (n instanceof CallableDeclaration o) {
                         List<TokenType> modifiers = a.getMethodModifiers();
                         if (a.isFirst(n)) {
-                            ConstructorDeclaration declare = new ConstructorDeclaration(node.getPrarent(), modifiers, o.getName(), o.getParameters(), (BlockStatement) b);
+                            ConstructorDeclaration declare = new ConstructorDeclaration(node.getPrarent(), modifiers, (Name) o.getExpression(), o.getParameters(), (BlockStatement) b);
                             TypeParametersExpression.parser(declare);
                             node.replaceAndRemove(a, declare, b);
                         }

@@ -45,7 +45,7 @@ public class MethodDeclaration extends Declaration {
                 Stream.of(a.getChildrens()).reduce((c, m, n) -> {
                     if (n instanceof CallableDeclaration o) {
                         List<TokenType> modifiers = a.getMethodModifiers();
-                        MethodDeclaration declare = new MethodDeclaration(node.getPrarent(), modifiers, Type.getType(m), o.getName(), o.getParameters(), (BlockStatement) b);
+                        MethodDeclaration declare = new MethodDeclaration(node.getPrarent(), modifiers, Type.getType(m), (Name) o.getExpression(), o.getParameters(), (BlockStatement) b);
                         TypeParametersExpression.parser(declare);
                         node.replaceAndRemove(a, declare, b);
                     }

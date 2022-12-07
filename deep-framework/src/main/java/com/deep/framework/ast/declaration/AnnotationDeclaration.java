@@ -38,7 +38,7 @@ public class AnnotationDeclaration extends Declaration {
                 node.getChildrens().remove(b);
                 node.replace(a, declare);
             } else if (a.equals(AT) && b instanceof CallableDeclaration c) {
-                AnnotationDeclaration declare = new AnnotationDeclaration(node.getPrarent(), c.getName(), c.getParameters());
+                AnnotationDeclaration declare = new AnnotationDeclaration(node.getPrarent(), (Name) c.getExpression(), c.getParameters());
                 node.getChildrens().remove(b);
                 node.replace(a, declare);
             }

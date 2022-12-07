@@ -9,17 +9,17 @@ import lombok.Data;
 @Data
 public class MethodCallExpression extends Expression {
     private Expression arguments;
-    private Expression name;
+    private Expression method;
 
-    public MethodCallExpression(Node prarent, Expression name, Expression arguments) {
+    public MethodCallExpression(Node prarent, Expression method, Expression arguments) {
         super(prarent);
-        this.name = name;
+        this.method = method;
         this.arguments = arguments;
 
-        this.name.setPrarent(this);
+        this.method.setPrarent(this);
         this.arguments.setPrarent(this);
 
-        getChildrens().addAll(name, arguments);
+        getChildrens().addAll(method, arguments);
     }
 
     public static void parser(Node node) {
@@ -27,7 +27,7 @@ public class MethodCallExpression extends Expression {
         if (node.getPrarent() instanceof TypeDeclaration) return;
         Stream.of(node.getChildrens()).reduce2((list, a, b) -> {
             if (a instanceof CallableDeclaration c) {
-                MethodCallExpression expression = new MethodCallExpression(node, c.getName(), c.getParameters());
+                MethodCallExpression expression = new MethodCallExpression(node, c.getExpression(), c.getParameters());
                 list.replace(a, expression);
             }
         });
@@ -35,6 +35,6 @@ public class MethodCallExpression extends Expression {
 
     @Override
     public String toString() {
-        return name.toString().concat(arguments.toString());
+        return method.toString().concat(arguments.toString());
     }
 }

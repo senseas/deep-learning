@@ -20,13 +20,11 @@ public class ArrayCreationExpression extends Expression {
 
     public static void parser(Node node) {
         Stream.of(node.getChildrens()).reduce((list, a, b) -> {
-            Stream.of(a.getChildrens()).reduce((c, m, n) -> {
-                if (m.equals(TokenType.NEW) && n instanceof ArrayType o) {
-                    ArrayCreationExpression expression = new ArrayCreationExpression(a, o);
-                    a.replace(m, expression);
-                    a.getChildrens().remove(n);
-                }
-            });
+            if (a.equals(TokenType.NEW) && b instanceof ArrayType o) {
+                ArrayCreationExpression expression = new ArrayCreationExpression(node, o);
+                node.replace(a, expression);
+                node.getChildrens().remove(b);
+            }
         });
     }
 

@@ -27,7 +27,7 @@ public class ObjectCreationExpression extends TypeDeclaration {
                 if (m.equals(TokenType.NEW) && n instanceof CallableDeclaration o) {
                     expression = new ObjectCreationExpression(node);
                     expression.setParameters(o.getParameters());
-                    expression.setName(o.getName());
+                    expression.setName((Name) o.getExpression());
                     a.replace(m, expression);
                     a.getChildrens().remove(n);
 
@@ -50,6 +50,6 @@ public class ObjectCreationExpression extends TypeDeclaration {
 
     @Override
     public String toString() {
-        return "new ".concat(name.toString()).concat("(").concat(parameters.toString()).concat(")");
+        return "new ".concat(name.toString()).concat(parameters.toString());
     }
 }

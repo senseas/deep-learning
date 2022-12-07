@@ -4,24 +4,23 @@ import com.deep.framework.ast.Node;
 import com.deep.framework.ast.Stream;
 import com.deep.framework.ast.expression.Expression;
 import com.deep.framework.ast.expression.LambdaExpression;
-import com.deep.framework.ast.expression.Name;
 import com.deep.framework.ast.expression.ParametersExpression;
 import lombok.Data;
 
 @Data
 public class CallableDeclaration extends Declaration {
-    private Name name;
+    private Expression expression;
     private Expression parameters;
 
-    public CallableDeclaration(Node prarent, Name name, Expression parameters) {
+    public CallableDeclaration(Node prarent, Expression expression, Expression parameters) {
         super(prarent);
-        this.name = name;
+        this.expression = expression;
         this.parameters = parameters;
 
-        this.name.setPrarent(this);
+        this.expression.setPrarent(this);
         this.parameters.setPrarent(this);
 
-        getChildrens().addAll(name, parameters);
+        getChildrens().addAll(expression, parameters);
     }
 
     public static void parser(Node node) {
@@ -29,8 +28,8 @@ public class CallableDeclaration extends Declaration {
         if (node instanceof MethodDeclaration) return;
         LambdaExpression.parser(node);
         Stream.of(node.getChildrens()).reduce2((list, m, n) -> {
-            if (m instanceof Name && n instanceof ParametersExpression) {
-                CallableDeclaration declare = new CallableDeclaration(node, (Name) m, (Expression) n);
+            if (m instanceof Expression && n instanceof ParametersExpression) {
+                CallableDeclaration declare = new CallableDeclaration(node, (Expression) m, (Expression) n);
                 list.replace(m, declare);
                 list.remove(n);
             }
@@ -39,6 +38,6 @@ public class CallableDeclaration extends Declaration {
 
     @Override
     public String toString() {
-        return name.toString().concat(parameters.toString());
+        return expression.toString().concat(parameters.toString());
     }
 }
