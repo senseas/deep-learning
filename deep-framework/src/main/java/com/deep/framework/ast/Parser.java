@@ -136,6 +136,7 @@ public class Parser {
         InstanceOfDeclaration.parser(node);
         AssertExpression.parser(node);
         ObjectCreationExpression.parser(node);
+        VariableDeclaration.parser(node);
         MethodCallExpression.parser(node);
         ForEachStatement.parser(node);
         ForStatement.parser(node);
@@ -147,7 +148,6 @@ public class Parser {
         IfStatement.parser(node);
         ClassOrInterfaceDeclaration.parser(node);
         EnumDeclaration.parser(node);
-        VariableDeclaration.parser(node);
         LambdaExpression.parser(node);
         SynchronizedStatement.parser(node);
         ThrowStatement.parser(node);

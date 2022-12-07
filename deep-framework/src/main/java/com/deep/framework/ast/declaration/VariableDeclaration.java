@@ -1,10 +1,10 @@
 package com.deep.framework.ast.declaration;
 
 import com.deep.framework.ast.Node;
+import com.deep.framework.ast.NodeList;
 import com.deep.framework.ast.Stream;
-import com.deep.framework.ast.expression.AssignExpression;
-import com.deep.framework.ast.expression.Expression;
-import com.deep.framework.ast.expression.Name;
+import com.deep.framework.ast.expression.*;
+import com.deep.framework.ast.lexer.TokenType;
 import com.deep.framework.ast.type.Type;
 import lombok.Data;
 
@@ -16,6 +16,7 @@ public class VariableDeclaration extends Declaration {
     private Type type;
     private Expression name;
     private Expression initializer;
+    private static Type variableType;
 
     public VariableDeclaration(Node prarent, Type type, Name name) {
         super(prarent);
@@ -42,31 +43,48 @@ public class VariableDeclaration extends Declaration {
     }
 
     public static void parser(Node node) {
+        if (node.getPrarent() instanceof ParametersExpression) return;
+        if (node instanceof MethodDeclaration) return;
+        if (node instanceof FieldDeclaration) return;
         if (node instanceof VariableDeclaration) return;
         List<Node> nodes = node.getChildrens().stream().filter(a -> Field_Modifiers.contains(a.getTokenType())).toList();
         node.getChildrens().removeAll(nodes);
-
+        variableType = null;
         Stream.of(node.getChildrens()).reduce((list, a, b, c) -> {
             if (a instanceof Name && b instanceof Name) {
-                VariableDeclaration declare = new VariableDeclaration(node, Type.getType(a), (Name) b);
+                VariableDeclaration declare = new VariableDeclaration(node, variableType = Type.getType(a), (Name) b);
                 node.replaceAndRemove(a, declare, b);
                 list.remove(b);
             } else if (a instanceof Type && b instanceof Name) {
-                VariableDeclaration declare = new VariableDeclaration(node, (Type) a, (Name) b);
+                VariableDeclaration declare = new VariableDeclaration(node, variableType = (Type) a, (Name) b);
                 node.replaceAndRemove(a, declare, b);
                 list.remove(b);
             } else if (a instanceof Name && b instanceof AssignExpression d) {
-                VariableDeclaration declare = new VariableDeclaration(node, Type.getType(a), d.getVariable(), d.getValue());
+                VariableDeclaration declare = new VariableDeclaration(node, variableType = Type.getType(a), d.getVariable(), d.getValue());
                 d.getValue().setPrarent(declare);
                 node.replaceAndRemove(a, declare, b);
                 list.remove(b);
             } else if (a instanceof Type && b instanceof AssignExpression d) {
-                VariableDeclaration declare = new VariableDeclaration(node, (Type) a, d.getVariable(), d.getValue());
+                VariableDeclaration declare = new VariableDeclaration(node, variableType = (Type) a, d.getVariable(), d.getValue());
                 d.getValue().setPrarent(declare);
+                node.replaceAndRemove(a, declare, b);
+                list.remove(b);
+            } else if (Objects.nonNull(variableType) && a.equals(TokenType.COMMA) && b instanceof Name) {
+                VariableDeclaration declare = new VariableDeclaration(node, variableType, (Name) a);
+                node.replaceAndRemove(a, declare, b);
+                list.remove(b);
+            } else if (Objects.nonNull(variableType) && a.equals(TokenType.COMMA) && b instanceof AssignExpression e) {
+                VariableDeclaration declare = new VariableDeclaration(node, variableType, e.getVariable(), e.getValue());
                 node.replaceAndRemove(a, declare, b);
                 list.remove(b);
             }
         });
+
+        if (Objects.nonNull(variableType) && node.getChildrens().size() > 1) {
+            NodeList<VariableDeclaration> variableDeclarations = new NodeList(node.getChildrens());
+            VariableExpression variableExpression = new VariableExpression(node.getPrarent(), variableDeclarations);
+            node.getPrarent().replace(node, variableExpression);
+        }
     }
 
     @Override
