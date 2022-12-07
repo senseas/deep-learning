@@ -90,7 +90,7 @@ public class VariableDeclaration extends Declaration {
     @Override
     public String toString() {
         String concat = type.toString().concat(" ").concat(name.toString()).concat(" ");
-        if (Objects.nonNull(initializer)) concat = concat.concat("= ").concat(initializer.toString()).concat(";");
+        if (Objects.nonNull(initializer)) concat = concat.concat(" = ").concat(initializer.toString()).concat(";");
         return concat;
     }
 }
