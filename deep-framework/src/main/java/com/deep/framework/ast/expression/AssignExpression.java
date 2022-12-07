@@ -13,7 +13,7 @@ import static com.deep.framework.ast.lexer.TokenType.*;
 
 @Data
 public class AssignExpression extends Expression {
-    private Name target;
+    private Expression variable;
     private Expression value;
     private TokenType operator;
     private static AssignExpression expression;
@@ -29,7 +29,7 @@ public class AssignExpression extends Expression {
             if (Objects.nonNull(m) && Objects.nonNull(n) && Objects.nonNull(o)) {
                 if (ASSIGN_TYPE.contains(n.getTokenType())) {
                     expression = new AssignExpression(node);
-                    expression.setTarget((Name) m);
+                    expression.setVariable((Name) m);
                     expression.setOperator(n.getTokenType());
                     expression.getChildrens().add(m);
 

@@ -128,6 +128,7 @@ public class Parser {
         TypeParametersExpression.parser(node);
         ArrayAccessExpression.parser(node);
         ArrayType.parser(node);
+        ArrayCreationExpression.parser(node);
         UnaryExpression.parser(node);
         BinaryExpression.parser(node);
         ConditionalExpression.parser(node);

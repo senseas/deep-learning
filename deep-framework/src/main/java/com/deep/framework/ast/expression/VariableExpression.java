@@ -54,12 +54,12 @@ public class VariableExpression extends Declaration {
                 node.replaceAndRemove(a, declare, b);
                 list.remove(b);
             } else if (a instanceof Name && b instanceof AssignExpression d) {
-                VariableExpression declare = new VariableExpression(node, Type.getType(a), d.getTarget(), d.getValue());
+                VariableExpression declare = new VariableExpression(node, Type.getType(a), d.getVariable(), d.getValue());
                 d.getValue().setPrarent(declare);
                 node.replaceAndRemove(a, declare, b);
                 list.remove(b);
             } else if (a instanceof Type && b instanceof AssignExpression d) {
-                VariableExpression declare = new VariableExpression(node, (Type) a, d.getTarget(), d.getValue());
+                VariableExpression declare = new VariableExpression(node, (Type) a, d.getVariable(), d.getValue());
                 d.getValue().setPrarent(declare);
                 node.replaceAndRemove(a, declare, b);
                 list.remove(b);
