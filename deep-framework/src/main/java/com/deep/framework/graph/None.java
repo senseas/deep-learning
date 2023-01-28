@@ -1,10 +1,13 @@
 package com.deep.framework.graph;
 
+import com.deep.framework.lang.util.BeanUtil;
 import lombok.Data;
 
 import java.io.Serializable;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
+
+import static com.deep.framework.framework.TensorCore.*;
 
 @Data
 public class None implements Serializable {
@@ -100,14 +103,16 @@ public class None implements Serializable {
     }
 
     public String getGradId() {
-        return "  e" + id + "  ";
+        if (BeanUtil.isNone(tensor)) return "inGrad[idx * N +" + idxInGrad.getAndIncrement() + "]";
+        return "e" + id;
     }
 
     public String getValId() {
-        if (tensor instanceof TensorConst) {
-            return "" + getValue();
-        }
-        return "  a" + id + "  ";
+        if (tensor instanceof TensorConst) return "" + getValue();
+        if (BeanUtil.isNone(tensor)) return "in[idx * N +" + idxIn.getAndIncrement() + "]";
+        if (isForward) return "out[idx * M +" + idxOut.getAndIncrement() + "]";
+        if (Objects.nonNull(valId)) return valId;
+        return valId = "out[idx * M +" + idxOut.getAndIncrement() + "]";
     }
 
     public boolean isVal() {
@@ -119,5 +124,8 @@ public class None implements Serializable {
     private transient int idx;
     private transient Tensor tensor;
     private int id = ID.getAndIncrement();
+    private boolean root;
+    private boolean isForward;
+    private String valId;
     public transient static AtomicInteger ID = new AtomicInteger();
 }

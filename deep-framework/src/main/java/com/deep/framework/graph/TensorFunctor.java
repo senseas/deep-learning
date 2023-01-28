@@ -1,7 +1,10 @@
 package com.deep.framework.graph;
 
+import com.deep.framework.framework.TensorCore;
 import com.deep.framework.framework.TensorFlux;
 import lombok.Data;
+
+import static com.deep.framework.framework.TensorCore.*;
 
 @Data
 public abstract class TensorFunctor {
@@ -22,14 +25,20 @@ public abstract class TensorFunctor {
     public abstract <M> M gradient(String grad);
 
     public String getGradId() {
-        return "  e" + id + "  ";
+        if (getName().startsWith("None")) return "inGrad[idx * N +" + idxInGrad.getAndIncrement() + "]";
+        if (root) return "outGrad[idx * M +" + idxOutGrad.getAndIncrement() + "]";
+        return "e" + id;
     }
 
     public String getValId() {
-        return "  a" + id + "  ";
+        if (getName().startsWith("None")) return "in[idx * N +" + idxIn.getAndIncrement() + "]";
+        return out.getValId();
     }
 
+    private TensorCore core;
     private int id;
+    private None out;
+    private boolean root;
     private String name = "Tensor::";
     private Tensor[] input;
 }

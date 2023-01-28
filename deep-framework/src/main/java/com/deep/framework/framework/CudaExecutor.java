@@ -17,7 +17,6 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import static com.deep.framework.cuda.Cuda.createFunction;
 import static com.deep.framework.cuda.Cuda.run;
 import static com.deep.framework.lang.ForEach.forEach;
 
@@ -46,7 +45,7 @@ public class CudaExecutor implements Serializable {
                 int length = tensor.getOutParams().size();
 
                 double[] output = new double[size * length];
-                run(function, new Dim(size), new Dim(1), input, output);
+                //run(function, new Dim(size), new Dim(1), input, output);
                 tensor.setValues(output);
                 tensor.setValue(IntStream.range(0, size).mapToDouble(i -> output[i * length + length - 1]).toArray());
             } else {
@@ -57,7 +56,7 @@ public class CudaExecutor implements Serializable {
                 int length = tensor.getOutParams().size();
 
                 double[] output = new double[size * length];
-                run(function, new Dim(1), new Dim(1), input, output);
+                //run(function, new Dim(1), new Dim(1), input, output);
                 tensor.setValues(output);
                 tensor.setValue(IntStream.range(0, size).mapToDouble(i -> output[i * length + length - 1]).toArray());
             }
@@ -68,7 +67,7 @@ public class CudaExecutor implements Serializable {
             int length = tensor.getOutParams().size();
 
             double[] output = new double[length];
-            run(function, input, output);
+            //run(function, input, output);
             tensor.setValues(output);
             None out = tensor.getOutput();
             out.setValue(output[length - 1]);
@@ -103,7 +102,7 @@ public class CudaExecutor implements Serializable {
                 double[] input = Arrays.stream(tensor.getInput()).flatMapToDouble(a -> Arrays.stream(a.getValue())).toArray();
                 double[] inGrad = new double[input.length];
                 int length = tensor.getInput().length, l = input.length / length;
-                run(function, new Dim(size), new Dim(1), input, tensor.getValues(), tensor.getGrad(), inGrad);
+                //run(function, new Dim(size), new Dim(1), input, tensor.getValues(), tensor.getGrad(), inGrad);
                 IntStream.range(0, length).forEach(i -> {
                     int from = i * l;
                     Tensor in = tensor.getInput()[i];
@@ -116,7 +115,7 @@ public class CudaExecutor implements Serializable {
                 CUfunction function = getGradient(tensor);
                 double[] inGrad = new double[input.length];
                 int length = tensor.getInput().length, l = input.length / length;
-                run(function, new Dim(size), new Dim(1), input, tensor.getValues(), tensor.getGrad(), inGrad);
+                //run(function, new Dim(size), new Dim(1), input, tensor.getValues(), tensor.getGrad(), inGrad);
                 IntStream.range(0, length).forEach(i -> {
                     int from = i * l;
                     Tensor in = tensor.getInput()[i];
@@ -128,7 +127,7 @@ public class CudaExecutor implements Serializable {
             double[] input = Arrays.stream(tensor.getInput()).flatMapToDouble(a -> Arrays.stream(a.getValue())).toArray();
             double[] inGrad = new double[input.length];
             int length = tensor.getInput().length, l = input.length / length;
-            run(function, input, tensor.getValues(), tensor.getGrad(), inGrad);
+            //run(function, input, tensor.getValues(), tensor.getGrad(), inGrad);
             IntStream.range(0, length).forEach(i -> {
                 int from = i * l;
                 Tensor in = tensor.getInput()[i];
@@ -198,13 +197,13 @@ public class CudaExecutor implements Serializable {
             core.forward(tensor);
         }
 
-        tensor.setOutParams(core.outParams);
-        tensor.setInParams(core.inParams);
+        //tensor.setOutParams(core.outParams);
+        //tensor.setInParams(core.inParams);
 
         String code = core.code.replace("compute", name);
         System.out.println(code);
 
-        function = createFunction(name, code);
+        //function = createFunction(name, code);
         parallels.put(name, tensor);
         functions.put(name, function);
 
@@ -226,7 +225,7 @@ public class CudaExecutor implements Serializable {
         CUfunction function = functions.get(name);
         if (Objects.nonNull(function)) return function;
 
-        core.outGradParams = getGradOutParam(tensor);
+       // core.outGradParams = getGradOutParam(tensor);
         core.inxGradMap = new HashMap<>();
         Arrays.stream(tensor.getInput()).forEach(a -> {
             if (BeanUtil.isTenser(a.getOutput())) {
@@ -252,7 +251,7 @@ public class CudaExecutor implements Serializable {
         String code = core.code.replace("gradient", name);
         System.out.println(code);
 
-        function = createFunction(name, code);
+       // function = createFunction(name, code);
         functions.put(name, function);
         return function;
     }
@@ -262,12 +261,25 @@ public class CudaExecutor implements Serializable {
             Tenser<Tensor> tenser = (Tenser<Tensor>) tensor.getFunction();
             if (!Objects.equals(tenser.size(), 1)) {
                 Tensor m = tenser.data(0), n = tenser.data(1);
-
+                None moutput = m.getOutput();
+                moutput.setRoot(true);
                 TensorCore corem = new TensorCore();
+                corem.clear();
+                moutput.setForward(true);
                 corem.forward(m);
+                corem.clear();
+                moutput.setForward(false);
+                corem.backward(m);
 
+                None noutput = n.getOutput();
+                noutput.setRoot(true);
                 TensorCore coren = new TensorCore();
+                corem.clear();
+                moutput.setForward(true);
                 coren.forward(n);
+                corem.clear();
+                moutput.setForward(false);
+                coren.backward(n);
 
                 tensor.setParallel(corem.code.equals(coren.code));
             }
