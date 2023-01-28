@@ -110,7 +110,7 @@ public class None implements Serializable {
     public String getValId() {
         if (tensor instanceof TensorConst) return "" + getValue();
         if (BeanUtil.isNone(tensor)) return "in[idx * N +" + idxIn.getAndIncrement() + "]";
-        if (isForward) return "out[idx * M +" + idxOut.getAndIncrement() + "]";
+        if (!isForward) return "out[idx * M +" + idxOut.getAndIncrement() + "]";
         if (Objects.nonNull(valId)) return valId;
         return valId = "out[idx * M +" + idxOut.getAndIncrement() + "]";
     }
@@ -125,7 +125,6 @@ public class None implements Serializable {
     private transient Tensor tensor;
     private int id = ID.getAndIncrement();
     private boolean root;
-    private boolean isForward;
     private String valId;
     public transient static AtomicInteger ID = new AtomicInteger();
 }

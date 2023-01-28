@@ -21,6 +21,7 @@ public class TensorCore implements Serializable {
     public List<None> inParams = new ArrayList<>(), outParams = new ArrayList<>(), gradParams = new ArrayList<>();
     public List<None> inGradParams = new ArrayList<>(), outGradParams = new ArrayList<>();
     public Map<String, Integer> inxMap, inxGradMap;
+    public static boolean isForward;
 
     public TensorCore(Integer... inputSize) {
         TensorCompiler tc = new TensorCompiler();

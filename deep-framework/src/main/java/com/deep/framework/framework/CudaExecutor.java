@@ -265,20 +265,20 @@ public class CudaExecutor implements Serializable {
                 moutput.setRoot(true);
                 TensorCore corem = new TensorCore();
                 corem.clear();
-                moutput.setForward(true);
+                TensorCore.isForward = true;
                 corem.forward(m);
                 corem.clear();
-                moutput.setForward(false);
+                TensorCore.isForward = false;
                 corem.backward(m);
 
                 None noutput = n.getOutput();
                 noutput.setRoot(true);
                 TensorCore coren = new TensorCore();
+                TensorCore.isForward = true;
                 corem.clear();
-                moutput.setForward(true);
                 coren.forward(n);
                 corem.clear();
-                moutput.setForward(false);
+                TensorCore.isForward = false;
                 coren.backward(n);
 
                 tensor.setParallel(corem.code.equals(coren.code));
