@@ -225,7 +225,7 @@ public class CudaExecutor implements Serializable {
         CUfunction function = functions.get(name);
         if (Objects.nonNull(function)) return function;
 
-       // core.outGradParams = getGradOutParam(tensor);
+        // core.outGradParams = getGradOutParam(tensor);
         core.inxGradMap = new HashMap<>();
         Arrays.stream(tensor.getInput()).forEach(a -> {
             if (BeanUtil.isTenser(a.getOutput())) {
@@ -251,7 +251,7 @@ public class CudaExecutor implements Serializable {
         String code = core.code.replace("gradient", name);
         System.out.println(code);
 
-       // function = createFunction(name, code);
+        // function = createFunction(name, code);
         functions.put(name, function);
         return function;
     }
@@ -260,27 +260,19 @@ public class CudaExecutor implements Serializable {
         if (BeanUtil.isTenser(tensor.getFunction())) {
             Tenser<Tensor> tenser = (Tenser<Tensor>) tensor.getFunction();
             if (!Objects.equals(tenser.size(), 1)) {
-                Tensor m = tenser.data(0), n = tenser.data(1);
-                None moutput = m.getOutput();
-                moutput.setRoot(true);
+                Tensor m = tenser.data(0);
                 TensorCore corem = new TensorCore();
-                corem.clear();
-                TensorCore.isForward = true;
+                corem.setForward();
                 corem.forward(m);
-                corem.clear();
-                TensorCore.isForward = false;
-                corem.backward(m);
+               // corem.setBackward(m);
+                //corem.backward(m);
 
-                None noutput = n.getOutput();
-                noutput.setRoot(true);
+                Tensor n = tenser.data(1);
                 TensorCore coren = new TensorCore();
-                TensorCore.isForward = true;
-                corem.clear();
-                coren.forward(n);
-                corem.clear();
-                TensorCore.isForward = false;
-                coren.backward(n);
-
+                //coren.setForward();
+                //coren.forward(n);
+                //coren.setBackward(n);
+                //coren.backward(n);
                 tensor.setParallel(corem.code.equals(coren.code));
             }
         }

@@ -15,13 +15,13 @@ import static com.deep.framework.lang.ForEach.forEach;
 
 public class TensorCore implements Serializable {
     public Map<String, TensorFunctor> map = new HashMap<>();
-    public static AtomicInteger idxIn = new AtomicInteger(), idxOut = new AtomicInteger();
-    public static AtomicInteger idxInGrad = new AtomicInteger(), idxOutGrad = new AtomicInteger();
     public String func = "", grad = "", code = "";
     public List<None> inParams = new ArrayList<>(), outParams = new ArrayList<>(), gradParams = new ArrayList<>();
     public List<None> inGradParams = new ArrayList<>(), outGradParams = new ArrayList<>();
     public Map<String, Integer> inxMap, inxGradMap;
-    public static boolean isForward;
+    public AtomicInteger idxIn = new AtomicInteger(), idxOut = new AtomicInteger();
+    public AtomicInteger idxInGrad = new AtomicInteger(), idxOutGrad = new AtomicInteger();
+    public boolean isBackward;
 
     public TensorCore(Integer... inputSize) {
         TensorCompiler tc = new TensorCompiler();
@@ -69,8 +69,11 @@ public class TensorCore implements Serializable {
     public void compute(Tensor tensor) {
         TensorFunctor functor = map.get(tensor.getName());
         None output = tensor.getOutput();
-        inParams.addAll(getInputParam(tensor));
-        outParams.add(output);
+        output.setValId(null);
+        output.setCore(this);
+        getInputParam(tensor);
+        /*inParams.addAll(getInputParam(tensor));
+        outParams.add(output);*/
 
         functor.setInput(tensor.getInput());
         functor.setOut(output);
@@ -92,12 +95,13 @@ public class TensorCore implements Serializable {
     public void gradient(Tensor tensor) {
         TensorFunctor functor = map.get(tensor.getName());
         None output = tensor.getOutput();
-        inGradParams.addAll(getGradParam(tensor));
-        gradParams.add(output);
+        output.setCore(this);
+        getGradParam(tensor);
+        /*inGradParams.addAll(getGradParam(tensor));
+        gradParams.add(output);*/
 
         functor.setInput(tensor.getInput());
-        functor.setId(output.getId());
-        functor.setRoot(output.isRoot());
+        functor.setOut(output);
 
         grad = grad.concat(functor.gradient(""));
         code = getGradCode();
@@ -108,12 +112,15 @@ public class TensorCore implements Serializable {
         .append("extern \"C\" __global__ void gradient(double* in, double* out, double* outGrad, double* inGrad){")
         .append("int idx = blockDim.x * blockIdx.x + threadIdx.x;")
         .append("int M = ").append(outParams.size()).append(";")
+        .append("int N = ").append(inParams.size()).append(";")
+        .append("int X = ").append(inGradParams.size()).append(";")
+        .append("int Y = ").append(outGradParams.size()).append(";")
         .append(grad)
         .append("}").toString();
     }
 
     private List<None> getInputParam(Tensor tensor) {
-        return Arrays.stream(tensor.getInput()).filter(BeanUtil::isNone).flatMap(a -> {
+        return Arrays.stream(tensor.getInput()).flatMap(a -> {
             if (BeanUtil.isTenser(a.getOutput())) {
                 Tenser<None> output = a.getOutput();
                 return output.stream();
@@ -121,11 +128,14 @@ public class TensorCore implements Serializable {
                 None out = a.getOutput();
                 return Stream.of(out);
             }
+        }).map(a -> {
+            a.setCore(this);
+            return a;
         }).toList();
     }
 
     private List<None> getGradParam(Tensor tensor) {
-        return Arrays.stream(tensor.getInput()).filter(BeanUtil::isNotNone).flatMap(a -> {
+        return Arrays.stream(tensor.getInput()).flatMap(a -> {
             if (BeanUtil.isTenser(a.getOutput())) {
                 Tenser<None> output = a.getOutput();
                 return output.stream();
@@ -133,13 +143,35 @@ public class TensorCore implements Serializable {
                 None out = a.getOutput();
                 return Stream.of(out);
             }
+        }).map(a -> {
+            a.setCore(this);
+            return a;
         }).toList();
     }
 
-    public void clear() {
+    public void setBackward(Tensor tensor) {
+        isBackward = true;
+        setOutGrad(tensor);
+        clear();
+    }
+
+    public void setForward() {
+        isBackward = false;
+        clear();
+    }
+
+    private void clear() {
         idxIn = new AtomicInteger();
         idxOut = new AtomicInteger();
         idxInGrad = new AtomicInteger();
         idxOutGrad = new AtomicInteger();
+    }
+
+    private void setOutGrad(Tensor tensor) {
+        if (tensor instanceof TensorOperator) {
+            forEach(tensor.getOutput(), (None out) -> out.setOutGrad(true));
+        } else if (tensor instanceof TensorFunction) {
+            forEach(tensor.getFunction(), this::setOutGrad);
+        }
     }
 }

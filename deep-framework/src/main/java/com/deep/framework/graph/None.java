@@ -1,13 +1,12 @@
 package com.deep.framework.graph;
 
+import com.deep.framework.framework.TensorCore;
 import com.deep.framework.lang.util.BeanUtil;
 import lombok.Data;
 
 import java.io.Serializable;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
-
-import static com.deep.framework.framework.TensorCore.*;
 
 @Data
 public class None implements Serializable {
@@ -103,16 +102,30 @@ public class None implements Serializable {
     }
 
     public String getGradId() {
-        if (BeanUtil.isNone(tensor)) return "inGrad[idx * N +" + idxInGrad.getAndIncrement() + "]";
+        if (BeanUtil.isNone(tensor)) {
+            core.inGradParams.add(this);
+            return "inGrad[idx * X +" + core.idxInGrad.getAndIncrement() + "]";
+        }
+        if (isOutGrad()) {
+            core.outGradParams.add(this);
+            return "outGrad[idx * Y +" + core.idxOutGrad.getAndIncrement() + "]";
+        }
         return "e" + id;
     }
 
     public String getValId() {
         if (tensor instanceof TensorConst) return "" + getValue();
-        if (BeanUtil.isNone(tensor)) return "in[idx * N +" + idxIn.getAndIncrement() + "]";
-        if (!isForward) return "out[idx * M +" + idxOut.getAndIncrement() + "]";
+        if (BeanUtil.isNone(tensor)) {
+            core.inParams.add(this);
+            return "in[idx * N +" + core.idxIn.getAndIncrement() + "]";
+        }
+        if (core.isBackward) {
+            core.outParams.add(this);
+            return "out[idx * M +" + core.idxOut.getAndIncrement() + "]";
+        }
         if (Objects.nonNull(valId)) return valId;
-        return valId = "out[idx * M +" + idxOut.getAndIncrement() + "]";
+        core.outParams.add(this);
+        return valId = "out[idx * M +" + core.idxOut.getAndIncrement() + "]";
     }
 
     public boolean isVal() {
@@ -123,8 +136,9 @@ public class None implements Serializable {
     private transient boolean reduce, gradre;
     private transient int idx;
     private transient Tensor tensor;
-    private int id = ID.getAndIncrement();
-    private boolean root;
+    private boolean isOutGrad;
+    private TensorCore core;
     private String valId;
+    private int id = ID.getAndIncrement();
     public transient static AtomicInteger ID = new AtomicInteger();
 }
