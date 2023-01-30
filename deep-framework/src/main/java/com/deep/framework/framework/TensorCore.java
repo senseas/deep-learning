@@ -15,15 +15,17 @@ import static com.deep.framework.lang.ForEach.forEach;
 
 public class TensorCore implements Serializable {
     public Map<String, TensorFunctor> map = new HashMap<>();
-    public String func = "", grad = "", code = "";
-    public List<None> inParams = new ArrayList<>(), outParams = new ArrayList<>(), gradParams = new ArrayList<>();
+    public String func = "", grad = "", funcCode = "", gradCode = "";
+    public List<None> inParams = new ArrayList<>(), outParams = new ArrayList<>();
+    public List<None> inBackParams = new ArrayList<>(), outBackParams = new ArrayList<>();
     public List<None> inGradParams = new ArrayList<>(), outGradParams = new ArrayList<>();
-    public Map<String, Integer> inxMap, inxGradMap;
+
     public AtomicInteger idxIn = new AtomicInteger(), idxOut = new AtomicInteger();
     public AtomicInteger idxInGrad = new AtomicInteger(), idxOutGrad = new AtomicInteger();
-    public boolean isBackward;
+    public Set<String> innerGradParam = new HashSet<>();
+    public boolean isForward;
 
-    public TensorCore(Integer... inputSize) {
+    public TensorCore() {
         TensorCompiler tc = new TensorCompiler();
         Method[] methods = tc.getClass().getDeclaredMethods();
         Arrays.stream(methods).forEach(method -> {
@@ -72,24 +74,23 @@ public class TensorCore implements Serializable {
         output.setValId(null);
         output.setCore(this);
         getInputParam(tensor);
-        /*inParams.addAll(getInputParam(tensor));
-        outParams.add(output);*/
 
         functor.setInput(tensor.getInput());
         functor.setOut(output);
 
         func = func.concat(functor.compute());
-        code = getFuncCode();
+        funcCode = getFuncCode();
     }
 
     private String getFuncCode() {
         return new StringBuilder()
         .append("extern \"C\" __global__ void compute(double* in, double* out){")
         .append("int idx = blockDim.x * blockIdx.x + threadIdx.x;")
-        .append("int M = ").append(outParams.size()).append(";")
-        .append("int N = ").append(inParams.size()).append(";")
+        .append("int M = ").append(outParams.size()).append(",")
+        .append("N = ").append(inParams.size()).append(";")
         .append(func)
-        .append("}").toString();
+        .append("}")
+        .toString();
     }
 
     public void gradient(Tensor tensor) {
@@ -97,26 +98,26 @@ public class TensorCore implements Serializable {
         None output = tensor.getOutput();
         output.setCore(this);
         getGradParam(tensor);
-        /*inGradParams.addAll(getGradParam(tensor));
-        gradParams.add(output);*/
 
         functor.setInput(tensor.getInput());
         functor.setOut(output);
 
         grad = grad.concat(functor.gradient(""));
-        code = getGradCode();
+        gradCode = getGradCode();
     }
 
     private String getGradCode() {
         return new StringBuilder()
         .append("extern \"C\" __global__ void gradient(double* in, double* out, double* outGrad, double* inGrad){")
         .append("int idx = blockDim.x * blockIdx.x + threadIdx.x;")
-        .append("int M = ").append(outParams.size()).append(";")
-        .append("int N = ").append(inParams.size()).append(";")
-        .append("int X = ").append(inGradParams.size()).append(";")
-        .append("int Y = ").append(outGradParams.size()).append(";")
+        .append("double ").append(String.join(",",innerGradParam)).append(";")
+        .append("int M = ").append(outBackParams.size()).append(",")
+        .append("N = ").append(inBackParams.size()).append(",")
+        .append("X = ").append(inGradParams.size()).append(",")
+        .append("Y = ").append(outGradParams.size()).append(";")
         .append(grad)
-        .append("}").toString();
+        .append("}")
+        .toString();
     }
 
     private List<None> getInputParam(Tensor tensor) {
@@ -149,15 +150,19 @@ public class TensorCore implements Serializable {
         }).toList();
     }
 
-    public void setBackward(Tensor tensor) {
-        isBackward = true;
-        setOutGrad(tensor);
+    public void setForward(Tensor tensor) {
+        isForward = true;
+        func = "";
         clear();
+        forward(tensor);
     }
 
-    public void setForward() {
-        isBackward = false;
+    public void setBackward(Tensor tensor) {
+        isForward = false;
+        grad = "";
+        setOutGrad(tensor);
         clear();
+        backward(tensor);
     }
 
     private void clear() {

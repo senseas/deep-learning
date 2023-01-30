@@ -1,13 +1,10 @@
 package com.deep.framework.graph;
 
-import com.deep.framework.framework.CudaExecutor;
-import com.deep.framework.framework.TensorExecutor;
 import com.deep.framework.framework.TensorFlux;
 
 import java.util.Arrays;
 import java.util.stream.Stream;
 
-import static com.deep.framework.framework.CudaExecutor.isSamex;
 
 public class TensorOperator extends Tensor {
 
@@ -50,27 +47,13 @@ public class TensorOperator extends Tensor {
     }
 
     public void forward() {
-        if (TensorExecutor.status) {
-            for (Tensor o : getInput()) TensorFlux.computer(o);
-            TensorFlux.compute(this);
-        } else if (getName().equals("Tensor::Add") && isSamex(this)) {
-            CudaExecutor.compute(this);
-        } else {
-            for (Tensor o : getInput()) TensorFlux.computer(o);
-            TensorFlux.compute(this);
-        }
+        for (Tensor o : getInput()) TensorFlux.computer(o);
+        TensorFlux.compute(this);
     }
 
     public void backward() {
-        if (TensorExecutor.status) {
-            TensorFlux.gradient(this);
-            for (Tensor o : getInput()) o.backward();
-        } else if (isIparallel()) {
-            CudaExecutor.gradient(this);
-        } else {
-            TensorFlux.gradient(this);
-            for (Tensor o : getInput()) o.backward();
-        }
+        TensorFlux.gradient(this);
+        for (Tensor o : getInput()) o.backward();
     }
 
     public void reduce() {

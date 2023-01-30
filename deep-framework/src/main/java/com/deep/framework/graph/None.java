@@ -110,22 +110,29 @@ public class None implements Serializable {
             core.outGradParams.add(this);
             return "outGrad[idx * Y +" + core.idxOutGrad.getAndIncrement() + "]";
         }
-        return "e" + id;
+        String eid = "e" + id;
+        core.innerGradParam.add(eid);
+        return eid;
     }
 
     public String getValId() {
         if (tensor instanceof TensorConst) return "" + getValue();
-        if (BeanUtil.isNone(tensor)) {
-            core.inParams.add(this);
-            return "in[idx * N +" + core.idxIn.getAndIncrement() + "]";
-        }
-        if (core.isBackward) {
+        if (core.isForward) {
+            if (BeanUtil.isNone(tensor)) {
+                core.inParams.add(this);
+                return "in[idx * N +" + core.idxIn.getAndIncrement() + "]";
+            }
+            if (Objects.nonNull(valId)) return valId;
             core.outParams.add(this);
+            return valId = "out[idx * M +" + core.idxOut.getAndIncrement() + "]";
+        } else {
+            if (BeanUtil.isNone(tensor)) {
+                core.inBackParams.add(this);
+                return "in[idx * N +" + core.idxIn.getAndIncrement() + "]";
+            }
+            core.outBackParams.add(this);
             return "out[idx * M +" + core.idxOut.getAndIncrement() + "]";
         }
-        if (Objects.nonNull(valId)) return valId;
-        core.outParams.add(this);
-        return valId = "out[idx * M +" + core.idxOut.getAndIncrement() + "]";
     }
 
     public boolean isVal() {
