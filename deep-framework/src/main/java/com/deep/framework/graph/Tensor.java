@@ -1,12 +1,11 @@
 package com.deep.framework.graph;
 
 import com.deep.framework.framework.CudaContext;
-import com.deep.framework.framework.TensorCore;
+import com.deep.framework.framework.TensorGeneContext;
 import com.deep.framework.framework.TensorFlux;
 import lombok.Data;
 
 import java.io.Serializable;
-import java.util.List;
 import java.util.Objects;
 
 import static com.deep.framework.lang.Shape.*;
@@ -106,5 +105,5 @@ public class Tensor implements Serializable {
     protected transient boolean[] reduce;
     private transient boolean gradre;
     private transient CudaContext context;
-    private transient TensorCore core;
+    private transient TensorGeneContext core;
 }

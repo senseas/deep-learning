@@ -136,7 +136,7 @@ public class Cuda {
      */
     public static CUdeviceptr createDeviceData(double[] value) {
         CUdeviceptr deviceData = new CUdeviceptr();
-        cuMemAlloc(deviceData, value.length * Sizeof.DOUBLE);
+        cuMemAlloc(deviceData, value.length == 0 ? 1 : value.length * Sizeof.DOUBLE);
         cuMemcpyHtoD(deviceData, Pointer.to(value), value.length * Sizeof.DOUBLE);
         return deviceData;
     }

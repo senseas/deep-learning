@@ -26,25 +26,22 @@ public class CudaExecutor implements Serializable {
 
     private static Map<String, CUfunction> functions = new HashMap<>();
     private static Map<String, Tensor> parallels = new HashMap<>();
-    private static TensorCore core;
+    private static TensorGeneContext core;
 
     @SneakyThrows
     public static void compute(Tensor tensor) {
         if (!tensor.getClass().getMethod("compute").isAnnotationPresent(Cuda.class)) return;
 
+        core = new TensorGeneContext();
+        CUfunction function = getFunction(tensor);
+        double[] input = tensor.getCore().inParams.stream().mapToDouble(None::getValue).toArray();
+        double[] output = new double[tensor.getCore().outParams.size()];
+
         if (BeanUtil.isTenser(tensor.getFunction())) {
             Tenser<None> tenser = tensor.getOutput();
             int size = tenser.size();
-            core = new TensorCore();
-            CUfunction function = getFunction(tensor);
-            double[] input = tensor.getCore().inParams.stream().mapToDouble(None::getValue).toArray();
-            double[] output = new double[tensor.getCore().outParams.size()];
             run(function, new Dim(size), new Dim(1), input, output);
         } else {
-            core = new TensorCore();
-            CUfunction function = getFunction(tensor);
-            double[] input = tensor.getCore().inParams.stream().mapToDouble(None::getValue).toArray();
-            double[] output = new double[tensor.getCore().outParams.size()];
             run(function, input, output);
         }
     }
@@ -54,21 +51,17 @@ public class CudaExecutor implements Serializable {
     public static void gradient(Tensor tensor) {
         if (!tensor.getClass().getMethod("compute").isAnnotationPresent(Cuda.class)) return;
 
+        CUfunction function = getGradient(tensor);
+        double[] input = tensor.getCore().inBackParams.stream().mapToDouble(None::getValue).toArray();
+        double[] output = tensor.getCore().outBackParams.stream().mapToDouble(None::getValue).toArray();
+        double[] outGrad = tensor.getCore().outGradParams.stream().mapToDouble(None::getGrad).toArray();
+        double[] inGrad = new double[tensor.getCore().inGradParams.size()];
+
         if (BeanUtil.isTenser(tensor.getFunction())) {
             int size = ((Tenser<None>) tensor.getOutput()).size();
-            CUfunction function = getGradient(tensor);
-            double[] input = tensor.getCore().inBackParams.stream().mapToDouble(None::getValue).toArray();
-            double[] output = tensor.getCore().outBackParams.stream().mapToDouble(None::getValue).toArray();
-            double[] outGradParams = tensor.getCore().outGradParams.stream().mapToDouble(None::getGrad).toArray();
-            double[] inGrad = new double[tensor.getCore().inGradParams.size()];
-            run(function, new Dim(size), new Dim(1), input, output, outGradParams, inGrad);
+            run(function, new Dim(size), new Dim(1), input, output, outGrad, inGrad);
             IntStream.range(0, inGrad.length).forEach(i -> tensor.getCore().inGradParams.get(i).setGrad(inGrad[i]));
         } else {
-            CUfunction function = getGradient(tensor);
-            double[] input = tensor.getCore().inBackParams.stream().mapToDouble(None::getValue).toArray();
-            double[] output = tensor.getCore().outBackParams.stream().mapToDouble(None::getValue).toArray();
-            double[] outGradParams = tensor.getCore().outGradParams.stream().mapToDouble(None::getValue).toArray();
-            double[] inGrad = new double[tensor.getCore().inGradParams.size()];
             run(function, input, output, tensor.getGrad(), inGrad);
             IntStream.range(0, inGrad.length).forEach(i -> tensor.getCore().inGradParams.get(i).setGrad(inGrad[i]));
         }
@@ -87,23 +80,23 @@ public class CudaExecutor implements Serializable {
         CUfunction function = functions.get(name);
         if (Objects.nonNull(function)) return function;
 
-        TensorCore corex = new TensorCore();
+        TensorGeneCuda cudac = new TensorGeneCuda();
         if (tensor instanceof TensorFunction) {
             if (BeanUtil.isTenser(tensor.getFunction())) {
                 Tenser<Tensor> tenser = (Tenser<Tensor>) tensor.getFunction();
-                corex.setForward(tenser.first());
+                cudac.setForward(tenser.first());
                 tenser.forEach(a -> core.setForward(a));
             } else {
                 Tensor func = (Tensor) tensor.getFunction();
-                corex.setForward(func);
+                cudac.setForward(func);
                 core.setForward(func);
             }
         } else {
-            corex.setForward(tensor);
+            cudac.setForward(tensor);
             core.setForward(tensor);
         }
 
-        String code = corex.funcCode.replace("compute", name);
+        String code = cudac.funcCode.replace("compute", name);
         System.out.println(code);
 
         function = createFunction(name, code);
@@ -127,24 +120,24 @@ public class CudaExecutor implements Serializable {
 
         CUfunction function = functions.get(name);
         if (Objects.nonNull(function)) return function;
-        TensorCore corex = new TensorCore();
+        TensorGeneCuda cudac = new TensorGeneCuda();
 
         if (tensor instanceof TensorFunction) {
             if (BeanUtil.isTenser(tensor.getFunction())) {
                 Tenser<Tensor> tenser = (Tenser<Tensor>) tensor.getFunction();
-                corex.setBackward(tenser.first());
+                cudac.setBackward(tenser.first());
                 tenser.forEach(a -> core.setBackward(a));
             } else {
                 Tensor func = (Tensor) tensor.getFunction();
-                corex.setBackward(func);
+                cudac.setBackward(func);
                 core.setBackward(func);
             }
         } else {
-            corex.setBackward(tensor);
+            cudac.setBackward(tensor);
             core.setBackward(tensor);
         }
 
-        String code = corex.gradCode.replace("gradient", name);
+        String code = cudac.gradCode.replace("gradient", name);
         System.out.println(code);
 
         function = createFunction(name, code);
