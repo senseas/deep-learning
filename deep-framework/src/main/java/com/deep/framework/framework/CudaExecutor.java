@@ -25,7 +25,6 @@ import static com.deep.framework.cuda.Cuda.run;
 public class CudaExecutor implements Serializable {
 
     private static Map<String, CUfunction> functions = new HashMap<>();
-    private static Map<String, Tensor> parallels = new HashMap<>();
     private static TensorGeneContext core;
 
     @SneakyThrows
@@ -100,7 +99,6 @@ public class CudaExecutor implements Serializable {
         System.out.println(code);
 
         function = createFunction(name, code);
-        parallels.put(name, tensor);
         functions.put(name, function);
 
         getGradient(tensor);
