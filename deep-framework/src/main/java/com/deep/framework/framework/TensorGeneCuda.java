@@ -1,11 +1,62 @@
 package com.deep.framework.framework;
 
-import com.deep.framework.graph.None;
-import com.deep.framework.graph.Tensor;
-import com.deep.framework.graph.TensorFunctor;
+import com.deep.framework.graph.*;
+import com.deep.framework.lang.Tenser;
+
+import static com.deep.framework.lang.ForEach.forEach;
 
 public class TensorGeneCuda extends TensorGene {
     public String func = "", grad = "", funcCode = "", gradCode = "";
+
+
+    public void forward(Tensor tensor) {
+        if (tensor instanceof TensorFunction) {
+            for (Tensor o : tensor.getInput()) {
+                forward(o);
+            }
+            if (tensor.getFunction() instanceof Tenser) {
+                Tenser<Tensor> tenser = (Tenser<Tensor>) tensor.getFunction();
+                func = func.concat("for (int i = 0; i <" + tenser.size() + " ; i++) {");
+                index = "i";
+                forward(tenser.first());
+                index = null;
+                func = func.concat("}");
+            } else {
+                Tensor func = (Tensor) tensor.getFunction();
+                forward(func);
+            }
+        } else if (tensor instanceof TensorOperator) {
+            for (Tensor o : tensor.getInput()) {
+                forward(o);
+            }
+            compute(tensor);
+        }
+    }
+
+    public void backward(Tensor tensor) {
+        if (tensor instanceof TensorFunction) {
+            if (tensor.getFunction() instanceof Tenser) {
+                Tenser<Tensor> tenser = (Tenser<Tensor>) tensor.getFunction();
+                grad = grad.concat("for (int i = 0; i <" + tenser.size() + " ; i++) {");
+                index = "i";
+                backward(tenser.first());
+                index = null;
+                grad = grad.concat("}");
+                gradCode = getGradCode();
+            } else {
+                Tensor func = (Tensor) tensor.getFunction();
+                backward(func);
+            }
+            for (Tensor o : tensor.getInput()) {
+                backward(o);
+            }
+        } else if (tensor instanceof TensorOperator) {
+            gradient(tensor);
+            for (Tensor o : tensor.getInput()) {
+                backward(o);
+            }
+        }
+    }
 
     public void compute(Tensor tensor) {
         TensorFunctor functor = map.get(tensor.getName());

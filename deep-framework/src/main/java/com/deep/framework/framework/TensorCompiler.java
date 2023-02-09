@@ -4,15 +4,11 @@ import com.deep.framework.graph.None;
 import com.deep.framework.graph.Tensor;
 import com.deep.framework.graph.TensorConst;
 import com.deep.framework.graph.TensorFunctor;
-import com.deep.framework.lang.function.Func1;
+import com.deep.framework.lang.Tenser;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 import java.util.stream.Collectors;
-
-import static com.deep.framework.lang.ForEach.forEach;
 
 public class TensorCompiler implements Serializable {
 
@@ -333,16 +329,32 @@ public class TensorCompiler implements Serializable {
 
             public String compute() {
                 Object A = getInput(0);
-                List<None> list = new ArrayList<>();
-                forEach(A, (Func1<None>) list::add);
-                return getValId() + "=" + list.stream().map(a -> "+" + a.getValId()).collect(Collectors.joining()) + ";";
+                StringBuilder builder = new StringBuilder(getValId() + "=0.0;");
+                if (A instanceof Tenser) {
+                    Tenser<None> tenser = (Tenser<None>) A;
+                    None a = tenser.first();
+                    builder.append("for (int i = 0; i <" + tenser.size() + " ; i++) {");
+                    builder.append(getValId() + "+=" + a.getValId() + ";");
+                    builder.append("}");
+                } else {
+                    None a = (None) A;
+                    builder.append(getValId() + "+=" + a.getValId());
+                }
+                return builder.toString();
             }
 
             public String gradient(String grad) {
                 Object A = getInput(0);
-                List<None> list = new ArrayList<>();
-                forEach(A, (Func1<None>) list::add);
-                return list.stream().filter(None::isVal).map(a -> a.getGradId() + "=" + getGradId() + ";").collect(Collectors.joining());
+                StringBuilder builder = new StringBuilder();
+                if (A instanceof Tenser) {
+                    Tenser<None> tenser = (Tenser<None>) A;
+                    None a = tenser.first();
+                    builder.append(a.getGradId() + "=" + getGradId() + ";");
+                } else {
+                    None a = (None) A;
+                    builder.append(a.getGradId() + "=" + getGradId() + ";");
+                }
+                return builder.toString();
             }
 
         };

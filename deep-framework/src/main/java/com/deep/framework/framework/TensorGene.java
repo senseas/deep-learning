@@ -13,6 +13,7 @@ import java.util.stream.IntStream;
 import static com.deep.framework.lang.ForEach.forEach;
 
 public abstract class TensorGene implements Serializable {
+    public String index = null;
 
     public TensorGene() {
         TensorCompiler tc = new TensorCompiler();
