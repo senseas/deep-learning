@@ -3,11 +3,8 @@ package com.deep.framework.framework;
 import com.deep.framework.graph.*;
 import com.deep.framework.lang.Tenser;
 
-import static com.deep.framework.lang.ForEach.forEach;
-
 public class TensorGeneCuda extends TensorGene {
     public String func = "", grad = "", funcCode = "", gradCode = "";
-
 
     public void forward(Tensor tensor) {
         if (tensor instanceof TensorFunction) {
@@ -19,6 +16,8 @@ public class TensorGeneCuda extends TensorGene {
                 func = func.concat("for (int i = 0; i <" + tenser.size() + " ; i++) {");
                 index = "i";
                 forward(tenser.first());
+                setForParamsx(tenser.size());
+
                 index = null;
                 func = func.concat("}");
             } else {
@@ -29,6 +28,7 @@ public class TensorGeneCuda extends TensorGene {
             for (Tensor o : tensor.getInput()) {
                 forward(o);
             }
+            setForwardParams();
             compute(tensor);
         }
     }
@@ -40,6 +40,7 @@ public class TensorGeneCuda extends TensorGene {
                 grad = grad.concat("for (int i = 0; i <" + tenser.size() + " ; i++) {");
                 index = "i";
                 backward(tenser.first());
+                setBackParamsx(tenser.size());
                 index = null;
                 grad = grad.concat("}");
                 gradCode = getGradCode();
@@ -51,6 +52,7 @@ public class TensorGeneCuda extends TensorGene {
                 backward(o);
             }
         } else if (tensor instanceof TensorOperator) {
+            setBackwardParams();
             gradient(tensor);
             for (Tensor o : tensor.getInput()) {
                 backward(o);
@@ -76,8 +78,8 @@ public class TensorGeneCuda extends TensorGene {
         return new StringBuilder()
         .append("extern \"C\" __global__ void compute(double* in, double* out){")
         .append("int idx = blockDim.x * blockIdx.x + threadIdx.x;")
-        .append("int M = ").append(outParams.size()).append(",")
-        .append("N = ").append(inParams.size()).append(";")
+        .append("int M = ").append(outParamsx.stream().mapToInt(Integer::intValue).sum()).append(",")
+        .append("N = ").append(inParamsx.stream().mapToInt(Integer::intValue).sum()).append(";")
         .append(func)
         .append("}")
         .toString();

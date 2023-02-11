@@ -40,6 +40,7 @@ public abstract class TensorGene implements Serializable {
             for (Tensor o : tensor.getInput()) {
                 forward(o);
             }
+            setForwardParams();
             compute(tensor);
         }
     }
@@ -51,6 +52,7 @@ public abstract class TensorGene implements Serializable {
                 backward(o);
             }
         } else if (tensor instanceof TensorOperator) {
+            setBackwardParams();
             gradient(tensor);
             for (Tensor o : tensor.getInput()) {
                 backward(o);
@@ -102,12 +104,80 @@ public abstract class TensorGene implements Serializable {
 
     public abstract void gradient(Tensor tensor);
 
+    public void setInParamsx() {
+        int index = inParamsx.size() - 1;
+        inParamsx.set(index, inParamsx.get(index) + 1);
+    }
+
+    public void setOutParamsx() {
+        int index = inParamsx.size() - 1;
+        outParamsx.set(index, outParamsx.get(index) + 1);
+    }
+
+    public void setInBackParamsx() {
+        int index = inBackParamsx.size() - 1;
+        inBackParamsx.set(index, inBackParamsx.get(index) + 1);
+    }
+
+    public void setOutBackParamsx() {
+        int index = outBackParamsx.size() - 1;
+        outBackParamsx.set(index, outBackParamsx.get(index) + 1);
+    }
+
+    public void setInGradParamsx() {
+        int index = inGradParamsx.size() - 1;
+        inGradParamsx.set(index, inGradParamsx.get(index) + 1);
+    }
+
+    public void setOutGradParamsx() {
+        int index = outGradParamsx.size() - 1;
+        outGradParamsx.set(index, outGradParamsx.get(index) + 1);
+    }
+
+    public void setForParamsx(int x) {
+        int index = inParamsx.size() - 1;
+        inParamsx.set(index, x * inParamsx.get(index));
+
+        int outdex = outParamsx.size() - 1;
+        outParamsx.set(outdex, x * outParamsx.get(outdex));
+    }
+
+    public void setBackParamsx(int x) {
+        int index = inBackParamsx.size() - 1;
+        inBackParamsx.set(index, x * inBackParamsx.get(index));
+
+        int outdex = outBackParamsx.size() - 1;
+        outBackParamsx.set(outdex, x * outBackParamsx.get(outdex));
+
+        int inGraddex = inGradParamsx.size() - 1;
+        inGradParamsx.set(inGraddex, x * inGradParamsx.get(inGraddex));
+
+        int outGraddex = outGradParamsx.size() - 1;
+        outGradParamsx.set(outGraddex, x * outGradParamsx.get(outGraddex));
+    }
+
+    public void setForwardParams() {
+        inParamsx.add(0);
+        outParamsx.add(0);
+    }
+
+    public void setBackwardParams() {
+        inBackParamsx.add(0);
+        outBackParamsx.add(0);
+        inGradParamsx.add(0);
+        outGradParamsx.add(0);
+    }
+
     public Map<String, TensorFunctor> map = new HashMap<>();
 
     public List<None> inParams = new ArrayList<>(), outParams = new ArrayList<>();
     public List<None> inBackParams = new ArrayList<>(), outBackParams = new ArrayList<>();
     public List<None> inGradParams = new ArrayList<>(), outGradParams = new ArrayList<>();
     public Set<String> innerGradParam = new HashSet<>();
+
+    public List<Integer> inParamsx = new ArrayList<>(), outParamsx = new ArrayList<>();
+    public List<Integer> inBackParamsx = new ArrayList<>(), outBackParamsx = new ArrayList<>();
+    public List<Integer> inGradParamsx = new ArrayList<>(), outGradParamsx = new ArrayList<>();
 
     public AtomicInteger idxIn = new AtomicInteger(), idxOut = new AtomicInteger();
     public AtomicInteger idxInGrad = new AtomicInteger(), idxOutGrad = new AtomicInteger();

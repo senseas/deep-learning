@@ -105,19 +105,23 @@ public class None implements Serializable {
         if (Objects.nonNull(core.index)) {
             if (BeanUtil.isNone(tensor)) {
                 core.inGradParams.add(this);
+                core.setInGradParamsx();
                 return "inGrad[idx * X +" + core.idxInGrad.getAndIncrement() + "+" + core.index + "]";
             }
             if (isOutGrad()) {
                 core.outGradParams.add(this);
+                core.setOutGradParamsx();
                 return "outGrad[idx * Y +" + core.idxOutGrad.getAndIncrement() + "+" + core.index + "]";
             }
         } else {
             if (BeanUtil.isNone(tensor)) {
                 core.inGradParams.add(this);
+                core.setInGradParamsx();
                 return "inGrad[idx * X +" + core.idxInGrad.getAndIncrement() + "]";
             }
             if (isOutGrad()) {
                 core.outGradParams.add(this);
+                core.setOutGradParamsx();
                 return "outGrad[idx * Y +" + core.idxOutGrad.getAndIncrement() + "]";
             }
         }
@@ -133,34 +137,42 @@ public class None implements Serializable {
             if (core.isForward) {
                 if (BeanUtil.isNone(tensor)) {
                     core.inParams.add(this);
+                    core.setInParamsx();
                     return "in[idx * N +" + core.idxIn.getAndIncrement() + "+" + core.index + "]";
                 }
                 if (Objects.nonNull(valId)) return valId;
                 core.outParams.add(this);
+                core.setOutParamsx();
                 return valId = "out[idx * M +" + core.idxOut.getAndIncrement() + "+" + core.index + "]";
             } else {
                 if (BeanUtil.isNone(tensor)) {
                     core.inBackParams.add(this);
+                    core.setInBackParamsx();
                     return "in[idx * N +" + core.idxIn.getAndIncrement() + "+" + core.index + "]";
                 }
                 core.outBackParams.add(this);
+                core.setOutBackParamsx();
                 return "out[idx * M +" + core.idxOut.getAndIncrement() + "+" + core.index + "]";
             }
         } else {
             if (core.isForward) {
                 if (BeanUtil.isNone(tensor)) {
                     core.inParams.add(this);
+                    core.setInParamsx();
                     return "in[idx * N +" + core.idxIn.getAndIncrement() + "]";
                 }
                 if (Objects.nonNull(valId)) return valId;
                 core.outParams.add(this);
+                core.setOutParamsx();
                 return valId = "out[idx * M +" + core.idxOut.getAndIncrement() + "]";
             } else {
                 if (BeanUtil.isNone(tensor)) {
                     core.inBackParams.add(this);
+                    core.setInBackParamsx();
                     return "in[idx * N +" + core.idxIn.getAndIncrement() + "]";
                 }
                 core.outBackParams.add(this);
+                core.setOutBackParamsx();
                 return "out[idx * M +" + core.idxOut.getAndIncrement() + "]";
             }
         }
