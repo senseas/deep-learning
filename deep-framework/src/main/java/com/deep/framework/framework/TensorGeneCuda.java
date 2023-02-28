@@ -16,9 +16,11 @@ public class TensorGeneCuda extends TensorGene {
                 func = func.concat("for (int i = 0; i <" + tenser.size() + " ; i++) {");
                 index = "i";
                 forward(tenser.first());
-                setForParamsx(tenser.size());
-
                 index = null;
+
+                TensorGeneContext context = new TensorGeneContext(this);
+                tenser.stream().skip(1).forEach(context::forward);
+
                 func = func.concat("}");
             } else {
                 Tensor func = (Tensor) tensor.getFunction();
@@ -28,7 +30,6 @@ public class TensorGeneCuda extends TensorGene {
             for (Tensor o : tensor.getInput()) {
                 forward(o);
             }
-            setForwardParams();
             compute(tensor);
         }
     }
@@ -40,8 +41,11 @@ public class TensorGeneCuda extends TensorGene {
                 grad = grad.concat("for (int i = 0; i <" + tenser.size() + " ; i++) {");
                 index = "i";
                 backward(tenser.first());
-                setBackParamsx(tenser.size());
                 index = null;
+
+                TensorGeneContext context = new TensorGeneContext(this);
+                tenser.stream().skip(1).forEach(context::backward);
+
                 grad = grad.concat("}");
                 gradCode = getGradCode();
             } else {
@@ -52,7 +56,6 @@ public class TensorGeneCuda extends TensorGene {
                 backward(o);
             }
         } else if (tensor instanceof TensorOperator) {
-            setBackwardParams();
             gradient(tensor);
             for (Tensor o : tensor.getInput()) {
                 backward(o);
@@ -78,8 +81,8 @@ public class TensorGeneCuda extends TensorGene {
         return new StringBuilder()
         .append("extern \"C\" __global__ void compute(double* in, double* out){")
         .append("int idx = blockDim.x * blockIdx.x + threadIdx.x;")
-        .append("int M = ").append(outParamsx.stream().mapToInt(Integer::intValue).sum()).append(",")
-        .append("N = ").append(inParamsx.stream().mapToInt(Integer::intValue).sum()).append(";")
+        .append("int M = ").append(outParams.size()).append(",")
+        .append("N = ").append(inParams.size()).append(";")
         .append(func)
         .append("}")
         .toString();
@@ -103,10 +106,10 @@ public class TensorGeneCuda extends TensorGene {
         .append("extern \"C\" __global__ void gradient(double* in, double* out, double* outGrad, double* inGrad){")
         .append("int idx = blockDim.x * blockIdx.x + threadIdx.x;")
         .append("double ").append(String.join(",",innerGradParam)).append(";")
-        .append("int M = ").append(outBackParamsx.stream().mapToInt(Integer::intValue).sum()).append(",")
-        .append("N = ").append(inBackParamsx.stream().mapToInt(Integer::intValue).sum()).append(",")
-        .append("X = ").append(inGradParamsx.stream().mapToInt(Integer::intValue).sum()).append(",")
-        .append("Y = ").append(outGradParamsx.stream().mapToInt(Integer::intValue).sum()).append(";")
+        .append("int M = ").append(outParams.size()).append(",")
+        .append("N = ").append(inParams.size()).append(",")
+        .append("X = ").append(inGradParams.size()).append(",")
+        .append("Y = ").append(outGradParams.size()).append(";")
         .append(grad)
         .append("}")
         .toString();

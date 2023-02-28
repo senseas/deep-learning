@@ -51,8 +51,8 @@ public class CudaExecutor implements Serializable {
         if (!tensor.getClass().getMethod("compute").isAnnotationPresent(Cuda.class)) return;
 
         CUfunction function = getGradient(tensor);
-        double[] input = tensor.getCore().inBackParams.stream().mapToDouble(None::getValue).toArray();
-        double[] output = tensor.getCore().outBackParams.stream().mapToDouble(None::getValue).toArray();
+        double[] input = tensor.getCore().inParams.stream().mapToDouble(None::getValue).toArray();
+        double[] output = tensor.getCore().outParams.stream().mapToDouble(None::getValue).toArray();
         double[] outGrad = tensor.getCore().outGradParams.stream().mapToDouble(None::getGrad).toArray();
         double[] inGrad = new double[tensor.getCore().inGradParams.size()];
 
@@ -83,16 +83,16 @@ public class CudaExecutor implements Serializable {
         if (tensor instanceof TensorFunction) {
             if (BeanUtil.isTenser(tensor.getFunction())) {
                 Tenser<Tensor> tenser = (Tenser<Tensor>) tensor.getFunction();
-                cudac.setForward(tenser.first());
-                tenser.forEach(a -> core.setForward(a));
+                cudac.forward(tenser.first());
+                tenser.forEach(a -> core.forward(a));
             } else {
                 Tensor func = (Tensor) tensor.getFunction();
-                cudac.setForward(func);
-                core.setForward(func);
+                cudac.forward(func);
+                core.forward(func);
             }
         } else {
-            cudac.setForward(tensor);
-            core.setForward(tensor);
+            cudac.forward(tensor);
+            core.forward(tensor);
         }
 
         String code = cudac.funcCode.replace("compute", name);

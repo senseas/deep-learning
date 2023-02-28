@@ -74,8 +74,8 @@ public class TensorCompiler implements Serializable {
 
             public String gradient(String grad) {
                 None inx = getInput(0), iny = getInput(1);
-                if (inx.isVal()) grad += inx.getGradId() + "=" + getGradId() + "*" + iny.getValId() + ";";
-                if (iny.isVal()) grad += iny.getGradId() + "=" + getGradId() + "*" + inx.getValId() + ";";
+                if (inx.isVal()) grad += inx.getGradId() + "=" + getGradId() + "*" + iny.getValIdx() + ";";
+                if (iny.isVal()) grad += iny.getGradId() + "=" + getGradId() + "*" + inx.getValIdx() + ";";
                 return grad;
             }
 
@@ -92,8 +92,8 @@ public class TensorCompiler implements Serializable {
 
             public String gradient(String grad) {
                 None inx = getInput(0), iny = getInput(1);
-                if (inx.isVal()) grad += inx.getGradId() + "=" + getGradId() + "/" + iny.getValId() + ";";
-                if (iny.isVal()) grad += iny.getGradId() + "=-" + getGradId() + "*" + inx.getValId() + "/pow(" + iny.getValId() + ",2.0);";
+                if (inx.isVal()) grad += inx.getGradId() + "=" + getGradId() + "/" + iny.getValIdx() + ";";
+                if (iny.isVal()) grad += iny.getGradId() + "=-" + getGradId() + "*" + inx.getValIdx() + "/pow(" + iny.getValIdx() + ",2.0);";
                 return grad;
             }
 
@@ -110,7 +110,7 @@ public class TensorCompiler implements Serializable {
 
             public String gradient(String grad) {
                 None inx = getInput(0);
-                return inx.getGradId() + "=" + getGradId() + "*exp(" + inx.getValId() + ");";
+                return inx.getGradId() + "=" + getGradId() + "*exp(" + inx.getValIdx() + ");";
             }
 
         };
@@ -126,7 +126,7 @@ public class TensorCompiler implements Serializable {
 
             public String gradient(String grad) {
                 None inx = getInput(0), iny = getInput(1);
-                return inx.getGradId() + "=" + getGradId() + "*" + iny.getValId() + "*pow(" + inx.getValId() + "," + iny.getValId() + "-1.0);";
+                return inx.getGradId() + "=" + getGradId() + "*" + iny.getValIdx() + "*pow(" + inx.getValIdx() + "," + iny.getValIdx() + "-1.0);";
             }
 
         };
@@ -142,7 +142,7 @@ public class TensorCompiler implements Serializable {
 
             public String gradient(String grad) {
                 None inx = getInput(0);
-                return inx.getGradId() + "=" + getGradId() + "/" + inx.getValId() + ";";
+                return inx.getGradId() + "=" + getGradId() + "/" + inx.getValIdx() + ";";
             }
 
         };
@@ -158,7 +158,7 @@ public class TensorCompiler implements Serializable {
 
             public String gradient(String grad) {
                 None inx = getInput(0);
-                return inx.getGradId() + "=" + getGradId() + "*cos(" + inx.getValId() + ");";
+                return inx.getGradId() + "=" + getGradId() + "*cos(" + inx.getValIdx() + ");";
             }
 
         };
@@ -174,7 +174,7 @@ public class TensorCompiler implements Serializable {
 
             public String gradient(String grad) {
                 None inx = getInput(0);
-                return inx.getGradId() + "=" + getGradId() + "*-sin(" + inx.getValId() + ");";
+                return inx.getGradId() + "=" + getGradId() + "*-sin(" + inx.getValIdx() + ");";
             }
 
         };
@@ -190,7 +190,7 @@ public class TensorCompiler implements Serializable {
 
             public String gradient(String grad) {
                 None inx = getInput(0);
-                return inx.getGradId() + "=" + getGradId() + "*pow(1.0/cos(" + inx.getValId() + "),2.0);";
+                return inx.getGradId() + "=" + getGradId() + "*pow(1.0/cos(" + inx.getValIdx() + "),2.0);";
             }
 
         };
@@ -206,7 +206,7 @@ public class TensorCompiler implements Serializable {
 
             public String gradient(String grad) {
                 None inx = getInput(0);
-                return inx.getGradId() + "=" + getGradId() + "*-pow(1.0/sin(" + inx.getValId() + "),2.0));";
+                return inx.getGradId() + "=" + getGradId() + "*-pow(1.0/sin(" + inx.getValIdx() + "),2.0));";
             }
 
         };
@@ -222,7 +222,7 @@ public class TensorCompiler implements Serializable {
 
             public String gradient(String grad) {
                 None inx = getInput(0);
-                return inx.getGradId() + "=" + getGradId() + "*tan(" + inx.getValId() + ")/cos(" + inx.getValId() + ");";
+                return inx.getGradId() + "=" + getGradId() + "*tan(" + inx.getValIdx() + ")/cos(" + inx.getValIdx() + ");";
             }
 
         };
@@ -238,7 +238,7 @@ public class TensorCompiler implements Serializable {
 
             public String gradient(String grad) {
                 None inx = getInput(0);
-                return inx.getGradId() + "=" + getGradId() + "*-cos(" + inx.getValId() + ")/pow(sin(" + inx.getValId() + "),2.0);";
+                return inx.getGradId() + "=" + getGradId() + "*-cos(" + inx.getValIdx() + ")/pow(sin(" + inx.getValIdx() + "),2.0);";
             }
 
         };
@@ -254,7 +254,7 @@ public class TensorCompiler implements Serializable {
 
             public String gradient(String grad) {
                 None inx = getInput(0);
-                return inx.getGradId() + "=" + getGradId() + "/pow(1.0-pow(" + inx.getValId() + ",2.0),-2.0);";
+                return inx.getGradId() + "=" + getGradId() + "/pow(1.0-pow(" + inx.getValIdx() + ",2.0),-2.0);";
             }
 
         };
@@ -270,7 +270,7 @@ public class TensorCompiler implements Serializable {
 
             public String gradient(String grad) {
                 None inx = getInput(0);
-                return inx.getGradId() + "=" + getGradId() + "/-pow(1.0-pow(" + inx.getValId() + ",2.0),-2.0);";
+                return inx.getGradId() + "=" + getGradId() + "/-pow(1.0-pow(" + inx.getValIdx() + ",2.0),-2.0);";
             }
 
         };
@@ -286,7 +286,7 @@ public class TensorCompiler implements Serializable {
 
             public String gradient(String grad) {
                 None inx = getInput(0);
-                return inx.getGradId() + "=" + getGradId() + "/(1.0+pow(" + inx.getValId() + ",2.0));";
+                return inx.getGradId() + "=" + getGradId() + "/(1.0+pow(" + inx.getValIdx() + ",2.0));";
             }
 
         };
@@ -302,7 +302,7 @@ public class TensorCompiler implements Serializable {
 
             public String gradient(String grad) {
                 None inx = getInput(0);
-                return inx.getGradId() + "=" + getGradId() + "/-(1.0+pow(" + inx.getValId() + ",2.0)));";
+                return inx.getGradId() + "=" + getGradId() + "/-(1.0+pow(" + inx.getValIdx() + ",2.0)));";
             }
 
         };
@@ -318,7 +318,7 @@ public class TensorCompiler implements Serializable {
 
             public String gradient(String gard) {
                 None inx = getInput(0);
-                return inx.getGradId() +"=" + getGradId() + "*(" + inx.getValId() + " > 0 ? 1.0 : 0.1);";
+                return inx.getGradId() +"=" + getGradId() + "*(" + inx.getValIdx() + " > 0 ? 1.0 : 0.1);";
             }
 
         };
