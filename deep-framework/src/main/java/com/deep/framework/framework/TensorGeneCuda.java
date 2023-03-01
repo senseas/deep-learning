@@ -15,6 +15,7 @@ public class TensorGeneCuda extends TensorGene {
                 Tenser<Tensor> tenser = (Tenser<Tensor>) tensor.getFunction();
                 func = func.concat("for (int i = 0; i <" + tenser.size() + " ; i++) {");
                 index = "i";
+
                 forward(tenser.first());
                 index = null;
 

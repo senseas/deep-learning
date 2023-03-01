@@ -329,7 +329,7 @@ public class TensorCompiler implements Serializable {
 
             public String compute() {
                 Object A = getInput(0);
-                StringBuilder builder = new StringBuilder(getValId() + "=0.0;");
+                StringBuilder builder = new StringBuilder();
                 if (A instanceof Tenser) {
                     Tenser<None> tenser = (Tenser<None>) A;
                     None a = tenser.first();

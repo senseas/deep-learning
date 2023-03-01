@@ -16,7 +16,6 @@ public class TensorGeneContext extends TensorGene {
         outGradParams = gene.outGradParams;
     }
 
-
     public void compute(Tensor tensor) {
         TensorFunctor functor = map.get(tensor.getName());
         None output = tensor.getOutput();
