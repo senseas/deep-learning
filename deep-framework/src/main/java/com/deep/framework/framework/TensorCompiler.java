@@ -337,11 +337,11 @@ public class TensorCompiler implements Serializable {
                         core.funcCode = new StringBuilder(core.funcCode)
                         .append("extern \"C\" __global__ void Sum(double* in, double* out){")
                         .append("int idx = blockDim.x * blockIdx.x + threadIdx.x;")
-                        .append("int M = 0 , N = ").append(core.inParams.size()).append(";")
+                        .append("int M = 1 , N = 1;")
                         .append(getValId()).append("+=").append(a.getValId()).append(";")
                         .append("}").toString();
 
-                        builder.append("Sum<<<1,").append(tenser.size()).append(">>>(in , out);");
+                        builder.append("Sum<<<1,").append(tenser.size()).append(">>>(in + idx * N , out + idx * M);");
                         return builder.toString();
                     } else {
                         builder.append(getValId()).append("+=").append(a.getValId()).append(";");

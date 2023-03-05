@@ -25,7 +25,7 @@ public class TensorGeneCuda extends TensorGene {
                 cuda.forward(tenser.first());
 
                 funcCode = funcCode.concat(cuda.getFuncCode());
-                func = func.concat(tensor.getName().replace("Tensor::", "")).concat("<<<1," + tenser.size() + ">>>").concat("(in+" + inParams.size()).concat(",out+" + outParams.size()).concat(");");
+                func = func.concat(tensor.getName().replace("Tensor::", "")).concat("<<<1," + tenser.size() + ">>>").concat("(in + idx * N+" + inParams.size()).concat(",out + idx * M+" + outParams.size()).concat(");");
 
                 TensorGeneContext context = new TensorGeneContext(this);
                 tenser.forEach(context::forward);
@@ -50,7 +50,7 @@ public class TensorGeneCuda extends TensorGene {
                 cuda.backward(tenser.first());
 
                 gradCode = gradCode.concat(cuda.getGradCode());
-                grad = grad.concat(tensor.getName().replace("Tensor::", "Grad")).concat("<<<1," + tenser.size() + ">>>").concat("(in+" + inParams.size()).concat(",out+" + outParams.size()).concat(",outGrad+" + outGradParams.size()).concat(",inGrad+" + inGradParams.size()).concat(",innerGrad+" + innerGradParam.size()).concat(");");
+                grad = grad.concat(tensor.getName().replace("Tensor::", "Grad")).concat("<<<1," + tenser.size() + ">>>").concat("(in + idx * N +" + inParams.size()).concat(",out + idx * M +" + outParams.size()).concat(",outGrad + idx * Y +" + outGradParams.size()).concat(",inGrad + idx * X +" + inGradParams.size()).concat(",innerGrad+" + innerGradParam.size()).concat(");");
 
                 TensorGeneContext context = new TensorGeneContext(this);
                 tenser.forEach(context::backward);
@@ -112,7 +112,7 @@ public class TensorGeneCuda extends TensorGene {
         .append(names).append("(double* in, double* out, double* outGrad, double* inGrad")
         .append(Objects.isNull(name) ? "){" : ",double* innerGrad){")
         .append("int idx = blockDim.x * blockIdx.x + threadIdx.x;")
-        .append(Objects.nonNull(name) ? "" : "double innerGrad[").append(innerGradParam.size()).append("];")
+        .append(Objects.nonNull(name) ? "" : "double innerGrad[" + innerGradParam.size()+"];")
         .append("int M = ").append(outParams.size()).append(",").append("N = ").append(inParams.size()).append(",").append("X = ").append(inGradParams.size()).append(",").append("Y = ").append(outGradParams.size()).append(";")
         .append(grad)
         .append("}")
