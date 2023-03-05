@@ -81,19 +81,12 @@ public abstract class TensorGene implements Serializable {
         }
     }
 
-    public String getIndex() {
-        if (index == null) return "";
-        return "+" + index;
-    }
-
     public abstract void compute(Tensor tensor);
 
     public abstract void gradient(Tensor tensor);
 
     public Map<String, TensorFunctor> map = new HashMap<>();
-
     public List<None> inParams = new ArrayList<>(), outParams = new ArrayList<>();
     public List<None> inGradParams = new ArrayList<>(), outGradParams = new ArrayList<>();
-    public Set<String> innerGradParam = new HashSet<>();
-    public String index = null;
+    public List<None> innerGradParam = new ArrayList<>();
 }

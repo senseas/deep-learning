@@ -1,7 +1,9 @@
 package com.deep.framework.graph;
 
-import com.deep.framework.framework.TensorFlux;
 import lombok.Data;
+
+import static com.deep.framework.framework.TensorFlux.getOutput;
+import static com.deep.framework.lang.ForEach.forEach;
 
 @Data
 public abstract class TensorFunctor {
@@ -13,7 +15,10 @@ public abstract class TensorFunctor {
 
     public <M> M getInput(int i) {
         Tensor input = getInput()[i];
-        if (input instanceof TensorFunction) return TensorFlux.getOutput(input.getFunction());
+        if (input instanceof TensorFunction){
+            Object nones = getOutput(input.getFunction());
+            forEach(input.getOutput(), nones, (None out, None none) -> out.setValId(none.getValId()));
+        }
         return input.getOutput();
     }
 

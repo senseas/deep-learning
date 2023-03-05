@@ -333,12 +333,22 @@ public class TensorCompiler implements Serializable {
                 if (A instanceof Tenser) {
                     Tenser<None> tenser = (Tenser<None>) A;
                     None a = tenser.first();
-                    builder.append("for (int i = 0; i <" + tenser.size() + " ; i++) {");
-                    builder.append(getValId() + "+=" + a.getValId() + ";");
-                    builder.append("}");
+                    if (getOut().getCore() instanceof TensorGeneCuda core) {
+                        core.funcCode = new StringBuilder(core.funcCode)
+                        .append("extern \"C\" __global__ void Sum(double* in, double* out){")
+                        .append("int idx = blockDim.x * blockIdx.x + threadIdx.x;")
+                        .append("int M = 0 , N = ").append(core.inParams.size()).append(";")
+                        .append(getValId()).append("+=").append(a.getValId()).append(";")
+                        .append("}").toString();
+
+                        builder.append("Sum<<<1,").append(tenser.size()).append(">>>(in , out);");
+                        return builder.toString();
+                    } else {
+                        builder.append(getValId()).append("+=").append(a.getValId()).append(";");
+                    }
                 } else {
                     None a = (None) A;
-                    builder.append(getValId() + "+=" + a.getValId());
+                    builder.append(getValId()).append("+=").append(a.getValId());
                 }
                 return builder.toString();
             }
@@ -349,10 +359,10 @@ public class TensorCompiler implements Serializable {
                 if (A instanceof Tenser) {
                     Tenser<None> tenser = (Tenser<None>) A;
                     None a = tenser.first();
-                    builder.append(a.getGradId() + "=" + getGradId() + ";");
+                    builder.append(a.getGradId()).append("=").append(getGradId()).append(";");
                 } else {
                     None a = (None) A;
-                    builder.append(a.getGradId() + "=" + getGradId() + ";");
+                    builder.append(a.getGradId()).append("=").append(getGradId()).append(";");
                 }
                 return builder.toString();
             }

@@ -95,7 +95,7 @@ public class CudaExecutor implements Serializable {
             core.forward(tensor);
         }
 
-        String code = cudac.funcCode.replace("compute", name);
+        String code = cudac.getFuncCode().replace("compute", name);
         System.out.println(code);
 
         function = createFunction(name, code);
@@ -135,7 +135,7 @@ public class CudaExecutor implements Serializable {
             core.setBackward(tensor);
         }
 
-        String code = cudac.gradCode.replace("gradient", name);
+        String code = cudac.getGradCode().replace("gradient", name);
         System.out.println(code);
 
         function = createFunction(name, code);

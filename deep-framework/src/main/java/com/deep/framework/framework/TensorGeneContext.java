@@ -14,6 +14,7 @@ public class TensorGeneContext extends TensorGene {
         outParams = gene.outParams;
         inGradParams = gene.inGradParams;
         outGradParams = gene.outGradParams;
+        innerGradParam = gene.innerGradParam;
     }
 
     public void compute(Tensor tensor) {

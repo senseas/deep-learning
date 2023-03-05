@@ -104,17 +104,18 @@ public class None implements Serializable {
     public String getGradId() {
         if (BeanUtil.isNone(tensor)) {
             core.inGradParams.add(this);
-            return "inGrad[idx * X +" + (core.inGradParams.size() - 1) + core.getIndex() + "]";
+            return "inGrad[idx * X +" + (core.inGradParams.size() - 1) + "]";
         }
 
         if (isOutGrad()) {
             core.outGradParams.add(this);
-            return "outGrad[idx * Y +" + (core.outGradParams.size() - 1) + core.getIndex() + "]";
+            return "outGrad[idx * Y +" + (core.outGradParams.size() - 1) + "]";
         }
 
-        String eid = "e" + id;
-        core.innerGradParam.add(eid);
-        return eid;
+        if (Objects.nonNull(gradId)) return gradId;
+
+        core.innerGradParam.add(this);
+        return gradId = "innerGrad[" + (core.innerGradParam.size() - 1) + "]";
     }
 
     public String getValId() {
@@ -122,13 +123,13 @@ public class None implements Serializable {
 
         if (BeanUtil.isNone(tensor)) {
             core.inParams.add(this);
-            return "in[idx * N +" + (core.inParams.size() - 1) + core.getIndex() + "]";
+            return "in[idx * N +" + (core.inParams.size() - 1) + "]";
         }
 
         if (Objects.nonNull(valId)) return valId;
 
         core.outParams.add(this);
-        return valId = "out[idx * M +" + (core.outParams.size() - 1) + core.getIndex() + "]";
+        return valId = "out[idx * M +" + (core.outParams.size() - 1) + "]";
     }
 
     public String getValIdx() {
@@ -136,11 +137,11 @@ public class None implements Serializable {
 
         if (BeanUtil.isNone(tensor)) {
             core.inParams.add(this);
-            return "in[idx * N +" + (core.inParams.size() - 1) + core.getIndex() + "]";
+            return "in[idx * N +" + (core.inParams.size() - 1) + "]";
         }
 
         core.outParams.add(this);
-        return "out[idx * M +" + (core.outParams.size() - 1) + core.getIndex() + "]";
+        return "out[idx * M +" + (core.outParams.size() - 1) + "]";
     }
 
     public boolean isVal() {
@@ -153,7 +154,7 @@ public class None implements Serializable {
     private transient Tensor tensor;
     private boolean isOutGrad;
     private TensorGene core;
-    private String valId;
+    private String valId, gradId;
     private int id = ID.getAndIncrement();
     public transient static AtomicInteger ID = new AtomicInteger();
 }
