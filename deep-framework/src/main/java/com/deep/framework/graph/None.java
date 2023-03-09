@@ -104,12 +104,12 @@ public class None implements Serializable {
     public String getGradId() {
         if (BeanUtil.isNone(tensor)) {
             core.inGradParams.add(this);
-            return "inGrad[idx * X +" + (core.inGradParams.size() - 1) + "]";
+            return "inGrad[X +" + (core.inGradParams.size() - 1) + "]";
         }
 
         if (isOutGrad()) {
             core.outGradParams.add(this);
-            return "outGrad[idx * Y +" + (core.outGradParams.size() - 1) + "]";
+            return "outGrad[Y +" + (core.outGradParams.size() - 1) + "]";
         }
 
         if (Objects.nonNull(gradId)) return gradId;
@@ -123,13 +123,13 @@ public class None implements Serializable {
 
         if (BeanUtil.isNone(tensor)) {
             core.inParams.add(this);
-            return "in[idx * N +" + (core.inParams.size() - 1) + "]";
+            return "in[M +" + (core.inParams.size() - 1) + "]";
         }
 
         if (Objects.nonNull(valId)) return valId;
 
         core.outParams.add(this);
-        return valId = "out[idx * M +" + (core.outParams.size() - 1) + "]";
+        return valId = "out[N +" + (core.outParams.size() - 1) + "]";
     }
 
     public String getValIdx() {
@@ -137,11 +137,11 @@ public class None implements Serializable {
 
         if (BeanUtil.isNone(tensor)) {
             core.inParams.add(this);
-            return "in[idx * N +" + (core.inParams.size() - 1) + "]";
+            return "in[M +" + (core.inParams.size() - 1) + "]";
         }
 
         core.outParams.add(this);
-        return "out[idx * M +" + (core.outParams.size() - 1) + "]";
+        return "out[N +" + (core.outParams.size() - 1) + "]";
     }
 
     public boolean isVal() {

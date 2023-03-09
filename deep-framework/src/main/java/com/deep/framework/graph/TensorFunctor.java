@@ -15,12 +15,6 @@ public abstract class TensorFunctor {
 
     public <M> M getInput(int i) {
         Tensor input = getInput()[i];
-        if (input instanceof TensorFunction){
-            forEach(input.getOutput(), getOutput(input.getFunction()), (None out, None none) -> {
-                out.setValId(none.getValId());
-                out.setValId(none.getValId());
-            });
-        }
         return input.getOutput();
     }
 
