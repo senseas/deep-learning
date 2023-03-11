@@ -122,14 +122,14 @@ public class None implements Serializable {
         if (tensor instanceof TensorConst) return "" + getValue();
 
         if (BeanUtil.isNone(tensor)) {
-            core.inParams.add(this);
-            return "in[M +" + (core.inParams.size() - 1) + "]";
+            core.inxParams.add(this);
+            return "in[M +" + (core.inxParams.size() - 1) + "]";
         }
 
         if (Objects.nonNull(valId)) return valId;
 
-        core.outParams.add(this);
-        return valId = "out[N +" + (core.outParams.size() - 1) + "]";
+        core.outxParams.add(this);
+        return valId = "out[N +" + (core.outxParams.size() - 1) + "]";
     }
 
     public String getValIdx() {

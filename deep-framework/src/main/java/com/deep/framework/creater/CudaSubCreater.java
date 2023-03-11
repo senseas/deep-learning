@@ -7,6 +7,9 @@ public class CudaSubCreater extends Creater {
     public String func = "", grad = "", funcCode = "", gradCode = "", name;
 
     public CudaSubCreater(Creater creater, String name) {
+        inxParams.addAll(creater.inxParams);
+        outxParams.addAll(creater.outxParams);
+
         inParams.addAll(creater.inParams);
         outParams.addAll(creater.outParams);
         inGradParams.addAll(creater.inGradParams);

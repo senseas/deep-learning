@@ -34,8 +34,8 @@ public class CudaExecutor implements Serializable {
 
         creater = new ParamCreater();
         CUfunction function = getFunction(tensor);
-        double[] input = tensor.getCore().inParams.stream().mapToDouble(None::getValue).toArray();
-        double[] output = new double[tensor.getCore().outParams.size()];
+        double[] input = tensor.getCore().inxParams.stream().mapToDouble(None::getValue).toArray();
+        double[] output = new double[tensor.getCore().outxParams.size()];
 
         if (BeanUtil.isTenser(tensor.getFunction())) {
             Tenser<None> tenser = tensor.getOutput();

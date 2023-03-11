@@ -9,6 +9,9 @@ public class ParamCreater extends Creater {
 
     public ParamCreater(Creater creater) {
         super();
+        inxParams = creater.inxParams;
+        outxParams = creater.outxParams;
+
         inParams = creater.inParams;
         outParams = creater.outParams;
         inGradParams = creater.inGradParams;

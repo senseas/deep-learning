@@ -88,8 +88,8 @@ public class CudaCreater extends Creater {
         .append("extern \"C\" __global__ ")
         .append("void compute(double* in, double* out){")
         .append("int idx = blockDim.x * blockIdx.x + threadIdx.x;")
-        .append("int M = idx * ").append(inParams.size()).append(",")
-        .append("N = idx * ").append(outParams.size()).append(";")
+        .append("int M = idx * ").append(inxParams.size()).append(",")
+        .append("N = idx * ").append(outxParams.size()).append(";")
         .append(func)
         .append("}")
         .toString();

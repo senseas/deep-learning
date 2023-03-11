@@ -86,6 +86,7 @@ public abstract class Creater implements Serializable {
     public abstract void gradient(Tensor tensor);
 
     public Map<String, TensorFunctor> map = new HashMap<>();
+    public List<None> inxParams = new ArrayList<>(), outxParams = new ArrayList<>();
     public List<None> inParams = new ArrayList<>(), outParams = new ArrayList<>();
     public List<None> inGradParams = new ArrayList<>(), outGradParams = new ArrayList<>();
     public List<None> innerGradParam = new ArrayList<>();
