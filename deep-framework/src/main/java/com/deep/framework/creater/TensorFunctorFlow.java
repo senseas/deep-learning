@@ -1,16 +1,15 @@
-package com.deep.framework.auto;
+package com.deep.framework.creater;
 
 import com.deep.framework.graph.None;
 import com.deep.framework.graph.Tensor;
 import com.deep.framework.graph.TensorConst;
-import com.deep.framework.graph.TensorFunctor;
 import com.deep.framework.lang.Tenser;
 
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.stream.Collectors;
 
-public class TensorCompiler implements Serializable {
+public class TensorFunctorFlow implements Serializable {
 
     public TensorFunctor add(Tensor... input) {
         return new TensorFunctor("Add") {

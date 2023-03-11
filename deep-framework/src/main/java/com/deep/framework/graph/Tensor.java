@@ -1,7 +1,7 @@
 package com.deep.framework.graph;
 
 import com.deep.framework.cuda.CudaContext;
-import com.deep.framework.auto.ParamCreater;
+import com.deep.framework.creater.ParamCreater;
 import com.deep.framework.core.TensorFlux;
 import lombok.Data;
 

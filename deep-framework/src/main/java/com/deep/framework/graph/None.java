@@ -1,6 +1,6 @@
 package com.deep.framework.graph;
 
-import com.deep.framework.auto.Creater;
+import com.deep.framework.creater.Creater;
 import com.deep.framework.lang.util.BeanUtil;
 import lombok.Data;
 

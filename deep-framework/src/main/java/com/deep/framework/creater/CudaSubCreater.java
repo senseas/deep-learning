@@ -1,17 +1,17 @@
-package com.deep.framework.auto;
+package com.deep.framework.creater;
 
 import com.deep.framework.graph.*;
 import com.deep.framework.lang.Tenser;
 
-public class SubCudaCreater extends Creater {
+public class CudaSubCreater extends Creater {
     public String func = "", grad = "", funcCode = "", gradCode = "", name;
 
-    public SubCudaCreater(Creater gene, String name) {
-        inParams.addAll(gene.inParams);
-        outParams.addAll(gene.outParams);
-        inGradParams.addAll(gene.inGradParams);
-        outGradParams.addAll(gene.outGradParams);
-        innerGradParam.addAll(gene.innerGradParam);
+    public CudaSubCreater(Creater creater, String name) {
+        inParams.addAll(creater.inParams);
+        outParams.addAll(creater.outParams);
+        inGradParams.addAll(creater.inGradParams);
+        outGradParams.addAll(creater.outGradParams);
+        innerGradParam.addAll(creater.innerGradParam);
         this.name = name;
     }
 
@@ -23,7 +23,7 @@ public class SubCudaCreater extends Creater {
             if (tensor.getFunction() instanceof Tenser) {
                 Tenser<Tensor> tenser = (Tenser<Tensor>) tensor.getFunction();
 
-                SubCudaCreater cuda = new SubCudaCreater(this, tensor.getName());
+                CudaSubCreater cuda = new CudaSubCreater(this, tensor.getName());
                 cuda.forward(tenser.first());
 
                 funcCode = funcCode.concat(cuda.getFuncCode());
@@ -48,7 +48,7 @@ public class SubCudaCreater extends Creater {
             if (tensor.getFunction() instanceof Tenser) {
                 Tenser<Tensor> tenser = (Tenser<Tensor>) tensor.getFunction();
 
-                SubCudaCreater cuda = new SubCudaCreater(this, tensor.getName());
+                CudaSubCreater cuda = new CudaSubCreater(this, tensor.getName());
                 cuda.backward(tenser.first());
 
                 gradCode = gradCode.concat(cuda.getGradCode());

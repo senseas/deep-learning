@@ -1,20 +1,19 @@
-package com.deep.framework.auto;
+package com.deep.framework.creater;
 
 import com.deep.framework.graph.None;
 import com.deep.framework.graph.Tensor;
-import com.deep.framework.graph.TensorFunctor;
 
 public class ParamCreater extends Creater {
 
     public ParamCreater() { super(); }
 
-    public ParamCreater(Creater gene) {
+    public ParamCreater(Creater creater) {
         super();
-        inParams = gene.inParams;
-        outParams = gene.outParams;
-        inGradParams = gene.inGradParams;
-        outGradParams = gene.outGradParams;
-        innerGradParam = gene.innerGradParam;
+        inParams = creater.inParams;
+        outParams = creater.outParams;
+        inGradParams = creater.inGradParams;
+        outGradParams = creater.outGradParams;
+        innerGradParam = creater.innerGradParam;
     }
 
     public void compute(Tensor tensor) {

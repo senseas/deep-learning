@@ -1,4 +1,4 @@
-package com.deep.framework.auto;
+package com.deep.framework.creater;
 
 import com.deep.framework.graph.*;
 import com.deep.framework.lang.Tenser;
@@ -14,7 +14,7 @@ import static com.deep.framework.lang.ForEach.forEach;
 public abstract class Creater implements Serializable {
 
     public Creater() {
-        TensorCompiler tc = new TensorCompiler();
+        TensorFunctorFlow tc = new TensorFunctorFlow();
         Method[] methods = tc.getClass().getDeclaredMethods();
         Arrays.stream(methods).forEach(method -> {
             try {

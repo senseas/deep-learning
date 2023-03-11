@@ -1,7 +1,7 @@
 package com.deep.framework.cuda;
 
-import com.deep.framework.auto.ParamCreater;
-import com.deep.framework.auto.CudaCreater;
+import com.deep.framework.creater.ParamCreater;
+import com.deep.framework.creater.CudaCreater;
 import com.deep.framework.graph.None;
 import com.deep.framework.graph.Tensor;
 import com.deep.framework.graph.TensorFunction;
@@ -26,13 +26,13 @@ import static com.deep.framework.cuda.Cuda.run;
 public class CudaExecutor implements Serializable {
 
     private static Map<String, CUfunction> functions = new HashMap<>();
-    private static ParamCreater core;
+    private static ParamCreater creater;
 
     @SneakyThrows
     public static void compute(Tensor tensor) {
         if (!tensor.getClass().getMethod("compute").isAnnotationPresent(Cuda.class)) return;
 
-        core = new ParamCreater();
+        creater = new ParamCreater();
         CUfunction function = getFunction(tensor);
         double[] input = tensor.getCore().inParams.stream().mapToDouble(None::getValue).toArray();
         double[] output = new double[tensor.getCore().outParams.size()];
@@ -85,15 +85,15 @@ public class CudaExecutor implements Serializable {
             if (BeanUtil.isTenser(tensor.getFunction())) {
                 Tenser<Tensor> tenser = (Tenser<Tensor>) tensor.getFunction();
                 cudac.forward(tenser.first());
-                tenser.forEach(a -> core.forward(a));
+                tenser.forEach(a -> creater.forward(a));
             } else {
                 Tensor func = (Tensor) tensor.getFunction();
                 cudac.forward(func);
-                core.forward(func);
+                creater.forward(func);
             }
         } else {
             cudac.forward(tensor);
-            core.forward(tensor);
+            creater.forward(tensor);
         }
 
         String code = cudac.getFuncCode().replace("compute", name);
@@ -125,22 +125,22 @@ public class CudaExecutor implements Serializable {
             if (BeanUtil.isTenser(tensor.getFunction())) {
                 Tenser<Tensor> tenser = (Tenser<Tensor>) tensor.getFunction();
                 cudac.setBackward(tenser.first());
-                tenser.forEach(a -> core.setBackward(a));
+                tenser.forEach(a -> creater.setBackward(a));
             } else {
                 Tensor func = (Tensor) tensor.getFunction();
                 cudac.setBackward(func);
-                core.setBackward(func);
+                creater.setBackward(func);
             }
         } else {
             cudac.setBackward(tensor);
-            core.setBackward(tensor);
+            creater.setBackward(tensor);
         }
 
         String code = cudac.getGradCode().replace("gradient", name);
         System.out.println(code);
 
         function = createFunction(name, code);
-        tensor.setCore(core);
+        tensor.setCore(creater);
         functions.put(name, function);
         return function;
     }

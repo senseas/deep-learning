@@ -1,4 +1,4 @@
-package com.deep.framework.auto;
+package com.deep.framework.creater;
 
 import com.deep.framework.graph.*;
 import com.deep.framework.lang.Tenser;
@@ -17,7 +17,7 @@ public class CudaCreater extends Creater {
             if (tensor.getFunction() instanceof Tenser) {
                 Tenser<Tensor> tenser = (Tenser<Tensor>) tensor.getFunction();
 
-                SubCudaCreater cuda = new SubCudaCreater(this, tensor.getName());
+                CudaSubCreater cuda = new CudaSubCreater(this, tensor.getName());
                 cuda.forward(tenser.first());
 
                 funcCode = funcCode.concat(cuda.getFuncCode());
@@ -47,7 +47,7 @@ public class CudaCreater extends Creater {
             if (tensor.getFunction() instanceof Tenser) {
                 Tenser<Tensor> tenser = (Tenser<Tensor>) tensor.getFunction();
 
-                SubCudaCreater cuda = new SubCudaCreater(this, tensor.getName());
+                CudaSubCreater cuda = new CudaSubCreater(this, tensor.getName());
                 cuda.backward(tenser.first());
 
                 gradCode = gradCode.concat(cuda.getGradCode());
@@ -88,7 +88,8 @@ public class CudaCreater extends Creater {
         .append("extern \"C\" __global__ ")
         .append("void compute(double* in, double* out){")
         .append("int idx = blockDim.x * blockIdx.x + threadIdx.x;")
-        .append("int M = idx * ").append(inParams.size()).append(",").append("N = idx * ").append(outParams.size()).append(";")
+        .append("int M = idx * ").append(inParams.size()).append(",")
+        .append("N = idx * ").append(outParams.size()).append(";")
         .append(func)
         .append("}")
         .toString();
@@ -112,7 +113,10 @@ public class CudaCreater extends Creater {
         .append("void gradient(double* in, double* out, double* outGrad, double* inGrad){")
         .append("int idx = blockDim.x * blockIdx.x + threadIdx.x;")
         .append("double innerGrad[").append(innerGradParam.size()).append("];")
-        .append("int M = idx * ").append(inParams.size()).append(",").append("N = idx * ").append(outParams.size()).append(",").append("X = idx * ").append(inGradParams.size()).append(",").append("Y = idx * ").append(outGradParams.size()).append(";")
+        .append("int M = idx * ").append(inParams.size()).append(",")
+        .append("N = idx * ").append(outParams.size()).append(",")
+        .append("X = idx * ").append(inGradParams.size()).append(",")
+        .append("Y = idx * ").append(outGradParams.size()).append(";")
         .append(grad)
         .append("}")
         .toString();
