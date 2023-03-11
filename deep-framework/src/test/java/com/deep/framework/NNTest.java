@@ -1,10 +1,10 @@
 package com.deep.framework;
 
 import com.alibaba.fastjson.JSONObject;
-import com.deep.framework.framework.TensorExecutor;
+import com.deep.framework.core.TensorExecutor;
 import com.deep.framework.graph.None;
 import com.deep.framework.graph.Tensor;
-import com.deep.framework.framework.TensorFlow;
+import com.deep.framework.core.TensorFlow;
 import com.deep.framework.lang.Shape;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Test;

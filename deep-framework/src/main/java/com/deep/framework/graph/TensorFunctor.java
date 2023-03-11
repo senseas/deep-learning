@@ -2,9 +2,6 @@ package com.deep.framework.graph;
 
 import lombok.Data;
 
-import static com.deep.framework.framework.TensorFlux.getOutput;
-import static com.deep.framework.lang.ForEach.forEach;
-
 @Data
 public abstract class TensorFunctor {
 

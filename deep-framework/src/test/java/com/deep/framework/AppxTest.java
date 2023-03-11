@@ -1,7 +1,7 @@
 package com.deep.framework;
 
-import com.deep.framework.framework.TensorExecutor;
-import com.deep.framework.framework.TensorFlow;
+import com.deep.framework.core.TensorExecutor;
+import com.deep.framework.core.TensorFlow;
 import com.deep.framework.graph.Tensor;
 import org.junit.Test;
 

@@ -1,6 +1,6 @@
 package com.deep.framework.graph;
 
-import com.deep.framework.framework.TensorGene;
+import com.deep.framework.auto.Creater;
 import com.deep.framework.lang.util.BeanUtil;
 import lombok.Data;
 
@@ -153,7 +153,7 @@ public class None implements Serializable {
     private transient int idx;
     private transient Tensor tensor;
     private boolean isOutGrad;
-    private TensorGene core;
+    private Creater core;
     private String valId, gradId;
     private int id = ID.getAndIncrement();
     public transient static AtomicInteger ID = new AtomicInteger();

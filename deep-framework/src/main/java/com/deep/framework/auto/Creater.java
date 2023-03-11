@@ -1,4 +1,4 @@
-package com.deep.framework.framework;
+package com.deep.framework.auto;
 
 import com.deep.framework.graph.*;
 import com.deep.framework.lang.Tenser;
@@ -11,9 +11,9 @@ import java.util.stream.IntStream;
 
 import static com.deep.framework.lang.ForEach.forEach;
 
-public abstract class TensorGene implements Serializable {
+public abstract class Creater implements Serializable {
 
-    public TensorGene() {
+    public Creater() {
         TensorCompiler tc = new TensorCompiler();
         Method[] methods = tc.getClass().getDeclaredMethods();
         Arrays.stream(methods).forEach(method -> {

@@ -1,6 +1,7 @@
-package com.deep.framework.framework;
+package com.deep.framework.cuda;
 
-import com.deep.framework.cuda.Dim;
+import com.deep.framework.auto.ParamCreater;
+import com.deep.framework.auto.CudaCreater;
 import com.deep.framework.graph.None;
 import com.deep.framework.graph.Tensor;
 import com.deep.framework.graph.TensorFunction;
@@ -25,13 +26,13 @@ import static com.deep.framework.cuda.Cuda.run;
 public class CudaExecutor implements Serializable {
 
     private static Map<String, CUfunction> functions = new HashMap<>();
-    private static TensorGeneContext core;
+    private static ParamCreater core;
 
     @SneakyThrows
     public static void compute(Tensor tensor) {
         if (!tensor.getClass().getMethod("compute").isAnnotationPresent(Cuda.class)) return;
 
-        core = new TensorGeneContext();
+        core = new ParamCreater();
         CUfunction function = getFunction(tensor);
         double[] input = tensor.getCore().inParams.stream().mapToDouble(None::getValue).toArray();
         double[] output = new double[tensor.getCore().outParams.size()];
@@ -79,7 +80,7 @@ public class CudaExecutor implements Serializable {
         CUfunction function = functions.get(name);
         if (Objects.nonNull(function)) return function;
 
-        TensorGeneCuda cudac = new TensorGeneCuda();
+        CudaCreater cudac = new CudaCreater();
         if (tensor instanceof TensorFunction) {
             if (BeanUtil.isTenser(tensor.getFunction())) {
                 Tenser<Tensor> tenser = (Tenser<Tensor>) tensor.getFunction();
@@ -118,7 +119,7 @@ public class CudaExecutor implements Serializable {
 
         CUfunction function = functions.get(name);
         if (Objects.nonNull(function)) return function;
-        TensorGeneCuda cudac = new TensorGeneCuda();
+        CudaCreater cudac = new CudaCreater();
 
         if (tensor instanceof TensorFunction) {
             if (BeanUtil.isTenser(tensor.getFunction())) {

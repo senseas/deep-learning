@@ -1,4 +1,4 @@
-package com.deep.framework.framework;
+package com.deep.framework.auto;
 
 import com.deep.framework.graph.None;
 import com.deep.framework.graph.Tensor;
@@ -333,12 +333,12 @@ public class TensorCompiler implements Serializable {
                 if (A instanceof Tenser) {
                     Tenser<None> tenser = (Tenser<None>) A;
                     None a = tenser.first();
-                    if (getOut().getCore() instanceof TensorGeneCuda core) {
+                    if (getOut().getCore() instanceof CudaCreater core) {
                         core.funcCode = new StringBuilder(core.funcCode)
                         .append("extern \"C\" __global__ void Sum(double* in, double* out){")
                         .append("int idx = blockDim.x * blockIdx.x + threadIdx.x;")
                         .append("int M = idx , N = idx;")
-                        .append(getValId()).append("+=").append(a.getValId()).append(";")
+                        .append("atomicAdd(&").append(getValId()).append(",").append(a.getValId()).append(");")
                         .append("}").toString();
 
                         builder.append("Sum<<<1,").append(tenser.size()).append(">>>(in + M, out + N);");

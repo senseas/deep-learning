@@ -1,10 +1,9 @@
 package com.deep.framework.graph;
 
-import com.deep.framework.framework.TensorFlux;
+import com.deep.framework.core.TensorFlux;
 
 import java.util.Arrays;
 import java.util.stream.Stream;
-
 
 public class TensorOperator extends Tensor {
 

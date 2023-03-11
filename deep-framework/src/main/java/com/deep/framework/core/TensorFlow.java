@@ -1,4 +1,4 @@
-package com.deep.framework.framework;
+package com.deep.framework.core;
 
 import com.deep.framework.graph.*;
 import com.deep.framework.cuda.Cublas;

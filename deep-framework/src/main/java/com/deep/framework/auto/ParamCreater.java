@@ -1,14 +1,14 @@
-package com.deep.framework.framework;
+package com.deep.framework.auto;
 
 import com.deep.framework.graph.None;
 import com.deep.framework.graph.Tensor;
 import com.deep.framework.graph.TensorFunctor;
 
-public class TensorGeneContext extends TensorGene {
+public class ParamCreater extends Creater {
 
-    public TensorGeneContext() { super(); }
+    public ParamCreater() { super(); }
 
-    public TensorGeneContext(TensorGene gene) {
+    public ParamCreater(Creater gene) {
         super();
         inParams = gene.inParams;
         outParams = gene.outParams;

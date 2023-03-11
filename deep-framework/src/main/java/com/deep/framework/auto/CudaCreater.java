@@ -1,19 +1,13 @@
-package com.deep.framework.framework;
+package com.deep.framework.auto;
 
 import com.deep.framework.graph.*;
 import com.deep.framework.lang.Tenser;
 
-public class TensorGeneCudaChild extends TensorGene {
-    public String func = "", grad = "", funcCode = "", gradCode = "", name;
+import static com.deep.framework.core.TensorFlux.getOutput;
+import static com.deep.framework.lang.ForEach.forEach;
 
-    public TensorGeneCudaChild(TensorGene gene, String name) {
-        inParams.addAll(gene.inParams);
-        outParams.addAll(gene.outParams);
-        inGradParams.addAll(gene.inGradParams);
-        outGradParams.addAll(gene.outGradParams);
-        innerGradParam.addAll(gene.innerGradParam);
-        this.name = name;
-    }
+public class CudaCreater extends Creater {
+    public String func = "", grad = "", funcCode = "", gradCode = "", name;
 
     public void forward(Tensor tensor) {
         if (tensor instanceof TensorFunction) {
@@ -23,18 +17,19 @@ public class TensorGeneCudaChild extends TensorGene {
             if (tensor.getFunction() instanceof Tenser) {
                 Tenser<Tensor> tenser = (Tenser<Tensor>) tensor.getFunction();
 
-                TensorGeneCudaChild cuda = new TensorGeneCudaChild(this, tensor.getName());
+                SubCudaCreater cuda = new SubCudaCreater(this, tensor.getName());
                 cuda.forward(tenser.first());
 
                 funcCode = funcCode.concat(cuda.getFuncCode());
-                func = func.concat(tensor.getName().replace("Tensor::", "")).concat("<<<1," + tenser.size() + ">>>").concat("(in + M, out + N);");
+                func = func.concat(tensor.getName().replace("Tensor::", "")).concat("<<<1," + tenser.size() + ">>>").concat("(in + M,out + N);");
 
-                TensorGeneContext context = new TensorGeneContext(this);
+                ParamCreater context = new ParamCreater(this);
                 tenser.forEach(context::forward);
             } else {
                 Tensor func = (Tensor) tensor.getFunction();
                 forward(func);
             }
+            forEach(tensor.getOutput(), getOutput(tensor.getFunction()), (None out, None none) -> out.setValId(none.getValId()));
         } else if (tensor instanceof TensorOperator) {
             for (Tensor o : tensor.getInput()) {
                 forward(o);
@@ -45,16 +40,20 @@ public class TensorGeneCudaChild extends TensorGene {
 
     public void backward(Tensor tensor) {
         if (tensor instanceof TensorFunction) {
+            forEach(tensor.getOutput(), getOutput(tensor.getFunction()), (None out, None none) -> {
+                none.setValId(out.getValId());
+                none.setValId(out.getValId());
+            });
             if (tensor.getFunction() instanceof Tenser) {
                 Tenser<Tensor> tenser = (Tenser<Tensor>) tensor.getFunction();
 
-                TensorGeneCudaChild cuda = new TensorGeneCudaChild(this, tensor.getName());
+                SubCudaCreater cuda = new SubCudaCreater(this, tensor.getName());
                 cuda.backward(tenser.first());
 
                 gradCode = gradCode.concat(cuda.getGradCode());
                 grad = grad.concat(tensor.getName().replace("Tensor::", "Grad")).concat("<<<1," + tenser.size() + ">>>").concat("(in + M, out + N, outGrad + Y, inGrad + X, innerGrad);");
 
-                TensorGeneContext context = new TensorGeneContext(this);
+                ParamCreater context = new ParamCreater(this);
                 tenser.forEach(context::backward);
             } else {
                 Tensor func = (Tensor) tensor.getFunction();
@@ -85,14 +84,13 @@ public class TensorGeneCudaChild extends TensorGene {
     }
 
     public String getFuncCode() {
-        String names = name.replace("Tensor::", "");
-        return new StringBuilder("extern \"C\" __global__ void ")
-        .append(names).append("(double* in, double* out){")
+        return new StringBuilder(funcCode)
+        .append("extern \"C\" __global__ ")
+        .append("void compute(double* in, double* out){")
         .append("int idx = blockDim.x * blockIdx.x + threadIdx.x;")
-        .append("int M = idx, N = idx;")
+        .append("int M = idx * ").append(inParams.size()).append(",").append("N = idx * ").append(outParams.size()).append(";")
         .append(func)
         .append("}")
-        .append(funcCode)
         .toString();
     }
 
@@ -109,14 +107,14 @@ public class TensorGeneCudaChild extends TensorGene {
     }
 
     public String getGradCode() {
-        String names = name.replace("Tensor::", "Grad");
-        return new StringBuilder("extern \"C\" __global__ void ")
-        .append(names).append("(double* in, double* out, double* outGrad, double* inGrad, double* innerGrad){")
+        return new StringBuilder(gradCode)
+        .append("extern \"C\" __global__ ")
+        .append("void gradient(double* in, double* out, double* outGrad, double* inGrad){")
         .append("int idx = blockDim.x * blockIdx.x + threadIdx.x;")
-        .append("int M = idx, N = idx, X = idx, Y = idx;")
+        .append("double innerGrad[").append(innerGradParam.size()).append("];")
+        .append("int M = idx * ").append(inParams.size()).append(",").append("N = idx * ").append(outParams.size()).append(",").append("X = idx * ").append(inGradParams.size()).append(",").append("Y = idx * ").append(outGradParams.size()).append(";")
         .append(grad)
         .append("}")
-        .append(gradCode)
         .toString();
     }
 

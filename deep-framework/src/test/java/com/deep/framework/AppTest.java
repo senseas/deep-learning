@@ -1,13 +1,13 @@
 package com.deep.framework;
 
-import com.deep.framework.framework.TensorExecutor;
-import com.deep.framework.framework.TensorFlow;
+import com.deep.framework.core.TensorExecutor;
+import com.deep.framework.core.TensorFlow;
 import com.deep.framework.graph.None;
 import com.deep.framework.graph.Tensor;
 import com.deep.framework.lang.Tenser;
 import org.junit.Test;
 
-import static com.deep.framework.framework.CudaExecutor.*;
+import static com.deep.framework.cuda.CudaExecutor.*;
 
 public class AppTest {
 
