@@ -1,6 +1,7 @@
 package com.deep.framework.graph;
 
 import com.deep.framework.creater.Creater;
+import com.deep.framework.creater.CudaCreater;
 import com.deep.framework.lang.util.BeanUtil;
 import lombok.Data;
 
@@ -126,10 +127,14 @@ public class None implements Serializable {
             return "in[M +" + (core.inxParams.size() - 1) + "]";
         }
 
-        if (Objects.nonNull(valId)) return valId;
+        if (Objects.nonNull(valId)) {
+            return core instanceof CudaCreater ? valId.replace("N +", "") : valId;
+        }
 
         core.outxParams.add(this);
-        return valId = "out[N +" + (core.outxParams.size() - 1) + "]";
+        valId = "out[N +" + (core.outxParams.size() - 1) + "]";
+        if (core instanceof CudaCreater) return valId.replace("N +", "");
+        return valId;
     }
 
     public String getValIdx() {
