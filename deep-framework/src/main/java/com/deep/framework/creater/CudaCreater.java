@@ -51,7 +51,7 @@ public class CudaCreater extends Creater {
                 cuda.backward(tenser.first());
 
                 gradCode = gradCode.concat(cuda.getGradCode());
-                grad = grad.concat(tensor.getName().replace("Tensor::", "Grad")).concat("<<<1," + tenser.size() + ">>>").concat("(in + M, out + N, outGrad + Y, inGrad + X, innerGrad);");
+                grad = grad.concat(tensor.getName().replace("Tensor::", "Grad")).concat("<<<1," + tenser.size() + ">>>").concat("(in + M, out + N, outGrad + Y, inGrad + X, &innerGrad);");
 
                 ParamCreater context = new ParamCreater(this);
                 tenser.forEach(context::backward);
