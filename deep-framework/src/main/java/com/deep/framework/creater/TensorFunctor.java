@@ -26,6 +26,9 @@ public abstract class TensorFunctor {
     }
 
     public String getValId() {
+        if (name.equals("Tensor::Sum")) {
+            return out.getValId().replace("N +", "");
+        }
         return out.getValId();
     }
 
