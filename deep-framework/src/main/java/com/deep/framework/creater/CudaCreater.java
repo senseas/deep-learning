@@ -42,7 +42,7 @@ public class CudaCreater extends Creater {
         if (tensor instanceof TensorFunction) {
             forEach(tensor.getOutput(), getOutput(tensor.getFunction()), (None out, None none) -> {
                 none.setValId(out.getValId());
-                none.setValId(out.getValId());
+                none.setGradId(out.getGradId());
             });
             if (tensor.getFunction() instanceof Tenser) {
                 Tenser<Tensor> tenser = (Tenser<Tensor>) tensor.getFunction();
