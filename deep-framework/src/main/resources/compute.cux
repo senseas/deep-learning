@@ -1,0 +1,30 @@
+extern "C" __global__ void compute(double* in, double* out) {
+  int idx = blockDim.x * blockIdx.x + threadIdx.x;
+  int M = idx * %s, N = idx * %s;
+  %s
+}
+
+extern "C" __global__ void gradient(double* in, double* out, double* outGrad, double* inGrad){
+    int idx = blockDim.x * blockIdx.x + threadIdx.x;
+    double innerGrad[%s];
+    int M = idx * %s, N = idx * %s, X = idx * %s, Y = idx * %s;
+    %s
+}
+
+extern "C" __global__ void %s(double* in, double* out) {
+  int idx = blockDim.x * blockIdx.x + threadIdx.x;
+  int M = idx, N = idx;
+  %s
+}
+
+extern "C" __global__ void %s(double* in, double* out, double* outGrad, double* inGrad, double* innerGrad){
+    int idx = blockDim.x * blockIdx.x + threadIdx.x;")
+    int M = idx, N = idx, X = idx, Y = idx;")
+    %s
+}
+
+extern "C" __global__ void Sum(double* in, double* out) {
+  int idx = blockDim.x * blockIdx.x + threadIdx.x;
+  int M = idx, N = idx;
+  atomicAdd(&%s, %s);
+}
