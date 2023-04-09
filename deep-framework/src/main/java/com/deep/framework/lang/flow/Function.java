@@ -4,15 +4,16 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 
 public class Function implements Operator {
 
-    public Function() { }
+    public Function() {}
 
     public Function(Context context, Operator... input) {
+        this.idx = context.data().size();
         this.data = context.data();
         this.gradMap = context.gradMap();
-        this.idx = context.data().size();
         this.input = input;
     }
 
@@ -32,12 +33,12 @@ public class Function implements Operator {
         this.value = value;
     }
 
-    public double getGradx() {
-        return gradx;
+    public List<Consumer> getGradFunc() {
+        return gradFunc;
     }
 
-    public void setGradx(double gradx) {
-        this.gradx = gradx;
+    public void setGradFunc(Consumer func) {
+        gradFunc.add(func);
     }
 
     public double getGrad() {
@@ -50,14 +51,15 @@ public class Function implements Operator {
 
     public void gradient() {
         for (Operator func : input) {
-            func.setGrad(grad * func.getGradx());
+            func.getGradFunc().forEach(a -> a.accept(0));
             func.gradient();
         }
     }
 
-    private int idx = 0;
-    private double value, gradx, grad;
+    private int idx;
+    private double value, grad;
     private Operator[] input;
     private List<Double> data = new ArrayList<>();
+    private List<Consumer> gradFunc = new ArrayList<>();
     private Map<Integer, Double> gradMap = new HashMap();
 }
