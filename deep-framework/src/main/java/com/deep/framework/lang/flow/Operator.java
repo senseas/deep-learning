@@ -1,212 +1,186 @@
 package com.deep.framework.lang.flow;
 
-public interface Operator extends Context, Flow {
 
-    default Operator add(Operator oper1, Operator oper2) {
-        Function func = new Function(this, oper1, oper2);
-        double valx = oper1.getValue(), valy = oper2.getValue();
-        func.setValue(valx + valy);
+public interface Operator extends Context, Application {
 
-        oper1.setGradFunc((i) -> oper1.setGrad(func.getGrad()));
-        oper2.setGradFunc((i) -> oper2.setGrad(func.getGrad()));
-        return func;
+    default Function add(Function func1, Function func2) {
+        double valx = func1.getValue(), valy = func2.getValue();
+        double value = valx + valy;
+
+        Gradient grad1 = grad -> func1.setGrad(grad);
+        Gradient grad2 = grad -> func2.setGrad(grad);
+        return () -> new AppContext(this, value, grad1, grad2);
     }
 
-    default Operator minus(Operator oper1, Operator oper2) {
-        Function func = new Function(this, oper1, oper2);
-        double valx = oper1.getValue(), valy = oper2.getValue();
-        func.setValue(valx - valy);
+    default Function minus(Function func1, Function func2) {
+        double valx = func1.getValue(), valy = func2.getValue();
+        double value = valx - valy;
 
-        oper1.setGradFunc((i) -> oper1.setGrad(func.getGrad()));
-        oper2.setGradFunc((i) -> oper2.setGrad(-func.getGrad()));
-        return func;
+        Gradient grad1 = grad -> func1.setGrad(grad);
+        Gradient grad2 = grad -> func2.setGrad(-grad);
+        return () -> new AppContext(this, value, grad1, grad2);
     }
 
-    default Operator minus(Operator oper1) {
-        Function func = new Function(this, oper1);
-        double valx = oper1.getValue();
-        func.setValue(-valx);
+    default Function minus(Function func1) {
+        double valx = func1.getValue();
 
-        oper1.setGradFunc((i) -> oper1.setGrad(-func.getGrad()));
-        return func;
+        Gradient grad1 = grad -> func1.setGrad(grad);
+        return () -> new AppContext(this, -valx, grad1);
     }
 
-    default Operator mul(Operator oper1, Operator oper2) {
-        Function func = new Function(this, oper1, oper2);
-        double valx = oper1.getValue(), valy = oper2.getValue();
-        func.setValue(valx * valy);
+    default Function mul(Function func1, Function func2) {
+        double valx = func1.getValue(), valy = func2.getValue();
+        double value = valx * valy;
 
-        oper1.setGradFunc((i) -> oper1.setGrad(func.getGrad() * valy));
-        oper2.setGradFunc((i) -> oper2.setGrad(func.getGrad() * valx));
-        return func;
+        Gradient grad1 = grad -> func1.setGrad(grad * valy);
+        Gradient grad2 = grad -> func2.setGrad(grad * valx);
+        return () -> new AppContext(this, value, grad1, grad2);
     }
 
-    default Operator div(Operator oper1, Operator oper2) {
-        Function func = new Function(this, oper1, oper2);
-        double valx = oper1.getValue(), valy = oper2.getValue();
-        func.setValue(valx / valy);
+    default Function div(Function func1, Function func2) {
+        double valx = func1.getValue(), valy = func2.getValue();
+        double value = valx / valy;
 
-        oper1.setGradFunc((i) -> oper1.setGrad(func.getGrad() / valy));
-        oper2.setGradFunc((i) -> oper2.setGrad(func.getGrad() * -valx / Math.pow(valy, 2)));
-        return func;
+        Gradient grad1 = grad -> func1.setGrad(grad / valy);
+        Gradient grad2 = grad -> func2.setGrad(grad * -valx / Math.pow(valy, 2));
+        return () -> new AppContext(this, value, grad1, grad2);
     }
 
-    default Operator exp(Operator oper1) {
-        Function func = new Function(this, oper1);
-        double valx = oper1.getValue();
-        double exp = Math.exp(valx);
-        func.setValue(exp);
+    default Function exp(Function func1) {
+        double valx = func1.getValue();
+        double value = Math.exp(valx);
 
-        oper1.setGradFunc((i) -> oper1.setGrad(func.getGrad() * exp));
-        return func;
+        Gradient grad1 = grad -> func1.setGrad(grad * value);
+        return () -> new AppContext(this, value, grad1);
     }
 
-    default Operator pow(Operator oper1, Operator oper2) {
-        Function func = new Function(this, oper1, oper2);
-        double valx = oper1.getValue(), valy = oper2.getValue();
-        func.setValue(Math.pow(valx, valy));
+    default Function pow(Function func1, Function func2) {
+        double valx = func1.getValue(), valy = func2.getValue();
+        double value = Math.pow(valx, valy);
 
-        oper1.setGradFunc((i) -> oper1.setGrad(func.getGrad() * valy * Math.pow(valx, valy - 1)));
-        return func;
+        Gradient grad1 = grad -> func1.setGrad(grad * valy * Math.pow(valx, valy - 1));
+        return () -> new AppContext(this, value, grad1);
     }
 
-    default Operator log(Operator oper1) {
-        Function func = new Function(this, oper1);
-        double valx = oper1.getValue();
-        func.setValue(Math.log(valx));
+    default Function log(Function func1) {
+        double valx = func1.getValue();
+        double value = Math.log(valx);
 
-        oper1.setGradFunc((i) -> oper1.setGrad(func.getGrad() / valx));
-        return func;
+        Gradient grad1 = grad -> func1.setGrad(grad / valx);
+        return () -> new AppContext(this, value, grad1);
     }
 
-    default Operator sin(Operator oper1) {
-        Function func = new Function(this, oper1);
-        double valx = oper1.getValue();
-        func.setValue(Math.sin(valx));
+    default Function sin(Function func1) {
+        double valx = func1.getValue();
+        double value = Math.sin(valx);
 
-        oper1.setGradFunc((i) -> oper1.setGrad(func.getGrad() * Math.cos(valx)));
-        return func;
+        Gradient grad1 = grad -> func1.setGrad(grad * Math.cos(valx));
+        return () -> new AppContext(this, value, grad1);
     }
 
-    default Operator cos(Operator oper1) {
-        Function func = new Function(this, oper1);
-        double valx = oper1.getValue();
-        func.setValue(Math.cos(valx));
+    default Function cos(Function func1) {
+        double valx = func1.getValue();
+        double value = Math.cos(valx);
 
-        oper1.setGradFunc((i) -> oper1.setGrad(func.getGrad() * -Math.sin(valx)));
-        return func;
+        Gradient grad1 = grad -> func1.setGrad(grad * -Math.sin(valx));
+        return () -> new AppContext(this, value, grad1);
     }
 
-    default Operator tan(Operator oper1) {
-        Function func = new Function(this, oper1);
-        double valx = oper1.getValue();
-        func.setValue(Math.tan(valx));
+    default Function tan(Function func1) {
+        double valx = func1.getValue();
+        double value = Math.tan(valx);
 
-        oper1.setGradFunc((i) -> oper1.setGrad(func.getGrad() * Math.pow(1 / Math.cos(valx), 2)));
-        return func;
+        Gradient grad1 = grad -> func1.setGrad(grad * Math.pow(1 / Math.cos(valx), 2));
+        return () -> new AppContext(this, value, grad1);
     }
 
-    default Operator cot(Operator oper1) {
-        Function func = new Function(this, oper1);
-        double valx = oper1.getValue();
-        func.setValue(Math.cos(valx) / Math.sin(valx));
+    default Function cot(Function func1) {
+        double valx = func1.getValue();
+        double value = Math.cos(valx) / Math.sin(valx);
 
-        oper1.setGradFunc((i) -> oper1.setGrad(func.getGrad() * -Math.pow(1 / Math.sin(valx), 2)));
-        return func;
+        Gradient grad1 = grad -> func1.setGrad(grad * -Math.pow(1 / Math.sin(valx), 2));
+        return () -> new AppContext(this, value, grad1);
     }
 
-    default Operator sec(Operator oper1) {
-        Function func = new Function(this, oper1);
-        double valx = oper1.getValue();
-        func.setValue(1 / Math.cos(valx));
+    default Function sec(Function func1) {
+        double valx = func1.getValue();
+        double value = 1 / Math.cos(valx);
 
-        oper1.setGradFunc((i) -> oper1.setGrad(func.getGrad() * Math.tan(valx) / Math.cos(valx)));
-        return func;
+        Gradient grad1 = grad -> func1.setGrad(grad * Math.tan(valx) / Math.cos(valx));
+        return () -> new AppContext(this, value, grad1);
     }
 
-    default Operator csc(Operator oper1) {
-        Function func = new Function(this, oper1);
-        double valx = oper1.getValue();
-        func.setValue(1 / Math.sin(valx));
+    default Function csc(Function func1) {
+        double valx = func1.getValue();
+        double value = 1 / Math.sin(valx);
 
-        oper1.setGradFunc((i) -> oper1.setGrad(func.getGrad() * -Math.cos(valx) / Math.pow(Math.sin(valx), 2)));
-        return func;
+        Gradient grad1 = grad -> func1.setGrad(grad * -Math.cos(valx) / Math.pow(Math.sin(valx), 2));
+        return () -> new AppContext(this, value, grad1);
     }
 
-    default Operator arcsin(Operator oper1) {
-        Function func = new Function(this, oper1);
-        double valx = oper1.getValue();
-        func.setValue(Math.asin(valx));
+    default Function arcsin(Function func1) {
+        double valx = func1.getValue();
+        double value = Math.asin(valx);
 
-        oper1.setGradFunc((i) -> oper1.setGrad(func.getGrad() / Math.pow(1 - Math.pow(valx, 2), -2)));
-        return func;
+        Gradient grad1 = grad -> func1.setGrad(grad / Math.pow(1 - Math.pow(valx, 2), -2));
+        return () -> new AppContext(this, value, grad1);
     }
 
-    default Operator arccos(Operator oper1) {
-        Function func = new Function(this, oper1);
-        double valx = oper1.getValue();
-        func.setValue(Math.acos(valx));
+    default Function arccos(Function func1) {
+        double valx = func1.getValue();
+        double value = Math.acos(valx);
 
-        oper1.setGradFunc((i) -> oper1.setGrad(func.getGrad() / -Math.pow(1 - Math.pow(valx, 2), -2)));
-        return func;
+        Gradient grad1 = grad -> func1.setGrad(grad / -Math.pow(1 - Math.pow(valx, 2), -2));
+        return () -> new AppContext(this, value, grad1);
     }
 
-    default Operator arctan(Operator oper1) {
-        Function func = new Function(this, oper1);
-        double valx = oper1.getValue();
-        func.setValue(Math.atan(valx));
+    default Function arctan(Function func1) {
+        double valx = func1.getValue();
+        double value = Math.atan(valx);
 
-        oper1.setGradFunc((i) -> oper1.setGrad(func.getGrad() / (1 + Math.pow(valx, 2))));
-        return func;
+        Gradient grad1 = grad -> func1.setGrad(grad / (1 + Math.pow(valx, 2)));
+        return () -> new AppContext(this, value, grad1);
     }
 
-    default Operator arccot(Operator oper1) {
-        Function func = new Function(this, oper1);
-        double valx = oper1.getValue();
-        func.setValue(Math.atan(1 / valx));
+    default Function arccot(Function func1) {
+        double valx = func1.getValue();
+        double value = Math.atan(1 / valx);
 
-        oper1.setGradFunc((i) -> oper1.setGrad(func.getGrad() / -(1 + Math.pow(valx, 2))));
-        return func;
+        Gradient grad1 = grad -> func1.setGrad(grad / -(1 + Math.pow(valx, 2)));
+        return () -> new AppContext(this, value, grad1);
     }
 
-    default Operator relu(Operator oper1) {
-        Function func = new Function(this, oper1);
-        double valx = oper1.getValue();
-        func.setValue(valx > 0 ? valx : 0.1 * valx);
+    default Function relu(Function func1) {
+        double valx = func1.getValue();
+        double value = valx > 0 ? valx : 0.1 * valx;
 
-        oper1.setGradFunc((i) -> oper1.setGrad(func.getGrad() * (valx > 0 ? 1 : 0.1)));
-        return func;
+        Gradient grad1 = grad -> func1.setGrad(grad * (valx > 0 ? 1 : 0.1));
+        return () -> new AppContext(this, value, grad1);
     }
 
-    default Operator max(Operator oper1, Operator oper2) {
-        Function func = new Function(this, oper1);
-        double valx = oper1.getValue(), valy = oper2.getValue();
-        func.setValue(Math.max(valx, valy));
+    default Function max(Function func1, Function func2) {
+        double valx = func1.getValue(), valy = func2.getValue();
+        double value = Math.max(valx, valy);
 
-        oper1.setGradFunc((i) -> oper1.setGrad(func.getGrad() * (valx > valy ? 1d : 0d)));
-        oper2.setGradFunc((i) -> oper2.setGrad(func.getGrad() * valx < valy ? 1d : 0d));
-        return func;
+        Gradient grad1 = grad -> func1.setGrad(grad * (valx > valy ? 1d : 0d));
+        Gradient grad2 = grad -> func2.setGrad(grad * valx < valy ? 1d : 0d);
+        return () -> new AppContext(this, value, grad1, grad2);
     }
 
-    default Operator min(Operator oper1, Operator oper2) {
-        Function func = new Function(this, oper1);
-        double valx = oper1.getValue(), valy = oper2.getValue();
-        func.setValue(Math.min(valx, valy));
+    default Function min(Function func1, Function func2) {
+        double valx = func1.getValue(), valy = func2.getValue();
+        double value = Math.min(valx, valy);
 
-        oper1.setGradFunc((i) -> oper1.setGrad(func.getGrad() * (valx < valy ? 1d : 0d)));
-        oper2.setGradFunc((i) -> oper2.setGrad(func.getGrad() * (valx > valy ? 1d : 0d)));
-        return func;
+        Gradient grad1 = grad -> func1.setGrad(grad * (valx < valy ? 1d : 0d));
+        Gradient grad2 = grad -> func2.setGrad(grad * (valx > valy ? 1d : 0d));
+        return () -> new AppContext(this, value, grad1, grad2);
     }
 
-    default Operator var(double d) {
-        Function func = new Function(this);
-        func.setValue(d);
-        return func;
+    default Function var(double d) {
+        return () -> new AppContext(this, d);
     }
 
-    default Operator one(double d) {
-        Function func = new Function(this);
-        func.setValue(d);
-        return func;
+    default Function one(double d) {
+        return () -> new AppContext(this, d);
     }
 }

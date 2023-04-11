@@ -1,19 +1,19 @@
 package com.deep.framework;
 
 import com.deep.framework.lang.flow.Function;
-import com.deep.framework.lang.flow.Operator;
+import com.deep.framework.lang.flow.AppContext;
 import org.junit.Test;
 
 public class AppFlowTest {
 
     @Test
     public void squareTest() {
-        Function functor = new Function() {
+        AppContext functor = new AppContext() {
 
             public void compute() {
-                Operator mul = mul(one(0.5), pow(minus(one(0.01), var(0.391249035007275)), one(2d)));
-                mul.setGrad(1d);
-                mul.gradient();
+                Function mul = mul(one(0.5), pow(minus(one(0.01), var(0.391249035007275)), one(2d)));
+                AppContext apply = mul.apply();
+                apply.setGrad(1).gradient();
             }
 
         };
