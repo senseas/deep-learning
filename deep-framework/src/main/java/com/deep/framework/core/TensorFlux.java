@@ -1,8 +1,8 @@
 package com.deep.framework.core;
 
-import com.deep.framework.cuda.CudaExecutor;
 import com.deep.framework.graph.None;
 import com.deep.framework.graph.Tensor;
+import com.deep.framework.graph.TensorOperator;
 import com.deep.framework.lang.util.BeanUtil;
 import lombok.SneakyThrows;
 
@@ -19,52 +19,36 @@ public class TensorFlux implements Serializable {
     public static void forward(Tensor tensor) {
         forEach(tensor.getFunction(), Tensor::forward);
         forwards(tensor);
-        CudaExecutor.compute(tensor);
+        //CudaExecutor.compute(tensor);
     }
 
     @SneakyThrows
     public static void backward(Tensor tensor) {
         backwards(tensor);
         forEach(tensor.getFunction(), Tensor::backward);
-        CudaExecutor.gradient(tensor);
+        //CudaExecutor.gradient(tensor);
         forEach(tensor.getOutput(), None::reset);
     }
 
     public static void reduce(Tensor tensor) {
-        forEach(tensor.getFunction(), (Tensor a) -> {
-            a.reduce();
-        });
+        forEach(tensor.getFunction(), Tensor::reduce);
     }
 
-    public static void compute(Tensor tensor) {
-        Object output = tensor.getOutput();
-        if (Objects.nonNull(output)) {
-            clearOutput(tensor);
-            Object nones = tensor.compute();
-            forEach(tensor.getOutput(), nones, (None out, None none) -> {
-                out.setValue(none.getValue());
-            });
-        } else {
-            Object nones = tensor.compute();
-            createOutput(tensor, nones);
-            forEach(tensor.getOutput(), nones, (None out, None none) -> {
-                out.setValue(none.getValue());
-            });
-        }
+    public static void compute(TensorOperator tensor) {
+        tensor.clearOutput();
+        tensor.setOutput(tensor.compute());
     }
 
     public static void computer(Tensor tensor) {
         if (Objects.nonNull(tensor.getOutput())) {
-            forEach(tensor.getOutput(), (None out) -> {
-                out.reset();
-            });
+            forEach(tensor.getOutput(), None::reset);
         }
         tensor.forward();
     }
 
-    public static void gradient(Tensor tensor) {
+    public static void gradient(TensorOperator tensor) {
         tensor.gradient();
-        forEach(tensor.getOutput(), None::reset);
+        Arrays.fill(tensor.getGrad(), 0d);
     }
 
     public static void reducer(Tensor tensor) {
@@ -88,9 +72,8 @@ public class TensorFlux implements Serializable {
         createOutput(tensor, nones);
         forEach(tensor.getOutput(), nones, (None out, None none) -> {
             out.setId(none.getId());
-            out.setGradre(none.isGradre());
             out.setValue(none.getValue());
-            out.reset();
+            out.setGrad(0);
         });
     }
 
@@ -105,11 +88,6 @@ public class TensorFlux implements Serializable {
         if (BeanUtil.isTenser(tensor.getOutput())) {
             Arrays.fill(tensor.getValue(), 0d);
             Arrays.fill(tensor.getGrad(), 0d);
-            Arrays.fill(tensor.getReduce(), false);
-        } else {
-            tensor.setValue(new double[]{0d});
-            tensor.setGrad(new double[]{0d});
-            tensor.setReduce(new boolean[]{false});
         }
     }
 
@@ -120,12 +98,10 @@ public class TensorFlux implements Serializable {
                 tensor.setShape(shape);
                 tensor.setValue(zeros(shape));
                 tensor.setGrad(zeros(shape));
-                tensor.setReduce(booleans(shape));
                 tensor.setOutput(fillNones(tensor));
             } else {
                 tensor.setValue(new double[]{0d});
                 tensor.setGrad(new double[]{0d});
-                tensor.setReduce(new boolean[]{false});
                 tensor.setOutput(new None(tensor));
             }
         }

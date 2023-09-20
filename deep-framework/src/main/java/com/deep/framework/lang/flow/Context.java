@@ -1,18 +1,28 @@
 package com.deep.framework.lang.flow;
 
-import java.util.List;
-import java.util.Map;
+import lombok.Data;
 
-public interface Context {
-    double getValue();
+import java.util.Objects;
 
-    void setValue(double value);
+@Data
+public class Context {
 
-    double getGrad();
+    public Context(Gradient gradient, double value, Context... input) {
+        this.gradient = gradient;
+        this.value = value;
+        this.input = input;
+    }
 
-    AppContext setGrad(double grad);
+    public Context(double value) {
+        this.value = value;
+    }
 
-    List<Double> data();
+    public void gradient(double grad) {
+        setGrad(grad);
+        if (Objects.nonNull(gradient)) gradient.apply(grad, input);
+    }
 
-    Map<Integer, Double> gradMap();
+    private double value, grad;
+    private Context[] input;
+    private Gradient gradient;
 }

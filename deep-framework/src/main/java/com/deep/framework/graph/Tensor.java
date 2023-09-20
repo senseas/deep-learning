@@ -1,8 +1,9 @@
 package com.deep.framework.graph;
 
-import com.deep.framework.cuda.CudaContext;
-import com.deep.framework.creater.ParamCreater;
+import com.deep.framework.core.TensorExecutor;
 import com.deep.framework.core.TensorFlux;
+import com.deep.framework.creater.ParamCreater;
+import com.deep.framework.cuda.CudaContext;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -12,6 +13,7 @@ import static com.deep.framework.lang.Shape.*;
 
 @Data
 public class Tensor implements Serializable {
+    static final double EX = 0.0000000001;
 
     public Tensor(double value) {
         this.name = "None";
@@ -67,26 +69,34 @@ public class Tensor implements Serializable {
         this.output = input;
     }
 
-    public Tensor(String name, Tensor... input) {
-        this.name = this.name.concat(name);
-        this.input = input;
-    }
-
     public <M> Tensor(M m) {
         this.name = "Function";
         this.function = m;
         this.output = TensorFlux.getOutput(function);
     }
 
-    public <M> M compute() { return null; }
-
-    public void gradient() { }
+    public Tensor(String name, Tensor... input) {
+        this.name = this.name.concat(name);
+        this.input = input;
+    }
 
     public void forward() { }
 
     public void backward() { }
 
-    public void reduce() { }
+    public void reduce() {
+        if(Objects.nonNull(reduce)) {
+            forEach(getOutput(), (None none) -> {
+                if (!none.isReduce()) {
+                    none.setReduce(true);
+                    double valu = Math.abs(none.getValue()), grad = Math.abs(none.getGrad());
+                    double rate = Math.min(valu / (grad + EX), grad / (valu + EX)) * TensorExecutor.rate;
+                    double value = none.getValue() - rate * none.getGrad();
+                    none.setValue(value);
+                }
+            });
+        }
+    }
 
     public <M> M getOutput() { return (M) output; }
 
@@ -102,6 +112,7 @@ public class Tensor implements Serializable {
     protected transient Object output, function;
     protected int[] shape;
     protected double[] value, grad;
+    protected double valuex, gradx;
     protected transient boolean[] reduce;
     private transient boolean gradre;
     private transient CudaContext context;

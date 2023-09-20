@@ -1,14 +1,22 @@
 package com.deep.framework.graph;
 
 import com.deep.framework.core.TensorFlux;
+import com.deep.framework.functions.Operator;
 import com.deep.framework.lang.util.BeanUtil;
 
+import java.util.Arrays;
 import java.util.Objects;
 
-public class TensorFunction extends Tensor {
+import static com.deep.framework.lang.Shape.*;
+
+public class TensorFunction extends Tensor implements Operator {
 
     public TensorFunction(String name, Tensor... input) {
         super(name, input);
+    }
+
+    public <M> M compute() {
+        return null;
     }
 
     public <M> M getInput(int i) {
@@ -28,18 +36,48 @@ public class TensorFunction extends Tensor {
     }
 
     public void forward() {
-        for (Tensor o : getInput()) TensorFlux.computer(o);
-        TensorFlux.forward(this);
+        for (Tensor o : getInput()) o.forward();
+
+        clearOutput();
+        forEach(getFunction(), Tensor::forward);
+
+        Object nones = TensorFlux.getOutput(getFunction());
+        create(nones);
+        forEach(getOutput(), nones, (None out, None none) -> {
+            out.setId(none.getId());
+            out.setValue(none.getValue());
+        });
     }
 
     public void backward() {
-        TensorFlux.backward(this);
+        Object nones = TensorFlux.getOutput(getFunction());
+        forEach(getOutput(), nones, (None out, None none) -> {
+            none.setGrad(out.getGrad());
+        });
+
+        forEach(getFunction(), Tensor::backward);
+        forEach(getOutput(), None::reset);
         for (Tensor o : getInput()) o.backward();
     }
 
     public void reduce() {
-        TensorFlux.reduce(this);
-        for (Tensor o : getInput()) TensorFlux.reducer(o);
+        forEach(getFunction(), Tensor::reduce);
+        for (Tensor o : getInput()) o.reduce();
+    }
+
+    public void clearOutput() {
+        if (Objects.isNull(value)) return;
+        Arrays.fill(value, 0d);
+        Arrays.fill(grad, 0d);
+    }
+
+    public void create(Object nones) {
+        if (Objects.isNull(value)) {
+            shape = shapes(nones);
+            this.value = random(shape);
+            this.grad = zeros(shape);
+            this.output = fillNones(this);
+        }
     }
 
 }

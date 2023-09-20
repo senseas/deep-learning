@@ -3,7 +3,10 @@ package com.deep.framework.graph;
 import com.deep.framework.core.TensorFlux;
 
 import java.util.Arrays;
+import java.util.Objects;
 import java.util.stream.Stream;
+
+import static com.deep.framework.lang.Shape.*;
 
 public class TensorOperator extends Tensor {
 
@@ -21,6 +24,10 @@ public class TensorOperator extends Tensor {
             setInput(stream.toArray(Tensor[]::new));
         }
     }
+
+    public double[] compute() { return null; }
+
+    public void gradient() { }
 
     public <M> M getInput(int i) {
         Tensor input = getInput()[i];
@@ -40,23 +47,38 @@ public class TensorOperator extends Tensor {
         return getOutput();
     }
 
-    public <M> M createOutput() {
-        TensorFlux.createOutput(this, 1);
-        return getOutput();
-    }
-
     public void forward() {
-        for (Tensor o : getInput()) TensorFlux.computer(o);
-        TensorFlux.compute(this);
+        for (Tensor o : getInput()) o.forward();
+        clearOutput();
+        create();
+        value = compute();
     }
 
     public void backward() {
-        TensorFlux.gradient(this);
+        gradient();
+        clearGrad();
         for (Tensor o : getInput()) o.backward();
     }
 
     public void reduce() {
-        for (Tensor o : getInput()) TensorFlux.reducer(o);
+        for (Tensor o : getInput()) o.reduce();
     }
 
+    public void create() {
+        if (Objects.isNull(value)) {
+            this.value = random(shape);
+            this.grad = zeros(shape);
+            this.output = fillNones(this);
+        }
+    }
+
+    public void clearOutput() {
+        if (Objects.isNull(value)) return;
+        Arrays.fill(value, 0d);
+        Arrays.fill(grad, 0d);
+    }
+
+    public void clearGrad() {
+        Arrays.fill(grad, 0d);
+    }
 }

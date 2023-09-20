@@ -14,17 +14,15 @@ import static java.lang.Math.atan;
 public class TensorFlow implements Serializable {
 
     public Tensor add(Tensor... input) {
-        return new TensorOperator("Add", input) {
+        return new ScalarOperator("Add", input) {
 
             @Cuda
-            public None compute() {
-                double value = inputStream().mapToDouble(a -> ((None) a).getValue()).sum();
-                return new None(value);
+            public double compute() {
+                return inputStream().mapToDouble(a -> ((None) a).getValue()).sum();
             }
 
-            public void gradient() {
-                None out = getOutput();
-                inputStream().forEach(a -> ((None) a).setGrad(out.getGrad()));
+            public void gradient(double grad) {
+                inputStream().forEach(a -> ((None) a).setGrad(grad));
             }
 
         };
@@ -33,7 +31,7 @@ public class TensorFlow implements Serializable {
     public Tensor addx(Tensor... input) {
         return new TensorOperator("Addx", input) {
 
-            public Object compute() {
+           /* public Object compute() {
                 Object B = createOutput(getInput(0));
                 inputStream().forEach(A -> {
                     forEach(A, B, (None a, None b) -> b.setValue(b.getValue() + a.getValue()));
@@ -46,23 +44,22 @@ public class TensorFlow implements Serializable {
                 inputStream().forEach(A -> {
                     forEach(A, B, (None a, None b) -> a.setGrad(b.getGrad()));
                 });
-            }
+            }*/
 
         };
     }
 
     public Tensor minus(Tensor... input) {
-        return new TensorOperator("Minus", input) {
+        return new ScalarOperator("Minus", input) {
 
-            public None compute() {
+            public double compute() {
                 None inx = getInput(0), iny = getInput(1);
                 double valx = inx.getValue(), valy = iny.getValue();
-                return new None(valx - valy);
+                return valx - valy;
             }
 
-            public void gradient() {
+            public void gradient(double grad) {
                 None inx = getInput(0), iny = getInput(1), out = getOutput();
-                double grad = out.getGrad();
                 inx.setGrad(grad);
                 iny.setGrad(-grad);
             }
@@ -72,17 +69,16 @@ public class TensorFlow implements Serializable {
 
 
     public Tensor minus(Tensor input) {
-        return new TensorOperator("Minusx", input) {
+        return new ScalarOperator("Minusx", input) {
 
-            public None compute() {
+            public double compute() {
                 None inx = getInput(0);
                 double valx = inx.getValue();
-                return new None(-valx);
+                return -valx;
             }
 
-            public void gradient() {
+            public void gradient(double grad) {
                 None inx = getInput(0), out = getOutput();
-                double grad = out.getGrad();
                 inx.setGrad(-grad);
             }
 
@@ -90,18 +86,17 @@ public class TensorFlow implements Serializable {
     }
 
     public Tensor mul(Tensor... input) {
-        return new TensorOperator("Mul", input) {
+        return new ScalarOperator("Mul", input) {
 
-            public None compute() {
+            public double compute() {
                 None inx = getInput(0), iny = getInput(1);
                 double valx = inx.getValue(), valy = iny.getValue();
-                return new None(valx * valy);
+                return valx * valy;
             }
 
-            public void gradient() {
-                None inx = getInput(0), iny = getInput(1), out = getOutput();
+            public void gradient(double grad) {
+                None inx = getInput(0), iny = getInput(1);
                 double valx = inx.getValue(), valy = iny.getValue();
-                double grad = out.getGrad();
                 inx.setGrad(grad * valy);
                 iny.setGrad(grad * valx);
             }
@@ -110,18 +105,17 @@ public class TensorFlow implements Serializable {
     }
 
     public Tensor div(Tensor... input) {
-        return new TensorOperator("Div", input) {
+        return new ScalarOperator("Div", input) {
 
-            public None compute() {
+            public double compute() {
                 None inx = getInput(0), iny = getInput(1);
                 double valx = inx.getValue(), valy = iny.getValue();
-                return new None(valx / valy);
+                return valx / valy;
             }
 
-            public void gradient() {
-                None inx = getInput(0), iny = getInput(1), out = getOutput();
+            public void gradient(double grad) {
+                None inx = getInput(0), iny = getInput(1);
                 double valx = inx.getValue(), valy = iny.getValue();
-                double grad = out.getGrad();
                 inx.setGrad(grad / valy);
                 iny.setGrad(-grad * valx / Math.pow(valy, 2));
             }
@@ -130,18 +124,17 @@ public class TensorFlow implements Serializable {
     }
 
     public Tensor exp(Tensor... input) {
-        return new TensorOperator("Exp", input) {
+        return new ScalarOperator("Exp", input) {
 
-            public None compute() {
+            public double compute() {
                 None inx = getInput(0);
                 double valx = inx.getValue();
-                return new None(Math.exp(valx));
+                return Math.exp(valx);
             }
 
-            public void gradient() {
-                None inx = getInput(0), out = getOutput();
+            public void gradient(double grad) {
+                None inx = getInput(0);
                 double valx = inx.getValue();
-                double grad = out.getGrad();
                 inx.setGrad(grad * Math.exp(valx));
             }
 
@@ -149,15 +142,15 @@ public class TensorFlow implements Serializable {
     }
 
     public Tensor expx(Tensor input) {
-        return new TensorFunction("Expx", input) {
+        return new TensorOperator("Expx", input) {
 
-            public Object compute() {
+            /*public Object compute() {
                 Object A = getInput(0), B = zeroTensors(A);
                 forEach(A, B, (Tensor a, Tenser<Tensor> b, int i) -> {
                     b.set(exp(a), i);
                 });
                 return B;
-            }
+            }*/
 
             public void gradient() { }
 
@@ -165,18 +158,17 @@ public class TensorFlow implements Serializable {
     }
 
     public Tensor pow(Tensor... input) {
-        return new TensorOperator("Pow", input) {
+        return new ScalarOperator("Pow", input) {
 
-            public None compute() {
+            public double compute() {
                 None inx = getInput(0), iny = getInput(1);
                 double valx = inx.getValue(), valy = iny.getValue();
-                return new None(Math.pow(valx, valy));
+                return Math.pow(valx, valy);
             }
 
-            public void gradient() {
-                None inx = getInput(0), iny = getInput(1), out = getOutput();
+            public void gradient(double grad) {
+                None inx = getInput(0), iny = getInput(1);
                 double valx = inx.getValue(), valy = iny.getValue();
-                double grad = out.getGrad();
                 inx.setGrad(grad * valy * Math.pow(valx, valy - 1));
             }
 
@@ -184,18 +176,17 @@ public class TensorFlow implements Serializable {
     }
 
     public Tensor log(Tensor... input) {
-        return new TensorOperator("Log", input) {
+        return new ScalarOperator("Log", input) {
 
-            public None compute() {
+            public double compute() {
                 None inx = getInput(0);
                 double valx = inx.getValue();
-                return new None(Math.log(valx));
+                return Math.log(valx);
             }
 
-            public void gradient() {
-                None inx = getInput(0), out = getOutput();
+            public void gradient(double grad) {
+                None inx = getInput(0);
                 double valx = inx.getValue();
-                double grad = out.getGrad();
                 inx.setGrad(grad / valx);
             }
 
@@ -203,13 +194,13 @@ public class TensorFlow implements Serializable {
     }
 
     public Tensor sum(Tensor input) {
-        return new TensorOperator("Sum", input) {
+        return new ScalarOperator("Sum", input) {
 
-            public None compute() {
+            public double compute() {
                 Object A = getInput(0);
-                None B = createOutput();
+                None B = new None(0d);
                 forEach(A, (None a) -> B.setValue(B.getValue() + a.getValue()));
-                return B;
+                return B.getValue();
             }
 
             public void gradient() {
@@ -222,18 +213,17 @@ public class TensorFlow implements Serializable {
     }
 
     public Tensor sin(Tensor... input) {
-        return new TensorOperator("Sin", input) {
+        return new ScalarOperator("Sin", input) {
 
-            public None compute() {
+            public double compute() {
                 None inx = getInput(0);
                 double valx = inx.getValue();
-                return new None(Math.sin(valx));
+                return Math.sin(valx);
             }
 
-            public void gradient() {
-                None inx = getInput(0), out = getOutput();
+            public void gradient(double grad) {
+                None inx = getInput(0);
                 double valx = inx.getValue();
-                double grad = out.getGrad();
                 inx.setGrad(grad * Math.cos(valx));
             }
 
@@ -241,18 +231,17 @@ public class TensorFlow implements Serializable {
     }
 
     public Tensor cos(Tensor... input) {
-        return new TensorOperator("Cos", input) {
+        return new ScalarOperator("Cos", input) {
 
-            public None compute() {
+            public double compute() {
                 None inx = getInput(0);
                 double valx = inx.getValue();
-                return new None(Math.cos(valx));
+                return Math.cos(valx);
             }
 
-            public void gradient() {
-                None inx = getInput(0), out = getOutput();
+            public void gradient(double grad) {
+                None inx = getInput(0);
                 double valx = inx.getValue();
-                double grad = out.getGrad();
                 inx.setGrad(grad * -Math.sin(valx));
             }
 
@@ -260,18 +249,17 @@ public class TensorFlow implements Serializable {
     }
 
     public Tensor tan(Tensor... input) {
-        return new TensorOperator("Tan", input) {
+        return new ScalarOperator("Tan", input) {
 
-            public None compute() {
+            public double compute() {
                 None inx = getInput(0);
                 double valx = inx.getValue();
-                return new None(Math.tan(valx));
+                return Math.tan(valx);
             }
 
-            public void gradient() {
-                None inx = getInput(0), out = getOutput();
+            public void gradient(double grad) {
+                None inx = getInput(0);
                 double valx = inx.getValue();
-                double grad = out.getGrad();
                 inx.setGrad(grad * Math.pow(1 / Math.cos(valx), 2));
             }
 
@@ -279,18 +267,17 @@ public class TensorFlow implements Serializable {
     }
 
     public Tensor cot(Tensor... input) {
-        return new TensorOperator("Cot", input) {
+        return new ScalarOperator("Cot", input) {
 
-            public None compute() {
+            public double compute() {
                 None inx = getInput(0);
                 double valx = inx.getValue();
-                return new None(Math.cos(valx) / Math.sin(valx));
+                return Math.cos(valx) / Math.sin(valx);
             }
 
-            public void gradient() {
-                None inx = getInput(0), out = getOutput();
+            public void gradient(double grad) {
+                None inx = getInput(0);
                 double valx = inx.getValue();
-                double grad = out.getGrad();
                 inx.setGrad(grad * -Math.pow(1 / Math.sin(valx), 2));
             }
 
@@ -298,18 +285,17 @@ public class TensorFlow implements Serializable {
     }
 
     public Tensor sec(Tensor... input) {
-        return new TensorOperator("Sec", input) {
+        return new ScalarOperator("Sec", input) {
 
-            public None compute() {
+            public double compute() {
                 None inx = getInput(0);
                 double valx = inx.getValue();
-                return new None(1 / Math.cos(valx));
+                return 1 / Math.cos(valx);
             }
 
-            public void gradient() {
-                None inx = getInput(0), out = getOutput();
+            public void gradient(double grad) {
+                None inx = getInput(0);
                 double valx = inx.getValue();
-                double grad = out.getGrad();
                 inx.setGrad(grad * Math.tan(valx) / Math.cos(valx));
             }
 
@@ -317,18 +303,17 @@ public class TensorFlow implements Serializable {
     }
 
     public Tensor csc(Tensor... input) {
-        return new TensorOperator("Csc", input) {
+        return new ScalarOperator("Csc", input) {
 
-            public None compute() {
+            public double compute() {
                 None inx = getInput(0);
                 double valx = inx.getValue();
-                return new None(1 / Math.sin(valx));
+                return 1 / Math.sin(valx);
             }
 
-            public void gradient() {
-                None inx = getInput(0), out = getOutput();
+            public void gradient(double grad) {
+                None inx = getInput(0);
                 double valx = inx.getValue();
-                double grad = out.getGrad();
                 inx.setGrad(grad * -Math.cos(valx) / Math.pow(Math.sin(valx), 2));
             }
 
@@ -336,18 +321,17 @@ public class TensorFlow implements Serializable {
     }
 
     public Tensor arcsin(Tensor... input) {
-        return new TensorOperator("Arcsin", input) {
+        return new ScalarOperator("Arcsin", input) {
 
-            public None compute() {
+            public double compute() {
                 None inx = getInput(0);
                 double valx = inx.getValue();
-                return new None(Math.asin(valx));
+                return Math.asin(valx);
             }
 
-            public void gradient() {
-                None inx = getInput(0), out = getOutput();
+            public void gradient(double grad) {
+                None inx = getInput(0);
                 double valx = inx.getValue();
-                double grad = out.getGrad();
                 inx.setGrad(grad / Math.pow(1 - Math.pow(valx,2), -2));
             }
 
@@ -355,18 +339,17 @@ public class TensorFlow implements Serializable {
     }
 
     public Tensor arccos(Tensor... input) {
-        return new TensorOperator("Arccos", input) {
+        return new ScalarOperator("Arccos", input) {
 
-            public None compute() {
+            public double compute() {
                 None inx = getInput(0);
                 double valx = inx.getValue();
-                return new None(Math.acos(valx));
+                return Math.acos(valx);
             }
 
-            public void gradient() {
-                None inx = getInput(0), out = getOutput();
+            public void gradient(double grad) {
+                None inx = getInput(0);
                 double valx = inx.getValue();
-                double grad = out.getGrad();
                 inx.setGrad(grad / -Math.pow(1 - Math.pow(valx,2), -2));
             }
 
@@ -374,18 +357,17 @@ public class TensorFlow implements Serializable {
     }
 
     public Tensor arctan(Tensor... input) {
-        return new TensorOperator("Arctan", input) {
+        return new ScalarOperator("Arctan", input) {
 
-            public None compute() {
+            public double compute() {
                 None inx = getInput(0);
                 double valx = inx.getValue();
-                return new None(Math.atan(valx));
+                return Math.atan(valx);
             }
 
-            public void gradient() {
-                None inx = getInput(0), out = getOutput();
+            public void gradient(double grad) {
+                None inx = getInput(0);
                 double valx = inx.getValue();
-                double grad = out.getGrad();
                 inx.setGrad(grad / (1 + Math.pow(valx, 2)));
             }
 
@@ -393,18 +375,17 @@ public class TensorFlow implements Serializable {
     }
 
     public Tensor arccot(Tensor... input) {
-        return new TensorOperator("Arccot", input) {
+        return new ScalarOperator("Arccot", input) {
 
-            public None compute() {
+            public double compute() {
                 None inx = getInput(0);
                 double valx = inx.getValue();
-                return new None(atan(1 / valx));
+                return atan(1 / valx);
             }
 
-            public void gradient() {
-                None inx = getInput(0), out = getOutput();
+            public void gradient(double grad) {
+                None inx = getInput(0);
                 double valx = inx.getValue();
-                double grad = out.getGrad();
                 inx.setGrad(grad / -(1 + Math.pow(valx, 2)));
             }
 
@@ -412,18 +393,17 @@ public class TensorFlow implements Serializable {
     }
 
     public Tensor relu(Tensor input) {
-        return new TensorOperator("Relu", input) {
+        return new ScalarOperator("Relu", input) {
 
-            public None compute() {
+            public double compute() {
                 None inx = getInput(0);
                 double valx = inx.getValue();
-                return new None(valx > 0 ? valx : 0.1 * valx);
+                return valx > 0 ? valx : 0.1 * valx;
             }
 
-            public void gradient() {
-                None inx = getInput(0), out = getOutput();
+            public void gradient(double grad) {
+                None inx = getInput(0);
                 double valx = inx.getValue();
-                double grad = out.getGrad();
                 inx.setGrad(valx > 0 ? grad : 0.1 * grad);
             }
 
@@ -448,18 +428,17 @@ public class TensorFlow implements Serializable {
     }
 
     public Tensor max(Tensor... input) {
-        return new TensorOperator("Max", input) {
+        return new ScalarOperator("Max", input) {
 
-            public None compute() {
+            public double compute() {
                 None inx = getInput(0), iny = getInput(1);
                 double valx = inx.getValue(), valy = iny.getValue();
-                return new None(Math.max(valx, valy));
+                return Math.max(valx, valy);
             }
 
-            public void gradient() {
-                None inx = getInput(0), iny = getInput(1), out = getOutput();
+            public void gradient(double grad) {
+                None inx = getInput(0), iny = getInput(1);
                 double valx = inx.getValue(), valy = iny.getValue();
-                double grad = out.getGrad();
                 inx.setGrad(valx > valy ? grad : 0);
                 iny.setGrad(valx < valy ? grad : 0);
             }
@@ -470,11 +449,11 @@ public class TensorFlow implements Serializable {
     public Tensor matmul(Tensor... input) {
         return new TensorOperator("Matmul", input) {
 
-            public Object compute() {
+            public double[] compute() {
                 Tenser<None> A = getInput(0), B = getInput(1);
                 Tenser<None> C = createOutput(new int[]{A.shape(0), B.shape(1)});
                 Cublas.New().matmul(getInput()[0], getInput()[1], this);
-                return C;
+                return value;
             }
 
             public void gradient() {
@@ -490,7 +469,7 @@ public class TensorFlow implements Serializable {
     public Tensor matmulTran(Tensor... input) {
         return new TensorOperator("MatmulTran", input) {
 
-            public Object compute() {
+            /*public Object compute() {
                 Tenser<None> A = getInput(0), B = getInput(1);
                 Tenser<None> C = createOutput(new int[]{A.shape(0),B.shape(0)});
                 forEach(A.shape(0), B.shape(0), A.shape(1), (i, l, j) -> {
@@ -508,7 +487,7 @@ public class TensorFlow implements Serializable {
                     inx.setGrad(out.getGrad() * iny.getValue());
                     iny.setGrad(out.getGrad() * inx.getValue());
                 });
-            }
+            }*/
 
         };
     }
@@ -669,7 +648,7 @@ public class TensorFlow implements Serializable {
     public Tensor conv(int[] stride, int padding, Tensor... input) {
         return new TensorOperator("Conv", input) {
 
-            public Tenser compute() {
+            /*public Tenser compute() {
                 Tenser<None> A = getInput(0), B = padding(getInput(1), padding);
                 int heights = stride[0], widths = stride[1];
                 int height = (B.shape(0) - A.shape(0)) / heights + 1;
@@ -691,7 +670,7 @@ public class TensorFlow implements Serializable {
                     inx.setGrad(out.getGrad() * iny.getValue());
                     iny.setGrad(out.getGrad() * inx.getValue());
                 });
-            }
+            }*/
 
         };
     }
@@ -719,7 +698,7 @@ public class TensorFlow implements Serializable {
     public Tensor deconv(int[] stride, int padding, Tensor... input) {
         return new TensorOperator("Deconv", input) {
 
-            public Tenser<None> compute() {
+            /*public Tenser<None> compute() {
                 Tenser<None> A = getInput(0), B = getInput(1);
                 int heighs = stride[0], widths = stride[1];
                 int height = (B.shape(0) - 1) * heighs + A.shape(0) - 2 * padding;
@@ -741,7 +720,7 @@ public class TensorFlow implements Serializable {
                     inx.setGrad(out.getGrad() * iny.getValue());
                     iny.setGrad(out.getGrad() * inx.getValue());
                 });
-            }
+            }*/
 
         };
     }
@@ -769,7 +748,7 @@ public class TensorFlow implements Serializable {
     public Tensor maxpool(int kernelSize, int[] stride, int padding, Tensor input) {
         return new TensorOperator("Maxpool", input) {
 
-            public Tenser compute() {
+            /*public Tenser compute() {
                 Tenser<None> A = padding(getInput(0), padding);
                 int heighs = stride[0], widths = stride[1];
                 int height = (A.shape(0) - kernelSize) / heighs + 1, width = (A.shape(1) - kernelSize) / widths + 1;
@@ -788,7 +767,7 @@ public class TensorFlow implements Serializable {
                     None inx = A.get(y * heighs + m, x * widths + n), out = B.get(y, x);
                     inx.setGrad(inx.getValue() == out.getValue() ? out.getGrad() : 0d);
                 });
-            }
+            }*/
 
         };
     }
@@ -813,7 +792,7 @@ public class TensorFlow implements Serializable {
     public Tensor demaxpool(int kernelSize, int[] stride, int padding, Tensor input) {
         return new TensorOperator("Demaxpool", input) {
 
-            public Tenser compute() {
+            /*public Tenser compute() {
                 Tenser<None> A = getInput(0);
                 int heighs = stride[0], widths = stride[1];
                 int height = (A.shape(0) - 1) * heighs + kernelSize - 2 * padding;
@@ -834,7 +813,7 @@ public class TensorFlow implements Serializable {
                     None inx = A.get(y, x), out = B.get(y * heighs + m, x * widths + n);
                     inx.setGrad(out.getGrad());
                 });
-            }
+            }*/
 
         };
     }
