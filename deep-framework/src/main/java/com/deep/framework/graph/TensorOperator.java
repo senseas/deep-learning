@@ -1,6 +1,7 @@
 package com.deep.framework.graph;
 
 import com.deep.framework.core.TensorFlux;
+import com.deep.framework.lang.Tenser;
 
 import java.util.Arrays;
 import java.util.Objects;
@@ -25,13 +26,48 @@ public class TensorOperator extends Tensor {
         }
     }
 
-    public double[] compute() { return null; }
+    public Tenser<None> compute() { return null; }
 
     public void gradient() { }
 
+    public void forward() {
+        for (Tensor o : getInput()) o.forward();
+        clearOutput();
+        //create();
+        compute();
+    }
+
+    public void backward() {
+        gradient();
+        clearGrad();
+        for (Tensor o : getInput()) o.backward();
+    }
+
+    public void reduce() {
+        for (Tensor o : getInput()) o.reduce();
+    }
+
+    public void clearOutput() {
+        if (Objects.nonNull(value)) {
+            Arrays.fill(value, 0d);
+            Arrays.fill(grad, 0d);
+        }
+    }
+
+    public void clearGrad() {
+        Arrays.fill(grad, 0d);
+    }
+
+    public void create() {
+        if (Objects.nonNull(value)) {
+            this.value = random(shape);
+            this.grad = zeros(shape);
+            this.output = fillNones(this);
+        }
+    }
+
     public <M> M getInput(int i) {
-        Tensor input = getInput()[i];
-        return input.getOutput();
+        return getInput()[i].getOutput();
     }
 
     public Stream inputStream() {
@@ -47,38 +83,4 @@ public class TensorOperator extends Tensor {
         return getOutput();
     }
 
-    public void forward() {
-        for (Tensor o : getInput()) o.forward();
-        clearOutput();
-        create();
-        value = compute();
-    }
-
-    public void backward() {
-        gradient();
-        clearGrad();
-        for (Tensor o : getInput()) o.backward();
-    }
-
-    public void reduce() {
-        for (Tensor o : getInput()) o.reduce();
-    }
-
-    public void create() {
-        if (Objects.isNull(value)) {
-            this.value = random(shape);
-            this.grad = zeros(shape);
-            this.output = fillNones(this);
-        }
-    }
-
-    public void clearOutput() {
-        if (Objects.isNull(value)) return;
-        Arrays.fill(value, 0d);
-        Arrays.fill(grad, 0d);
-    }
-
-    public void clearGrad() {
-        Arrays.fill(grad, 0d);
-    }
 }

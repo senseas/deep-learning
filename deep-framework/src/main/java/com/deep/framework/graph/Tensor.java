@@ -1,12 +1,12 @@
 package com.deep.framework.graph;
 
 import com.deep.framework.core.TensorExecutor;
-import com.deep.framework.core.TensorFlux;
 import com.deep.framework.creater.ParamCreater;
 import com.deep.framework.cuda.CudaContext;
 import lombok.Data;
 
 import java.io.Serializable;
+import java.util.Arrays;
 import java.util.Objects;
 
 import static com.deep.framework.lang.Shape.*;
@@ -69,18 +69,17 @@ public class Tensor implements Serializable {
         this.output = input;
     }
 
-    public <M> Tensor(M m) {
-        this.name = "Function";
-        this.function = m;
-        this.output = TensorFlux.getOutput(function);
-    }
-
     public Tensor(String name, Tensor... input) {
         this.name = this.name.concat(name);
         this.input = input;
     }
 
-    public void forward() { }
+    public void forward() {
+        if (Objects.nonNull(value)) {
+            Arrays.fill(reduce, false);
+            Arrays.fill(grad, 0d);
+        }
+    }
 
     public void backward() { }
 

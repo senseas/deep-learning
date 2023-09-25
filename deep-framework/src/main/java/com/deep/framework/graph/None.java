@@ -152,9 +152,9 @@ public class None implements Serializable {
     private transient boolean reduce, gradre;
     private transient int idx;
     private transient Tensor tensor;
-    private boolean isOutGrad;
-    private Creater core;
-    private String valId, gradId;
-    private int id = ID.getAndIncrement();
+    private transient boolean isOutGrad;
+    private transient Creater core;
+    private transient String valId, gradId;
+    private transient int id = ID.getAndIncrement();
     public transient static AtomicInteger ID = new AtomicInteger();
 }

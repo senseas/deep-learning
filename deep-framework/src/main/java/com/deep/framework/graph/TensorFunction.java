@@ -2,7 +2,7 @@ package com.deep.framework.graph;
 
 import com.deep.framework.core.TensorFlux;
 import com.deep.framework.functions.Operator;
-import com.deep.framework.lang.util.BeanUtil;
+import com.deep.framework.lang.Tenser;
 
 import java.util.Arrays;
 import java.util.Objects;
@@ -15,48 +15,31 @@ public class TensorFunction extends Tensor implements Operator {
         super(name, input);
     }
 
+    public TensorFunction(Tenser function) {
+        super(null, new Tensor[0]);
+        this.function = function;
+    }
+
     public <M> M compute() {
         return null;
     }
 
-    public <M> M getInput(int i) {
-        Tensor input = getInput()[i];
-        if (BeanUtil.isFunction(input)) return (M) input.getFunction();
-        return TensorFlux.getTensor(input.getOutput());
-    }
-
-    public <M> M getOutput() {
-        return (M) output;
-    }
-
-    public Object getFunction() {
-        if (Objects.nonNull(function)) return function;
-        output = null;
-        return function = compute();
-    }
-
     public void forward() {
         for (Tensor o : getInput()) o.forward();
-
         clearOutput();
         forEach(getFunction(), Tensor::forward);
 
         Object nones = TensorFlux.getOutput(getFunction());
         create(nones);
-        forEach(getOutput(), nones, (None out, None none) -> {
-            out.setId(none.getId());
-            out.setValue(none.getValue());
-        });
+        forEach(getOutput(), nones, (None out, None none) -> out.setValue(none.getValue()));
     }
 
     public void backward() {
         Object nones = TensorFlux.getOutput(getFunction());
-        forEach(getOutput(), nones, (None out, None none) -> {
-            none.setGrad(out.getGrad());
-        });
+        forEach(getOutput(), nones, (None out, None none) -> none.setGrad(out.getGrad()));
 
         forEach(getFunction(), Tensor::backward);
-        forEach(getOutput(), None::reset);
+        clearGrad();
         for (Tensor o : getInput()) o.backward();
     }
 
@@ -66,9 +49,16 @@ public class TensorFunction extends Tensor implements Operator {
     }
 
     public void clearOutput() {
-        if (Objects.isNull(value)) return;
-        Arrays.fill(value, 0d);
-        Arrays.fill(grad, 0d);
+        if (Objects.nonNull(value)) {
+            Arrays.fill(value, 0d);
+            Arrays.fill(grad, 0d);
+        }
+    }
+
+    public void clearGrad() {
+        if (Objects.nonNull(value)) {
+            Arrays.fill(grad, 0d);
+        }
     }
 
     public void create(Object nones) {
@@ -78,6 +68,20 @@ public class TensorFunction extends Tensor implements Operator {
             this.grad = zeros(shape);
             this.output = fillNones(this);
         }
+    }
+
+    public Object getFunction() {
+        if (Objects.nonNull(function)) return function;
+        return function = compute();
+    }
+
+    public <M> M getInput(int i) {
+        Tensor input = getInput()[i];
+        return TensorFlux.getTensor(input.getOutput());
+    }
+
+    public <M> M getOutput() {
+        return (M) output;
     }
 
 }

@@ -16,19 +16,6 @@ public class ScalarOperator extends Tensor {
 
     public void gradient(double grad) { }
 
-    public None getInput(int i) {
-        Tensor input = getInput()[i];
-        return input.getOutput();
-    }
-
-    public Stream inputStream() {
-        return Arrays.stream(getInput()).map(Tensor::getOutput);
-    }
-
-    public <M> M getOutput() {
-        return (M) output;
-    }
-
     public void forward() {
         for (Tensor o : getInput()) o.forward();
         clearOutput();
@@ -52,6 +39,18 @@ public class ScalarOperator extends Tensor {
 
     public void clearGrad() {
         grad[0] = 0;
+    }
+
+    public None getInput(int i) {
+        return getInput()[i].getOutput();
+    }
+
+    public Stream inputStream() {
+        return Arrays.stream(getInput()).map(Tensor::getOutput);
+    }
+
+    public <M> M getOutput() {
+        return (M) output;
     }
 
 }

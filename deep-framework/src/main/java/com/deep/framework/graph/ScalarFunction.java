@@ -16,26 +16,9 @@ public class ScalarFunction extends Tensor implements Operator {
         this.output = new None(this);
     }
 
-    public Tensor compute() {
-        return null;
-    }
+    public Tensor compute() { return null; }
 
-    public void gradient() {}
-
-    public <M> M getInput(int i) {
-        Tensor input = getInput()[i];
-        return TensorFlux.getTensor(input.getOutput());
-    }
-
-    public <M> M getOutput() {
-        return (M) output;
-    }
-
-    public Object getFunction() {
-        if (Objects.nonNull(function)) return function;
-        output = null;
-        return function = compute();
-    }
+    public void gradient() { }
 
     public void forward() {
         for (Tensor o : getInput()) o.forward();
@@ -60,6 +43,11 @@ public class ScalarFunction extends Tensor implements Operator {
         for (Tensor o : getInput()) o.reduce();
     }
 
+    public Object getFunction() {
+        if (Objects.nonNull(function)) return function;
+        return function = compute();
+    }
+
     public void clearOutput() {
         value[0] = 0;
         grad[0] = 0;
@@ -68,5 +56,12 @@ public class ScalarFunction extends Tensor implements Operator {
     public void clearGrad() {
         grad[0] = 0;
     }
+
+    public <M> M getInput(int i) {
+        Tensor input = getInput()[i];
+        return TensorFlux.getTensor(input.getOutput());
+    }
+
+    public <M> M getOutput() { return (M) output; }
 
 }
