@@ -20,9 +20,7 @@ public class TensorFunction extends Tensor implements Operator {
         this.function = function;
     }
 
-    public <M> M compute() {
-        return null;
-    }
+    public <M> M compute() { return null; }
 
     public void forward() {
         for (Tensor o : getInput()) o.forward();
