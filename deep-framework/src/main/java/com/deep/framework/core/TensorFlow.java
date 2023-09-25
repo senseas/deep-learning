@@ -1,7 +1,7 @@
 package com.deep.framework.core;
 
-import com.deep.framework.graph.*;
 import com.deep.framework.cuda.Cublas;
+import com.deep.framework.graph.*;
 import com.deep.framework.lang.Tenser;
 import com.deep.framework.lang.annotation.Cuda;
 
@@ -450,6 +450,14 @@ public class TensorFlow implements Serializable {
         return new TensorFunction(input);
     }
 
+    public Tensor cons(double value) {
+        return new TensorConst(value);
+    }
+
+    public Tensor cons(int[] shape, double value) {
+        return new TensorConst(shape, value);
+    }
+
     public Tensor matmul(Tensor... input) {
         return new TensorOperator("Matmul", input) {
 
@@ -533,7 +541,7 @@ public class TensorFlow implements Serializable {
 
             public Tensor compute() {
                 Tensor A = getInput(0);
-                return div(new TensorConst(1d), add(new TensorConst(1d), exp(minus(A))));
+                return div(cons(1d), add(cons(1d), exp(minus(A))));
             }
 
             public void gradient() { }
@@ -563,7 +571,7 @@ public class TensorFlow implements Serializable {
 
             public Tensor compute() {
                 Tensor a = getInput(0), b = getInput(1);
-                return mul(new TensorConst(0.5), pow(minus(a, b), new TensorConst(2d)));
+                return mul(cons(0.5), pow(minus(a, b), cons(2d)));
             }
 
             public void gradient() { }
@@ -577,7 +585,7 @@ public class TensorFlow implements Serializable {
             @Cuda
             public Tensor compute() {
                 Object A = getInput(0), B = getInput(1);
-                Tensor[] C = {new TensorConst(0d)};
+                Tensor[] C = {cons(0d)};
                 forEach(A, B, (Tensor a, Tensor b) -> {
                     C[0] = add(C[0], square(a, b));
                 });
@@ -607,7 +615,7 @@ public class TensorFlow implements Serializable {
 
             public Tensor compute() {
                 Object A = getInput(0), B = getInput(1);
-                Tensor[] C = {new TensorConst(0d)};
+                Tensor[] C = {cons(0d)};
                 forEach(A, B, (Tensor a, Tensor b) -> {
                     C[0] = add(C[0], softmaxCross(a, b));
                 });
@@ -624,7 +632,7 @@ public class TensorFlow implements Serializable {
 
             public Tensor compute() {
                 Tensor a = getInput(0), b = getInput(1);
-                return minus(add(mul(a, log(b)), mul(minus(new TensorConst(1), a), log(minus(new TensorConst(1), b)))));
+                return minus(add(mul(a, log(b)), mul(minus(cons(1), a), log(minus(cons(1), b)))));
             }
 
             public void gradient() { }
@@ -637,7 +645,7 @@ public class TensorFlow implements Serializable {
 
             public Tensor compute() {
                 Object A = getInput(0), B = getInput(1);
-                Tensor[] C = {new TensorConst(0d)};
+                Tensor[] C = {cons(0d)};
                 forEach(A, B, (Tensor a, Tensor b) -> {
                     C[0] = add(C[0], sigmoidCross(a, b));
                 });
@@ -866,7 +874,7 @@ public class TensorFlow implements Serializable {
                 Tensor C0 = matmul(funcx(A), funcx(B.get(0)));
                 Tensor C1 = matmul(funcx(A), funcx(B.get(1)));
                 Tensor C2 = matmul(funcx(A), funcx(B.get(2)));
-                return matmul(softmax(prod(matmulTran(C0, C1), new TensorConst(8))), C2);
+                return matmul(softmax(prod(matmulTran(C0, C1), cons(8))), C2);
             }
 
             public void gradient() { }
@@ -879,10 +887,10 @@ public class TensorFlow implements Serializable {
 
             public Object compute() {
                 Tenser A = getInput(0), B = zeroTensors(A);
-                Tensor C = mul(new TensorConst(1d / A.shape(0)), sum(funcx(A)));
-                Tensor[] D = {new TensorConst(0)};
-                forEach(A, a -> D[0] = add(D[0], pow(minus((Tensor) a, C), new TensorConst(2))));
-                Tensor E = pow(add(mul(new TensorConst(1d / A.shape(0)), D[0]), new TensorConst(Math.E)), new TensorConst(0.5));
+                Tensor C = mul(cons(1d / A.shape(0)), sum(funcx(A)));
+                Tensor[] D = {cons(0)};
+                forEach(A, a -> D[0] = add(D[0], pow(minus((Tensor) a, C), cons(2))));
+                Tensor E = pow(add(mul(cons(1d / A.shape(0)), D[0]), cons(Math.E)), cons(0.5));
                 forEach(A, B, (Tensor a, Tenser<Tensor> b, int i) -> b.set(add(mul(new Tensor(0.9), div(minus(a, C), E)), new Tensor(0.9)), i));
                 return B;
             }
