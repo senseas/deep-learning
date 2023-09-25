@@ -84,9 +84,9 @@ public class Tensor implements Serializable {
     public void backward() { }
 
     public void reduce() {
-        if(Objects.nonNull(reduce)) {
+        if (Objects.nonNull(reduce)) {
             forEach(getOutput(), (None none) -> {
-                if (!none.isReduce()) {
+                if (none.isGradre() && !none.isReduce()) {
                     none.setReduce(true);
                     double valu = Math.abs(none.getValue()), grad = Math.abs(none.getGrad());
                     double rate = Math.min(valu / (grad + EX), grad / (valu + EX)) * TensorExecutor.rate;

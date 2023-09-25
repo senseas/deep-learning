@@ -1,7 +1,6 @@
 package com.deep.framework.graph;
 
 import com.deep.framework.core.TensorFlux;
-import com.deep.framework.functions.Operator;
 import com.deep.framework.lang.Tenser;
 
 import java.util.Arrays;
@@ -9,7 +8,7 @@ import java.util.Objects;
 
 import static com.deep.framework.lang.Shape.*;
 
-public class TensorFunction extends Tensor implements Operator {
+public class TensorFunction extends Tensor {
 
     public TensorFunction(String name, Tensor... input) {
         super(name, input);
@@ -17,7 +16,9 @@ public class TensorFunction extends Tensor implements Operator {
 
     public TensorFunction(Tenser function) {
         super(null, new Tensor[0]);
+        this.shape = function.shape;
         this.function = function;
+        create(function);
     }
 
     public <M> M compute() { return null; }

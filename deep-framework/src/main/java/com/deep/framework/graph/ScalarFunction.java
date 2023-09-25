@@ -1,13 +1,12 @@
 package com.deep.framework.graph;
 
 import com.deep.framework.core.TensorFlux;
-import com.deep.framework.functions.Operator;
 
 import java.util.Objects;
 
 import static com.deep.framework.lang.ForEach.forEach;
 
-public class ScalarFunction extends Tensor implements Operator {
+public class ScalarFunction extends Tensor{
 
     public ScalarFunction(String name, Tensor... input) {
         super(name, input);
@@ -31,7 +30,8 @@ public class ScalarFunction extends Tensor implements Operator {
 
     public void backward() {
         Tensor function = (Tensor) getFunction();
-        function.getGrad()[0] = grad[0];
+        None output = function.getOutput();
+        output.setGrad(grad[0]);
         function.backward();
 
         clearGrad();
@@ -62,6 +62,8 @@ public class ScalarFunction extends Tensor implements Operator {
         return TensorFlux.getTensor(input.getOutput());
     }
 
-    public <M> M getOutput() { return (M) output; }
+    public <M> M getOutput() {
+        return (M) output;
+    }
 
 }
