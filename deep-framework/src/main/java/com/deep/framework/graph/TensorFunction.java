@@ -63,7 +63,7 @@ public class TensorFunction extends Tensor {
     public void create(Object nones) {
         if (Objects.isNull(value)) {
             shape = shapes(nones);
-            this.value = random(shape);
+            this.value = zeros(shape);
             this.grad = zeros(shape);
             this.output = fillNones(this);
         }

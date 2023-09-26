@@ -3,10 +3,13 @@ package com.deep.framework.graph;
 import java.util.Arrays;
 import java.util.stream.Stream;
 
+import static com.deep.framework.core.TensorFlux.concat;
+
 public class ScalarOperator extends Tensor {
 
     public ScalarOperator(String name, Tensor... input) {
         super(name, input);
+        concat(this);
         this.value = new double[1];
         this.grad = new double[1];
         this.output = new None(this);

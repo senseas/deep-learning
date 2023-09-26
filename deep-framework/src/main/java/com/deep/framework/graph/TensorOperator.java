@@ -7,23 +7,14 @@ import java.util.Arrays;
 import java.util.Objects;
 import java.util.stream.Stream;
 
+import static com.deep.framework.core.TensorFlux.concat;
 import static com.deep.framework.lang.Shape.*;
 
 public class TensorOperator extends Tensor {
 
     public TensorOperator(String name, Tensor... input) {
         super(name, input);
-        if (Arrays.asList("Add", "Addx").contains(name)) {
-            Stream<Tensor> stream = Stream.of();
-            for (Tensor o : input) {
-                if (o.getName().equals(getName())) {
-                    stream = Stream.concat(stream, Arrays.stream(o.getInput()));
-                } else if (!(o instanceof TensorConst && o.getValue()[0] == 0.0)) {
-                    stream = Stream.concat(stream, Stream.of(o));
-                }
-            }
-            setInput(stream.toArray(Tensor[]::new));
-        }
+        concat(this);
     }
 
     public Tenser<None> compute() { return null; }
@@ -60,7 +51,7 @@ public class TensorOperator extends Tensor {
 
     public void create() {
         if (Objects.nonNull(value)) {
-            this.value = random(shape);
+            this.value = zeros(shape);
             this.grad = zeros(shape);
             this.output = fillNones(this);
         }

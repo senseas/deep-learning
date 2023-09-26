@@ -2,14 +2,31 @@ package com.deep.framework.core;
 
 import com.deep.framework.graph.None;
 import com.deep.framework.graph.Tensor;
+import com.deep.framework.graph.TensorConst;
 import com.deep.framework.lang.util.BeanUtil;
 
 import java.io.Serializable;
+import java.util.Arrays;
 import java.util.Objects;
+import java.util.stream.Stream;
 
 import static com.deep.framework.lang.Shape.*;
 
 public class TensorFlux implements Serializable {
+
+    public static void concat(Tensor tensor) {
+        if (Arrays.asList("Add", "Addx").contains(tensor.getName())) {
+            Stream<Tensor> stream = Stream.of();
+            for (Tensor o : tensor.getInput()) {
+                if (o.getName().equals(tensor.getName())) {
+                    stream = Stream.concat(stream, Arrays.stream(o.getInput()));
+                } else if (!(o instanceof TensorConst && o.getValue()[0] == 0.0)) {
+                    stream = Stream.concat(stream, Stream.of(o));
+                }
+            }
+            tensor.setInput(stream.toArray(Tensor[]::new));
+        }
+    }
 
     public static void createOutput(Tensor tensor, Object o) {
         if (Objects.isNull((tensor.getOutput()))) {

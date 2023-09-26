@@ -111,7 +111,6 @@ public class Tensor implements Serializable {
     protected transient Object output, function;
     protected int[] shape;
     protected double[] value, grad;
-    protected double valuex, gradx;
     protected transient boolean[] reduce;
     private transient boolean gradre;
     private transient CudaContext context;
