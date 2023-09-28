@@ -1,6 +1,5 @@
 package com.deep.framework.graph;
 
-import com.deep.framework.core.TensorFlux;
 import com.deep.framework.lang.Tenser;
 
 import java.util.Objects;
