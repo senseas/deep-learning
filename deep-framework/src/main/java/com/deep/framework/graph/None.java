@@ -1,3 +1,4 @@
+/*
 package com.deep.framework.graph;
 
 import com.deep.framework.creater.Creater;
@@ -157,4 +158,4 @@ public class None implements Serializable {
     private transient String valId, gradId;
     private transient int id = ID.getAndIncrement();
     public transient static AtomicInteger ID = new AtomicInteger();
-}
+}*/

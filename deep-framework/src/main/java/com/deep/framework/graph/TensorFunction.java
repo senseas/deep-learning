@@ -5,6 +5,7 @@ import com.deep.framework.lang.Tenser;
 
 import java.util.Arrays;
 import java.util.Objects;
+import java.util.stream.IntStream;
 
 import static com.deep.framework.lang.Shape.*;
 
@@ -30,12 +31,12 @@ public class TensorFunction extends Tensor {
 
         Object nones = TensorFlux.getOutput(getFunction());
         create(nones);
-        forEach(getOutput(), nones, (None out, None none) -> out.setValue(none.getValue()));
+        forEach(getOutput(), nones, (Tensor out, Tensor none) -> out.setValue(none.getValue()));
     }
 
     public void backward() {
         Object nones = TensorFlux.getOutput(getFunction());
-        forEach(getOutput(), nones, (None out, None none) -> none.setGrad(out.getGrad()));
+        forEach(getOutput(), nones, (Tensor out, Tensor none) -> none.setGrad(out.getGrad()));
 
         forEach(getFunction(), Tensor::backward);
         clearGrad();
@@ -48,29 +49,30 @@ public class TensorFunction extends Tensor {
     }
 
     public void clearOutput() {
-        if (Objects.nonNull(value)) {
-            Arrays.fill(value, 0d);
-            Arrays.fill(grad, 0d);
+        if (Objects.nonNull(data)) {
+            Arrays.fill(data, 0d);
+            Arrays.fill(grads, 0d);
         }
     }
 
     public void clearGrad() {
-        if (Objects.nonNull(value)) {
-            Arrays.fill(grad, 0d);
+        if (Objects.nonNull(data)) {
+            Arrays.fill(grads, 0d);
         }
     }
 
     public void create(Object nones) {
-        if (Objects.isNull(value)) {
+        if (Objects.isNull(data)) {
             shape = shapes(nones);
-            this.value = zeros(shape);
-            this.grad = zeros(shape);
-            this.output = fillNones(this);
+            this.data = zeros(shape);
+            this.grads = zeros(shape);
         }
     }
 
-    public Object getFunction() {
+    public Tenser<Tensor> getFunction() {
         if (Objects.nonNull(function)) return function;
+
+        function = new Tenser<>(Tensor.class, shape);
         return function = compute();
     }
 
@@ -79,8 +81,12 @@ public class TensorFunction extends Tensor {
         return TensorFlux.getTensor(input.getOutput());
     }
 
-    public <M> M getOutput() {
-        return (M) output;
+    public Tenser<Tensor> getOutput() {
+        if (Objects.nonNull(output)) return output;
+
+        output = new Tenser<>(Tensor.class, shape);
+        IntStream.range(0, output.size()).forEach(i -> output.set(new Tensor(this, i), i));
+        return output;
     }
 
 }

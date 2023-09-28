@@ -1,6 +1,7 @@
 package com.deep.framework.graph;
 
 import com.deep.framework.core.TensorFlux;
+import com.deep.framework.lang.Tenser;
 
 import java.util.Objects;
 
@@ -10,9 +11,9 @@ public class ScalarFunction extends Tensor{
 
     public ScalarFunction(String name, Tensor... input) {
         super(name, input);
-        this.value = new double[1];
-        this.grad = new double[1];
-        this.output = new None(this);
+        this.data = new double[1];
+        this.grads = new double[1];
+        this.output = new Tenser<>(new Tensor[]{new Tensor(this, 0)});
     }
 
     public Tensor compute() { return null; }
@@ -23,16 +24,15 @@ public class ScalarFunction extends Tensor{
         for (Tensor o : getInput()) o.forward();
         clearOutput();
 
-        Tensor function = (Tensor) getFunction();
-        function.forward();
-        value[0] = function.getValue()[0];
+        Tensor tensor = getFunction().first();
+        tensor.forward();
+        data[0] = tensor.getValue();
     }
 
     public void backward() {
-        Tensor function = (Tensor) getFunction();
-        None output = function.getOutput();
-        output.setGrad(grad[0]);
-        function.backward();
+        Tensor tensor = getFunction().first();
+        tensor.setGrad(grads[0]);
+        tensor.backward();
 
         clearGrad();
         for (Tensor o : getInput()) o.backward();
@@ -43,27 +43,28 @@ public class ScalarFunction extends Tensor{
         for (Tensor o : getInput()) o.reduce();
     }
 
-    public Object getFunction() {
+    public Tenser<Tensor> getFunction() {
         if (Objects.nonNull(function)) return function;
-        return function = compute();
+        return function = new Tenser<>(new Tensor[]{compute()});
     }
 
     public void clearOutput() {
-        value[0] = 0;
-        grad[0] = 0;
+        data[0] = 0;
+        grads[0] = 0;
     }
 
     public void clearGrad() {
-        grad[0] = 0;
+        grads[0] = 0;
     }
 
-    public <M> M getInput(int i) {
+    public Tensor getInput(int i) {
         Tensor input = getInput()[i];
-        return TensorFlux.getTensor(input.getOutput());
+        if (Objects.isNull(input.getOutput())) return input;
+        return input.getOutput().first();
     }
 
-    public <M> M getOutput() {
-        return (M) output;
+    public Tenser<Tensor> getOutput() {
+        return output;
     }
 
 }

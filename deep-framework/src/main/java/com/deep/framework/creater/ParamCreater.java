@@ -1,3 +1,4 @@
+/*
 package com.deep.framework.creater;
 
 import com.deep.framework.graph.None;
@@ -43,4 +44,4 @@ public class ParamCreater extends Creater {
 
         functor.gradient("");
     }
-}
+}*/

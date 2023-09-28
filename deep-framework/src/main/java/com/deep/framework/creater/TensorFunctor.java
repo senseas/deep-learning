@@ -1,3 +1,4 @@
+/*
 package com.deep.framework.creater;
 
 import com.deep.framework.graph.None;
@@ -35,4 +36,4 @@ public abstract class TensorFunctor {
     private None out;
     private String name = "Tensor::";
     private Tensor[] input;
-}
+}*/

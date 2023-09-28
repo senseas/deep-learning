@@ -1,8 +1,8 @@
 package com.deep.framework.core;
 
-import com.deep.framework.graph.None;
 import com.deep.framework.graph.Tensor;
 import com.deep.framework.graph.TensorConst;
+import com.deep.framework.lang.Tenser;
 import com.deep.framework.lang.util.BeanUtil;
 
 import java.io.Serializable;
@@ -20,7 +20,7 @@ public class TensorFlux implements Serializable {
             for (Tensor o : tensor.getInput()) {
                 if (o.getName().equals(tensor.getName())) {
                     stream = Stream.concat(stream, Arrays.stream(o.getInput()));
-                } else if (!(o instanceof TensorConst && o.getValue()[0] == 0.0)) {
+                } else if (!(o instanceof TensorConst && o.getValue() == 0.0)) {
                     stream = Stream.concat(stream, Stream.of(o));
                 }
             }
@@ -33,13 +33,13 @@ public class TensorFlux implements Serializable {
             if (BeanUtil.isTenser(o) || BeanUtil.isArray(o)) {
                 int[] shape = shapes(o);
                 tensor.setShape(shape);
-                tensor.setValue(zeros(shape));
+                tensor.setData(zeros(shape));
                 tensor.setGrad(zeros(shape));
                 tensor.setOutput(fillNones(tensor));
             } else {
-                tensor.setValue(new double[]{0d});
-                tensor.setGrad(new double[]{0d});
-                tensor.setOutput(new None(tensor));
+                tensor.setData(new double[]{0d});
+                tensor.setGrads(new double[]{0d});
+                tensor.setOutput(new Tenser<>(new Tensor[]{new Tensor(tensor, 0)}));
             }
         }
     }
@@ -50,22 +50,22 @@ public class TensorFlux implements Serializable {
                 Tensor o = (Tensor) b;
                 return o.getOutput();
             });
-            return (E) fill(c, shape(None.class, c), b -> b);
+            return (E) fill(c, shape(Tensor.class, c), b -> b);
         } else {
             Tensor o = (Tensor) a;
-            return o.getOutput();
+            return (E)o.getOutput();
         }
     }
 
     public static <E> E getTensor(Object a) {
         if (BeanUtil.isTenser(a)) {
             return (E) fill(a, shape(Tensor.class, a), b -> {
-                None o = (None) b;
-                return new Tensor(o);
+                Tensor o = (Tensor) b;
+                return o;
             });
         } else {
-            None o = (None) a;
-            return (E) new Tensor(o);
+            Tensor o = (Tensor) a;
+            return (E) o;
         }
     }
 

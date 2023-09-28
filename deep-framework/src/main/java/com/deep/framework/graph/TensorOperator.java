@@ -5,10 +5,11 @@ import com.deep.framework.lang.Tenser;
 
 import java.util.Arrays;
 import java.util.Objects;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static com.deep.framework.core.TensorFlux.concat;
-import static com.deep.framework.lang.Shape.*;
+import static com.deep.framework.lang.Shape.zeros;
 
 public class TensorOperator extends Tensor {
 
@@ -17,7 +18,7 @@ public class TensorOperator extends Tensor {
         concat(this);
     }
 
-    public Tenser<None> compute() { return null; }
+    public Tenser<Tensor> compute() { return null; }
 
     public void gradient() { }
 
@@ -39,25 +40,24 @@ public class TensorOperator extends Tensor {
     }
 
     public void clearOutput() {
-        if (Objects.nonNull(value)) {
-            Arrays.fill(value, 0d);
-            Arrays.fill(grad, 0d);
+        if (Objects.nonNull(data)) {
+            Arrays.fill(data, 0d);
+            Arrays.fill(grads, 0d);
         }
     }
 
     public void clearGrad() {
-        Arrays.fill(grad, 0d);
+        Arrays.fill(grads, 0d);
     }
 
     public void create() {
-        if (Objects.nonNull(value)) {
-            this.value = zeros(shape);
-            this.grad = zeros(shape);
-            this.output = fillNones(this);
+        if (Objects.nonNull(data)) {
+            this.data = zeros(shape);
+            this.grads = zeros(shape);
         }
     }
 
-    public <M> M getInput(int i) {
+    public Tenser<Tensor> getInput(int i) {
         return getInput()[i].getOutput();
     }
 
@@ -65,11 +65,15 @@ public class TensorOperator extends Tensor {
         return Arrays.stream(getInput()).map(Tensor::getOutput);
     }
 
-    public <M> M getOutput() {
-        return (M) output;
+    public Tenser<Tensor> getOutput() {
+        if (Objects.nonNull(output)) return output;
+
+        output = new Tenser<>(Tensor.class, shape);
+        IntStream.range(0, output.size()).forEach(i -> output.set(new Tensor(this, i), i));
+        return output;
     }
 
-    public <M> M createOutput(Object o) {
+    public Tenser<Tensor> createOutput(Object o) {
         TensorFlux.createOutput(this, o);
         return getOutput();
     }

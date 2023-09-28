@@ -30,6 +30,13 @@ public class Tenser<T> implements Serializable {
         this.nexts = next();
     }
 
+    public Tenser(T[] data) {
+        this.shape = new int[]{1};
+        this.data = data;
+        this.start = 0;
+        this.nexts = next();
+    }
+
     public Tenser(Class clas, int[] shape) {
         this.shape = shape;
         this.data = (T[]) Array.newInstance(clas, size());
@@ -60,6 +67,10 @@ public class Tenser<T> implements Serializable {
     public void set(T data, int... index) {
         int start = start(index);
         this.data[start] = data;
+    }
+
+    public void set(T data, int index) {
+        this.data[start + index] = data;
     }
 
     private int start(int[] index) {

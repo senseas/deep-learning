@@ -1,3 +1,4 @@
+/*
 package com.deep.framework.creater;
 
 import com.deep.framework.graph.*;
@@ -90,4 +91,4 @@ public abstract class Creater implements Serializable {
     public List<None> inParams = new ArrayList<>(), outParams = new ArrayList<>();
     public List<None> inGradParams = new ArrayList<>(), outGradParams = new ArrayList<>();
     public List<None> innerGradParam = new ArrayList<>();
-}
+}*/

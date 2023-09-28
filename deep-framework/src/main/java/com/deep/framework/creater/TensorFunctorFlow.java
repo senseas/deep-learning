@@ -1,3 +1,4 @@
+/*
 package com.deep.framework.creater;
 
 import com.deep.framework.graph.None;
@@ -369,4 +370,4 @@ public class TensorFunctorFlow implements Serializable {
         };
     }
 
-}
+}*/
