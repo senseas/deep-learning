@@ -1,6 +1,5 @@
 package com.deep.framework.lang;
 
-import com.deep.framework.graph.None;
 import com.deep.framework.graph.Tensor;
 import com.deep.framework.graph.TensorConst;
 import com.deep.framework.lang.function.Func;
@@ -8,31 +7,35 @@ import org.apache.commons.math3.random.RandomDataGenerator;
 
 import java.lang.reflect.Array;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.IntStream;
 
 public class Shape extends ForEach {
 
-    public static <E> E random(int[] shape) {
+    public static double[] random(int[] shape) {
         RandomDataGenerator random = new RandomDataGenerator();
-        return (E) IntStream.range(0, size(shape)).mapToDouble(i -> random.nextGaussian(0, 0.1)).toArray();
+        return IntStream.range(0, size(shape)).mapToDouble(i -> random.nextGaussian(0, 0.1)).toArray();
     }
 
-    public static <E> E values(int[] shape, double value) {
-        return (E) IntStream.range(0, size(shape)).mapToDouble(i -> value).toArray();
+    public static double[] values(int[] shape, double value) {
+        return IntStream.range(0, size(shape)).mapToDouble(i -> value).toArray();
     }
 
-    public static <E> E fillNones(Tensor tensor) {
-        None[] nones = IntStream.range(0, size(tensor.getShape())).mapToObj(i -> new None(tensor, i)).toArray(None[]::new);
-        return (E) new Tenser(nones, tensor.getShape());
+    public static Tenser<Tensor> Tensors(Tensor tensor) {
+        Tensor[] tensors = IntStream.range(0, size(tensor.getShape())).mapToObj(i -> new Tensor(tensor, i)).toArray(Tensor[]::new);
+        return new Tenser<>(tensors, tensor.getShape());
     }
 
-    public static <E> E zeros(int[] shape) {
-        return (E) new double[size(shape)];
+    public static Tenser<Tensor> TensorConsts(Tensor tensor) {
+        Tensor[] tensors = IntStream.range(0, size(tensor.getShape())).mapToObj(i -> new TensorConst(tensor, i)).toArray(Tensor[]::new);
+        return new Tenser<>(tensors, tensor.getShape());
     }
 
-    public static <E> E booleans(int[] shape) {
-        return (E) new boolean[size(shape)];
+    public static double[] zeros(int[] shape) {
+        return new double[size(shape)];
+    }
+
+    public static boolean[] booleans(int[] shape) {
+        return new boolean[size(shape)];
     }
 
     public static <E> E zeroTensors(Object a) {
@@ -40,11 +43,7 @@ public class Shape extends ForEach {
     }
 
     public static <E> E zeroTensors(int[] a, int[] b) {
-        return (E) fill(shape(Tensor.class, a), o -> new TensorConst(b, 0d));
-    }
-
-    public static <E> E zeroNones(Object a) {
-        return (E) fill(shape(None.class, a), o -> new None(0d, false));
+        return (E) fill(shape(Tensor.class, a), o -> new TensorConst(0d, b));
     }
 
     public static Object shape(Class clas, Object o) {
@@ -88,31 +87,8 @@ public class Shape extends ForEach {
         return list.stream().mapToInt(Integer::intValue).toArray();
     }
 
-    public static double[] linesValue(Object arr) {
-        double[] list = new double[size(arr)];
-        AtomicInteger index = new AtomicInteger();
-        forEach(arr, (None a) -> {
-            list[index.getAndIncrement()] = a.getValue();
-        });
-        return list;
-    }
-
-    public static double[] linesGrad(Object arr) {
-        double[] list = new double[size(arr)];
-        AtomicInteger index = new AtomicInteger();
-        forEach(arr, (None a) -> {
-            list[index.getAndIncrement()] = a.getGrad();
-        });
-        return list;
-    }
-
-    public static int size(Object arr) {
-        int size = 1;
-        while (Objects.nonNull(arr) && arr.getClass().isArray()) {
-            size *= Array.getLength(arr);
-            arr = Array.get(arr, 0);
-        }
-        return size;
+    public static int[] shape(int... shape) {
+        return shape;
     }
 
     public static Class getArrayDeepClass(Object arr) {

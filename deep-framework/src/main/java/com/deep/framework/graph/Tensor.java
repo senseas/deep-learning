@@ -8,7 +8,6 @@ import lombok.Data;
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Objects;
-import java.util.stream.IntStream;
 
 import static com.deep.framework.lang.Shape.*;
 
@@ -37,7 +36,6 @@ public class Tensor implements Serializable {
         this.data = random(shape);
         this.grads = zeros(shape);
         this.reduces = booleans(shape);
-        this.output = fillNones(this);
     }
 
     public Tensor(int[] shape, double value) {
@@ -46,7 +44,6 @@ public class Tensor implements Serializable {
         this.data = values(shape, value);
         this.grads = zeros(shape);
         this.reduces = booleans(shape);
-        this.output = fillNones(this);
     }
 
     public Tensor(Tensor tensor, int idx) {
@@ -62,10 +59,8 @@ public class Tensor implements Serializable {
     }
 
     public void forward() {
-        if (Objects.nonNull(data)) {
-            Arrays.fill(reduces, false);
-            Arrays.fill(grads, 0d);
-        }
+        if (Objects.nonNull(grads)) Arrays.fill(grads, 0d);
+        if (Objects.nonNull(reduces)) Arrays.fill(reduces, false);
     }
 
     public void backward() { }
@@ -86,9 +81,8 @@ public class Tensor implements Serializable {
 
     public Tenser<Tensor> getOutput() {
         if (Objects.nonNull(output)) return output;
-        output = new Tenser<>(Tensor.class, shape);
-        IntStream.range(0, output.size()).forEach(i -> output.set(new Tensor(this, i), i));
-        return output;
+        if (Objects.isNull(shape)) return output = new Tenser<>(new Tensor[]{this});
+        return output = Tensors(this);
     }
 
     public double getValue() {
@@ -96,11 +90,11 @@ public class Tensor implements Serializable {
     }
 
     public void setValue(double value) {
-        this.data[idx] = value;
+        data[idx] = value;
     }
 
     public void setGrad(double grad) {
-        this.grads[idx] += grad;
+        grads[idx] += grad;
     }
 
     public double getGrad() {
@@ -112,22 +106,25 @@ public class Tensor implements Serializable {
     }
 
     public void setReduce(boolean reduce) {
-        this.reduces[idx] = reduce;
+        reduces[idx] = reduce;
     }
 
-    public int shape(int i) {return shape[i];}
+    public int shape(int i) {
+        return shape[i];
+    }
 
     public CudaContext getContext() {
         if (Objects.nonNull(context)) return context;
         return context = new CudaContext(this);
     }
 
+    private int idx;
+    protected int[] shape;
+    protected double[] data, grads;
+    protected boolean[] reduces;
+
     private String name = "Tensor::";
     private Tensor[] input;
-    protected transient Tenser<Tensor> output, function;
-    protected double[] data, grads;
-    protected transient boolean[] reduces;
-    protected int[] shape;
-    private transient int idx;
+    protected Tenser<Tensor> output, function;
     private transient CudaContext context;
 }

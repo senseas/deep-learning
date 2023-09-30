@@ -4,6 +4,8 @@ import com.deep.framework.graph.ScalarOperator;
 import com.deep.framework.graph.Tensor;
 import com.deep.framework.lang.annotation.Cuda;
 
+import java.util.stream.Stream;
+
 import static com.deep.framework.lang.ForEach.forEach;
 import static java.lang.Math.atan;
 
@@ -14,11 +16,11 @@ public interface Operator {
 
             @Cuda
             public double compute() {
-                return inputStream().mapToDouble(a -> a.getValue()).sum();
+                return Stream.of(getInput()).mapToDouble(Tensor::getValue).sum();
             }
 
             public void gradient(double grad) {
-                inputStream().forEach(a -> a.setGrad(grad));
+                Stream.of(getInput()).forEach(a -> a.setGrad(grad));
             }
 
         };
@@ -382,6 +384,25 @@ public interface Operator {
                 double valx = inx.getValue(), valy = iny.getValue();
                 inx.setGrad(valx > valy ? grad : 0);
                 iny.setGrad(valx < valy ? grad : 0);
+            }
+
+        };
+    }
+
+    default Tensor min(Tensor... input) {
+        return new ScalarOperator("Min", input) {
+
+            public double compute() {
+                Tensor inx = getInput(0), iny = getInput(1);
+                double valx = inx.getValue(), valy = iny.getValue();
+                return Math.min(valx, valy);
+            }
+
+            public void gradient(double grad) {
+                Tensor inx = getInput(0), iny = getInput(1);
+                double valx = inx.getValue(), valy = iny.getValue();
+                inx.setGrad(valx < valy ? grad : 0);
+                iny.setGrad(valx > valy ? grad : 0);
             }
 
         };

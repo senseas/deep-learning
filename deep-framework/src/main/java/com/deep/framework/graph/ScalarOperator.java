@@ -2,8 +2,7 @@ package com.deep.framework.graph;
 
 import com.deep.framework.lang.Tenser;
 
-import java.util.Arrays;
-import java.util.stream.Stream;
+import java.util.Objects;
 
 import static com.deep.framework.core.TensorFlux.concat;
 
@@ -14,7 +13,6 @@ public class ScalarOperator extends Tensor {
         concat(this);
         this.data = new double[1];
         this.grads = new double[1];
-        this.output = new Tenser<>(new Tensor[]{new Tensor(this, 0)});
     }
 
     public double compute() { return 0; }
@@ -50,12 +48,9 @@ public class ScalarOperator extends Tensor {
         return getInput()[i];
     }
 
-    public Stream<Tensor> inputStream() {
-        return Arrays.stream(getInput()).map(a -> a.getOutput().first());
-    }
-
     public Tenser<Tensor> getOutput() {
-        return output;
+        if (Objects.nonNull(output)) return output;
+        return output = new Tenser<>(new Tensor[]{new Tensor(this, 0)});
     }
 
 }

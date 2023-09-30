@@ -5,16 +5,21 @@ import com.deep.framework.lang.Tenser;
 
 import java.util.Arrays;
 import java.util.Objects;
-import java.util.stream.IntStream;
-import java.util.stream.Stream;
 
 import static com.deep.framework.core.TensorFlux.concat;
+import static com.deep.framework.lang.Shape.Tensors;
 import static com.deep.framework.lang.Shape.zeros;
 
 public class TensorOperator extends Tensor {
 
     public TensorOperator(String name, Tensor... input) {
         super(name, input);
+        concat(this);
+    }
+
+    public TensorOperator(String name, int[] shape, Tensor... input) {
+        super(name, input);
+        this.shape = shape;
         concat(this);
     }
 
@@ -25,7 +30,7 @@ public class TensorOperator extends Tensor {
     public void forward() {
         for (Tensor o : getInput()) o.forward();
         clearOutput();
-        //create();
+        create();
         compute();
     }
 
@@ -51,7 +56,7 @@ public class TensorOperator extends Tensor {
     }
 
     public void create() {
-        if (Objects.nonNull(data)) {
+        if (Objects.isNull(data)) {
             this.data = zeros(shape);
             this.grads = zeros(shape);
         }
@@ -61,16 +66,9 @@ public class TensorOperator extends Tensor {
         return getInput()[i].getOutput();
     }
 
-    public Stream inputStream() {
-        return Arrays.stream(getInput()).map(Tensor::getOutput);
-    }
-
     public Tenser<Tensor> getOutput() {
         if (Objects.nonNull(output)) return output;
-
-        output = new Tenser<>(Tensor.class, shape);
-        IntStream.range(0, output.size()).forEach(i -> output.set(new Tensor(this, i), i));
-        return output;
+        return output = Tensors(this);
     }
 
     public Tenser<Tensor> createOutput(Object o) {

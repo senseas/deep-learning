@@ -2,9 +2,8 @@ package com.deep.framework;
 
 import com.alibaba.fastjson.JSONObject;
 import com.deep.framework.core.TensorExecutor;
-import com.deep.framework.graph.None;
-import com.deep.framework.graph.Tensor;
 import com.deep.framework.core.TensorFlow;
+import com.deep.framework.graph.Tensor;
 import com.deep.framework.lang.DataLoader;
 import com.deep.framework.lang.ModeLoader;
 import com.deep.framework.lang.Shape;
@@ -151,7 +150,7 @@ public class DenseNetTest extends Shape {
     }
 
     public void img(Tensor tensor, int i) {
-        Func<None> fun = None::getValue;
+        Func<Tensor> fun = Tensor::getValue;
         Double[][][] data = Shape.reshape(tensor.getOutput(), new Double[3][140][140], fun);
         ImageUtil.rgb2Image(data, DataLoader.IMG_PATH.concat(i + ".jpg"));
     }

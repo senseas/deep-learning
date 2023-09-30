@@ -2,12 +2,8 @@ package com.deep.framework;
 
 import com.deep.framework.core.TensorExecutor;
 import com.deep.framework.core.TensorFlow;
-import com.deep.framework.graph.None;
 import com.deep.framework.graph.Tensor;
-import com.deep.framework.lang.Tenser;
 import org.junit.Test;
-
-import static com.deep.framework.cuda.CudaExecutor.*;
 
 public class AppTest {
 
@@ -30,8 +26,8 @@ public class AppTest {
         Tensor tensor = tf.sigmoid(new Tensor(-0.6354469361189982));
         TensorExecutor executor = new TensorExecutor(tensor);
         executor.run();
-        None none = tensor.getInput()[0].getOutput();
-        gradient(tensor);
+        Tensor none = tensor.getInput()[0].getOutput().one();
+        //gradient(tensor);
         System.out.println(none.getGrad());
 
         Double value = 1 / (1 + Math.exp(-(-0.6354469361189982)));
@@ -46,8 +42,8 @@ public class AppTest {
         Tensor tensor = tf.relux(new Tensor(new int[]{2,3}));
         TensorExecutor executor = new TensorExecutor(tensor);
         executor.run();
-        Tenser<None> none = tensor.getInput()[0].getOutput();
-        compute(tensor);
+        Tensor none = tensor.getInput()[0].getOutput().one();
+        //compute(tensor);
         System.out.println(none);
     }
 

@@ -2,9 +2,8 @@ package com.deep.framework;
 
 import com.alibaba.fastjson.JSONObject;
 import com.deep.framework.core.TensorExecutor;
-import com.deep.framework.graph.None;
-import com.deep.framework.graph.Tensor;
 import com.deep.framework.core.TensorFlow;
+import com.deep.framework.graph.Tensor;
 import com.deep.framework.lang.DataLoader;
 import com.deep.framework.lang.ModeLoader;
 import com.deep.framework.lang.Shape;
@@ -65,7 +64,7 @@ public class LeNetTest extends Shape {
                     log.info("---------{}------------", i);
                     ModeLoader.save(executor, i + "LetNet.obj");
                     log(Shape.reshape(labSet, new Double[10]));
-                    log(Shape.reshape(softmax.getOutput(), new None[10]));
+                    log(Shape.reshape(softmax.getOutput(), new Tensor[10]));
                     log(crossx.getOutput());
                 }
             });
@@ -88,7 +87,7 @@ public class LeNetTest extends Shape {
                     log.info("---------{}------------", i);
                     ModeLoader.save(executor, i + "LetNet.obj");
                     log(Shape.reshape(labSet, new Double[10]));
-                    log(Shape.reshape(softmax.getOutput(), new None[10]));
+                    log(Shape.reshape(softmax.getOutput(), new Tensor[10]));
                     log(crossx.getOutput());
                 }
             });
@@ -109,7 +108,7 @@ public class LeNetTest extends Shape {
             Object inSet = inputSet[i], labSet = labelSet[i];
             executor.forward(inSet, labSet);
             Double[] label = Shape.reshape(labSet, new Double[10]);
-            None[] output = Shape.reshape(softmax.getOutput(), new None[10]);
+            Tensor[] output = Shape.reshape(softmax.getOutput(), new Tensor[10]);
 
             double sum = IntStream.range(0, 9).mapToDouble(a -> a * label[a]).sum();
             TreeMap<Double, Integer> map = new TreeMap<>(Comparator.reverseOrder());

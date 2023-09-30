@@ -1,6 +1,7 @@
 package com.deep.framework.lang;
 
 import com.deep.framework.graph.Tensor;
+import com.deep.framework.graph.TensorConst;
 import com.deep.framework.lang.function.*;
 import com.deep.framework.lang.util.BeanUtil;
 
@@ -184,13 +185,13 @@ public class ForEach implements Serializable {
         Tenser nones = new Tenser(new Tensor[hx * wx], new int[]{hx, wx});
 
         forEach(padding, wx, (m, n) -> {
-            nones.set(new Tensor(0d, false), m, n);
-            nones.set(new Tensor(0d, false), m + padding + height, n);
+            nones.set(new TensorConst(0d), m, n);
+            nones.set(new TensorConst(0d), m + padding + height, n);
         });
 
         forEach(hx, padding, (m, n) -> {
-            nones.set(new Tensor(0d, false), m, n);
-            nones.set(new Tensor(0d, false), m, n + padding + width);
+            nones.set(new TensorConst(0d), m, n);
+            nones.set(new TensorConst(0d), m, n + padding + width);
         });
 
         forEach(height, width, (i, l) -> {

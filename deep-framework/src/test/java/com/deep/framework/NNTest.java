@@ -2,9 +2,8 @@ package com.deep.framework;
 
 import com.alibaba.fastjson.JSONObject;
 import com.deep.framework.core.TensorExecutor;
-import com.deep.framework.graph.None;
-import com.deep.framework.graph.Tensor;
 import com.deep.framework.core.TensorFlow;
+import com.deep.framework.graph.Tensor;
 import com.deep.framework.lang.Shape;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Test;
@@ -58,7 +57,7 @@ public class NNTest extends Shape {
             executor.run(inSet, labSet);
             if (i % 1000 == 0) {
                 log.info("---------{}------------", i);
-                None loss = tensor34.getOutput();
+                Tensor loss = tensor34.getOutput().one();
                 log("输入：", inSet);
                 log("标签：", labSet);
                 log("输出：", tensor33.getValue());

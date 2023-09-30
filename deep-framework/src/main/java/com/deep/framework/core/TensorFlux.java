@@ -2,7 +2,6 @@ package com.deep.framework.core;
 
 import com.deep.framework.graph.Tensor;
 import com.deep.framework.graph.TensorConst;
-import com.deep.framework.lang.Tenser;
 import com.deep.framework.lang.util.BeanUtil;
 
 import java.io.Serializable;
@@ -34,12 +33,10 @@ public class TensorFlux implements Serializable {
                 int[] shape = shapes(o);
                 tensor.setShape(shape);
                 tensor.setData(zeros(shape));
-                tensor.setGrad(zeros(shape));
-                tensor.setOutput(fillNones(tensor));
+                tensor.setGrads(zeros(shape));
             } else {
                 tensor.setData(new double[]{0d});
                 tensor.setGrads(new double[]{0d});
-                tensor.setOutput(new Tenser<>(new Tensor[]{new Tensor(tensor, 0)}));
             }
         }
     }
@@ -48,25 +45,15 @@ public class TensorFlux implements Serializable {
         if (BeanUtil.isTenser(a)) {
             Object c = fill(a, shape(Object.class, a), b -> {
                 Tensor o = (Tensor) b;
+                if (Objects.isNull(o.getShape())) return o.getOutput().one();
                 return o.getOutput();
             });
             return (E) fill(c, shape(Tensor.class, c), b -> b);
         } else {
             Tensor o = (Tensor) a;
-            return (E)o.getOutput();
+            return (E) o.getOutput();
         }
-    }
 
-    public static <E> E getTensor(Object a) {
-        if (BeanUtil.isTenser(a)) {
-            return (E) fill(a, shape(Tensor.class, a), b -> {
-                Tensor o = (Tensor) b;
-                return o;
-            });
-        } else {
-            Tensor o = (Tensor) a;
-            return (E) o;
-        }
     }
 
 }
