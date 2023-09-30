@@ -61,7 +61,7 @@ public class ResnetTest extends Shape {
                 Object inSet = inputSet[i], labSet = labelSet[i];
                 executor.run(inSet, labSet);
                 ModeLoader.save(executor, DataLoader.BASE_PATH.concat(i + "LetNet.obj"));
-                Double[][][] data = Shape.reshape(tensor74.getOutput(), new Double[3][140][140], (Func<Tensor>) (Tensor a) -> (double) a.getValue());
+                Double[][][] data = Shape.reshape(tensor74.getOutput(), new Double[3][140][140], (Func<Tensor>) (Tensor a) -> (double) a.data());
                 ImageUtil.rgb2Image(data, "D:/img/".concat(i + ".jpg"));
                 log(squarex.getOutput());
             });

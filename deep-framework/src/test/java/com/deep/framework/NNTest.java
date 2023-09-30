@@ -60,8 +60,8 @@ public class NNTest extends Shape {
                 Tensor loss = tensor34.getOutput().one();
                 log("输入：", inSet);
                 log("标签：", labSet);
-                log("输出：", tensor33.getValue());
-                log("误差：", loss.getValue());
+                log("输出：", tensor33.data());
+                log("误差：", loss.data());
             }
         });
     }

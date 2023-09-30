@@ -12,7 +12,7 @@ public class ScalarOperator extends Tensor {
         super(name, input);
         concat(this);
         this.data = new double[1];
-        this.grads = new double[1];
+        this.grad = new double[1];
     }
 
     public double compute() { return 0; }
@@ -26,22 +26,22 @@ public class ScalarOperator extends Tensor {
     }
 
     public void backward() {
-        gradient(grads[0]);
+        gradient(grad[0]);
         clearGrad();
         for (Tensor o : getInput()) o.backward();
     }
 
-    public void reduce() {
-        for (Tensor o : getInput()) o.reduce();
+    public void reducer() {
+        for (Tensor o : getInput()) o.reducer();
     }
 
     public void clearOutput() {
         data[0] = 0;
-        grads[0] = 0;
+        grad[0] = 0;
     }
 
     public void clearGrad() {
-        grads[0] = 0;
+        grad[0] = 0;
     }
 
     public Tensor getInput(int i) {

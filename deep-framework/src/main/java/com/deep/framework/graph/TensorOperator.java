@@ -40,25 +40,25 @@ public class TensorOperator extends Tensor {
         for (Tensor o : getInput()) o.backward();
     }
 
-    public void reduce() {
-        for (Tensor o : getInput()) o.reduce();
+    public void reducer() {
+        for (Tensor o : getInput()) o.reducer();
     }
 
     public void clearOutput() {
         if (Objects.nonNull(data)) {
             Arrays.fill(data, 0d);
-            Arrays.fill(grads, 0d);
+            Arrays.fill(grad, 0d);
         }
     }
 
     public void clearGrad() {
-        Arrays.fill(grads, 0d);
+        Arrays.fill(grad, 0d);
     }
 
     public void create() {
         if (Objects.isNull(data)) {
             this.data = zeros(shape);
-            this.grads = zeros(shape);
+            this.grad = zeros(shape);
         }
     }
 

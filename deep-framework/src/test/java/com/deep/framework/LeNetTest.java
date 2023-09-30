@@ -112,7 +112,7 @@ public class LeNetTest extends Shape {
 
             double sum = IntStream.range(0, 9).mapToDouble(a -> a * label[a]).sum();
             TreeMap<Double, Integer> map = new TreeMap<>(Comparator.reverseOrder());
-            IntStream.range(0, 9).forEach(a -> map.put(output[a].getValue(), a));
+            IntStream.range(0, 9).forEach(a -> map.put(output[a].data(), a));
             if (sum == map.get(map.firstKey())) list.add(output);
             log.info("标签：  {}", sum);
             log.info("输出：  {}", JSONObject.toJSONString(map));

@@ -2,11 +2,11 @@ package com.deep.framework.functions;
 
 import com.deep.framework.graph.ScalarOperator;
 import com.deep.framework.graph.Tensor;
+import com.deep.framework.lang.Tenser;
 import com.deep.framework.lang.annotation.Cuda;
 
 import java.util.stream.Stream;
 
-import static com.deep.framework.lang.ForEach.forEach;
 import static java.lang.Math.atan;
 
 public interface Operator {
@@ -16,11 +16,11 @@ public interface Operator {
 
             @Cuda
             public double compute() {
-                return Stream.of(getInput()).mapToDouble(Tensor::getValue).sum();
+                return Stream.of(getInput()).mapToDouble(Tensor::data).sum();
             }
 
             public void gradient(double grad) {
-                Stream.of(getInput()).forEach(a -> a.setGrad(grad));
+                Stream.of(getInput()).forEach(a -> a.grad(grad));
             }
 
         };
@@ -31,14 +31,14 @@ public interface Operator {
 
             public double compute() {
                 Tensor inx = getInput(0), iny = getInput(1);
-                double valx = inx.getValue(), valy = iny.getValue();
+                double valx = inx.data(), valy = iny.data();
                 return valx - valy;
             }
 
             public void gradient(double grad) {
                 Tensor inx = getInput(0), iny = getInput(1);
-                inx.setGrad(grad);
-                iny.setGrad(-grad);
+                inx.grad(grad);
+                iny.grad(-grad);
             }
 
         };
@@ -50,13 +50,13 @@ public interface Operator {
 
             public double compute() {
                 Tensor inx = getInput(0);
-                double valx = inx.getValue();
+                double valx = inx.data();
                 return -valx;
             }
 
             public void gradient(double grad) {
                 Tensor inx = getInput(0);
-                inx.setGrad(-grad);
+                inx.grad(-grad);
             }
 
         };
@@ -67,15 +67,15 @@ public interface Operator {
 
             public double compute() {
                 Tensor inx = getInput(0), iny = getInput(1);
-                double valx = inx.getValue(), valy = iny.getValue();
+                double valx = inx.data(), valy = iny.data();
                 return valx * valy;
             }
 
             public void gradient(double grad) {
                 Tensor inx = getInput(0), iny = getInput(1);
-                double valx = inx.getValue(), valy = iny.getValue();
-                inx.setGrad(grad * valy);
-                iny.setGrad(grad * valx);
+                double valx = inx.data(), valy = iny.data();
+                inx.grad(grad * valy);
+                iny.grad(grad * valx);
             }
 
         };
@@ -86,15 +86,15 @@ public interface Operator {
 
             public double compute() {
                 Tensor inx = getInput(0), iny = getInput(1);
-                double valx = inx.getValue(), valy = iny.getValue();
+                double valx = inx.data(), valy = iny.data();
                 return valx / valy;
             }
 
             public void gradient(double grad) {
                 Tensor inx = getInput(0), iny = getInput(1);
-                double valx = inx.getValue(), valy = iny.getValue();
-                inx.setGrad(grad / valy);
-                iny.setGrad(-grad * valx / Math.pow(valy, 2));
+                double valx = inx.data(), valy = iny.data();
+                inx.grad(grad / valy);
+                iny.grad(-grad * valx / Math.pow(valy, 2));
             }
 
         };
@@ -105,14 +105,14 @@ public interface Operator {
 
             public double compute() {
                 Tensor inx = getInput(0);
-                double valx = inx.getValue();
+                double valx = inx.data();
                 return Math.exp(valx);
             }
 
             public void gradient(double grad) {
                 Tensor inx = getInput(0);
-                double valx = inx.getValue();
-                inx.setGrad(grad * Math.exp(valx));
+                double valx = inx.data();
+                inx.grad(grad * Math.exp(valx));
             }
 
         };
@@ -123,14 +123,14 @@ public interface Operator {
 
             public double compute() {
                 Tensor inx = getInput(0), iny = getInput(1);
-                double valx = inx.getValue(), valy = iny.getValue();
+                double valx = inx.data(), valy = iny.data();
                 return Math.pow(valx, valy);
             }
 
             public void gradient(double grad) {
                 Tensor inx = getInput(0), iny = getInput(1);
-                double valx = inx.getValue(), valy = iny.getValue();
-                inx.setGrad(grad * valy * Math.pow(valx, valy - 1));
+                double valx = inx.data(), valy = iny.data();
+                inx.grad(grad * valy * Math.pow(valx, valy - 1));
             }
 
         };
@@ -141,14 +141,14 @@ public interface Operator {
 
             public double compute() {
                 Tensor inx = getInput(0);
-                double valx = inx.getValue();
+                double valx = inx.data();
                 return Math.log(valx);
             }
 
             public void gradient(double grad) {
                 Tensor inx = getInput(0);
-                double valx = inx.getValue();
-                inx.setGrad(grad / valx);
+                double valx = inx.data();
+                inx.grad(grad / valx);
             }
 
         };
@@ -158,15 +158,13 @@ public interface Operator {
         return new ScalarOperator("Sum", input) {
 
             public double compute() {
-                Object A = getInput(0);
-                Tensor B = new Tensor(0d);
-                forEach(A, (Tensor a) -> B.setValue(B.getValue() + a.getValue()));
-                return B.getValue();
+                Tenser<Tensor> A = getInput(0).getOutput();
+                return A.stream().mapToDouble(Tensor::data).sum();
             }
 
             public void gradient(double grad) {
-                Object A = getInput(0);
-                forEach(A, (Tensor a) -> a.setGrad(grad));
+                Tenser<Tensor> A = getInput(0).getOutput();
+                A.stream().forEach(a -> a.grad(grad));
             }
 
         };
@@ -177,14 +175,14 @@ public interface Operator {
 
             public double compute() {
                 Tensor inx = getInput(0);
-                double valx = inx.getValue();
+                double valx = inx.data();
                 return Math.sin(valx);
             }
 
             public void gradient(double grad) {
                 Tensor inx = getInput(0);
-                double valx = inx.getValue();
-                inx.setGrad(grad * Math.cos(valx));
+                double valx = inx.data();
+                inx.grad(grad * Math.cos(valx));
             }
 
         };
@@ -195,14 +193,14 @@ public interface Operator {
 
             public double compute() {
                 Tensor inx = getInput(0);
-                double valx = inx.getValue();
+                double valx = inx.data();
                 return Math.cos(valx);
             }
 
             public void gradient(double grad) {
                 Tensor inx = getInput(0);
-                double valx = inx.getValue();
-                inx.setGrad(grad * -Math.sin(valx));
+                double valx = inx.data();
+                inx.grad(grad * -Math.sin(valx));
             }
 
         };
@@ -213,14 +211,14 @@ public interface Operator {
 
             public double compute() {
                 Tensor inx = getInput(0);
-                double valx = inx.getValue();
+                double valx = inx.data();
                 return Math.tan(valx);
             }
 
             public void gradient(double grad) {
                 Tensor inx = getInput(0);
-                double valx = inx.getValue();
-                inx.setGrad(grad * Math.pow(1 / Math.cos(valx), 2));
+                double valx = inx.data();
+                inx.grad(grad * Math.pow(1 / Math.cos(valx), 2));
             }
 
         };
@@ -231,14 +229,14 @@ public interface Operator {
 
             public double compute() {
                 Tensor inx = getInput(0);
-                double valx = inx.getValue();
+                double valx = inx.data();
                 return Math.cos(valx) / Math.sin(valx);
             }
 
             public void gradient(double grad) {
                 Tensor inx = getInput(0);
-                double valx = inx.getValue();
-                inx.setGrad(grad * -Math.pow(1 / Math.sin(valx), 2));
+                double valx = inx.data();
+                inx.grad(grad * -Math.pow(1 / Math.sin(valx), 2));
             }
 
         };
@@ -249,14 +247,14 @@ public interface Operator {
 
             public double compute() {
                 Tensor inx = getInput(0);
-                double valx = inx.getValue();
+                double valx = inx.data();
                 return 1 / Math.cos(valx);
             }
 
             public void gradient(double grad) {
                 Tensor inx = getInput(0);
-                double valx = inx.getValue();
-                inx.setGrad(grad * Math.tan(valx) / Math.cos(valx));
+                double valx = inx.data();
+                inx.grad(grad * Math.tan(valx) / Math.cos(valx));
             }
 
         };
@@ -267,14 +265,14 @@ public interface Operator {
 
             public double compute() {
                 Tensor inx = getInput(0);
-                double valx = inx.getValue();
+                double valx = inx.data();
                 return 1 / Math.sin(valx);
             }
 
             public void gradient(double grad) {
                 Tensor inx = getInput(0);
-                double valx = inx.getValue();
-                inx.setGrad(grad * -Math.cos(valx) / Math.pow(Math.sin(valx), 2));
+                double valx = inx.data();
+                inx.grad(grad * -Math.cos(valx) / Math.pow(Math.sin(valx), 2));
             }
 
         };
@@ -285,14 +283,14 @@ public interface Operator {
 
             public double compute() {
                 Tensor inx = getInput(0);
-                double valx = inx.getValue();
+                double valx = inx.data();
                 return Math.asin(valx);
             }
 
             public void gradient(double grad) {
                 Tensor inx = getInput(0);
-                double valx = inx.getValue();
-                inx.setGrad(grad / Math.pow(1 - Math.pow(valx, 2), -2));
+                double valx = inx.data();
+                inx.grad(grad / Math.pow(1 - Math.pow(valx, 2), -2));
             }
 
         };
@@ -303,14 +301,14 @@ public interface Operator {
 
             public double compute() {
                 Tensor inx = getInput(0);
-                double valx = inx.getValue();
+                double valx = inx.data();
                 return Math.acos(valx);
             }
 
             public void gradient(double grad) {
                 Tensor inx = getInput(0);
-                double valx = inx.getValue();
-                inx.setGrad(grad / -Math.pow(1 - Math.pow(valx, 2), -2));
+                double valx = inx.data();
+                inx.grad(grad / -Math.pow(1 - Math.pow(valx, 2), -2));
             }
 
         };
@@ -321,14 +319,14 @@ public interface Operator {
 
             public double compute() {
                 Tensor inx = getInput(0);
-                double valx = inx.getValue();
+                double valx = inx.data();
                 return Math.atan(valx);
             }
 
             public void gradient(double grad) {
                 Tensor inx = getInput(0);
-                double valx = inx.getValue();
-                inx.setGrad(grad / (1 + Math.pow(valx, 2)));
+                double valx = inx.data();
+                inx.grad(grad / (1 + Math.pow(valx, 2)));
             }
 
         };
@@ -339,14 +337,14 @@ public interface Operator {
 
             public double compute() {
                 Tensor inx = getInput(0);
-                double valx = inx.getValue();
+                double valx = inx.data();
                 return atan(1 / valx);
             }
 
             public void gradient(double grad) {
                 Tensor inx = getInput(0);
-                double valx = inx.getValue();
-                inx.setGrad(grad / -(1 + Math.pow(valx, 2)));
+                double valx = inx.data();
+                inx.grad(grad / -(1 + Math.pow(valx, 2)));
             }
 
         };
@@ -357,14 +355,14 @@ public interface Operator {
 
             public double compute() {
                 Tensor inx = getInput(0);
-                double valx = inx.getValue();
+                double valx = inx.data();
                 return valx > 0 ? valx : 0.1 * valx;
             }
 
             public void gradient(double grad) {
                 Tensor inx = getInput(0);
-                double valx = inx.getValue();
-                inx.setGrad(valx > 0 ? grad : 0.1 * grad);
+                double valx = inx.data();
+                inx.grad(valx > 0 ? grad : 0.1 * grad);
             }
 
         };
@@ -375,15 +373,15 @@ public interface Operator {
 
             public double compute() {
                 Tensor inx = getInput(0), iny = getInput(1);
-                double valx = inx.getValue(), valy = iny.getValue();
+                double valx = inx.data(), valy = iny.data();
                 return Math.max(valx, valy);
             }
 
             public void gradient(double grad) {
                 Tensor inx = getInput(0), iny = getInput(1);
-                double valx = inx.getValue(), valy = iny.getValue();
-                inx.setGrad(valx > valy ? grad : 0);
-                iny.setGrad(valx < valy ? grad : 0);
+                double valx = inx.data(), valy = iny.data();
+                inx.grad(valx > valy ? grad : 0);
+                iny.grad(valx < valy ? grad : 0);
             }
 
         };
@@ -394,15 +392,15 @@ public interface Operator {
 
             public double compute() {
                 Tensor inx = getInput(0), iny = getInput(1);
-                double valx = inx.getValue(), valy = iny.getValue();
+                double valx = inx.data(), valy = iny.data();
                 return Math.min(valx, valy);
             }
 
             public void gradient(double grad) {
                 Tensor inx = getInput(0), iny = getInput(1);
-                double valx = inx.getValue(), valy = iny.getValue();
-                inx.setGrad(valx < valy ? grad : 0);
-                iny.setGrad(valx > valy ? grad : 0);
+                double valx = inx.data(), valy = iny.data();
+                inx.grad(valx < valy ? grad : 0);
+                iny.grad(valx > valy ? grad : 0);
             }
 
         };

@@ -58,12 +58,12 @@ public class Cublas {
         //GA= KM_T[DB=KN * GC_T=NM]
         cublasDgemm(handle, CUBLAS_OP_T, CUBLAS_OP_N, K, M, N, alpha, DB, N, GC, N, beta, GA, K);
         // Copy the result from the device to the host
-        cublasGetVector(M * K, Sizeof.DOUBLE, GA, 1, Pointer.to(A.getGrads()), 1);
+        cublasGetVector(M * K, Sizeof.DOUBLE, GA, 1, Pointer.to(A.getGrad()), 1);
 
         //GB= NK_T[GC_T=NM * DA=MK]
         cublasDgemm(handle, CUBLAS_OP_N, CUBLAS_OP_T, N, K, M, alpha, GC, N, DA, K, beta, GB, N);
         // Copy the result from the device to the host
-        cublasGetVector(K * N, Sizeof.DOUBLE, GB, 1, Pointer.to(B.getGrads()), 1);
+        cublasGetVector(K * N, Sizeof.DOUBLE, GB, 1, Pointer.to(B.getGrad()), 1);
     }
 
     public void matmul(int transa, int transb, int M, int N, int K, Pointer A, Pointer B, Pointer C) {

@@ -19,7 +19,7 @@ public class TensorFlux implements Serializable {
             for (Tensor o : tensor.getInput()) {
                 if (o.getName().equals(tensor.getName())) {
                     stream = Stream.concat(stream, Arrays.stream(o.getInput()));
-                } else if (!(o instanceof TensorConst && o.getValue() == 0.0)) {
+                } else if (!(o instanceof TensorConst && o.data() == 0.0)) {
                     stream = Stream.concat(stream, Stream.of(o));
                 }
             }
@@ -33,10 +33,10 @@ public class TensorFlux implements Serializable {
                 int[] shape = shapes(o);
                 tensor.setShape(shape);
                 tensor.setData(zeros(shape));
-                tensor.setGrads(zeros(shape));
+                tensor.setGrad(zeros(shape));
             } else {
                 tensor.setData(new double[]{0d});
-                tensor.setGrads(new double[]{0d});
+                tensor.setGrad(new double[]{0d});
             }
         }
     }

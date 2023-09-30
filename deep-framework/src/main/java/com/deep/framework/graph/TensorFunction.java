@@ -35,39 +35,39 @@ public class TensorFunction extends Tensor {
 
         Object nones = TensorFlux.getOutput(getFunction());
         create(nones);
-        forEach(getOutput(), nones, (Tensor out, Tensor none) -> out.setValue(none.getValue()));
+        forEach(getOutput(), nones, (Tensor out, Tensor none) -> out.data(none.data()));
     }
 
     public void backward() {
         Object nones = TensorFlux.getOutput(getFunction());
-        forEach(getOutput(), nones, (Tensor out, Tensor none) -> none.setGrad(out.getGrad()));
+        forEach(getOutput(), nones, (Tensor out, Tensor none) -> none.grad(out.grad()));
 
         forEach(getFunction(), Tensor::backward);
         clearGrad();
         for (Tensor o : getInput()) o.backward();
     }
 
-    public void reduce() {
-        forEach(getFunction(), Tensor::reduce);
-        for (Tensor o : getInput()) o.reduce();
+    public void reducer() {
+        forEach(getFunction(), Tensor::reducer);
+        for (Tensor o : getInput()) o.reducer();
     }
 
     public void clearOutput() {
         if (Objects.nonNull(data)) {
             Arrays.fill(data, 0d);
-            Arrays.fill(grads, 0d);
+            Arrays.fill(grad, 0d);
         }
     }
 
     public void clearGrad() {
-        Arrays.fill(grads, 0d);
+        Arrays.fill(grad, 0d);
     }
 
     public void create(Object nones) {
         if (Objects.isNull(data)) {
             this.shape = shapes(nones);
             this.data = zeros(shape);
-            this.grads = zeros(shape);
+            this.grad = zeros(shape);
         }
     }
 

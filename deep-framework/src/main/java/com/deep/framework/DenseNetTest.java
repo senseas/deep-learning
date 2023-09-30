@@ -149,7 +149,7 @@ public class DenseNetTest extends Shape {
     }
 
     public static void img(Tensor tensor, int i) {
-        Func<Tensor> fun = Tensor::getValue;
+        Func<Tensor> fun = Tensor::data;
         Double[][][] data = Shape.reshape(tensor.getOutput(), new Double[3][140][140], fun);
         ImageUtil.rgb2Image(data, DataLoader.IMG_PATH.concat(i + ".jpg"));
     }

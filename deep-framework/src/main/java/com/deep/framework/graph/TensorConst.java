@@ -16,9 +16,9 @@ public class TensorConst extends Tensor {
 
     public void forward() {}
 
-    public void reduce() {}
+    public void reducer() {}
 
-    public void setGrad(double grad) {}
+    public void grad(double grad) {}
 
     public Tenser<Tensor> getOutput() {
         if (Objects.nonNull(output)) return output;

@@ -28,7 +28,7 @@ public class AppTest {
         executor.run();
         Tensor none = tensor.getInput()[0].getOutput().one();
         //gradient(tensor);
-        System.out.println(none.getGrad());
+        System.out.println(none.grad());
 
         Double value = 1 / (1 + Math.exp(-(-0.6354469361189982)));
         System.out.println(value);

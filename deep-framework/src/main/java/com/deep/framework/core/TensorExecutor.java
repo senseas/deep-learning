@@ -38,7 +38,7 @@ public class TensorExecutor<E> implements Serializable {
         long ss = System.currentTimeMillis();
         tensor.forward();
         this.backward();
-        tensor.reduce();
+        tensor.reducer();
         status = false;
         //System.out.println(System.currentTimeMillis() - ss);
     }
@@ -50,21 +50,21 @@ public class TensorExecutor<E> implements Serializable {
     }
 
     public void backward() {
-        forEach(tensor.getOutput(), (Tensor none) -> none.setGrad(1d));
+        forEach(tensor.getOutput(), (Tensor none) -> none.grad(1d));
         tensor.backward();
     }
 
     public void reduce() {
-        tensor.reduce();
+        tensor.reducer();
     }
 
     public void setInput(Object o) {
-        Func2<Tensor, Double> func = Tensor::setValue;
+        Func2<Tensor, Double> func = Tensor::data;
         forEach(input.getOutput(), Tensers.tenser(o), func);
     }
 
     public void setLabel(Object o) {
-        Func2<Tensor, Double> func = Tensor::setValue;
+        Func2<Tensor, Double> func = Tensor::data;
         forEach(label.getOutput(), Tensers.tenser(o), func);
     }
 

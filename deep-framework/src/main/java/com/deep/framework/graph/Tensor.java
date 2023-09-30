@@ -18,39 +18,39 @@ public class Tensor implements Serializable {
     public Tensor(double value) {
         this.name = "None";
         this.data = new double[]{value};
-        this.grads = new double[]{0d};
-        this.reduces = new boolean[]{false};
+        this.grad = new double[]{0d};
+        this.reduce = new boolean[]{false};
     }
 
     public Tensor(int[] shape) {
         this.name = "None";
         this.shape = shape;
         this.data = random(shape);
-        this.grads = zeros(shape);
-        this.reduces = booleans(shape);
+        this.grad = zeros(shape);
+        this.reduce = booleans(shape);
     }
 
     public Tensor(String name, int[] shape) {
         this.name = "None::".concat(name);
         this.shape = shape;
         this.data = random(shape);
-        this.grads = zeros(shape);
-        this.reduces = booleans(shape);
+        this.grad = zeros(shape);
+        this.reduce = booleans(shape);
     }
 
     public Tensor(int[] shape, double value) {
         this.name = "None";
         this.shape = shape;
         this.data = values(shape, value);
-        this.grads = zeros(shape);
-        this.reduces = booleans(shape);
+        this.grad = zeros(shape);
+        this.reduce = booleans(shape);
     }
 
     public Tensor(Tensor tensor, int idx) {
         this.idx = idx;
         this.data = tensor.getData();
-        this.grads = tensor.getGrads();
-        this.reduces = tensor.getReduces();
+        this.grad = tensor.getGrad();
+        this.reduce = tensor.getReduce();
     }
 
     public Tensor(String name, Tensor... input) {
@@ -59,21 +59,21 @@ public class Tensor implements Serializable {
     }
 
     public void forward() {
-        if (Objects.nonNull(grads)) Arrays.fill(grads, 0d);
-        if (Objects.nonNull(reduces)) Arrays.fill(reduces, false);
+        if (Objects.nonNull(grad)) Arrays.fill(grad, 0d);
+        if (Objects.nonNull(reduce)) Arrays.fill(reduce, false);
     }
 
     public void backward() { }
 
-    public void reduce() {
-        if (Objects.nonNull(reduces)) {
+    public void reducer() {
+        if (Objects.nonNull(reduce)) {
             forEach(getOutput(), (Tensor none) -> {
-                if (!none.getReduce()) {
-                    none.setReduce(true);
-                    double valu = Math.abs(none.getValue()), grad = Math.abs(none.getGrad());
+                if (!none.reduce()) {
+                    none.reduce(true);
+                    double valu = Math.abs(none.data()), grad = Math.abs(none.grad());
                     double rate = Math.min(valu / (grad + EX), grad / (valu + EX)) * TensorExecutor.rate;
-                    double value = none.getValue() - rate * none.getGrad();
-                    none.setValue(value);
+                    double value = none.data() - rate * none.grad();
+                    none.data(value);
                 }
             });
         }
@@ -85,28 +85,28 @@ public class Tensor implements Serializable {
         return output = Tensors(this);
     }
 
-    public double getValue() {
-        return data[idx];
+    public double data() {
+        return this.data[idx];
     }
 
-    public void setValue(double value) {
-        data[idx] = value;
+    public void data(double value) {
+        this.data[idx] = value;
     }
 
-    public void setGrad(double grad) {
-        grads[idx] += grad;
+    public void grad(double grad) {
+        this.grad[idx] += grad;
     }
 
-    public double getGrad() {
-        return grads[idx];
+    public double grad() {
+        return this.grad[idx];
     }
 
-    public boolean getReduce() {
-        return reduces[idx];
+    public boolean reduce() {
+        return this.reduce[idx];
     }
 
-    public void setReduce(boolean reduce) {
-        reduces[idx] = reduce;
+    public void reduce(boolean reduce) {
+        this.reduce[idx] = reduce;
     }
 
     public int shape(int i) {
@@ -118,13 +118,13 @@ public class Tensor implements Serializable {
         return context = new CudaContext(this);
     }
 
-    private int idx;
+    transient private int idx;
     protected int[] shape;
-    protected double[] data, grads;
-    protected boolean[] reduces;
+    protected double[] data, grad;
+    transient protected boolean[] reduce;
 
     private String name = "Tensor::";
     private Tensor[] input;
-    protected Tenser<Tensor> output, function;
-    private transient CudaContext context;
+    transient protected Tenser<Tensor> output, function;
+    transient private CudaContext context;
 }
