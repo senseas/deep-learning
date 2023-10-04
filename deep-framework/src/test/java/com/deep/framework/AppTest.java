@@ -26,7 +26,7 @@ public class AppTest {
         Tensor tensor = tf.sigmoid(new Tensor(-0.6354469361189982));
         TensorExecutor executor = new TensorExecutor(tensor);
         executor.run();
-        Tensor none = tensor.getInput()[0].getOutput().one();
+        Tensor none = tensor.getInput()[0].getOutput().tensor();
         //gradient(tensor);
         System.out.println(none.grad());
 
@@ -42,7 +42,7 @@ public class AppTest {
         Tensor tensor = tf.relux(new Tensor(new int[]{2,3}));
         TensorExecutor executor = new TensorExecutor(tensor);
         executor.run();
-        Tensor none = tensor.getInput()[0].getOutput().one();
+        Tensor none = tensor.getInput()[0].getOutput().tensor();
         //compute(tensor);
         System.out.println(none);
     }

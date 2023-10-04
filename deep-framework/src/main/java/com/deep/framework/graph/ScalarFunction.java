@@ -22,13 +22,13 @@ public class ScalarFunction extends Tensor{
         for (Tensor o : getInput()) o.forward();
         clearOutput();
 
-        Tensor tensor = getFunction().one();
+        Tensor tensor = getFunction().tensor();
         tensor.forward();
         data[0] = tensor.data();
     }
 
     public void backward() {
-        Tensor tensor = getFunction().one();
+        Tensor tensor = getFunction().tensor();
         tensor.grad(grad[0]);
         tensor.backward();
 

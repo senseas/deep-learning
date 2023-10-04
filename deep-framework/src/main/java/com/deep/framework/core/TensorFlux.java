@@ -45,7 +45,7 @@ public class TensorFlux implements Serializable {
         if (BeanUtil.isTenser(a)) {
             Object c = fill(a, shape(Object.class, a), b -> {
                 Tensor o = (Tensor) b;
-                if (Objects.isNull(o.getShape())) return o.getOutput().one();
+                if (Objects.isNull(o.getShape())) return o.getOutput().tensor();
                 return o.getOutput();
             });
             return (E) fill(c, shape(Tensor.class, c), b -> b);
