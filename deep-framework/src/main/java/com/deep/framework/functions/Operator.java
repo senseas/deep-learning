@@ -3,9 +3,8 @@ package com.deep.framework.functions;
 import com.deep.framework.graph.ScalarOperator;
 import com.deep.framework.graph.Tensor;
 import com.deep.framework.lang.Tenser;
-import com.deep.framework.lang.annotation.Cuda;
 
-import java.util.stream.Stream;
+import java.util.Arrays;
 
 import static java.lang.Math.atan;
 
@@ -14,13 +13,12 @@ public interface Operator {
     default Tensor add(Tensor... input) {
         return new ScalarOperator("Add", input) {
 
-            @Cuda
             public double compute() {
-                return Stream.of(getInput()).mapToDouble(Tensor::data).sum();
+                return Arrays.stream(getInput()).mapToDouble(Tensor::data).sum();
             }
 
             public void gradient(double grad) {
-                Stream.of(getInput()).forEach(a -> a.grad(grad));
+                Arrays.stream(getInput()).forEach(a -> a.grad(grad));
             }
 
         };

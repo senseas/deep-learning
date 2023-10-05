@@ -30,6 +30,14 @@ public class Tensor implements Serializable {
         this.reduce = booleans(shape);
     }
 
+    public Tensor(double[] data, int[] shape) {
+        this.name = "None";
+        this.shape = shape;
+        this.data = data;
+        this.grad = zeros(shape);
+        this.reduce = booleans(shape);
+    }
+
     public Tensor(String name, int[] shape) {
         this.name = "None::".concat(name);
         this.shape = shape;

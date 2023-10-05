@@ -29,7 +29,6 @@ public class TensorFlow implements Serializable {
     public Tensor add(Tensor... input) {
         return new ScalarOperator("Add", input) {
 
-            @Cuda
             public double compute() {
                 return Arrays.stream(getInput()).mapToDouble(Tensor::data).sum();
             }
@@ -424,7 +423,6 @@ public class TensorFlow implements Serializable {
     public Tensor relux(Tensor input) {
         return new TensorFunction("Relux", input) {
 
-            @Cuda
             public Tenser<Tensor> compute() {
                 Tenser<Tensor> A = getInput(0), B = zeroTensors(A);
                 forEach(A, B, (Tensor a, Tenser<Tensor> b, int i) -> {
@@ -547,7 +545,6 @@ public class TensorFlow implements Serializable {
     public Tensor sigmoidx(Tensor input) {
         return new TensorFunction("Sigmoidx", input.getShape(), input) {
 
-            @Cuda
             public Tenser<Tensor> compute() {
                 Tenser<Tensor> A = getInput(0), B = zeroTensors(shape);
                 forEach(A, B, (Tensor a, Tenser<Tensor> b, int i) -> {
@@ -577,7 +574,6 @@ public class TensorFlow implements Serializable {
     public Tensor squarex(Tensor... input) {
         return new ScalarFunction("Squarex", input) {
 
-            @Cuda
             public Tensor compute() {
                 Tenser<Tensor> A = getInput(0), B = getInput(1);
                 Tensor[] C = {cons(0d)};
@@ -845,7 +841,6 @@ public class TensorFlow implements Serializable {
     public Tensor softmax(Tensor input) {
         return new TensorFunction("Softmax", input) {
 
-            @Cuda
             public Tenser<Tensor> compute() {
                 Tenser<Tensor> A = getInput(0), B = zeroTensors(A);
                 Tensor sum = sum(expx(funcx(A)));
