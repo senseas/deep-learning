@@ -20,7 +20,7 @@ public class TensorFunction extends Tensor {
     }
 
     public TensorFunction(Tenser<Tensor> function) {
-        super(null, new Tensor[0]);
+        super("", new Tensor[0]);
         this.shape = function.shape;
         this.function = function;
         create(function);
