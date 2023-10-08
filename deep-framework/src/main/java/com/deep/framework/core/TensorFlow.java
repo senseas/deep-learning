@@ -463,12 +463,12 @@ public class TensorFlow implements Serializable {
         return new TensorOperator("Matmul", Shape.shape(inx.shape(0), iny.shape(1)), inx, iny) {
 
             public Tenser<Tensor> compute() {
-                Cublas.New().matmul(getInput()[0], getInput()[1], this);
+                Cublas.matmul(getInput()[0], getInput()[1], this);
                 return output;
             }
 
             public void gradient() {
-                Cublas.New().matmulGrad(getInput()[0], getInput()[1], this);
+                Cublas.matmulGrad(getInput()[0], getInput()[1], this);
             }
 
         };

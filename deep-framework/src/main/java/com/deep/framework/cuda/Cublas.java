@@ -7,8 +7,6 @@ import jcuda.driver.CUdeviceptr;
 import jcuda.jcublas.JCublas2;
 import jcuda.jcublas.cublasHandle;
 
-import java.util.Objects;
-
 import static jcuda.jcublas.JCublas2.*;
 import static jcuda.jcublas.cublasOperation.CUBLAS_OP_N;
 import static jcuda.jcublas.cublasOperation.CUBLAS_OP_T;
@@ -17,22 +15,15 @@ import static jcuda.runtime.JCuda.cudaFree;
 public class Cublas {
 
     private static cublasHandle handle;
-    private static Cublas cublas;
 
-    // Create a CUBLAS handle
-    private Cublas() {
-        handle = new cublasHandle();
-        cublasCreate(handle);
-    }
-
-    public static Cublas New() {
+     static {
         JCublas2.setExceptionsEnabled(true);
-        if (Objects.nonNull(cublas)) return cublas;
-        return cublas = new Cublas();
+         handle = new cublasHandle();
+         cublasCreate(handle);
     }
 
     //MK*KN
-    public void matmul(Tensor A, Tensor B, Tensor C) {
+    public static void matmul(Tensor A, Tensor B, Tensor C) {
         // Allocate Copy the memory from the host to the device
         Pointer DA = A.getContext().getValue(), DB = B.getContext().getValue(), DC = C.getContext().getValue();
         //alpha, beta
@@ -46,7 +37,7 @@ public class Cublas {
     }
 
     //MK*KN
-    public void matmulGrad(Tensor A, Tensor B, Tensor C) {
+    public static void matmulGrad(Tensor A, Tensor B, Tensor C) {
         // Allocate Copy the memory from the host to the device
         Pointer DA = A.getContext().getValue(), DB = B.getContext().getValue();
         // Allocate Copy the memory from the host to the device
