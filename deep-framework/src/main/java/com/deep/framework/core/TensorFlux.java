@@ -14,7 +14,7 @@ import static com.deep.framework.lang.Shape.*;
 public class TensorFlux implements Serializable {
 
     public static void concat(Tensor tensor) {
-        if (Arrays.asList("Add", "Addx").contains(tensor.getName())) {
+        if (Stream.of("Add", "Addx").anyMatch(a -> tensor.getName().contains(a))) {
             Stream<Tensor> stream = Stream.of();
             for (Tensor o : tensor.getInput()) {
                 if (o.getName().equals(tensor.getName())) {
@@ -42,18 +42,12 @@ public class TensorFlux implements Serializable {
     }
 
     public static <E> E getOutput(Object a) {
-        if (BeanUtil.isTenser(a)) {
-            Object c = fill(a, shape(Object.class, a), b -> {
-                Tensor o = (Tensor) b;
-                if (Objects.isNull(o.getShape())) return o.getOutput().tensor();
-                return o.getOutput();
-            });
-            return (E) fill(c, shape(Tensor.class, c), b -> b);
-        } else {
-            Tensor o = (Tensor) a;
-            return (E) o.getOutput();
-        }
-
+        Object c = fill(a, shape(Object.class, a), b -> {
+            Tensor o = (Tensor) b;
+            if (Objects.isNull(o.getShape())) return o;
+            return o.getOutput();
+        });
+        return (E) fill(c, shape(Tensor.class, c), b -> b);
     }
 
 }

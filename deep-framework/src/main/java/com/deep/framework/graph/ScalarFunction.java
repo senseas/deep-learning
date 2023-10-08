@@ -6,7 +6,7 @@ import java.util.Objects;
 
 import static com.deep.framework.lang.ForEach.forEach;
 
-public class ScalarFunction extends Tensor{
+public class ScalarFunction extends Tensor {
 
     public ScalarFunction(String name, Tensor... input) {
         super(name, input);
@@ -43,7 +43,7 @@ public class ScalarFunction extends Tensor{
 
     public Tenser<Tensor> getFunction() {
         if (Objects.nonNull(function)) return function;
-        return function = new Tenser<>(new Tensor[]{compute()});
+        return function = new Tenser<>(compute());
     }
 
     public void clearOutput() {
@@ -55,13 +55,13 @@ public class ScalarFunction extends Tensor{
         grad[0] = 0;
     }
 
-    public Tenser<Tensor> getInput(int i) {
-        return getInput()[i].getOutput();
+    public Tensor getInput(int i) {
+        return getInput()[i];
     }
 
     public Tenser<Tensor> getOutput() {
         if (Objects.nonNull(output)) return output;
-        return output = new Tenser<>(new Tensor[]{new Tensor(this, 0)});
+        return output = new Tenser<>(new Tensor(this, 0));
     }
 
 }

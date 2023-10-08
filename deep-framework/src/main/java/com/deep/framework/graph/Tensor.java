@@ -56,9 +56,7 @@ public class Tensor implements Serializable {
 
     public Tensor(Tensor tensor, int idx) {
         this.idx = idx;
-        this.data = tensor.getData();
-        this.grad = tensor.getGrad();
-        this.reduce = tensor.getReduce();
+        this.tensor = tensor;
     }
 
     public Tensor(String name, Tensor... input) {
@@ -88,33 +86,56 @@ public class Tensor implements Serializable {
     }
 
     public Tenser<Tensor> getOutput() {
-        if (Objects.nonNull(output)) return output;
-        if (Objects.isNull(shape)) return output = new Tenser<>(new Tensor[]{this});
+        if (Objects.nonNull(output) || Objects.isNull(shape)) return output;
         return output = Tensors(this);
     }
 
     public double data() {
-        return this.data[idx];
+        if (Objects.isNull(tensor)) {
+            return this.data[idx];
+        } else {
+            return tensor.getData()[idx];
+        }
     }
 
     public void data(double value) {
-        this.data[idx] = value;
-    }
-
-    public void grad(double grad) {
-        this.grad[idx] += grad;
+        if (Objects.isNull(tensor)) {
+            this.data[idx] = value;
+        } else {
+            tensor.getData()[idx] = value;
+        }
     }
 
     public double grad() {
-        return this.grad[idx];
+        if (Objects.isNull(tensor)) {
+            return this.grad[idx];
+        } else {
+            return tensor.getGrad()[idx];
+        }
+    }
+
+    public void grad(double grad) {
+        if (Objects.isNull(tensor)) {
+            this.grad[idx] += grad;
+        } else {
+            tensor.getGrad()[idx] += grad;
+        }
     }
 
     public boolean reduce() {
-        return this.reduce[idx];
+        if (Objects.isNull(tensor)) {
+            return this.reduce[idx];
+        } else {
+            return tensor.getReduce()[idx];
+        }
     }
 
     public void reduce(boolean reduce) {
-        this.reduce[idx] = reduce;
+        if (Objects.isNull(tensor)) {
+            this.reduce[idx] = reduce;
+        } else {
+            tensor.getReduce()[idx] = reduce;
+        }
     }
 
     public int shape(int i) {
@@ -127,6 +148,8 @@ public class Tensor implements Serializable {
     }
 
     transient private int idx;
+    transient private Tensor tensor;
+
     protected int[] shape;
     protected double[] data, grad;
     transient protected boolean[] reduce;

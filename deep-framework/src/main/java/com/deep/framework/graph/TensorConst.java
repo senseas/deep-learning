@@ -21,8 +21,7 @@ public class TensorConst extends Tensor {
     public void grad(double grad) {}
 
     public Tenser<Tensor> getOutput() {
-        if (Objects.nonNull(output)) return output;
-        if (Objects.isNull(shape)) return output = new Tenser<>(new Tensor[]{this});
+        if (Objects.nonNull(output) || Objects.isNull(shape)) return output;
         return output = TensorConsts(this);
     }
 }

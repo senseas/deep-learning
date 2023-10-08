@@ -50,7 +50,7 @@ public class ScalarOperator extends Tensor {
 
     public Tenser<Tensor> getOutput() {
         if (Objects.nonNull(output)) return output;
-        return output = new Tenser<>(new Tensor[]{new Tensor(this, 0)});
+        return output = new Tenser<>(new Tensor(this, 0));
     }
 
 }

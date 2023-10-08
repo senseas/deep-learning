@@ -56,7 +56,7 @@ public class TensorOperator extends Tensor {
     }
 
     public void create() {
-        if (Objects.isNull(data)) {
+        if (Objects.isNull(data) && Objects.nonNull(shape)) {
             this.data = zeros(shape);
             this.grad = zeros(shape);
         }
@@ -67,7 +67,7 @@ public class TensorOperator extends Tensor {
     }
 
     public Tenser<Tensor> getOutput() {
-        if (Objects.nonNull(output)) return output;
+        if (Objects.nonNull(output) || Objects.isNull(shape)) return output;
         return output = Tensors(this);
     }
 

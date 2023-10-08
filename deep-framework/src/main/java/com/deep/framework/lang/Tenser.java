@@ -30,9 +30,9 @@ public class Tenser<T> implements Serializable {
         this.nexts = next();
     }
 
-    public Tenser(T[] data) {
+    public Tenser(T data) {
         this.shape = new int[]{1};
-        this.data = data;
+        this.data = (T[]) new Object[]{data};
         this.start = 0;
         this.nexts = next();
     }
