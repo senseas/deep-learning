@@ -3,27 +3,17 @@ package com.deep.framework.cuda;
 import com.deep.framework.graph.Tensor;
 import jcuda.Pointer;
 import jcuda.Sizeof;
-import jcuda.driver.CUdeviceptr;
-import jcuda.jcublas.JCublas2;
-import jcuda.jcublas.cublasHandle;
 
-import static jcuda.jcublas.JCublas2.*;
+import static com.deep.framework.cuda.CublasConfig.handle;
+import static jcuda.jcublas.JCublas2.cublasDgemm;
+import static jcuda.jcublas.JCublas2.cublasGetVector;
 import static jcuda.jcublas.cublasOperation.CUBLAS_OP_N;
 import static jcuda.jcublas.cublasOperation.CUBLAS_OP_T;
-import static jcuda.runtime.JCuda.cudaFree;
 
-public class Cublas {
-
-    private static cublasHandle handle;
-
-     static {
-        JCublas2.setExceptionsEnabled(true);
-         handle = new cublasHandle();
-         cublasCreate(handle);
-    }
+public class Matmul {
 
     //MK*KN
-    public static void matmul(Tensor A, Tensor B, Tensor C) {
+    public static void matmulForward(Tensor A, Tensor B, Tensor C) {
         // Allocate Copy the memory from the host to the device
         Pointer DA = A.getContext().getValue(), DB = B.getContext().getValue(), DC = C.getContext().getValue();
         //alpha, beta
@@ -37,7 +27,7 @@ public class Cublas {
     }
 
     //MK*KN
-    public static void matmulGrad(Tensor A, Tensor B, Tensor C) {
+    public static void matmulBackward(Tensor A, Tensor B, Tensor C) {
         // Allocate Copy the memory from the host to the device
         Pointer DA = A.getContext().getValue(), DB = B.getContext().getValue();
         // Allocate Copy the memory from the host to the device
@@ -57,16 +47,10 @@ public class Cublas {
         cublasGetVector(K * N, Sizeof.DOUBLE, GB, 1, Pointer.to(B.getGrad()), 1);
     }
 
-    public void matmul(int transa, int transb, int M, int N, int K, Pointer A, Pointer B, Pointer C) {
+    public void matmulForward(int transa, int transb, int M, int N, int K, Pointer A, Pointer B, Pointer C) {
         int lda = transa == CUBLAS_OP_N ? K : M, ldb = transb == CUBLAS_OP_N ? N : K, ldc = N;
         Pointer alpha = Pointer.to(new double[]{1}), beta = Pointer.to(new double[]{0});
         cublasDgemm(handle, transb, transa, N, M, K, alpha, B, ldb, A, lda, beta, C, ldc);
-    }
-
-    // Clean up
-    public static void cudaFreex(CUdeviceptr d) {
-        cudaFree(d);
-        cublasDestroy(handle);
     }
 
 }

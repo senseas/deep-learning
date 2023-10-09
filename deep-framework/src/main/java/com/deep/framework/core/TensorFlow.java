@@ -1,7 +1,6 @@
 package com.deep.framework.core;
 
-import com.deep.framework.cuda.Cublas;
-import com.deep.framework.cuda.Relu;
+import com.deep.framework.cuda.Matmul;
 import com.deep.framework.graph.*;
 import com.deep.framework.lang.Shape;
 import com.deep.framework.lang.Tenser;
@@ -9,6 +8,10 @@ import com.deep.framework.lang.Tenser;
 import java.io.Serializable;
 import java.util.Arrays;
 
+import static com.deep.framework.cuda.Matmul.matmulBackward;
+import static com.deep.framework.cuda.Matmul.matmulForward;
+import static com.deep.framework.cuda.Relu.reluBackward;
+import static com.deep.framework.cuda.Relu.reluForward;
 import static com.deep.framework.lang.ForEach.forEach;
 import static com.deep.framework.lang.Shape.*;
 
@@ -425,13 +428,13 @@ public class TensorFlow implements Serializable {
 
             public Tenser<Tensor> compute() {
                 Tenser<Tensor> A = getInput(0), B = createOutput(A);
-                Relu.reluForward(getInput()[0], this);
+                reluForward(getInput()[0], this);
                 return B;
             }
 
             public void gradient() {
                 Tenser<Tensor> A = getInput(0);
-                Relu.reluForward(getInput()[0], this);
+                reluBackward(getInput()[0], this);
             }
 
         };
@@ -460,12 +463,12 @@ public class TensorFlow implements Serializable {
         return new TensorOperator("Matmul", Shape.shape(inx.shape(0), iny.shape(1)), inx, iny) {
 
             public Tenser<Tensor> compute() {
-                Cublas.matmul(getInput()[0], getInput()[1], this);
+                matmulForward(getInput()[0], getInput()[1], this);
                 return output;
             }
 
             public void gradient() {
-                Cublas.matmulGrad(getInput()[0], getInput()[1], this);
+                matmulBackward(getInput()[0], getInput()[1], this);
             }
 
         };
