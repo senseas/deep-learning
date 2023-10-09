@@ -10,7 +10,8 @@ public class AppxTest {
     @Test
     public void softmaxTest() {
         TensorFlow tf = new TensorFlow();
-        Tensor softmax = tf.softmax(new Tensor(new int[]{3}));
+        double[] floats = {0.2731f, 0.1389f, 0.7491f, 0.2307f, 0.3411f, 0.6492f, 0.2313f, 0.5270f, 0.6267f, 0.2598f};
+        Tensor softmax = tf.softmax(new Tensor(floats, new int[]{10}));
         TensorExecutor executor = new TensorExecutor(softmax);
         executor.run();
     }

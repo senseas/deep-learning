@@ -1,6 +1,7 @@
 package com.deep.framework.core;
 
 import com.deep.framework.cuda.Cublas;
+import com.deep.framework.cuda.Relu;
 import com.deep.framework.graph.*;
 import com.deep.framework.lang.Shape;
 import com.deep.framework.lang.Tenser;
@@ -424,17 +425,13 @@ public class TensorFlow implements Serializable {
 
             public Tenser<Tensor> compute() {
                 Tenser<Tensor> A = getInput(0), B = createOutput(A);
-                forEach(A, B, (Tensor a, Tensor b) -> {
-                    b.data(a.data() > 0 ? a.data() : 0.1 * a.data());
-                });
+                Relu.reluForward(getInput()[0], this);
                 return B;
             }
 
             public void gradient() {
-                Tenser<Tensor> A = getInput(0), B = getOutput();
-                forEach(A, B, (Tensor a, Tensor b) -> {
-                    a.grad(a.data() > 0 ? b.grad() : 0.1 * b.grad());
-                });
+                Tenser<Tensor> A = getInput(0);
+                Relu.reluForward(getInput()[0], this);
             }
 
         };

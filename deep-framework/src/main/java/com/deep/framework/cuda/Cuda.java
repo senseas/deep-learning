@@ -10,7 +10,8 @@ import java.util.stream.Stream;
 
 import static jcuda.driver.JCudaDriver.*;
 import static jcuda.nvrtc.JNvrtc.*;
-import static jcuda.runtime.JCuda.cudaFree;
+import static jcuda.runtime.JCuda.*;
+import static jcuda.runtime.cudaMemcpyKind.cudaMemcpyHostToDevice;
 
 public class Cuda {
 
@@ -138,6 +139,36 @@ public class Cuda {
         CUdeviceptr deviceData = new CUdeviceptr();
         cuMemAlloc(deviceData, value.length == 0 ? 1 : value.length * Sizeof.DOUBLE);
         cuMemcpyHtoD(deviceData, Pointer.to(value), value.length * Sizeof.DOUBLE);
+        return deviceData;
+    }
+
+    /**
+     * Create device data containing the given float value, the given number
+     * of times
+     *
+     * @param data The value of the elements
+     * @return The pointer to the data
+     */
+    public static Pointer createDevicePointer(double[] data) {
+        int size = data.length * Sizeof.DOUBLE;
+        Pointer deviceData = new Pointer();
+        cudaMalloc(deviceData, size);
+        cudaMemcpy(deviceData, Pointer.to(data), size, cudaMemcpyHostToDevice);
+        return deviceData;
+    }
+
+    /**
+     * Create device data containing the given float value, the given number
+     * of times
+     *
+     * @param data The value of the elements
+     * @return The pointer to the data
+     */
+    public static Pointer createDevicePointer(float[] data) {
+        int size = data.length * Sizeof.FLOAT;
+        Pointer deviceData = new Pointer();
+        cudaMalloc(deviceData, size);
+        cudaMemcpy(deviceData, Pointer.to(data), size, cudaMemcpyHostToDevice);
         return deviceData;
     }
 

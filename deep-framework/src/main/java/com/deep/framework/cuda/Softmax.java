@@ -1,0 +1,99 @@
+package com.deep.framework.cuda;
+
+import com.deep.framework.lang.Shape;
+import jcuda.Pointer;
+import jcuda.Sizeof;
+import jcuda.jcudnn.cudnnTensorDescriptor;
+
+import static com.deep.framework.cuda.Cuda.createDevicePointer;
+import static com.deep.framework.cuda.CudnnConfig.handle;
+import static jcuda.jcudnn.JCudnn.*;
+import static jcuda.jcudnn.cudnnDataType.CUDNN_DATA_FLOAT;
+import static jcuda.jcudnn.cudnnSoftmaxAlgorithm.CUDNN_SOFTMAX_ACCURATE;
+import static jcuda.jcudnn.cudnnSoftmaxMode.CUDNN_SOFTMAX_MODE_CHANNEL;
+import static jcuda.jcudnn.cudnnTensorFormat.CUDNN_TENSOR_NCHW;
+import static jcuda.runtime.JCuda.cudaFree;
+import static jcuda.runtime.JCuda.cudaMemcpy;
+import static jcuda.runtime.cudaMemcpyKind.cudaMemcpyDeviceToHost;
+
+public class Softmax {
+
+    // 声明softmax算法和算法描述符
+    private static final int softmaxAlgo = CUDNN_SOFTMAX_ACCURATE;
+    private static final int softmaxMode = CUDNN_SOFTMAX_MODE_CHANNEL;
+
+    public static void softmaxForward(float[] input_data, float[] output_data, int[] shape) {
+        // 设置输入张量描述符
+        int batch_size = shape[0], channels = shape[1], height = shape[2], width = shape[3];
+        long length = Shape.size(shape);
+
+        // 声明输入张量描述符
+        cudnnTensorDescriptor input_desc = new cudnnTensorDescriptor();
+        cudnnCreateTensorDescriptor(input_desc);
+        cudnnSetTensor4dDescriptor(input_desc, CUDNN_TENSOR_NCHW, CUDNN_DATA_FLOAT, batch_size, channels, height, width);
+
+        // 声明输出张量描述符
+        cudnnTensorDescriptor output_desc = new cudnnTensorDescriptor();
+        cudnnCreateTensorDescriptor(output_desc);
+        cudnnSetTensor4dDescriptor(output_desc, CUDNN_TENSOR_NCHW, CUDNN_DATA_FLOAT, batch_size, channels, height, width);
+
+        // 分配设备内存
+        Pointer d_input_data = createDevicePointer(input_data);
+        Pointer d_output_data = createDevicePointer(output_data);
+
+        // 执行SoftmaxForward操作
+        Pointer alpha = Pointer.to(new float[]{1.0f}), beta = Pointer.to(new float[]{0.0f});
+        cudnnSoftmaxForward(handle, softmaxAlgo, softmaxMode, alpha, input_desc, d_input_data, beta, output_desc, d_output_data);
+
+        // 将输出数据复制到主机内存
+        cudaMemcpy(Pointer.to(output_data), d_output_data, length * Sizeof.FLOAT, cudaMemcpyDeviceToHost);
+        // 释放内存
+        cudaFree(d_input_data);
+        cudaFree(d_output_data);
+        cudnnDestroyTensorDescriptor(input_desc);
+        cudnnDestroyTensorDescriptor(output_desc);
+    }
+
+    public static void softmaxBackward(float[] output_data, float[] output_grad_data, float[] input_grad_data, int[] shape) {
+        // 设置输入张量描述符
+        int batch_size = shape[0], channels = shape[1], height = shape[2], width = shape[3];
+        long length = Shape.size(shape);
+
+        // 声明输出张量描述符
+        cudnnTensorDescriptor output_desc = new cudnnTensorDescriptor();
+        cudnnCreateTensorDescriptor(output_desc);
+        cudnnSetTensor4dDescriptor(output_desc, CUDNN_TENSOR_NCHW, CUDNN_DATA_FLOAT, batch_size, channels, height, width);
+
+        // 声明输出张量描述符
+        cudnnTensorDescriptor output_grad_desc = new cudnnTensorDescriptor();
+        cudnnCreateTensorDescriptor(output_grad_desc);
+        cudnnSetTensor4dDescriptor(output_grad_desc, CUDNN_TENSOR_NCHW, CUDNN_DATA_FLOAT, batch_size, channels, height, width);
+
+        // 声明输出张量描述符
+        cudnnTensorDescriptor input_grad_desc = new cudnnTensorDescriptor();
+        cudnnCreateTensorDescriptor(input_grad_desc);
+        cudnnSetTensor4dDescriptor(input_grad_desc, CUDNN_TENSOR_NCHW, CUDNN_DATA_FLOAT, batch_size, channels, height, width);
+
+        // 分配设备内存
+        Pointer d_output_data = createDevicePointer(output_data);
+        Pointer d_output_grad_data = createDevicePointer(output_grad_data);
+        Pointer d_input_grad_data = createDevicePointer(input_grad_data);
+
+        // 执行SoftmaxBackward操作
+        Pointer alpha = Pointer.to(new float[]{1.0f}), beta = Pointer.to(new float[]{0.0f});
+        cudnnSoftmaxBackward(handle, softmaxAlgo, softmaxMode, alpha, output_desc, d_output_data, output_grad_desc, d_output_grad_data, beta, input_grad_desc, d_input_grad_data);
+
+        // 将输出数据复制到主机内存
+        cudaMemcpy(Pointer.to(input_grad_data), d_input_grad_data, length * Sizeof.FLOAT, cudaMemcpyDeviceToHost);
+
+        // 释放内存
+        cudaFree(d_output_data);
+        cudaFree(d_output_grad_data);
+        cudaFree(d_input_grad_data);
+
+        cudnnDestroyTensorDescriptor(output_desc);
+        cudnnDestroyTensorDescriptor(output_grad_desc);
+        cudnnDestroyTensorDescriptor(input_grad_desc);
+    }
+
+}

@@ -39,7 +39,8 @@ public class AppTest {
     @Test
     public void reluxTest() {
         TensorFlow tf = new TensorFlow();
-        Tensor tensor = tf.relux(new Tensor(new int[]{2,3}));
+        double[] floats = {0.2731f, 0.1389f, 0.7491f, -0.2307f, 0.3411f, 0.6492f, 0.2313f, -0.5270f, 0.6267f, 0.2598f};
+        Tensor tensor = tf.relux(new Tensor(floats,new int[]{2,5}));
         TensorExecutor executor = new TensorExecutor(tensor);
         executor.run();
         Tensor none = tensor.getInput()[0].getOutput().tensor();
