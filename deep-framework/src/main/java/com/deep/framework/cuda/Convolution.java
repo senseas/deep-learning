@@ -29,7 +29,7 @@ public class Convolution {
     private static final int BWD_DATA_ALGO = CUDNN_CONVOLUTION_BWD_DATA_ALGO_0;
 
     public static void convForward(Tensor filter, int[] padding, int[] stride, Tensor input, Tensor output) {
-        convForward(input.getData(), Shape.shapes(input.getShape()), filter.getData(), Shape.shapes(filter.getShape()), padding, stride, output.getData(), Shape.shapes(output.getShape()));
+        convForward(input.getData(), Shape.shapes(input.getShape()), filter.getData(), filter.getShape(), padding, stride, output.getData(), Shape.shapes(output.getShape()));
     }
 
     public static void convBackward(Tensor filter, int[] padding, int[] stride, Tensor input, Tensor output) {

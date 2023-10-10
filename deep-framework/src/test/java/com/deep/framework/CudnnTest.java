@@ -10,7 +10,7 @@ import java.util.Arrays;
 
 import static com.deep.framework.cuda.Convolution.convBackward;
 import static com.deep.framework.cuda.Convolution.convForward;
-import static com.deep.framework.cuda.CudnnReduce.reduce;
+import static com.deep.framework.cuda.Reduce.reduce;
 import static com.deep.framework.cuda.Relu.reluBackward;
 import static com.deep.framework.cuda.Relu.reluForward;
 import static com.deep.framework.cuda.Softmax.softmaxBackward;

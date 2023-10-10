@@ -8,11 +8,11 @@ import static jcuda.jcudnn.cudnnActivationMode.CUDNN_ACTIVATION_RELU;
 public class Relu {
 
     public static void reluForward(Tensor input, Tensor output) {
-        CudnnActivation.activationForward(input.getData(), output.getData(), Shape.shapes(input.getShape()), CUDNN_ACTIVATION_RELU);
+        Activation.activationForward(input.getData(), output.getData(), Shape.shapes(input.getShape()), CUDNN_ACTIVATION_RELU);
     }
 
     public static void reluBackward(Tensor input, Tensor output) {
-        CudnnActivation.activationBackward(input.getData(), input.getGrad(), output.getData(), output.getGrad(), Shape.shapes(input.getShape()), CUDNN_ACTIVATION_RELU);
+        Activation.activationBackward(input.getData(), input.getGrad(), output.getData(), output.getGrad(), Shape.shapes(input.getShape()), CUDNN_ACTIVATION_RELU);
     }
 
 }

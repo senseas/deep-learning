@@ -16,7 +16,7 @@ import static jcuda.jcudnn.cudnnTensorFormat.CUDNN_TENSOR_NCHW;
 import static jcuda.runtime.JCuda.*;
 import static jcuda.runtime.cudaMemcpyKind.cudaMemcpyDeviceToHost;
 
-public class CudnnReduce {
+public class Reduce {
 
     public static void reduce(double[] input, int[] input_shape, double[] output, int[] output_shape, int op) {
         int batch_size = input_shape[0], channels = input_shape[1], height = input_shape[2], width = input_shape[3];

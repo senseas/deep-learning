@@ -1,6 +1,5 @@
 package com.deep.framework.cuda;
 
-import com.deep.framework.lang.Shape;
 import jcuda.Pointer;
 import jcuda.Sizeof;
 import jcuda.jcudnn.cudnnActivationDescriptor;
@@ -16,7 +15,9 @@ import static jcuda.runtime.JCuda.cudaFree;
 import static jcuda.runtime.JCuda.cudaMemcpy;
 import static jcuda.runtime.cudaMemcpyKind.cudaMemcpyDeviceToHost;
 
-public class CudnnActivation {
+public class Activation {
+    private static final int DATA_TYPE = CUDNN_DATA_DOUBLE;
+    private static final int DATA_TYPE_SZIE = Sizeof.DOUBLE;
 
     public static void activationForward(double[] input, double[] output, int[] shape, int activation) {
         // 指定输入的维度
@@ -25,12 +26,12 @@ public class CudnnActivation {
         // 创建描述符句柄,指定输入描述符
         cudnnTensorDescriptor input_desc = new cudnnTensorDescriptor();
         cudnnCreateTensorDescriptor(input_desc);
-        cudnnSetTensor4dDescriptor(input_desc, CUDNN_TENSOR_NCHW, CUDNN_DATA_DOUBLE, batch_size, channels, height, width);
+        cudnnSetTensor4dDescriptor(input_desc, CUDNN_TENSOR_NCHW, DATA_TYPE, batch_size, channels, height, width);
 
         // 创建输出数据和描述符句柄
         cudnnTensorDescriptor output_desc = new cudnnTensorDescriptor();
         cudnnCreateTensorDescriptor(output_desc);
-        cudnnSetTensor4dDescriptor(output_desc, CUDNN_TENSOR_NCHW, CUDNN_DATA_DOUBLE, batch_size, channels, height, width);
+        cudnnSetTensor4dDescriptor(output_desc, CUDNN_TENSOR_NCHW, DATA_TYPE, batch_size, channels, height, width);
 
         // 创建激活函数描述符句柄
         cudnnActivationDescriptor activation_desc = new cudnnActivationDescriptor();
@@ -41,9 +42,9 @@ public class CudnnActivation {
         Pointer device_output = createDevicePointer(output);
 
         // 执行激活函数
-        Pointer alpha = Pointer.to(new double[]{1.0f}), beta = Pointer.to(new double[]{0.0f});
+        Pointer alpha = Pointer.to(new double[]{1}), beta = Pointer.to(new double[]{0});
         cudnnActivationForward(handle, activation_desc, alpha, input_desc, device_input, beta, output_desc, device_output);
-        cudaMemcpy(Pointer.to(output), device_output, Shape.size(shape) * Sizeof.DOUBLE, cudaMemcpyDeviceToHost);
+        cudaMemcpy(Pointer.to(output), device_output, output.length * DATA_TYPE_SZIE, cudaMemcpyDeviceToHost);
         // 释放资源
         cudaFree(device_input);
         cudaFree(device_output);
@@ -60,22 +61,22 @@ public class CudnnActivation {
         // 创建描述符句柄,指定输入描述符
         cudnnTensorDescriptor input_desc = new cudnnTensorDescriptor();
         cudnnCreateTensorDescriptor(input_desc);
-        cudnnSetTensor4dDescriptor(input_desc, CUDNN_TENSOR_NCHW, CUDNN_DATA_DOUBLE, batch_size, channels, height, width);
+        cudnnSetTensor4dDescriptor(input_desc, CUDNN_TENSOR_NCHW, DATA_TYPE, batch_size, channels, height, width);
 
         // 创建描述符句柄,指定输入描述符
         cudnnTensorDescriptor input_grad_desc = new cudnnTensorDescriptor();
         cudnnCreateTensorDescriptor(input_grad_desc);
-        cudnnSetTensor4dDescriptor(input_grad_desc, CUDNN_TENSOR_NCHW, CUDNN_DATA_DOUBLE, batch_size, channels, height, width);
+        cudnnSetTensor4dDescriptor(input_grad_desc, CUDNN_TENSOR_NCHW, DATA_TYPE, batch_size, channels, height, width);
 
         // 创建输出数据和描述符句柄
         cudnnTensorDescriptor output_desc = new cudnnTensorDescriptor();
         cudnnCreateTensorDescriptor(output_desc);
-        cudnnSetTensor4dDescriptor(output_desc, CUDNN_TENSOR_NCHW, CUDNN_DATA_DOUBLE, batch_size, channels, height, width);
+        cudnnSetTensor4dDescriptor(output_desc, CUDNN_TENSOR_NCHW, DATA_TYPE, batch_size, channels, height, width);
 
         // 创建输出梯度数据和描述符句柄
         cudnnTensorDescriptor output_grad_desc = new cudnnTensorDescriptor();
         cudnnCreateTensorDescriptor(output_grad_desc);
-        cudnnSetTensor4dDescriptor(output_grad_desc, CUDNN_TENSOR_NCHW, CUDNN_DATA_DOUBLE, batch_size, channels, height, width);
+        cudnnSetTensor4dDescriptor(output_grad_desc, CUDNN_TENSOR_NCHW, DATA_TYPE, batch_size, channels, height, width);
 
         // 创建激活函数描述符句柄
         cudnnActivationDescriptor activation_desc = new cudnnActivationDescriptor();
@@ -89,9 +90,9 @@ public class CudnnActivation {
         Pointer device_output_grad = createDevicePointer(output_grad);
 
         // 执行激活函数
-        Pointer alpha = Pointer.to(new double[]{1.0f}), beta = Pointer.to(new double[]{0.0f});
+        Pointer alpha = Pointer.to(new double[]{1}), beta = Pointer.to(new double[]{0});
         cudnnActivationBackward(handle, activation_desc, alpha, output_desc, device_output, output_grad_desc, device_output_grad, input_desc, device_input, beta, input_grad_desc, device_input_grad);
-        cudaMemcpy(Pointer.to(input_grad), device_input_grad, Shape.size(shape) * Sizeof.DOUBLE, cudaMemcpyDeviceToHost);
+        cudaMemcpy(Pointer.to(input_grad), device_input_grad, input_grad.length * DATA_TYPE_SZIE, cudaMemcpyDeviceToHost);
         // 释放资源
         cudaFree(device_input);
         cudaFree(device_input_grad);

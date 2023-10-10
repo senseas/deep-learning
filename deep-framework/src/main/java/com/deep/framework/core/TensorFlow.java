@@ -7,10 +7,13 @@ import com.deep.framework.lang.Tenser;
 import java.io.Serializable;
 import java.util.Arrays;
 
+import static com.deep.framework.cuda.Convolution.convForward;
 import static com.deep.framework.cuda.Elu.eluBackward;
 import static com.deep.framework.cuda.Elu.eluForward;
 import static com.deep.framework.cuda.Matmul.matmulBackward;
 import static com.deep.framework.cuda.Matmul.matmulForward;
+import static com.deep.framework.cuda.Pooling.poolingBackward;
+import static com.deep.framework.cuda.Pooling.poolingForward;
 import static com.deep.framework.lang.ForEach.forEach;
 import static com.deep.framework.lang.Shape.*;
 
@@ -660,22 +663,14 @@ public class TensorFlow implements Serializable {
                 int height = (B.shape(0) - A.shape(0)) / heights + 1;
                 int width = (B.shape(1) - A.shape(1)) / widths + 1;
                 Tenser<Tensor> C = createOutput(new int[]{height, width});
-                forEach(height, width, A.shape(0), A.shape(1), (h, w, m, n) -> {
-                    Tensor inx = A.get(m, n), iny = B.get(h * heights + m, w * widths + n), out = C.get(h, w);
-                    out.data(out.data() + inx.data() * iny.data());
-                });
+                convForward(getInput()[0], padding, stride, getInput()[1], this);
                 return C;
             }
 
             public void gradient() {
                 Tenser<Tensor> A = getInput(0), B = padding(getInput(1), padding);
                 Tenser<Tensor> C = getOutput();
-                int heights = stride[0], widths = stride[1];
-                forEach(C.shape(0), C.shape(1), A.shape(0), A.shape(1), (h, w, m, n) -> {
-                    Tensor inx = A.get(m, n), iny = B.get(h * heights + m, w * widths + n), out = C.get(h, w);
-                    inx.grad(out.grad() * iny.data());
-                    iny.grad(out.grad() * inx.data());
-                });
+                convForward(getInput()[0], padding, stride, getInput()[1], this);
             }
 
         };
@@ -751,41 +746,35 @@ public class TensorFlow implements Serializable {
         };
     }
 
-    public Tensor maxpool(int kernelSize, int[] stride, int[] padding, Tensor input) {
+    public Tensor maxpool(int[] window, int[] stride, int[] padding, Tensor input) {
         return new TensorOperator("Maxpool", input) {
 
             public Tenser<Tensor> compute() {
                 Tenser<Tensor> A = padding(getInput(0), padding);
                 int heighs = stride[0], widths = stride[1];
-                int height = (A.shape(0) - kernelSize) / heighs + 1, width = (A.shape(1) - kernelSize) / widths + 1;
+                int height = (A.shape(0) - window[0]) / heighs + 1, width = (A.shape(1) - window[1]) / widths + 1;
                 Tenser<Tensor> B = createOutput(new int[]{height, width});
-                forEach(height, width, kernelSize, kernelSize, (y, x, m, n) -> {
-                    Tensor inx = A.get(y * heighs + m, x * widths + n), out = B.get(y, x);
-                    out.data(Math.max(out.data(), inx.data()));
-                });
+                poolingForward(window, padding, stride, getInput()[0], this);
                 return B;
             }
 
             public void gradient() {
                 Tenser<Tensor> A = padding(getInput(0), padding), B = getOutput();
                 int heighs = stride[0], widths = stride[1];
-                forEach(B.shape(0), B.shape(1), kernelSize, kernelSize, (y, x, m, n) -> {
-                    Tensor inx = A.get(y * heighs + m, x * widths + n), out = B.get(y, x);
-                    inx.grad(inx.data() == out.data() ? out.grad() : 0d);
-                });
+                poolingBackward(window, padding, stride, getInput()[0], this);
             }
 
         };
     }
 
-    public Tensor maxpoolx(int kernelSize, int[] stride, int[] padding, Tensor input) {
+    public Tensor maxpoolx(int[] window, int[] stride, int[] padding, Tensor input) {
         return new TensorFunction("Maxpoolx", input) {
 
             public Tenser<Tensor> compute() {
                 Tenser<Tensor> A = getInput(0);
                 Tenser<Tensor> B = zeroTensors(new int[]{A.shape(0)});
                 forEach(A.shape(0), i -> {
-                    B.set(maxpool(kernelSize, stride, padding,  funcx(A.get(i))), i);
+                    B.set(maxpool(window, stride, padding,  funcx(A.get(i))), i);
                 });
                 return B;
             }

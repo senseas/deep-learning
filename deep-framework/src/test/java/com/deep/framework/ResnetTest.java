@@ -26,7 +26,7 @@ public class ResnetTest extends Shape {
 
         Tensor tensor11 = tf.convx(new int[]{2, 2}, new int[]{0, 0}, new Tensor("weight", new int[]{64, 5, 5}), input);//64*134*134
         Tensor tensor12 = tf.relux(tensor11);//64*134*134
-        Tensor tensor13 = tf.maxpoolx(3,new int[]{2, 2}, new int[]{0, 0}, tensor12);//64*68*68
+        Tensor tensor13 = tf.maxpoolx(new int[]{3, 3},new int[]{2, 2}, new int[]{0, 0}, tensor12);//64*68*68
 
         Tensor tensor21 = tf.convx(new int[]{1, 1}, new int[]{1, 1}, new Tensor("weight", new int[]{64, 3, 3}), tensor13);//64*68*68
         Tensor tensor22 = tf.relux(tensor21);//64*68*68

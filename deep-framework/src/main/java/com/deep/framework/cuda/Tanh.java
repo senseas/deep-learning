@@ -8,11 +8,11 @@ import static jcuda.jcudnn.cudnnActivationMode.CUDNN_ACTIVATION_TANH;
 public class Tanh {
 
     public static void tanhForward(Tensor input, Tensor output) {
-        CudnnActivation.activationForward(input.getData(), output.getData(), Shape.shapes(input.getShape()), CUDNN_ACTIVATION_TANH);
+        Activation.activationForward(input.getData(), output.getData(), Shape.shapes(input.getShape()), CUDNN_ACTIVATION_TANH);
     }
 
     public static void tanhBackward(Tensor input, Tensor output) {
-        CudnnActivation.activationBackward(input.getData(), input.getGrad(), output.getData(), output.getGrad(), Shape.shapes(input.getShape()), CUDNN_ACTIVATION_TANH);
+        Activation.activationBackward(input.getData(), input.getGrad(), output.getData(), output.getGrad(), Shape.shapes(input.getShape()), CUDNN_ACTIVATION_TANH);
     }
 
 }
