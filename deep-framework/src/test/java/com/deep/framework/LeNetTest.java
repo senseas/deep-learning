@@ -30,15 +30,15 @@ public class LeNetTest extends Shape {
         Tensor input = new Tensor(new int[]{1, 28, 28});
         Tensor label = new Tensor(new int[]{10, 1});
 
-        Tensor tensor11 = tf.convx(new int[]{1, 1}, 0, new Tensor("weight", new int[]{10, 5, 5}), input);//6*24
+        Tensor tensor11 = tf.convx(new int[]{1, 1}, new int[]{0, 0}, new Tensor("weight", new int[]{10, 5, 5}), input);//6*24
         Tensor tensor12 = tf.relux(tensor11);//6*24
-        Tensor tensor13 = tf.maxpoolx(2, new int[]{2, 2}, 0, tensor12);//6*12
+        Tensor tensor13 = tf.maxpoolx(2, new int[]{2, 2}, new int[]{0, 0}, tensor12);//6*12
 
-        Tensor tensor21 = tf.convx(new int[]{1, 1}, 0, new Tensor("weight", new int[]{16, 5, 5}), tensor13);//16*8
+        Tensor tensor21 = tf.convx(new int[]{1, 1}, new int[]{0, 0}, new Tensor("weight", new int[]{16, 5, 5}), tensor13);//16*8
         Tensor tensor22 = tf.relux(tensor21);//16*8
-        Tensor tensor23 = tf.maxpoolx(2, new int[]{2, 2}, 0, tensor22);//16*4
+        Tensor tensor23 = tf.maxpoolx(2, new int[]{2, 2}, new int[]{0, 0}, tensor22);//16*4
 
-        Tensor tensor31 = tf.convx(new int[]{1, 1}, 0, new Tensor("weight", new int[]{32, 4, 4}), tensor23);//32*1
+        Tensor tensor31 = tf.convx(new int[]{1, 1}, new int[]{0, 0}, new Tensor("weight", new int[]{32, 4, 4}), tensor23);//32*1
         Tensor tensor30 = tf.shape(tensor31, new Tensor(new int[]{32, 1}));
         Tensor tensor32 = tf.matmul(new Tensor("weight", new int[]{86, 32}), tensor30);//86*1
         Tensor tensor33 = tf.addx(tensor32, new Tensor("bias", new int[]{86, 1}));//86*1

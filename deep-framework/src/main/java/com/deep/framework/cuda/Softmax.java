@@ -53,7 +53,7 @@ public class Softmax {
         cudnnDestroyTensorDescriptor(output_desc);
     }
 
-    public static void softmaxBackward(double[] output, double[] output_grad_data, double[] input_grad, int[] shape) {
+    public static void softmaxBackward(double[] input_grad, double[] output, double[] output_grad, int[] shape) {
         // 设置输入张量描述符
         int batch_size = shape[0], channels = shape[1], height = shape[2], width = shape[3];
 
@@ -74,7 +74,7 @@ public class Softmax {
 
         // 分配设备内存
         Pointer device_output = createDevicePointer(output);
-        Pointer device_output_grad = createDevicePointer(output_grad_data);
+        Pointer device_output_grad = createDevicePointer(output_grad);
         Pointer device_input_grad = createDevicePointer(input_grad);
 
         // 执行SoftmaxBackward操作

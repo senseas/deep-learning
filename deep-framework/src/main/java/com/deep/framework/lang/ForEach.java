@@ -7,6 +7,7 @@ import com.deep.framework.lang.util.BeanUtil;
 
 import java.io.Serializable;
 import java.lang.reflect.Array;
+import java.util.Arrays;
 
 public class ForEach implements Serializable {
 
@@ -178,25 +179,25 @@ public class ForEach implements Serializable {
         }
     }
 
-    public static Tenser<Tensor> padding(Tenser<Tensor> a, int padding) {
-        if (padding == 0) return a;
+    public static Tenser<Tensor> padding(Tenser<Tensor> a, int[] padding) {
+        if (Arrays.stream(padding).sum() == 0) return a;
         int height = a.shape(0), width = a.shape(1);
-        int hx = height + 2 * padding, wx = width + 2 * padding;
+        int hx = height + 2 * padding[0], wx = width + 2 * padding[1];
         Tenser nones = new Tenser(new Tensor[hx * wx], new int[]{hx, wx});
 
-        forEach(padding, wx, (m, n) -> {
+        forEach(padding[0], wx, (m, n) -> {
             nones.set(new TensorConst(0d), m, n);
-            nones.set(new TensorConst(0d), m + padding + height, n);
+            nones.set(new TensorConst(0d), m + padding[0] + height, n);
         });
 
-        forEach(hx, padding, (m, n) -> {
+        forEach(hx, padding[1], (m, n) -> {
             nones.set(new TensorConst(0d), m, n);
-            nones.set(new TensorConst(0d), m, n + padding + width);
+            nones.set(new TensorConst(0d), m, n + padding[1] + width);
         });
 
         forEach(height, width, (i, l) -> {
             Object data = a.get(i, l);
-            nones.set(data, i + padding, l + padding);
+            nones.set(data, i + padding[0], l + padding[1]);
         });
         return nones;
     }

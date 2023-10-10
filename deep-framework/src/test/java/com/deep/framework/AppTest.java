@@ -39,8 +39,7 @@ public class AppTest {
     @Test
     public void reluxTest() {
         TensorFlow tf = new TensorFlow();
-        double[] floats = {0.2731f, 0.1389f, 0.7491f, -0.2307f, 0.3411f, 0.6492f, 0.2313f, -0.5270f, 0.6267f, 0.2598f};
-        Tensor tensor = tf.relux(new Tensor(floats,new int[]{2,5}));
+        Tensor tensor = tf.relux(new Tensor(new int[]{2,5}));
         TensorExecutor executor = new TensorExecutor(tensor);
         executor.run();
         Tensor none = tensor.getInput()[0].getOutput().tensor();
@@ -91,7 +90,7 @@ public class AppTest {
     @Test
     public void convTest() {
         TensorFlow tf = new TensorFlow();
-        Tensor tensor = tf.conv(new int[]{1, 1}, 0, new Tensor(new int[]{5, 5}), new Tensor(new int[]{140, 140}));
+        Tensor tensor = tf.conv(new int[]{1, 1}, new int[]{0, 0}, new Tensor(new int[]{5, 5}), new Tensor(new int[]{140, 140}));
         TensorExecutor executor = new TensorExecutor(tensor);
         executor.run();
     }
@@ -99,7 +98,7 @@ public class AppTest {
     @Test
     public void convxTest() {
         TensorFlow tf = new TensorFlow();
-        Tensor tensor = tf.convx(new int[]{1, 1}, 0, new Tensor(new int[]{10, 5, 5}), new Tensor(new int[]{3, 140, 140}));
+        Tensor tensor = tf.convx(new int[]{1, 1}, new int[]{0, 0}, new Tensor(new int[]{10, 5, 5}), new Tensor(new int[]{3, 140, 140}));
         TensorExecutor executor = new TensorExecutor(tensor);
         executor.run();
     }
@@ -107,7 +106,7 @@ public class AppTest {
     @Test
     public void deconvTest() {
         TensorFlow tf = new TensorFlow();
-        Tensor tensor = tf.deconv(new int[]{1, 1}, 0, new Tensor(new int[]{5, 5}), new Tensor(new int[]{140, 140}));
+        Tensor tensor = tf.deconv(new int[]{1, 1}, new int[]{0, 0}, new Tensor(new int[]{5, 5}), new Tensor(new int[]{140, 140}));
         TensorExecutor executor = new TensorExecutor(tensor);
         executor.run();
     }
@@ -115,7 +114,7 @@ public class AppTest {
     @Test
     public void demaxpoolTest() {
         TensorFlow tf = new TensorFlow();
-        Tensor tensor = tf.demaxpool(2, new int[]{2, 2}, 0, new Tensor(new int[]{140, 140}));
+        Tensor tensor = tf.demaxpool(2, new int[]{2, 2}, new int[]{0, 0}, new Tensor(new int[]{140, 140}));
         TensorExecutor executor = new TensorExecutor(tensor);
         executor.run();
     }

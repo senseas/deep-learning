@@ -6,7 +6,6 @@ import com.deep.framework.lang.function.Func2;
 import lombok.Data;
 
 import java.io.Serializable;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import static com.deep.framework.lang.ForEach.forEach;
 
