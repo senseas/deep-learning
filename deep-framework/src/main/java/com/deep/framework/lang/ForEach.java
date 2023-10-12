@@ -8,6 +8,7 @@ import com.deep.framework.lang.util.BeanUtil;
 import java.io.Serializable;
 import java.lang.reflect.Array;
 import java.util.Arrays;
+import java.util.stream.IntStream;
 
 public class ForEach implements Serializable {
 
@@ -114,6 +115,12 @@ public class ForEach implements Serializable {
         }
     }
 
+    public static <M> void forEach(Tenser<M> a, Tenser<M> b, Tenser<M> c, Tenser<M> d, Funcr3<M> func) {
+        IntStream.range(0, a.size()).forEach(i -> {
+            d.set(func.apply(a.data(i), b.data(i), c.data(i)), i);
+        });
+    }
+
     public static <M> void forEach(Object a, For1<M> func) {
         if (BeanUtil.isTenser(a)) {
             forEach(Tensers.getLength(a), i -> {
@@ -138,6 +145,12 @@ public class ForEach implements Serializable {
                 }
             });
         }
+    }
+
+    public static <M> void forEach(Tenser<M> a, Tenser<M> b, Funcr1<M> func) {
+        IntStream.range(0, a.size()).forEach(i -> {
+            b.set(func.apply(a.data(i)), i);
+        });
     }
 
     public static <M> void forEach(Object a, Object b, Object c, For3<M> func) {

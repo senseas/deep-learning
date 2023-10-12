@@ -1,5 +1,6 @@
 package com.deep.framework.core;
 
+import com.deep.framework.cuda.Reduce;
 import com.deep.framework.graph.*;
 import com.deep.framework.lang.Shape;
 import com.deep.framework.lang.Tenser;
@@ -16,6 +17,7 @@ import static com.deep.framework.cuda.Pooling.poolingBackward;
 import static com.deep.framework.cuda.Pooling.poolingForward;
 import static com.deep.framework.lang.ForEach.forEach;
 import static com.deep.framework.lang.Shape.*;
+import static jcuda.jcudnn.cudnnReduceTensorOp.CUDNN_REDUCE_TENSOR_AVG;
 
 public class TensorFlow implements Serializable {
 
@@ -856,11 +858,116 @@ public class TensorFlow implements Serializable {
                 Tensor C0 = matmul(funcx(A), funcx(B.get(0)));
                 Tensor C1 = matmul(funcx(A), funcx(B.get(1)));
                 Tensor C2 = matmul(funcx(A), funcx(B.get(2)));
-                return new Tenser<>(matmul(softmax(prod(matmulTran(C0, C1), cons(8))), C2)) ;
+                return new Tenser<>(matmul(softmax(prod(matmulTran(C0, C1), cons(8))), C2));
             }
 
-            public void gradient() { }
+            public void gradient() {}
 
+        };
+    }
+
+    public Tensor multiHeadAttention(Tensor... input) {
+        return new TensorFunction("SelfAttention", input) {
+
+            public Tenser<Tensor> compute() {
+                Tenser<Tensor>A = getInput(0), B = getInput(1);
+                Tensor[] arr=new Tensor[8];
+                forEach(B.shape[0], i -> arr[i] = selfAttention(funcx(A), funcx(B.get(i))));
+
+                Tensor N1 = matmul(getInput()[2], concat(arr));
+                Tensor N2 = layerNormal(addx(input[0], N1));
+                return new Tenser(N2);
+            }
+
+            public void gradient() {}
+
+        };
+    }
+
+    public Tensor layerNormal(Tensor... input) {
+        return new TensorFunction("SelfAttention", input) {
+
+            public Tenser<Tensor> compute() {
+                Tenser<Tensor> A = getInput(0);
+                Tensor mean = mean(input[0]), std = standard(input[0], mean);
+                Tenser<Tensor> D = new Tenser<>(Tensor.class, shape);
+                Tenser<Tensor> B = new Tenser<>(Tensor.class, new int[]{shape[0], shape[1]});
+                Tenser<Tensor> C = new Tenser<>(Tensor.class, new int[]{shape[0], shape[1]});
+                forEach(A, B, C, D, (Tensor a, Tensor b, Tensor c) -> {
+                    return add(div(mul(b, minus(a, mean)), add(std, cons(0.0000001))), c);
+                });
+                return D;
+            }
+
+            public void gradient() {}
+
+        };
+    }
+
+    public Tensor standard(Tensor... input) {
+        return new TensorFunction("SelfAttention", input) {
+
+            public Tenser<Tensor> compute() {
+                Tenser<Tensor> inx = getInput(0);
+                Tensor mean = input[1];
+                Tenser<Tensor> sump = new Tenser<>(Tensor.class, shape);
+                forEach(inx, sump, (Tensor a) -> pow(minus(a, mean), cons(2)));
+                Tensor std = pow(div(sum(funcx(sump)), cons(sump.size())), cons(0.5));
+                return new Tenser<>(std);
+            }
+
+            public void gradient() {}
+
+        };
+    }
+
+
+    public Tensor mean(Tensor... input) {
+        return new ScalarOperator("Mean", input) {
+
+            public double compute() {
+                Tensor inx = getInput(0);
+                int[] inShape = Shape.shape(inx.getShape()) , outShape = {1, 1, 1, 1};
+                Reduce.reduce(inx.getData(), inShape, data, outShape, CUDNN_REDUCE_TENSOR_AVG);
+                return data();
+            }
+
+            public void gradient() {}
+
+        };
+    }
+
+    public Tensor concat(Tensor... input) {
+        return new TensorOperator("SelfAttention", input) {
+
+            public Tenser<Tensor> compute() {
+                for (int i = 0; i < input.length; i++) {
+                    Tensor in = getInput()[i];
+                    int M = in.shape(0), N = in.shape(1);
+                    for (int m = 0; m < M; m++) {
+                        for (int n = 0; n < N; n++) {
+                            int idx = i * N + input.length * m * N + n;
+                            int idy = m * N + n;
+                            data[idx] = in.getData()[idy];
+                        }
+                    }
+                }
+                return output;
+            }
+
+            public void gradient() {
+                for (int i = 0; i < input.length; i++) {
+                    Tensor in = getInput()[i];
+                    int M = in.shape(0), N = in.shape(1);
+                    for (int m = 0; m < M; m++) {
+                        for (int n = 0; n < N; n++) {
+                            int idx = i * N + input.length * m * N + n;
+                            int idy = m * N + n;
+                            in.getGrad()[idy] += grad[idx];
+                        }
+                    }
+                }
+            }
         };
     }
 
