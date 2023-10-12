@@ -1,13 +1,16 @@
-package com.deep.framework.cuda;
+package com.deep.framework.cudnn;
 
+import com.deep.framework.graph.Tensor;
+import com.deep.framework.lang.Shape;
 import jcuda.Pointer;
 import jcuda.Sizeof;
 import jcuda.jcudnn.cudnnActivationDescriptor;
 import jcuda.jcudnn.cudnnTensorDescriptor;
 
 import static com.deep.framework.cuda.Cuda.createDevicePointer;
-import static com.deep.framework.cuda.CudnnConfig.handle;
+import static com.deep.framework.cudnn.CudnnConfig.handle;
 import static jcuda.jcudnn.JCudnn.*;
+import static jcuda.jcudnn.cudnnActivationMode.*;
 import static jcuda.jcudnn.cudnnDataType.CUDNN_DATA_DOUBLE;
 import static jcuda.jcudnn.cudnnNanPropagation.CUDNN_NOT_PROPAGATE_NAN;
 import static jcuda.jcudnn.cudnnTensorFormat.CUDNN_TENSOR_NCHW;
@@ -16,8 +19,41 @@ import static jcuda.runtime.JCuda.cudaMemcpy;
 import static jcuda.runtime.cudaMemcpyKind.cudaMemcpyDeviceToHost;
 
 public class Activation {
+
     private static final int DATA_TYPE = CUDNN_DATA_DOUBLE;
     private static final int DATA_TYPE_SZIE = Sizeof.DOUBLE;
+
+    public static void sigmoidForward(Tensor input, Tensor output) {
+        activationForward(input.getData(), output.getData(), Shape.shapes(input.getShape()), CUDNN_ACTIVATION_SIGMOID);
+    }
+
+    public static void sigmoidBackward(Tensor input, Tensor output) {
+        activationBackward(input.getData(), input.getGrad(), output.getData(), output.getGrad(), Shape.shapes(input.getShape()), CUDNN_ACTIVATION_SIGMOID);
+    }
+
+    public static void eluForward(Tensor input, Tensor output) {
+        activationForward(input.getData(), output.getData(), Shape.shapes(input.getShape()), CUDNN_ACTIVATION_ELU);
+    }
+
+    public static void eluBackward(Tensor input, Tensor output) {
+        activationBackward(input.getData(), input.getGrad(), output.getData(), output.getGrad(), Shape.shapes(input.getShape()), CUDNN_ACTIVATION_ELU);
+    }
+
+    public static void reluForward(Tensor input, Tensor output) {
+        activationForward(input.getData(), output.getData(), Shape.shapes(input.getShape()), CUDNN_ACTIVATION_RELU);
+    }
+
+    public static void reluBackward(Tensor input, Tensor output) {
+        activationBackward(input.getData(), input.getGrad(), output.getData(), output.getGrad(), Shape.shapes(input.getShape()), CUDNN_ACTIVATION_RELU);
+    }
+
+    public static void tanhForward(Tensor input, Tensor output) {
+        activationForward(input.getData(), output.getData(), Shape.shapes(input.getShape()), CUDNN_ACTIVATION_TANH);
+    }
+
+    public static void tanhBackward(Tensor input, Tensor output) {
+        activationBackward(input.getData(), input.getGrad(), output.getData(), output.getGrad(), Shape.shapes(input.getShape()), CUDNN_ACTIVATION_TANH);
+    }
 
     public static void activationForward(double[] input, double[] output, int[] shape, int activation) {
         // 指定输入的维度

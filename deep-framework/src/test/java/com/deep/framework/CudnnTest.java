@@ -8,13 +8,13 @@ import org.junit.Test;
 
 import java.util.Arrays;
 
-import static com.deep.framework.cuda.Convolution.convBackward;
-import static com.deep.framework.cuda.Convolution.convForward;
-import static com.deep.framework.cuda.Reduce.reduce;
-import static com.deep.framework.cuda.Relu.reluBackward;
-import static com.deep.framework.cuda.Relu.reluForward;
-import static com.deep.framework.cuda.Softmax.softmaxBackward;
-import static com.deep.framework.cuda.Softmax.softmaxForward;
+import static com.deep.framework.cudnn.Activation.reluBackward;
+import static com.deep.framework.cudnn.Activation.reluForward;
+import static com.deep.framework.cudnn.Convolution.convBackward;
+import static com.deep.framework.cudnn.Convolution.convForward;
+import static com.deep.framework.cudnn.Reduce.reduce;
+import static com.deep.framework.cudnn.Softmax.softmaxBackward;
+import static com.deep.framework.cudnn.Softmax.softmaxForward;
 import static jcuda.jcudnn.cudnnReduceTensorOp.CUDNN_REDUCE_TENSOR_ADD;
 
 @Slf4j

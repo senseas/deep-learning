@@ -1,4 +1,4 @@
-package com.deep.framework.cuda;
+package com.deep.framework.cudnn;
 
 import com.deep.framework.graph.Tensor;
 import com.deep.framework.lang.Shape;
@@ -9,7 +9,7 @@ import jcuda.jcudnn.cudnnFilterDescriptor;
 import jcuda.jcudnn.cudnnTensorDescriptor;
 
 import static com.deep.framework.cuda.Cuda.createDevicePointer;
-import static com.deep.framework.cuda.CudnnConfig.handle;
+import static com.deep.framework.cudnn.CudnnConfig.handle;
 import static jcuda.jcudnn.JCudnn.*;
 import static jcuda.jcudnn.cudnnConvolutionBwdDataAlgo.CUDNN_CONVOLUTION_BWD_DATA_ALGO_0;
 import static jcuda.jcudnn.cudnnConvolutionBwdFilterAlgo.CUDNN_CONVOLUTION_BWD_FILTER_ALGO_0;
@@ -33,7 +33,7 @@ public class Convolution {
     }
 
     public static void convBackward(Tensor filter, int[] padding, int[] stride, Tensor input, Tensor output) {
-        convBackward(input.getData(), input.getGrad(), Shape.shapes(input.getShape()), filter.getData(), filter.getGrad(), Shape.shapes(filter.getShape()), padding, stride, output.getData(), output.getGrad(), Shape.shapes(output.getShape()));
+        convBackward(input.getData(), input.getGrad(), Shape.shapes(input.getShape()), filter.getData(), filter.getGrad(), filter.getShape(), padding, stride, output.getData(), output.getGrad(), Shape.shapes(output.getShape()));
     }
 
     public static void convForward(double[] input, int[] input_shape, double[] filter, int[] filter_shape, int[] padding, int[] stride, double[] ouput, int[] output_shape) {

@@ -1,6 +1,6 @@
 package com.deep.framework.core;
 
-import com.deep.framework.cuda.Reduce;
+import com.deep.framework.cudnn.Reduce;
 import com.deep.framework.graph.*;
 import com.deep.framework.lang.Shape;
 import com.deep.framework.lang.Tenser;
@@ -8,13 +8,14 @@ import com.deep.framework.lang.Tenser;
 import java.io.Serializable;
 import java.util.Arrays;
 
-import static com.deep.framework.cuda.Convolution.convForward;
-import static com.deep.framework.cuda.Elu.eluBackward;
-import static com.deep.framework.cuda.Elu.eluForward;
 import static com.deep.framework.cuda.Matmul.matmulBackward;
 import static com.deep.framework.cuda.Matmul.matmulForward;
-import static com.deep.framework.cuda.Pooling.poolingBackward;
-import static com.deep.framework.cuda.Pooling.poolingForward;
+import static com.deep.framework.cudnn.Activation.eluBackward;
+import static com.deep.framework.cudnn.Activation.eluForward;
+import static com.deep.framework.cudnn.Convolution.convBackward;
+import static com.deep.framework.cudnn.Convolution.convForward;
+import static com.deep.framework.cudnn.Pooling.maxPoolingBackward;
+import static com.deep.framework.cudnn.Pooling.maxPoolingForward;
 import static com.deep.framework.lang.ForEach.forEach;
 import static com.deep.framework.lang.Shape.*;
 import static jcuda.jcudnn.cudnnReduceTensorOp.CUDNN_REDUCE_TENSOR_AVG;
@@ -672,7 +673,7 @@ public class TensorFlow implements Serializable {
             public void gradient() {
                 Tenser<Tensor> A = getInput(0), B = padding(getInput(1), padding);
                 Tenser<Tensor> C = getOutput();
-                convForward(getInput()[0], padding, stride, getInput()[1], this);
+                convBackward(getInput()[0], padding, stride, getInput()[1], this);
             }
 
         };
@@ -756,14 +757,14 @@ public class TensorFlow implements Serializable {
                 int heighs = stride[0], widths = stride[1];
                 int height = (A.shape(0) - window[0]) / heighs + 1, width = (A.shape(1) - window[1]) / widths + 1;
                 Tenser<Tensor> B = createOutput(new int[]{height, width});
-                poolingForward(window, padding, stride, getInput()[0], this);
+                maxPoolingForward(window, padding, stride, getInput()[0], this);
                 return B;
             }
 
             public void gradient() {
                 Tenser<Tensor> A = padding(getInput(0), padding), B = getOutput();
                 int heighs = stride[0], widths = stride[1];
-                poolingBackward(window, padding, stride, getInput()[0], this);
+                maxPoolingBackward(window, padding, stride, getInput()[0], this);
             }
 
         };

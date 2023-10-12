@@ -1,4 +1,4 @@
-package com.deep.framework.cuda;
+package com.deep.framework.cudnn;
 
 import com.deep.framework.graph.Tensor;
 import com.deep.framework.lang.Shape;
@@ -8,7 +8,7 @@ import jcuda.jcudnn.cudnnPoolingDescriptor;
 import jcuda.jcudnn.cudnnTensorDescriptor;
 
 import static com.deep.framework.cuda.Cuda.createDevicePointer;
-import static com.deep.framework.cuda.CudnnConfig.handle;
+import static com.deep.framework.cudnn.CudnnConfig.handle;
 import static jcuda.jcudnn.JCudnn.*;
 import static jcuda.jcudnn.cudnnDataType.CUDNN_DATA_DOUBLE;
 import static jcuda.jcudnn.cudnnNanPropagation.CUDNN_NOT_PROPAGATE_NAN;
@@ -22,17 +22,16 @@ public class Pooling {
 
     private static final int DATA_TYPE = CUDNN_DATA_DOUBLE;
     private static final int DATA_TYPE_SZIE = Sizeof.DOUBLE;
-    private static final int POOLING_MODE = CUDNN_POOLING_MAX;
 
-    public static void poolingForward(int[] window, int[] padding, int[] stride, Tensor input, Tensor output) {
-        poolingForward(input.getData(), Shape.shapes(input.getShape()), window, padding, stride, output.getData(), Shape.shapes(output.getShape()));
+    public static void maxPoolingForward(int[] window, int[] padding, int[] stride, Tensor input, Tensor output) {
+        poolingForward(input.getData(), Shape.shapes(input.getShape()), window, padding, stride, output.getData(), Shape.shapes(output.getShape()), CUDNN_POOLING_MAX);
     }
 
-    public static void poolingBackward(int[] window, int[] padding, int[] stride, Tensor input, Tensor output) {
-        poolingBackward(input.getData(), input.getGrad(), Shape.shapes(input.getShape()), window, padding, stride, output.getData(), output.getGrad(), Shape.shapes(output.getShape()));
+    public static void maxPoolingBackward(int[] window, int[] padding, int[] stride, Tensor input, Tensor output) {
+        poolingBackward(input.getData(), input.getGrad(), Shape.shapes(input.getShape()), window, padding, stride, output.getData(), output.getGrad(), Shape.shapes(output.getShape()), CUDNN_POOLING_MAX);
     }
 
-    public static void poolingForward(double[] input, int[] input_shape, int[] window, int[] padding, int[] stride, double[] ouput, int[] output_shape) {
+    public static void poolingForward(double[] input, int[] input_shape, int[] window, int[] padding, int[] stride, double[] ouput, int[] output_shape, int mode) {
         // Define input tensor
         cudnnTensorDescriptor input_desc = new cudnnTensorDescriptor();
         cudnnCreateTensorDescriptor(input_desc);
@@ -46,7 +45,7 @@ public class Pooling {
         // Define pooling descriptor
         cudnnPoolingDescriptor pool_desc = new cudnnPoolingDescriptor();
         cudnnCreatePoolingDescriptor(pool_desc);
-        cudnnSetPooling2dDescriptor(pool_desc, POOLING_MODE, CUDNN_NOT_PROPAGATE_NAN, window[0], window[1], padding[0], padding[1], stride[0], stride[1]);
+        cudnnSetPooling2dDescriptor(pool_desc, mode, CUDNN_NOT_PROPAGATE_NAN, window[0], window[1], padding[0], padding[1], stride[0], stride[1]);
 
         // allocate memory on device
         Pointer device_input = createDevicePointer(input);
@@ -65,7 +64,7 @@ public class Pooling {
         cudnnDestroyPoolingDescriptor(pool_desc);
     }
 
-    public static void poolingBackward(double[] input, double[] input_grad, int[] input_shape, int[] window, int[] padding, int[] stride, double[] ouput, double[] ouput_grad, int[] output_shape) {
+    public static void poolingBackward(double[] input, double[] input_grad, int[] input_shape, int[] window, int[] padding, int[] stride, double[] ouput, double[] ouput_grad, int[] output_shape, int mode) {
         // define input tensor
         cudnnTensorDescriptor input_desc = new cudnnTensorDescriptor();
         cudnnCreateTensorDescriptor(input_desc);
@@ -87,7 +86,7 @@ public class Pooling {
         // define pooling descriptor
         cudnnPoolingDescriptor pool_desc = new cudnnPoolingDescriptor();
         cudnnCreatePoolingDescriptor(pool_desc);
-        cudnnSetPooling2dDescriptor(pool_desc, POOLING_MODE, CUDNN_NOT_PROPAGATE_NAN, window[0], window[1], padding[0], padding[1], stride[0], stride[1]);
+        cudnnSetPooling2dDescriptor(pool_desc, mode, CUDNN_NOT_PROPAGATE_NAN, window[0], window[1], padding[0], padding[1], stride[0], stride[1]);
 
         // allocate memory on device
         Pointer device_input = createDevicePointer(input);

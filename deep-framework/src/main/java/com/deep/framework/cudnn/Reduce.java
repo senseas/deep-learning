@@ -1,22 +1,35 @@
-package com.deep.framework.cuda;
+package com.deep.framework.cudnn;
 
+import com.deep.framework.graph.Tensor;
+import com.deep.framework.lang.Shape;
 import jcuda.Pointer;
 import jcuda.Sizeof;
 import jcuda.jcudnn.cudnnReduceTensorDescriptor;
 import jcuda.jcudnn.cudnnTensorDescriptor;
 
+import java.util.Arrays;
+
 import static com.deep.framework.cuda.Cuda.createDevicePointer;
-import static com.deep.framework.cuda.CudnnConfig.handle;
+import static com.deep.framework.cudnn.CudnnConfig.handle;
 import static jcuda.jcudnn.JCudnn.*;
 import static jcuda.jcudnn.cudnnDataType.CUDNN_DATA_DOUBLE;
 import static jcuda.jcudnn.cudnnIndicesType.CUDNN_32BIT_INDICES;
 import static jcuda.jcudnn.cudnnNanPropagation.CUDNN_NOT_PROPAGATE_NAN;
 import static jcuda.jcudnn.cudnnReduceTensorIndices.CUDNN_REDUCE_TENSOR_NO_INDICES;
+import static jcuda.jcudnn.cudnnReduceTensorOp.CUDNN_REDUCE_TENSOR_ADD;
 import static jcuda.jcudnn.cudnnTensorFormat.CUDNN_TENSOR_NCHW;
 import static jcuda.runtime.JCuda.*;
 import static jcuda.runtime.cudaMemcpyKind.cudaMemcpyDeviceToHost;
 
 public class Reduce {
+
+    public static void sumForward(Tensor input, Tensor output) {
+        reduce(input.getData(), Shape.shapes(input.getShape()), output.getData(), Shape.shapes(output.getShape()), CUDNN_REDUCE_TENSOR_ADD);
+    }
+
+    public static void sumBackward(Tensor input, Tensor output) {
+        Arrays.stream(Shape.shapes(input.getShape())).forEach(i -> input.getData()[i] += output.grad());
+    }
 
     public static void reduce(double[] input, int[] input_shape, double[] output, int[] output_shape, int op) {
         int batch_size = input_shape[0], channels = input_shape[1], height = input_shape[2], width = input_shape[3];

@@ -1,6 +1,6 @@
 package com.deep.framework;
 
-import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson2.JSONObject;
 import com.deep.framework.core.TensorExecutor;
 import com.deep.framework.core.TensorFlow;
 import com.deep.framework.graph.Tensor;
@@ -67,7 +67,7 @@ public class DenseNetTest extends Shape {
             executor.run(inSet, labSet);
             if (x != 0 && x % 2 == 0) ModeLoader.save(executor, i + "LetNet.obj");
             img(tensor64, i);
-            log(squarex.getOutput());
+            log(squarex.getData());
         });
     }
 

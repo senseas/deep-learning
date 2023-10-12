@@ -1,4 +1,4 @@
-package com.deep.framework.cuda;
+package com.deep.framework.cudnn;
 
 import jcuda.jcudnn.JCudnn;
 import jcuda.jcudnn.cudnnHandle;
