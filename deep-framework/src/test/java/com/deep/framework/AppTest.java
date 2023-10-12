@@ -114,7 +114,7 @@ public class AppTest {
     @Test
     public void demaxpoolTest() {
         TensorFlow tf = new TensorFlow();
-        Tensor tensor = tf.demaxpool(2, new int[]{2, 2}, new int[]{0, 0}, new Tensor(new int[]{140, 140}));
+        Tensor tensor = tf.demaxpool(new int[]{2, 2}, new int[]{2, 2}, new int[]{0, 0}, new Tensor(new int[]{140, 140}));
         TensorExecutor executor = new TensorExecutor(tensor);
         executor.run();
     }

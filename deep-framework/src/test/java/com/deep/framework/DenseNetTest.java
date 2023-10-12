@@ -39,13 +39,13 @@ public class DenseNetTest extends Shape {
         Tensor tensor31 = tf.convx(new int[]{1, 1}, new int[]{1, 1}, new Tensor("weight", new int[]{40, 3, 3}), tensor25);//32*35*35
         Tensor tensor32 = tf.relux(tensor31);//32*35*35
 
-        Tensor tensor41 = tf.demaxpoolx(2, new int[]{2, 2}, new int[]{0, 0}, tensor32);//32*70*70
+        Tensor tensor41 = tf.demaxpoolx(new int[]{2, 2}, new int[]{2, 2}, new int[]{0, 0}, tensor32);//32*70*70
         Tensor tensor42 = tf.convx(new int[]{1, 1}, new int[]{1, 1}, new Tensor("weight", new int[]{20, 3, 3}), tensor41);//20*70*70
         Tensor tensor43 = tf.relux(tensor42);//20*70*70
         Tensor tensor44 = tf.convx(new int[]{1, 1}, new int[]{1, 1}, new Tensor("weight", new int[]{20, 3, 3}), tensor43);//20*70*70
         Tensor tensor45 = tf.relux(tensor44);//20*70*70
 
-        Tensor tensor51 = tf.demaxpoolx(2, new int[]{2, 2}, new int[]{0, 0}, tensor45);//20*140*140
+        Tensor tensor51 = tf.demaxpoolx(new int[]{2, 2}, new int[]{2, 2}, new int[]{0, 0}, tensor45);//20*140*140
         Tensor tensor52 = tf.convx(new int[]{1, 1}, new int[]{1, 1}, new Tensor("weight", new int[]{10, 3, 3}), tensor51);//16*140*140
         Tensor tensor53 = tf.relux(tensor52);//16*140*140
         Tensor tensor54 = tf.convx(new int[]{1, 1}, new int[]{1, 1}, new Tensor("weight", new int[]{10, 3, 3}), tensor53);//16*140*140
@@ -91,11 +91,11 @@ public class DenseNetTest extends Shape {
         Tensor tensor33 = tf.convx(new int[]{1, 1}, new int[]{2, 2}, new Tensor("weight", new int[]{64, 5, 5}), tensor32);//64*35*35
         Tensor tensor34 = tf.relux(tensor33);//64*35*35
 
-        Tensor tensor41 = tf.demaxpoolx(2, new int[]{2, 2}, new int[]{0, 0}, tensor34);//64*70*70
+        Tensor tensor41 = tf.demaxpoolx(new int[]{2, 2}, new int[]{2, 2}, new int[]{0, 0}, tensor34);//64*70*70
         Tensor tensor42 = tf.convx(new int[]{1, 1}, new int[]{2, 2}, new Tensor("weight", new int[]{32, 5, 5}), tensor41);//32*70*70
         Tensor tensor43 = tf.relux(tensor42);//32*70*70
 
-        Tensor tensor51 = tf.demaxpoolx(2, new int[]{2, 2}, new int[]{0, 0}, tensor43);//32*140*140
+        Tensor tensor51 = tf.demaxpoolx(new int[]{2, 2}, new int[]{2, 2}, new int[]{0, 0}, tensor43);//32*140*140
         Tensor tensor52 = tf.convx(new int[]{1, 1}, new int[]{2, 2}, new Tensor("weight", new int[]{16, 5, 5}), tensor51);//16*140*140
         Tensor tensor53 = tf.relux(tensor52);//16*140*140
 
