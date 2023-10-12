@@ -59,7 +59,7 @@ public class DenseNetTest extends Shape {
         Tensor tensor64 = tf.relux(tensor63);//10*140*140
         Tensor squarex = tf.squarex(label, tensor64);
 
-        TensorExecutor.rate = 0.0003;
+        TensorExecutor.rate = 0.000003;
         TensorExecutor executor = new TensorExecutor(squarex, input, label);
         forEach(600, labelSet.length, (x, i) -> {
             log.info("epoch = {{},{}}", x, i);

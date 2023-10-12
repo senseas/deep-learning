@@ -15,7 +15,7 @@ public class TransformerTest extends Shape {
         TensorFlow tf = new TensorFlow();
         Tensor input = new Tensor(new int[]{ 64, 64});
         Tensor label = new Tensor(new int[]{10, 1});
-        Tensor tensor = tf.selfAttention(input, new Tensor(new int[]{3, 64, 512}));
+        //Tensor tensor = tf.selfAttention(input, new Tensor(new int[]{3, 64, 512}));
     }
 
     public void log(Object obj) {

@@ -127,4 +127,30 @@ public class AppTest {
         executor.run();
     }
 
+    @Test
+    public void concatTest() {
+        TensorFlow tf = new TensorFlow();
+        Tensor tensor = tf.concat(new Tensor(new int[]{3, 2}),new Tensor(new int[]{3, 2}));
+        TensorExecutor executor = new TensorExecutor(tensor);
+        executor.run();
+    }
+
+    @Test
+    public void meanTest() {
+        TensorFlow tf = new TensorFlow();
+        Tensor tensor = tf.mean(new Tensor(new int[]{3, 2}));
+        TensorExecutor executor = new TensorExecutor(tensor);
+        executor.run();
+    }
+
+    @Test
+    public void standardTest() {
+        TensorFlow tf = new TensorFlow();
+        Tensor data = new Tensor(new int[]{3, 2});
+        Tensor mean = tf.mean(data);
+        Tensor tensor = tf.standard(data,mean);
+        TensorExecutor executor = new TensorExecutor(tensor);
+        executor.run();
+    }
+
 }
