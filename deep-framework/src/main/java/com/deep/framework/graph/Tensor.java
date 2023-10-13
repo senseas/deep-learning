@@ -1,7 +1,6 @@
 package com.deep.framework.graph;
 
 import com.deep.framework.core.TensorExecutor;
-import com.deep.framework.cuda.CudaContext;
 import com.deep.framework.lang.Tenser;
 import lombok.Data;
 
@@ -142,11 +141,6 @@ public class Tensor implements Serializable {
         return shape[i];
     }
 
-    public CudaContext getContext() {
-        if (Objects.nonNull(context)) return context;
-        return context = new CudaContext(this);
-    }
-
     transient private int idx;
     transient private Tensor tensor;
 
@@ -157,5 +151,4 @@ public class Tensor implements Serializable {
     private String name = "Tensor::";
     private Tensor[] input;
     transient protected Tenser<Tensor> output, function;
-    transient private CudaContext context;
 }

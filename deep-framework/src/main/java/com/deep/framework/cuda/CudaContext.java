@@ -21,6 +21,7 @@ public class CudaContext implements Serializable {
 
     public Pointer getValue() {
         if (Objects.nonNull(value)) return value;
+
         return createDeviceData(tensor.getData());
     }
 
