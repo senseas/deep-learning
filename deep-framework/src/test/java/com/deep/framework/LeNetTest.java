@@ -17,8 +17,10 @@ import java.util.List;
 import java.util.TreeMap;
 import java.util.stream.IntStream;
 
+import static com.deep.framework.lang.ForEach.forEach;
+
 @Slf4j
-public class LeNetTest extends Shape {
+public class LeNetTest {
 
     @Test
     public void LeNetTest() {

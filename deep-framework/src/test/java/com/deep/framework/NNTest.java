@@ -4,12 +4,13 @@ import com.alibaba.fastjson.JSONObject;
 import com.deep.framework.core.TensorExecutor;
 import com.deep.framework.core.TensorFlow;
 import com.deep.framework.graph.Tensor;
-import com.deep.framework.lang.Shape;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Test;
 
+import static com.deep.framework.lang.ForEach.forEach;
+
 @Slf4j
-public class NNTest extends Shape {
+public class NNTest{
 
     @Test
     public void NNTest() {

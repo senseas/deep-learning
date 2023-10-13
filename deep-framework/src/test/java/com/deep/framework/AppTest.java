@@ -8,51 +8,27 @@ import org.junit.Test;
 public class AppTest {
 
     @Test
-    public void sigmoidTest() {
-        TensorFlow tf = new TensorFlow();
-        Tensor tensor = tf.sigmoid(new Tensor(-0.6354469361189982));
-        TensorExecutor executor = new TensorExecutor(tensor);
-        executor.run();
-
-        Double value = 1 / (1 + Math.exp(-(-0.6354469361189982)));
-        System.out.println(value);
-        Double value1 = value * (1 - value);
-        System.out.println(value1 * 0.1694231856183997);
-    }
-
-    @Test
-    public void sigmoidTestxx() {
-        TensorFlow tf = new TensorFlow();
-        Tensor tensor = tf.sigmoid(new Tensor(-0.6354469361189982));
-        TensorExecutor executor = new TensorExecutor(tensor);
-        executor.run();
-        Tensor none = tensor.getInput()[0].getOutput().tensor();
-        //gradient(tensor);
-        System.out.println(none.grad());
-
-        Double value = 1 / (1 + Math.exp(-(-0.6354469361189982)));
-        System.out.println(value);
-        Double value1 = value * (1 - value);
-        System.out.println(value1 * 0.1694231856183997);
-    }
-
-    @Test
-    public void reluxTest() {
-        TensorFlow tf = new TensorFlow();
-        Tensor tensor = tf.relux(new Tensor(new int[]{2,5}));
-        TensorExecutor executor = new TensorExecutor(tensor);
-        executor.run();
-        Tensor none = tensor.getInput()[0].getOutput().tensor();
-        //compute(tensor);
-        System.out.println(none);
-    }
-
-    @Test
     public void appTest() {
         TensorFlow tf = new TensorFlow();
         Tensor x = new Tensor(2d);
         Tensor m = tf.mul(tf.minus(new Tensor(6d), x), x);
         TensorExecutor executor = new TensorExecutor(m);
+        executor.run();
+    }
+
+    @Test
+    public void sigmoidTest() {
+        TensorFlow tf = new TensorFlow();
+        Tensor tensor = tf.sigmoid(new Tensor(-0.6354469361189982));
+        TensorExecutor executor = new TensorExecutor(tensor);
+        executor.run();
+    }
+
+    @Test
+    public void sigmoidxTest() {
+        TensorFlow tf = new TensorFlow();
+        Tensor sigmoidx = tf.sigmoidx(new Tensor(new int[]{3}));
+        TensorExecutor executor = new TensorExecutor(sigmoidx);
         executor.run();
     }
 
@@ -71,6 +47,7 @@ public class AppTest {
         TensorExecutor executor = new TensorExecutor(tensor);
         executor.run();
     }
+
     @Test
     public void squarexTest() {
         TensorFlow tf = new TensorFlow();
@@ -84,6 +61,15 @@ public class AppTest {
         TensorFlow tf = new TensorFlow();
         Tensor tensor = tf.softmax(new Tensor(new int[]{2}));
         TensorExecutor executor = new TensorExecutor(tensor);
+        executor.run();
+    }
+
+    @Test
+    public void softmaxCrossxTest() {
+        TensorFlow tf = new TensorFlow();
+        Tensor softmaxCrossx = tf.softmaxCrossx(new Tensor(new int[]{2}), new Tensor(new int[]{2}));
+        TensorExecutor executor = new TensorExecutor(softmaxCrossx);
+        executor.run();
         executor.run();
     }
 
@@ -130,7 +116,7 @@ public class AppTest {
     @Test
     public void concatTest() {
         TensorFlow tf = new TensorFlow();
-        Tensor tensor = tf.concat(new Tensor(new int[]{3, 2}),new Tensor(new int[]{3, 2}));
+        Tensor tensor = tf.concat(new Tensor(new int[]{3, 2}), new Tensor(new int[]{3, 2}));
         TensorExecutor executor = new TensorExecutor(tensor);
         executor.run();
     }
@@ -148,7 +134,7 @@ public class AppTest {
         TensorFlow tf = new TensorFlow();
         Tensor data = new Tensor(new int[]{3, 2});
         Tensor mean = tf.mean(data);
-        Tensor tensor = tf.standard(data,mean);
+        Tensor tensor = tf.standard(data, mean);
         TensorExecutor executor = new TensorExecutor(tensor);
         executor.run();
     }

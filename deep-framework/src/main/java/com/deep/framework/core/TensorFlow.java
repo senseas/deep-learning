@@ -851,7 +851,7 @@ public class TensorFlow implements Serializable {
                 Tensor C1 = matmul(A, funcx(B.get(1)));
                 Tensor C2 = matmul(A, funcx(B.get(2)));
                 Tensor C3 = matmulTran(C0, C1);
-                Tensor C4 = softmax(prod(C3, cons(scaler)));
+                Tensor C4 = softmax(mask(prod(C3, cons(scaler))));
                 return new Tenser<>(matmul(C4, C2));
             }
 
@@ -864,9 +864,8 @@ public class TensorFlow implements Serializable {
         return new TensorFunction("MultiHeadAttention", input) {
 
             public Tenser<Tensor> compute() {
-                Tensor A = getInput()[0], M = getInput()[2], N = getInput()[3];
+                Tensor A = getInput()[0], C = getInput()[2], M = getInput()[3], N = getInput()[4];
                 Tenser<Tensor> B = getInput(1);
-                Tensor C = getInput()[2];
                 int headers = B.shape[0];
                 Tensor[] arr = new Tensor[headers];
                 forEach(headers, i -> arr[i] = selfAttention(scaler, A, funcx(B.get(i))));
@@ -923,6 +922,55 @@ public class TensorFlow implements Serializable {
                 int[] inShape = Shape.shapes(inx.getShape()) , outShape = {1, 1, 1, 1};
                 Reduce.reduce(inx.getData(), inShape, data, outShape, CUDNN_REDUCE_TENSOR_AVG);
                 return data();
+            }
+
+            public void gradient() {}
+
+        };
+    }
+
+    public Tensor wordEmbedding(Tensor... input) {
+        return new ScalarFunction("Mean", input) {
+
+            public Tensor compute() {
+                Tensor A = getInput()[0], B = getInput()[1];
+                return matmul(A, B);
+            }
+
+            public void gradient() {}
+
+        };
+    }
+
+    public Tensor mask(Tensor... input) {
+        return new TensorOperator("Mean", input[0].getShape(), input) {
+
+            public Tenser compute() {
+                forEach(shape[0], shape[1], (int i, int l) -> {
+                    data[shape[1] * i + l + i + 1] = 0;
+                });
+                return output;
+            }
+
+            public void gradient() {}
+
+        };
+    }
+
+    public Tensor positionalEmbedding(int[] shape, Tensor... input) {
+        return new TensorOperator("Mean", shape, input) {
+
+            public Tenser compute() {
+                Tensor inx = getInput()[0];
+                int dim = shape[1];
+                forEach(shape(0), shape(1), (int i, int l) -> {
+                    if (l % 2 == 0) {
+                        data[dim * i + l] = Math.sin(inx.getData()[i] / Math.pow(1000, 2 * l / dim));
+                    } else {
+                        data[dim * i + l] = Math.cos(inx.getData()[i] / Math.pow(1000, 2 * l / dim));
+                    }
+                });
+                return output;
             }
 
             public void gradient() {}

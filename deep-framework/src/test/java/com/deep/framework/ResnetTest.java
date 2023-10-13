@@ -12,8 +12,10 @@ import com.deep.framework.lang.util.ImageUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Test;
 
+import static com.deep.framework.lang.ForEach.forEach;
+
 @Slf4j
-public class ResnetTest extends Shape {
+public class ResnetTest{
 
     @Test
     public void DenseNetTest() {
