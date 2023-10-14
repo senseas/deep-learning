@@ -30,12 +30,4 @@ public class Tensers {
         arrayEach(o, (a, i) -> Array.set(array, index.getAndIncrement(), Array.get(a, i)));
         return new Tenser((Object[]) array, shape);
     }
-
-    public static <T> T array(Tenser o) {
-        AtomicInteger index = new AtomicInteger();
-        Object array = Array.newInstance(getTenserDeepClass(o), o.shape);
-        arrayEach(array, (a, i) -> Array.set(a, i, o.data[index.getAndIncrement()]));
-        return (T) array;
-    }
-
 }

@@ -1,7 +1,5 @@
 package com.deep.framework.lang.util;
 
-import com.deep.framework.graph.Tensor;
-import com.deep.framework.graph.TensorOperator;
 import com.deep.framework.lang.Tenser;
 import org.apache.commons.math3.random.RandomDataGenerator;
 
@@ -10,14 +8,6 @@ import java.util.Objects;
 public class BeanUtil {
 
     static RandomDataGenerator random = new RandomDataGenerator();
-
-    public static boolean isOperation(Tensor tensor) {
-        return tensor instanceof TensorOperator;
-    }
-
-    public static boolean isNotOperation(Tensor tensor) {
-        return !(tensor instanceof TensorOperator);
-    }
 
     public static boolean isTenser(Object o) {
         if (Objects.isNull(o)) return false;
@@ -37,18 +27,6 @@ public class BeanUtil {
     public static boolean isNotArray(Object o) {
         if (Objects.isNull(o)) return true;
         return !(o.getClass().isArray());
-    }
-
-    public static boolean isNone(Tensor o) {
-        return o.getName().startsWith("None");
-    }
-
-    public static boolean isNotNone(Tensor o) {
-        return !o.getName().startsWith("None");
-    }
-
-    public static boolean isFunction(Tensor o) {
-        return o.getName().equals("Function");
     }
 
     public static double toDouble(double o) {

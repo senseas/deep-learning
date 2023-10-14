@@ -825,14 +825,12 @@ public class TensorFlow implements Serializable {
     }
 
     public Tensor softmax(Tensor input) {
-        return new TensorFunction("Softmax", input) {
+        return new TensorFunction("Softmax", input.getShape(), input) {
 
             public Tenser<Tensor> compute() {
                 Tenser<Tensor> A = getInput(0), B = zeroTensors(A);
                 Tensor sum = sum(expx(funcx(A)));
-                forEach(A, B, (Tensor a, Tenser<Tensor> b, int i) -> {
-                    b.set(div(exp(a), sum), i);
-                });
+                forEach(A, B, (Tensor a) -> div(exp(a), sum));
                 return B;
             }
 
@@ -861,12 +859,12 @@ public class TensorFlow implements Serializable {
     }
 
     public Tensor multiHeadAttention(int scaler, Tensor... input) {
-        return new TensorFunction("MultiHeadAttention", input) {
+        return new TensorFunction("MultiHeadAttention", new int[]{input[1].shape(2), input[1].shape(3)}, input) {
 
             public Tenser<Tensor> compute() {
                 Tensor A = getInput()[0], C = getInput()[2], M = getInput()[3], N = getInput()[4];
                 Tenser<Tensor> B = getInput(1);
-                int headers = B.shape[0];
+                int headers = B.shape(0);
                 Tensor[] arr = new Tensor[headers];
                 forEach(headers, i -> arr[i] = selfAttention(scaler, A, funcx(B.get(i))));
                 Tensor addx = addx(input[0], matmul(concat(arr), C));
