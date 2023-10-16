@@ -10,10 +10,6 @@ import static com.deep.framework.lang.Shape.*;
 
 public class TensorFunction extends Tensor {
 
-    public TensorFunction(String name, Tensor... input) {
-        super(name, input);
-    }
-
     public TensorFunction(String name, int[] shape, Tensor... input) {
         super(name, input);
         this.shape = shape;

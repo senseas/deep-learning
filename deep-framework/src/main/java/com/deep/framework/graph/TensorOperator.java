@@ -12,11 +12,6 @@ import static com.deep.framework.lang.Shape.zeros;
 
 public class TensorOperator extends Tensor {
 
-    public TensorOperator(String name, Tensor... input) {
-        super(name, input);
-        concat(this);
-    }
-
     public TensorOperator(String name, int[] shape, Tensor... input) {
         super(name, input);
         this.shape = shape;
@@ -56,7 +51,7 @@ public class TensorOperator extends Tensor {
     }
 
     public void create() {
-        if (Objects.isNull(data) && Objects.nonNull(shape)) {
+        if (Objects.isNull(data)) {
             this.data = zeros(shape);
             this.grad = zeros(shape);
         }
@@ -67,7 +62,7 @@ public class TensorOperator extends Tensor {
     }
 
     public Tenser<Tensor> getOutput() {
-        if (Objects.nonNull(output) || Objects.isNull(shape)) return output;
+        if (Objects.nonNull(output)) return output;
         return output = Tensors(this);
     }
 

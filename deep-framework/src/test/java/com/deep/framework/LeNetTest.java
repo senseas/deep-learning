@@ -56,7 +56,7 @@ public class LeNetTest {
 
         Tensor softmax = tf.softmax(tensor53);
         Tensor crossx = tf.softmaxCrossx(label, softmax);
-        TensorExecutor.rate = 0.03;
+        TensorExecutor.rate = 0.003;
         TensorExecutor executor = new TensorExecutor(crossx, input, label);
         forEach(20, x -> {
             forEach(60000, i -> {
@@ -65,9 +65,9 @@ public class LeNetTest {
                 if (i % 500 == 0) {
                     log.info("---------{}------------", i);
                     ModeLoader.save(executor, i + "LetNet.obj");
-                    log(Shape.reshape(labSet, new Double[10]));
-                    log(Shape.reshape(softmax.getOutput(), new Tensor[10]));
-                    log(crossx.getOutput());
+                    log(labSet);
+                    log(softmax.getData());
+                    log(crossx.getData());
                 }
             });
         });
@@ -125,7 +125,7 @@ public class LeNetTest {
 
     @Test
     public void ImgTest() {
-        int index = 12500;
+        int index = 2500;
         double[][][][] images = DataLoader.getMnistImages();
         String fileName = DataLoader.IMG_PATH.concat(String.valueOf(index)).concat(".JPEG");
         ImageUtil.write(images[index][0], fileName);
