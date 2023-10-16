@@ -526,7 +526,7 @@ public class TensorFlow implements Serializable {
 
             public Tenser<Tensor> compute() {
                 Tenser<Tensor> A = getInput(0), C = zeroTensors(A);
-                Tensor b = getInput(1).tensor();
+                Tensor b = getInput(1).one();
                 forEach(A, C, (Tensor a, Tenser<Tensor> c, int i) -> {
                     c.set(mul(a, b), i);
                 });
@@ -542,7 +542,7 @@ public class TensorFlow implements Serializable {
         return new ScalarFunction("Sigmoid", input) {
 
             public Tensor compute() {
-                Tensor A = getInput(0);
+                Tensor A = getInput(0).one();
                 return div(cons(1d), add(cons(1d), exp(minus(A))));
             }
 
@@ -571,7 +571,7 @@ public class TensorFlow implements Serializable {
         return new ScalarFunction("Square", input) {
 
             public Tensor compute() {
-                Tensor a = getInput(0), b = getInput(1);
+                Tensor a = getInput(0).one(), b = getInput(1).one();
                 return mul(cons(0.5), pow(minus(a, b), cons(2d)));
             }
 
@@ -584,7 +584,7 @@ public class TensorFlow implements Serializable {
         return new ScalarFunction("Squarex", input) {
 
             public Tensor compute() {
-                Tenser<Tensor> A = getInput(0).getOutput(), B = getInput(1).getOutput();
+                Tenser<Tensor> A = getInput(0), B = getInput(1);
                 Tensor[] C = {cons(0d)};
                 forEach(A, B, (Tensor a, Tensor b) -> {
                     C[0] = add(C[0], square(a, b));
@@ -601,11 +601,11 @@ public class TensorFlow implements Serializable {
         return new ScalarFunction("SoftmaxCross", input) {
 
             public Tensor compute() {
-                Tensor a = getInput(0), b = getInput(1);
+                Tensor a = getInput(0).one(), b = getInput(1).one();
                 return minus(mul(a, log(b)));
             }
 
-            public void gradient() { }
+            public void gradient() {}
 
         };
     }
@@ -614,7 +614,7 @@ public class TensorFlow implements Serializable {
         return new ScalarFunction("SoftmaxCrossx", input) {
 
             public Tensor compute() {
-                Tenser<Tensor> A = getInput(0).getOutput(), B = getInput(1).getOutput();
+                Tenser<Tensor> A = getInput(0), B = getInput(1);
                 Tensor[] C = {cons(0d)};
                 forEach(A, B, (Tensor a, Tensor b) -> {
                     C[0] = add(C[0], softmaxCross(a, b));
@@ -631,7 +631,7 @@ public class TensorFlow implements Serializable {
         return new ScalarFunction("SigmoidCross", input) {
 
             public Tensor compute() {
-                Tensor a = getInput(0), b = getInput(1);
+                Tensor a = getInput(0).one(), b = getInput(1).one();
                 return minus(add(mul(a, log(b)), mul(minus(cons(1), a), log(minus(cons(1), b)))));
             }
 
@@ -644,7 +644,7 @@ public class TensorFlow implements Serializable {
         return new ScalarFunction("SigmoidCrossx", input) {
 
             public Tensor compute() {
-                Tenser<Tensor> A = getInput(0).getOutput(), B = getInput(1).getOutput();
+                Tenser<Tensor> A = getInput(0), B = getInput(1);
                 Tensor[] C = {cons(0d)};
                 forEach(A, B, (Tensor a, Tensor b) -> {
                     C[0] = add(C[0], sigmoidCross(a, b));
@@ -899,7 +899,7 @@ public class TensorFlow implements Serializable {
 
             public Tenser<Tensor> compute() {
                 Tenser<Tensor> inx = getInput(0), iny = getInput(1);
-                Tensor mean = iny.tensor();
+                Tensor mean = iny.one();
                 Tenser<Tensor> pows = new Tenser<>(Tensor.class, inx.shape);
                 forEach(inx, pows, (Tensor a) -> pow(minus(a, mean), cons(2)));
                 Tensor std = mean(funcx(pows));

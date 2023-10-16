@@ -66,7 +66,7 @@ public class TransformerTest{
             executor.run(null, null);
             if (i % 1000 == 0) {
                 log.info("---------{}------------", i);
-                Tensor loss = crossx.getOutput().tensor();
+                Tensor loss = crossx.getOutput().one();
                 log("输入：", null);
                 log("标签：", null);
                 log("输出：", softmax.data());
