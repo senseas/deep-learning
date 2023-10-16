@@ -56,9 +56,7 @@ public class ScalarFunction extends Tensor {
     }
 
     public Tenser<Tensor> getInput(int i) {
-        Tensor tensor = getInput()[i];
-        if (Objects.isNull(tensor.getOutput())) return new Tenser<>(tensor);
-        return tensor.getOutput();
+        return getInput()[i].getOutput();
     }
 
     public Tenser<Tensor> getOutput() {

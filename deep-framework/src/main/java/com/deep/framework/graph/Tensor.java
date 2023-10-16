@@ -85,7 +85,8 @@ public class Tensor implements Serializable {
     }
 
     public Tenser<Tensor> getOutput() {
-        if (Objects.nonNull(output) || Objects.isNull(shape)) return output;
+        if (Objects.nonNull(output)) return output;
+        if (Objects.isNull(shape)) return new Tenser<>(this);
         return output = Tensors(this);
     }
 
