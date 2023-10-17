@@ -16,7 +16,7 @@ public class TensorFunction extends Tensor {
     }
 
     public TensorFunction(Tenser<Tensor> function) {
-        super("", new Tensor[0]);
+        super("Function", new Tensor[0]);
         this.shape = function.shape;
         this.function = function;
         create(function);
@@ -49,10 +49,9 @@ public class TensorFunction extends Tensor {
     }
 
     public void clearOutput() {
-        if (Objects.nonNull(data)) {
-            Arrays.fill(data, 0d);
-            Arrays.fill(grad, 0d);
-        }
+        if (Objects.isNull(data)) return;
+        Arrays.fill(data, 0d);
+        Arrays.fill(grad, 0d);
     }
 
     public void clearGrad() {
@@ -60,11 +59,10 @@ public class TensorFunction extends Tensor {
     }
 
     public void create(Object nones) {
-        if (Objects.isNull(data)) {
-            this.shape = shapes(nones);
-            this.data = zeros(shape);
-            this.grad = zeros(shape);
-        }
+        if (Objects.nonNull(data)) return;
+        this.shape = shapes(nones);
+        this.data = zeros(shape);
+        this.grad = zeros(shape);
     }
 
     public Tenser<Tensor> getFunction() {

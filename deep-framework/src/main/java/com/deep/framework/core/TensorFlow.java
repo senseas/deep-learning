@@ -965,7 +965,7 @@ public class TensorFlow implements Serializable {
     public Tensor mask(Tensor... input) {
         return new TensorOperator("Mean", input[0].getShape(), input) {
 
-            public Tenser compute() {
+            public Tenser<Tensor> compute() {
                 forEach(shape[0], shape[1], (int i, int l) -> {
                     data[shape[1] * i + l + i + 1] = 0;
                 });

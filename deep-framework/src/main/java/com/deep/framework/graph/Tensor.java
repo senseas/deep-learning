@@ -56,7 +56,6 @@ public class Tensor implements Serializable {
     public Tensor(Tensor tensor, int idx) {
         this.idx = idx;
         this.tensor = tensor;
-        this.name = name.concat("child");
     }
 
     public Tensor(String name, Tensor... input) {

@@ -39,10 +39,9 @@ public class TensorOperator extends Tensor {
     }
 
     public void clearOutput() {
-        if (Objects.nonNull(data)) {
-            Arrays.fill(data, 0d);
-            Arrays.fill(grad, 0d);
-        }
+        if (Objects.isNull(data)) return;
+        Arrays.fill(data, 0d);
+        Arrays.fill(grad, 0d);
     }
 
     public void clearGrad() {
@@ -50,10 +49,9 @@ public class TensorOperator extends Tensor {
     }
 
     public void create() {
-        if (Objects.isNull(data)) {
-            this.data = zeros(shape);
-            this.grad = zeros(shape);
-        }
+        if (Objects.nonNull(data)) return;
+        this.data = zeros(shape);
+        this.grad = zeros(shape);
     }
 
     public Tenser<Tensor> getInput(int i) {

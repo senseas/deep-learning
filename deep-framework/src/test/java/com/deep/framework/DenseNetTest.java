@@ -56,18 +56,18 @@ public class DenseNetTest{
         Tensor tensor61 = tf.convx(new int[]{1, 1}, new int[]{1, 1}, new Tensor("weight", new int[]{8, 3, 3}), tensor55);//3*140*140
         Tensor tensor62 = tf.relux(tensor61);//10*140*140
         Tensor tensor63 = tf.convx(new int[]{1, 1}, new int[]{1, 1}, new Tensor("weight", new int[]{3, 3, 3}), tensor62);//3*140*140
-        Tensor tensor64 = tf.relux(tensor63);//10*140*140
-        Tensor squarex = tf.squarex(label, tensor64);
+        //Tensor tensor64 = tf.relux(tensor63);//10*140*140
+        Tensor squarex = tf.squarex(label, tensor63);
 
-        TensorExecutor.rate = 0.0003;
+        TensorExecutor.rate = 0.003;
         TensorExecutor executor = new TensorExecutor(squarex, input, label);
         forEach(600, labelSet.length, (x, i) -> {
             log.info("epoch = {{},{}}", x, i);
             Object inSet = inputSet[i], labSet = labelSet[i];
             executor.run(inSet, labSet);
             if (x != 0 && x % 2 == 0) ModeLoader.save(executor, i + "LetNet.obj");
-            img(tensor64, i);
-            log(squarex.getOutput());
+            img(tensor63, i);
+            log(squarex.getData());
         });
     }
 
