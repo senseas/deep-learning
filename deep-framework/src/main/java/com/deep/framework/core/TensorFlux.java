@@ -2,14 +2,14 @@ package com.deep.framework.core;
 
 import com.deep.framework.graph.Tensor;
 import com.deep.framework.graph.TensorConst;
-import com.deep.framework.lang.util.BeanUtil;
 
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Objects;
 import java.util.stream.Stream;
 
-import static com.deep.framework.lang.Shape.*;
+import static com.deep.framework.lang.Shape.fill;
+import static com.deep.framework.lang.Shape.shape;
 
 public class TensorFlux implements Serializable {
 
@@ -24,20 +24,6 @@ public class TensorFlux implements Serializable {
                 }
             }
             tensor.setInput(stream.toArray(Tensor[]::new));
-        }
-    }
-
-    public static void createOutput(Tensor tensor, Object o) {
-        if (Objects.isNull((tensor.getOutput()))) {
-            if (BeanUtil.isTenser(o) || BeanUtil.isArray(o)) {
-                int[] shape = shapes(o);
-                tensor.setShape(shape);
-                tensor.setData(zeros(shape));
-                tensor.setGrad(zeros(shape));
-            } else {
-                tensor.setData(new double[]{0d});
-                tensor.setGrad(new double[]{0d});
-            }
         }
     }
 

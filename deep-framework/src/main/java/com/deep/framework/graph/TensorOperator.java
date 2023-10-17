@@ -1,6 +1,5 @@
 package com.deep.framework.graph;
 
-import com.deep.framework.core.TensorFlux;
 import com.deep.framework.lang.Tenser;
 
 import java.util.Arrays;
@@ -64,11 +63,6 @@ public class TensorOperator extends Tensor {
     public Tenser<Tensor> getOutput() {
         if (Objects.nonNull(output)) return output;
         return output = Tensors(this);
-    }
-
-    public Tenser<Tensor> createOutput(Object o) {
-        TensorFlux.createOutput(this, o);
-        return getOutput();
     }
 
 }

@@ -525,9 +525,7 @@ public class TensorFlow implements Serializable {
             public Tenser<Tensor> compute() {
                 Tenser<Tensor> A = getInput(0), C = zeroTensors(A);
                 Tensor b = getInput(1).one();
-                forEach(A, C, (Tensor a, Tenser<Tensor> c, int i) -> {
-                    c.set(mul(a, b), i);
-                });
+                forEach(A, C, (Tensor a) -> mul(a, b));
                 return C;
             }
 
@@ -554,9 +552,7 @@ public class TensorFlow implements Serializable {
 
             public Tenser<Tensor> compute() {
                 Tenser<Tensor> A = getInput(0), B = zeroTensors(shape);
-                forEach(A, B, (Tensor a, Tenser<Tensor> b, int i) -> {
-                    b.set(sigmoid(a), i);
-                });
+                forEach(A, B, (Tensor a) -> sigmoid(a));
                 return B;
             }
 
@@ -1010,7 +1006,6 @@ public class TensorFlow implements Serializable {
             public Tenser<Tensor> compute() {
                 Tensor inx = getInput()[0];
                 int M = inx.shape(0), N = inx.shape(1);
-                createOutput(new int[]{M, N * input.length});
 
                 for (int i = 0; i < input.length; i++) {
                     Tensor in = getInput()[i];
