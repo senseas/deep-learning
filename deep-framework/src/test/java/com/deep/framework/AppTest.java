@@ -152,6 +152,15 @@ public class AppTest {
     }
 
     @Test
+    public void maskTest() {
+        TensorFlow tf = new TensorFlow();
+        Tensor data = new Tensor(new int[]{5, 5});
+        Arrays.fill(data.getData(), 1);
+        Tensor tensor = tf.mask(data);
+        tensor.forward();
+    }
+
+    @Test
     public void matmulTranTest() {
         TensorFlow tf = new TensorFlow();
         Tensor data1 = new Tensor(new int[]{3, 2});

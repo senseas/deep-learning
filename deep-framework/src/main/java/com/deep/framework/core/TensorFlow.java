@@ -8,8 +8,7 @@ import com.deep.framework.lang.Tenser;
 import java.io.Serializable;
 import java.util.Arrays;
 
-import static com.deep.framework.cuda.Matmul.matmulBackward;
-import static com.deep.framework.cuda.Matmul.matmulForward;
+import static com.deep.framework.cuda.Matmul.*;
 import static com.deep.framework.lang.ForEach.forEach;
 import static com.deep.framework.lang.Shape.*;
 import static jcuda.jcudnn.cudnnReduceTensorOp.CUDNN_REDUCE_TENSOR_AVG;
@@ -482,23 +481,12 @@ public class TensorFlow implements Serializable {
         return new TensorOperator("MatmulTran", Shape.shape(input[0].shape(0), input[1].shape(0)), input) {
 
             public Tenser<Tensor> compute() {
-                Tenser<Tensor> A = getInput(0), B = getInput(1);
-                Tenser<Tensor> C = getOutput();
-                forEach(A.shape(0), B.shape(0), A.shape(1), (i, l, j) -> {
-                    Tensor inx = A.get(i, j), iny = B.get(l, j), out = C.get(i, l);
-                    out.data(out.data() + inx.data() * iny.data());
-                });
-                return C;
+                matmulTranbForward(getInput()[0], getInput()[1], this);
+                return output;
             }
 
             public void gradient() {
-                Tenser<Tensor> A = getInput(0), B = getInput(1);
-                Tenser<Tensor> C = getOutput();
-                forEach(A.shape(0), B.shape(0), A.shape(1), (i, l, j) -> {
-                    Tensor inx = A.get(i, j), iny = B.get(l, j), out = C.get(i, l);
-                    inx.grad(out.grad() * iny.data());
-                    iny.grad(out.grad() * inx.data());
-                });
+                matmulTranbBackward(getInput()[0], getInput()[1], this);
             }
 
         };
@@ -888,7 +876,7 @@ public class TensorFlow implements Serializable {
     }
 
     public Tensor selfAttention(int scaler, Tensor... input) {
-        return new TensorFunction("SelfAttention",null, input) {
+        return new TensorFunction("SelfAttention", input[0].getShape(), input) {
 
             public Tenser<Tensor> compute() {
                 Tensor A = getInput()[0];
@@ -975,7 +963,7 @@ public class TensorFlow implements Serializable {
     }
 
     public Tensor wordEmbedding(Tensor... input) {
-        return new ScalarFunction("Mean", input) {
+        return new ScalarFunction("WordEmbedding", input) {
 
             public Tensor compute() {
                 Tensor A = getInput()[0], B = getInput()[1];
@@ -988,16 +976,28 @@ public class TensorFlow implements Serializable {
     }
 
     public Tensor mask(Tensor... input) {
-        return new TensorOperator("Mean", input[0].getShape(), input) {
+        return new TensorOperator("Mask", input[0].getShape(), input) {
 
             public Tenser<Tensor> compute() {
-                forEach(shape[0], shape[1], (int i, int l) -> {
-                    data[shape[1] * i + l + i + 1] = 0;
-                });
+                Tensor input = getInput()[0];
+                for (int l = 0; l < shape(1); l++) {
+                    for (int i = l; i < shape(0); i++) {
+                        int idx = shape[1] * i + l;
+                        data[idx] = input.getData()[idx];
+                    }
+                }
                 return output;
             }
 
-            public void gradient() {}
+            public void gradient() {
+                Tensor input = getInput()[0];
+                for (int l = 0; l < shape(1); l++) {
+                    for (int i = l; i < shape(0); i++) {
+                        int idx = shape[1] * i + l;
+                        input.getGrad()[idx] = grad[idx];
+                    }
+                }
+            }
 
         };
     }

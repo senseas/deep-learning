@@ -36,7 +36,7 @@ public class TransformerTest {
         Tensor tensor14 = tf.addx(tensor12, tensor13);//500*512
 
         //MultiHeadAttention
-        Tensor tensor15 = tf.multiHeadAttention(64, tensor14, new Tensor(new int[]{8, 3, dim, dim}), new Tensor(new int[]{dim * 8, dim}), new Tensor(new int[]{dim, dim}), new Tensor(new int[]{dim, dim}));//500*512
+        Tensor tensor15 = tf.multiHeadAttention(64, tensor14, new Tensor(new int[]{8, 3, dim, dim}), new Tensor(new int[]{dim * 8, dim}), new Tensor(new int[]{batch_size, dim}), new Tensor(new int[]{batch_size, dim}));//500*512
 
         //Linear
         Tensor tensor16 = tf.matmul(tensor15, new Tensor(new int[]{dim, dim}));//500*512
@@ -48,7 +48,7 @@ public class TransformerTest {
         Tensor tensor10 = tf.layerNormal(tensor19, new Tensor(tensor19.getShape()), new Tensor(tensor19.getShape()));//500*512
 
         //MultiHeadAttention
-        Tensor tensor21 = tf.multiHeadAttention(8, tensor10, new Tensor(new int[]{8, 3, dim, dim}), new Tensor(new int[]{dim * 8, dim}), new Tensor(new int[]{dim, dim}), new Tensor(new int[]{dim, dim}));//500*512
+        Tensor tensor21 = tf.multiHeadAttention(8, tensor10, new Tensor(new int[]{8, 3, dim, dim}), new Tensor(new int[]{dim * 8, dim}), new Tensor(new int[]{batch_size, dim}), new Tensor(new int[]{batch_size, dim}));//500*512
 
         //Linear
         Tensor tensor22 = tf.matmul(tensor21, new Tensor(new int[]{dim, dim}));//500*512
