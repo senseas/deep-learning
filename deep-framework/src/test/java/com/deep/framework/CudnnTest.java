@@ -1,6 +1,7 @@
 package com.deep.framework;
 
 import com.alibaba.fastjson.JSONObject;
+import com.deep.framework.core.TensorFlow;
 import com.deep.framework.graph.Tensor;
 import com.deep.framework.lang.Shape;
 import lombok.extern.slf4j.Slf4j;
@@ -8,8 +9,7 @@ import org.junit.Test;
 
 import java.util.Arrays;
 
-import static com.deep.framework.cudnn.Activation.reluBackward;
-import static com.deep.framework.cudnn.Activation.reluForward;
+import static com.deep.framework.cudnn.Activation.*;
 import static com.deep.framework.cudnn.Convolution.convBackward;
 import static com.deep.framework.cudnn.Convolution.convForward;
 import static com.deep.framework.cudnn.Reduce.reduce;
@@ -30,7 +30,7 @@ public class CudnnTest {
 
     @Test
     public void softmaxTest() {
-        int[] shape = {1, 10, 1, 1};
+        int[] shape = {1, 1, 1, 10};
         int size = Shape.size(shape);
 
         double[] input = {0.2731f, 0.1389f, 0.7491f, 0.2307f, 0.3411f, 0.6492f, 0.2313f, 0.5270f, 0.6267f, 0.2598f};
@@ -42,6 +42,16 @@ public class CudnnTest {
         double[] input_grad = new double[size];
         softmaxBackward(input_grad, output, output_grad, shape);
         System.out.println(JSONObject.toJSONString(input_grad));
+
+        TensorFlow tf = new TensorFlow();
+        Tensor input1 = new Tensor(input, new int[]{10});
+        Tensor tensor = tf.softmax(input1);
+        tensor.forward();
+        tensor.setGrad(output_grad);
+        tensor.backward();
+
+        System.out.println(JSONObject.toJSONString(tensor.getData()));
+        System.out.println(JSONObject.toJSONString(input1.getGrad()));
     }
 
     @Test
@@ -49,9 +59,22 @@ public class CudnnTest {
         double[] data = {0.2731f, 0.1389f, 0.7491f, -0.2307f, 0.3411f, 0.6492f, 0.2313f, -0.5270f, 0.6267f, 0.2598f};
         Tensor input = new Tensor(data, new int[]{1, 1, 2, 5});
         Tensor output = new Tensor(new int[]{1, 1, 2, 5}, 0);
-        output.setGrad(new double[]{0.2731f, 0.1389f, 0.7491f, -0.2307f, 0.3411f, 0.6492f, 0.2313f, -0.5270f, 0.6267f, 0.2598f});
-        reluForward(input, output);
-        reluBackward(input, output);
+        output.setGrad(data);
+
+        eluForward(input, output);
+        eluBackward(input, output);
+        System.out.println(JSONObject.toJSONString(output.getData()));
+        System.out.println(JSONObject.toJSONString(input.getGrad()));
+
+        TensorFlow tf = new TensorFlow();
+        Tensor input1 = new Tensor(data, new int[]{1, 1, 2, 5});
+        Tensor tensor = tf.relux(input1);
+        tensor.forward();
+        tensor.setGrad(data);
+        tensor.backward();
+
+        System.out.println(JSONObject.toJSONString(tensor.getData()));
+        System.out.println(JSONObject.toJSONString(input1.getGrad()));
     }
 
     /**

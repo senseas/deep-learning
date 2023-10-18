@@ -9,6 +9,8 @@ import java.io.Serializable;
 import java.util.Arrays;
 
 import static com.deep.framework.cuda.Matmul.*;
+import static com.deep.framework.cudnn.Softmax.softmaxBackward;
+import static com.deep.framework.cudnn.Softmax.softmaxForward;
 import static com.deep.framework.lang.ForEach.forEach;
 import static com.deep.framework.lang.Shape.*;
 import static jcuda.jcudnn.cudnnReduceTensorOp.CUDNN_REDUCE_TENSOR_AVG;
@@ -861,16 +863,16 @@ public class TensorFlow implements Serializable {
     }
 
     public Tensor softmax(Tensor input) {
-        return new TensorFunction("Softmax", input.getShape(), input) {
+        return new TensorOperator("Softmax", input.getShape(), input) {
 
             public Tenser<Tensor> compute() {
-                Tenser<Tensor> A = getInput(0), B = zeroTensors(A);
-                Tensor sum = sum(expx(funcx(A)));
-                forEach(A, B, (Tensor a) -> div(exp(a), sum));
-                return B;
+                softmaxForward(getInput()[0], this);
+                return output;
             }
 
-            public void gradient() { }
+            public void gradient() {
+                softmaxBackward(getInput()[0], this);
+            }
 
         };
     }
@@ -900,10 +902,9 @@ public class TensorFlow implements Serializable {
             public Tenser<Tensor> compute() {
                 Tensor A = getInput()[0], C = getInput()[2], M = getInput()[3], N = getInput()[4];
                 Tenser<Tensor> B = getInput(1);
-                int headers = B.shape(0);
-                Tensor[] arr = new Tensor[headers];
-                forEach(headers, i -> arr[i] = selfAttention(scaler, A, funcx(B.get(i))));
-                Tensor addx = addx(input[0], matmul(concat(arr), C));
+                Tensor[] arr = new Tensor[B.shape(0)];
+                forEach(arr.length, i -> arr[i] = selfAttention(scaler, A, funcx(B.get(i))));
+                Tensor addx = addx(A, matmul(concat(arr), C));
                 return new Tenser<>(layerNormal(addx, M, N));
             }
 

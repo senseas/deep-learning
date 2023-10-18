@@ -1,10 +1,11 @@
 package com.deep.framework.core;
 
 import com.deep.framework.graph.Tensor;
+import com.deep.framework.lang.Tensers;
+import com.deep.framework.lang.function.Func2;
 import lombok.Data;
 
 import java.io.Serializable;
-import java.util.stream.IntStream;
 
 import static com.deep.framework.lang.ForEach.forEach;
 
@@ -68,15 +69,18 @@ public class TensorExecutor<E> implements Serializable {
     }
 
     public void setInput(Object o) {
-        IntStream.range(0, input.getData().length).forEach(i -> input.getData()[i] = ((double[]) o)[i]);
+        Func2<Tensor, Double> func = Tensor::data;
+        forEach(input.getOutput(), Tensers.tenser(o), func);
     }
 
     public void setInputx(Object o) {
-        IntStream.range(0, inputx.getData().length).forEach(i -> inputx.getData()[i] = ((double[]) o)[i]);
+        Func2<Tensor, Double> func = Tensor::data;
+        forEach(inputx.getOutput(), Tensers.tenser(o), func);
     }
 
     public void setLabel(Object o) {
-        IntStream.range(0, label.getData().length).forEach(i -> label.getData()[i] = ((double[]) o)[i]);
+        Func2<Tensor, Double> func = Tensor::data;
+        forEach(label.getOutput(), Tensers.tenser(o), func);
     }
 
 }

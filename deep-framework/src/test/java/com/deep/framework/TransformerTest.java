@@ -82,14 +82,11 @@ public class TransformerTest {
             double[] labSet = oneHot(list.get(i + 1));
             double[] wordIndex = getWordIndex(data);
             executor.run(inSet, wordIndex, labSet);
-            if (i % 1000 == 0) {
-                log.info("---------{}------------", i);
-                Tensor loss = crossx.getOutput().one();
-                log("输入：", null);
-                log("标签：", null);
-                log("输出：", softmax.data());
-                log("误差：", loss.data());
-            }
+
+            log.info("---------{}------------", i);
+            log("输入：", data);
+            log("标签：", list.get(i + 1));
+            log("输出：", softmax.data());
         });
 
         System.out.println(JSONObject.toJSONString(tensor18));

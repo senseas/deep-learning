@@ -1,5 +1,7 @@
 package com.deep.framework.cudnn;
 
+import com.deep.framework.graph.Tensor;
+import com.deep.framework.lang.Shape;
 import jcuda.Pointer;
 import jcuda.Sizeof;
 import jcuda.jcudnn.cudnnTensorDescriptor;
@@ -9,7 +11,7 @@ import static com.deep.framework.cudnn.CudnnConfig.handle;
 import static jcuda.jcudnn.JCudnn.*;
 import static jcuda.jcudnn.cudnnDataType.CUDNN_DATA_DOUBLE;
 import static jcuda.jcudnn.cudnnSoftmaxAlgorithm.CUDNN_SOFTMAX_ACCURATE;
-import static jcuda.jcudnn.cudnnSoftmaxMode.CUDNN_SOFTMAX_MODE_CHANNEL;
+import static jcuda.jcudnn.cudnnSoftmaxMode.CUDNN_SOFTMAX_MODE_INSTANCE;
 import static jcuda.jcudnn.cudnnTensorFormat.CUDNN_TENSOR_NCHW;
 import static jcuda.runtime.JCuda.cudaFree;
 import static jcuda.runtime.JCuda.cudaMemcpy;
@@ -21,7 +23,15 @@ public class Softmax {
     private static final int DATA_TYPE = CUDNN_DATA_DOUBLE;
     private static final int DATA_TYPE_SZIE = Sizeof.DOUBLE;
     private static final int softmaxAlgo = CUDNN_SOFTMAX_ACCURATE;
-    private static final int softmaxMode = CUDNN_SOFTMAX_MODE_CHANNEL;
+    private static final int softmaxMode = CUDNN_SOFTMAX_MODE_INSTANCE;
+
+    public static void softmaxForward(Tensor input, Tensor output) {
+        softmaxForward(input.getData(), output.getData(), Shape.shapes(output.getShape()));
+    }
+
+    public static void softmaxBackward(Tensor input, Tensor output) {
+        softmaxBackward(input.getGrad(), output.getData(), output.getGrad(), Shape.shapes(output.getShape()));
+    }
 
     public static void softmaxForward(double[] input, double[] output, int[] shape) {
         // 设置输入张量描述符
