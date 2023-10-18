@@ -9,7 +9,7 @@ import org.junit.Test;
 import java.util.Arrays;
 import java.util.List;
 
-import static com.deep.framework.lang.util.Sequence.getWordIndexList;
+import static com.deep.framework.lang.util.Sequence.getWordIndex;
 import static com.deep.framework.lang.util.Sequence.getWordList;
 
 public class EmbeddingTest {
@@ -30,7 +30,7 @@ public class EmbeddingTest {
 
     @Test
     public void positionalEmbeddingTest() {
-        double[] index = getWordIndexList("希望让普通读者也能轻易理解");
+        double[] index = getWordIndex("希望让普通读者也能轻易理解");
 
         TensorFlow tf = new TensorFlow();
         Tensor input = new Tensor(index, new int[]{index.length});

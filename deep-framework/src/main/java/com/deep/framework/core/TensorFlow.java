@@ -907,7 +907,7 @@ public class TensorFlow implements Serializable {
     }
 
     public Tensor multiHeadAttention(int scaler, Tensor... input) {
-        return new TensorFunction("MultiHeadAttention", new int[]{input[1].shape(2), input[1].shape(3)}, input) {
+        return new TensorFunction("MultiHeadAttention", new int[]{input[0].shape(0), input[0].shape(1)}, input) {
 
             public Tenser<Tensor> compute() {
                 Tensor A = getInput()[0], C = getInput()[2], M = getInput()[3], N = getInput()[4];
