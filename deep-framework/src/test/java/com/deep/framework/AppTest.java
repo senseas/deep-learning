@@ -1,9 +1,13 @@
 package com.deep.framework;
 
+import com.alibaba.fastjson2.JSONObject;
 import com.deep.framework.core.TensorExecutor;
 import com.deep.framework.core.TensorFlow;
+import com.deep.framework.cuda.Matmul;
 import com.deep.framework.graph.Tensor;
 import org.junit.Test;
+
+import java.util.Arrays;
 
 public class AppTest {
 
@@ -137,6 +141,52 @@ public class AppTest {
         Tensor tensor = tf.standard(data, mean);
         TensorExecutor executor = new TensorExecutor(tensor);
         executor.run();
+    }
+
+    @Test
+    public void matTranTest() {
+        TensorFlow tf = new TensorFlow();
+        Tensor data = new Tensor(new int[]{3, 2});
+        Tensor tensor = tf.matTran(data);
+        tensor.forward();
+    }
+
+    @Test
+    public void matmulTranTest() {
+        TensorFlow tf = new TensorFlow();
+        Tensor data1 = new Tensor(new int[]{3, 2});
+        Tensor data2 = new Tensor(new int[]{4, 2});
+        Tensor matTran = tf.matTran(data2);
+        Tensor matmul = tf.matmul(data1, matTran);
+        matmul.forward();
+        Arrays.fill(matmul.getGrad(), 1);
+        matmul.backward();
+
+        System.out.println("getData" + JSONObject.toJSONString(matmul.getData()));
+        System.out.println("data1" + JSONObject.toJSONString(data1.getGrad()));
+        System.out.println("data2" + JSONObject.toJSONString(data2.getGrad()));
+        System.out.println(" ");
+
+        Arrays.fill(data1.getGrad(), 0);
+        Arrays.fill(data2.getGrad(), 0);
+        Tensor matmulTran = tf.matmulTran(data1, data2);
+        matmulTran.forward();
+        Arrays.fill(matmulTran.getGrad(), 1);
+        matmulTran.backward();
+
+        System.out.println("getData" + JSONObject.toJSONString(matmulTran.getData()));
+        System.out.println("data1" + JSONObject.toJSONString(data1.getGrad()));
+        System.out.println("data2" + JSONObject.toJSONString(data2.getGrad()));
+        System.out.println(" ");
+
+        Tensor data3 = new Tensor(new int[]{3, 4});
+        Matmul.matmulTranbForward(data1, data2, data3);
+        Arrays.fill(data3.getGrad(), 1);
+        Matmul.matmulTranbBackward(data1, data2, data3);
+
+        System.out.println("data3" + JSONObject.toJSONString(data3.getData()));
+        System.out.println("data1" + JSONObject.toJSONString(data1.getGrad()));
+        System.out.println("data2" + JSONObject.toJSONString(data2.getGrad()));
     }
 
 }

@@ -504,6 +504,31 @@ public class TensorFlow implements Serializable {
         };
     }
 
+    public Tensor matTran(Tensor input) {
+        return new TensorOperator("MatmulTran", Shape.shape(input.shape(1), input.shape(0)), input) {
+
+            public Tenser<Tensor> compute() {
+                Tenser<Tensor> A = getInput(0);
+                Tenser<Tensor> B = getOutput();
+                forEach(A.shape(0), A.shape(1), (i, l) -> {
+                    Tensor inx = A.get(i, l), out = B.get(l, i);
+                    out.data(inx.data());
+                });
+                return B;
+            }
+
+            public void gradient() {
+                Tenser<Tensor> A = getInput(0);
+                Tenser<Tensor> B = getOutput();
+                forEach(A.shape(0), A.shape(1), (i, l) -> {
+                    Tensor inx = A.get(i, l), out = B.get(l, i);
+                    inx.grad(out.grad());
+                });
+            }
+
+        };
+    }
+
     public Tensor shape(Tensor... input) {
         return new TensorFunction("Shape", input[1].getShape(), input) {
 
