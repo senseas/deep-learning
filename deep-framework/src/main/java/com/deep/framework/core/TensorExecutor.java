@@ -12,6 +12,7 @@ import static com.deep.framework.lang.ForEach.forEach;
 @Data
 public class TensorExecutor<E> implements Serializable {
     public static double rate = 0.003;
+    public static final double eps = 0.0000001d;
     private Tensor tensor;
     private Tensor input, inputx, label;
 
