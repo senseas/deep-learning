@@ -905,7 +905,8 @@ public class TensorFlow implements Serializable {
                 Tensor[] arr = new Tensor[B.shape(0)];
                 forEach(arr.length, i -> arr[i] = selfAttention(scaler, A, funcx(B.get(i))));
                 Tensor addx = addx(A, matmul(concat(arr), C));
-                return new Tenser<>(layerNormal(addx, M, N));
+                Tensor normal = layerNormal(addx, M, N);
+                return new Tenser<>(normal);
             }
 
             public void gradient() {}
@@ -976,8 +977,8 @@ public class TensorFlow implements Serializable {
         };
     }
 
-    public Tensor mask(Tensor... input) {
-        return new TensorOperator("Mask", input[0].getShape(), input) {
+    public Tensor mask(Tensor input) {
+        return new TensorOperator("Mask", input.getShape(), input) {
 
             public Tenser<Tensor> compute() {
                 Tensor input = getInput()[0];
@@ -1079,6 +1080,21 @@ public class TensorFlow implements Serializable {
             }
 
             public void gradient() { }
+
+        };
+    }
+
+    public Tensor linear(Tensor... input) {
+        return new TensorFunction("Linear", new int[]{input[0].shape(0), input[1].shape(1),}, input) {
+
+            public Tenser<Tensor> compute() {
+                Tensor tensor1 = matmul(getInput()[0], getInput()[1]);
+                Tensor tensor2 = new Tensor("bias", tensor1.getShape());
+                Tensor tensor3 = addx(tensor1, tensor2);
+                Tensor tensor4 = relux(tensor3);
+                addInput(tensor2);
+                return new Tenser<>(tensor4);
+            }
 
         };
     }

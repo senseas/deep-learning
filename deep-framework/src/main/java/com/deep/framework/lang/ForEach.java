@@ -153,6 +153,12 @@ public class ForEach implements Serializable {
         });
     }
 
+    public static <M> void forEach(Tenser<M> a, Tenser<M> b, Func2<M, M> func) {
+        IntStream.range(0, a.size()).forEach(i -> {
+            func.apply(a.data(i), b.data(i));
+        });
+    }
+
     public static <M> void forEach(Object a, Object b, Object c, For3<M> func) {
         if (BeanUtil.isTenser(a)) {
             forEach(Tensers.getLength(a), i -> {

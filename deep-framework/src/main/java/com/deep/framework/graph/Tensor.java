@@ -148,8 +148,9 @@ public class Tensor implements Serializable {
     protected int[] shape;
     protected double[] data, grad;
     transient protected boolean[] reduce;
+    transient protected boolean status;
 
-    private String name = "Tensor::";
+    private String name = "";
     private Tensor[] input;
     transient protected Tenser<Tensor> output, function;
 }

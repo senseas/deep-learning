@@ -22,10 +22,12 @@ public class TensorOperator extends Tensor {
     public void gradient() { }
 
     public void forward() {
+        if(status) return;
         for (Tensor o : getInput()) o.forward();
         clearOutput();
         create();
         compute();
+        status = true;
     }
 
     public void backward() {
@@ -45,6 +47,7 @@ public class TensorOperator extends Tensor {
     }
 
     public void clearGrad() {
+        status = false;
         Arrays.fill(grad, 0d);
     }
 

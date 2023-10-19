@@ -19,12 +19,14 @@ public class ScalarFunction extends Tensor {
     public void gradient() { }
 
     public void forward() {
+        if(status) return;
         for (Tensor o : getInput()) o.forward();
         clearOutput();
 
         Tensor tensor = getFunction().one();
         tensor.forward();
         data[0] = tensor.data();
+        status = true;
     }
 
     public void backward() {
@@ -52,6 +54,7 @@ public class ScalarFunction extends Tensor {
     }
 
     public void clearGrad() {
+        status = false;
         grad[0] = 0;
     }
 

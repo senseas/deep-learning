@@ -70,17 +70,17 @@ public class TensorExecutor<E> implements Serializable {
 
     public void setInput(Object o) {
         Func2<Tensor, Double> func = Tensor::data;
-        forEach(input.getOutput(), Tensers.tenser(o), func);
+        forEach(input.getOutput(), Tensers.tenser(o, input.getShape()), func);
     }
 
     public void setInputx(Object o) {
         Func2<Tensor, Double> func = Tensor::data;
-        forEach(inputx.getOutput(), Tensers.tenser(o), func);
+        forEach(inputx.getOutput(), Tensers.tenser(o, inputx.getShape()), func);
     }
 
     public void setLabel(Object o) {
         Func2<Tensor, Double> func = Tensor::data;
-        forEach(label.getOutput(), Tensers.tenser(o), func);
+        forEach(label.getOutput(), Tensers.tenser(o, label.getShape()), func);
     }
 
 }

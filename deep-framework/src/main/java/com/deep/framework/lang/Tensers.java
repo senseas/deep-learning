@@ -4,7 +4,8 @@ import java.lang.reflect.Array;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static com.deep.framework.lang.ForEach.arrayEach;
-import static com.deep.framework.lang.Shape.*;
+import static com.deep.framework.lang.Shape.getArrayDeepClass;
+import static com.deep.framework.lang.Shape.size;
 
 public class Tensers {
 
@@ -23,8 +24,7 @@ public class Tensers {
         a.set(value, index);
     }
 
-    public static Tenser tenser(Object o) {
-        int[] shape = shapes(o);
+    public static Tenser tenser(Object o, int[] shape) {
         AtomicInteger index = new AtomicInteger();
         Object array = Array.newInstance(getArrayDeepClass(o), size(shape));
         arrayEach(o, (a, i) -> Array.set(array, index.getAndIncrement(), Array.get(a, i)));

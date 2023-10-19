@@ -5,6 +5,7 @@ import com.deep.framework.lang.Tenser;
 
 import java.util.Arrays;
 import java.util.Objects;
+import java.util.stream.Stream;
 
 import static com.deep.framework.lang.Shape.*;
 
@@ -16,26 +17,28 @@ public class TensorFunction extends Tensor {
     }
 
     public TensorFunction(Tenser<Tensor> function) {
-        super("Function", new Tensor[0]);
+        super("", new Tensor[0]);
         this.shape = function.shape;
         this.function = function;
-        create(function);
+        create();
     }
 
     public Tenser<Tensor> compute() { return null; }
 
     public void forward() {
+        if (status) return;
         for (Tensor o : getInput()) o.forward();
         clearOutput();
-        forEach(getFunction(), Tensor::forward);
 
-        Object nones = TensorFlux.getOutput(getFunction());
-        create(nones);
+        forEach(getFunction(), Tensor::forward);
+        Tenser<Tensor> nones = TensorFlux.getOutput(getFunction());
+        create();
         forEach(getOutput(), nones, (Tensor out, Tensor none) -> out.data(none.data()));
+        status = true;
     }
 
     public void backward() {
-        Object nones = TensorFlux.getOutput(getFunction());
+        Tenser<Tensor> nones = TensorFlux.getOutput(getFunction());
         forEach(getOutput(), nones, (Tensor out, Tensor none) -> none.grad(out.grad()));
 
         forEach(getFunction(), Tensor::backward);
@@ -55,12 +58,12 @@ public class TensorFunction extends Tensor {
     }
 
     public void clearGrad() {
+        status = false;
         Arrays.fill(grad, 0d);
     }
 
-    public void create(Object nones) {
+    public void create() {
         if (Objects.nonNull(data)) return;
-        this.shape = shapes(nones);
         this.data = zeros(shape);
         this.grad = zeros(shape);
     }
@@ -72,6 +75,11 @@ public class TensorFunction extends Tensor {
 
     public Tenser<Tensor> getInput(int i) {
         return getInput()[i].getOutput();
+    }
+
+    public void addInput(Tensor in) {
+        Tensor[] tensors = Stream.concat(Stream.of(getInput()), Stream.of(in)).toArray(Tensor[]::new);
+        setInput(tensors);
     }
 
     public Tenser<Tensor> getOutput() {
