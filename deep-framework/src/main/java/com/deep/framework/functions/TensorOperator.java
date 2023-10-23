@@ -14,7 +14,7 @@ public class TensorOperator extends Tensor {
 
     public void forward() {
         for (Tensor o : getInput()) o.forward();
-        data = "double " + getVarId() + "=" + compute() + ";";
+        data = "double ".concat(getVarId()).concat("=").concat(compute()).concat(";");
     }
 
     public void backward() {
