@@ -198,4 +198,22 @@ public class AppTest {
         System.out.println("data2" + JSONObject.toJSONString(data2.getGrad()));
     }
 
+    @Test
+    public void layerNormalTest() {
+        TensorFlow tf = new TensorFlow();
+        Tensor data1 = new Tensor(new int[]{3, 2});
+        Tensor data2 = new Tensor(new int[]{3, 2});
+        Tensor data3 = new Tensor(new int[]{3, 2});
+        Tensor layerNormal = tf.layerNormal(data1, data2,data3);
+        layerNormal.forward();
+        Arrays.fill(layerNormal.getGrad(), 1);
+        layerNormal.backward();
+
+        System.out.println("getData" + JSONObject.toJSONString(layerNormal.getData()));
+        System.out.println("data1" + JSONObject.toJSONString(data1.getGrad()));
+        System.out.println("data2" + JSONObject.toJSONString(data2.getGrad()));
+        System.out.println("data2" + JSONObject.toJSONString(data3.getGrad()));
+        System.out.println(" ");
+    }
+
 }
