@@ -44,13 +44,21 @@ public class Tensor implements Serializable {
 
     public void backward() {}
 
+    public void reducer() {
+        System.out.println("double ".concat(getGradId()).concat("=").concat(this.grad));
+    }
+
     public String getVarId() {return "a" + id;}
 
-    public String getGraId() {return "g" + id;}
+    public String getGradId() {return "g" + id;}
 
     public void setGrad(String grad) {
         if (grad.equals("0d")) return;
         this.grad += "+" + grad;
+    }
+
+    public void setGradx(String grad) {
+        this.grad = grad;
     }
 
     public int shape(int i) {return shape[i];}

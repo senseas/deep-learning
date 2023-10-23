@@ -14,8 +14,7 @@ public class TensorFlow implements Operator {
                 Tenser<Tensor> A = getInput(0), B = getInput(1), C = getInput(2);
                 Tensor tensor = Tensor(A), mean = mean(tensor), std = standard(tensor, mean);
                 Tenser<Tensor> D = zeroTensors(A.shape);
-                Tensor epsilon = cons(eps), cons2 = cons(0.5);
-                Tensor pow = pow(add(std, epsilon), cons2);
+                Tensor pow = pow(add(std, cons(eps)), cons(0.5));
                 forEach(A, B, C, D, (Tensor a, Tensor b, Tensor c) -> {
                     return add(mul(b, div(minus(a, mean), pow)), c);
                 });
@@ -71,5 +70,6 @@ public class TensorFlow implements Operator {
 
         layerNormal.forward();
         layerNormal.backward();
+        layerNormal.reducer();
     }
 }

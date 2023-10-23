@@ -41,6 +41,11 @@ public class TensorFunction extends Tensor {
         for (Tensor o : getInput()) o.backward();
     }
 
+    public void reducer() {
+        forEach(getFunction(), Tensor::reducer);
+        for (Tensor o : getInput()) o.reducer();
+    }
+
     public Tenser<Tensor> getFunction() {
         if (Objects.nonNull(function)) return function;
         return function = compute();
@@ -51,7 +56,7 @@ public class TensorFunction extends Tensor {
     }
 
     public void clearGrad() {
-        forEach(getOutput(), (Tensor out) -> out.setGrad("0d"));
+        forEach(getOutput(), (Tensor out) -> out.setGradx("0d"));
     }
 
 }
