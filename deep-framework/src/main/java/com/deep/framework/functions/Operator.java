@@ -1,42 +1,51 @@
 package com.deep.framework.functions;
 
-import com.deep.framework.graph.ScalarOperator;
-import com.deep.framework.graph.Tensor;
 import com.deep.framework.lang.Tenser;
 
 import java.util.Arrays;
-
-import static java.lang.Math.atan;
+import java.util.stream.Collectors;
 
 public interface Operator {
 
-    default Tensor add(Tensor... input) {
-        return new ScalarOperator("Add", input) {
+    default Tensor cons(String input) {
+        return new Tensor(input);
+    }
 
-            public double compute() {
-                return Arrays.stream(getInput()).mapToDouble(Tensor::data).sum();
+    default Tensor cons(double input) {
+        return new Tensor(String.valueOf(input));
+    }
+
+    default Tensor Tensor(Tenser input) {
+        return new TensorFunction(input);
+    }
+
+    default Tensor add(Tensor... input) {
+        return new TensorOperator("Add", input) {
+
+            public String compute() {
+                return Arrays.stream(getInput()).map(a -> a.getOutput().one().getVarId()).collect(Collectors.joining("+"));
             }
 
-            public void gradient(double grad) {
-                Arrays.stream(getInput()).forEach(a -> a.grad(grad));
+            public void gradient(String grad) {
+                Arrays.stream(getInput()).map(a -> a.getOutput().one()).forEach(a -> a.setGrad(grad));
             }
 
         };
     }
 
     default Tensor minus(Tensor... input) {
-        return new ScalarOperator("Minus", input) {
+        return new TensorOperator("Minus", input) {
 
-            public double compute() {
-                Tensor inx = getInput(0), iny = getInput(1);
-                double valx = inx.data(), valy = iny.data();
-                return valx - valy;
+            public String compute() {
+                Tensor inx = getInput(0).one(), iny = getInput(1).one();
+                String valx = inx.getVarId(), valy = iny.getVarId();
+                return valx + "-" + valy;
             }
 
-            public void gradient(double grad) {
-                Tensor inx = getInput(0), iny = getInput(1);
-                inx.grad(grad);
-                iny.grad(-grad);
+            public void gradient(String grad) {
+                Tensor inx = getInput(0).one(), iny = getInput(1).one();
+                inx.setGrad(grad);
+                iny.setGrad("-" + grad);
             }
 
         };
@@ -44,361 +53,360 @@ public interface Operator {
 
 
     default Tensor minus(Tensor input) {
-        return new ScalarOperator("Minusx", input) {
+        return new TensorOperator("Minusx", input) {
 
-            public double compute() {
-                Tensor inx = getInput(0);
-                double valx = inx.data();
-                return -valx;
+            public String compute() {
+                Tensor inx = getInput(0).one();
+                String valx = inx.getVarId();
+                return "-" + valx;
             }
 
-            public void gradient(double grad) {
-                Tensor inx = getInput(0);
-                inx.grad(-grad);
+            public void gradient(String grad) {
+                Tensor inx = getInput(0).one();
+                inx.setGrad("-" + "(" + grad + ")");
             }
 
         };
     }
 
     default Tensor mul(Tensor... input) {
-        return new ScalarOperator("Mul", input) {
+        return new TensorOperator("Mul", input) {
 
-            public double compute() {
-                Tensor inx = getInput(0), iny = getInput(1);
-                double valx = inx.data(), valy = iny.data();
-                return valx * valy;
+            public String compute() {
+                Tensor inx = getInput(0).one(), iny = getInput(1).one();
+                String valx = inx.getVarId(), valy = iny.getVarId();
+                return valx + "*" + valy;
             }
 
-            public void gradient(double grad) {
-                Tensor inx = getInput(0), iny = getInput(1);
-                double valx = inx.data(), valy = iny.data();
-                inx.grad(grad * valy);
-                iny.grad(grad * valx);
+            public void gradient(String grad) {
+                Tensor inx = getInput(0).one(), iny = getInput(1).one();
+                String valx = inx.getVarId(), valy = iny.getVarId();
+                inx.setGrad(grad + "*" + valy);
+                iny.setGrad(grad + "*" + valx);
             }
 
         };
     }
 
     default Tensor div(Tensor... input) {
-        return new ScalarOperator("Div", input) {
+        return new TensorOperator("Div", input) {
 
-            public double compute() {
-                Tensor inx = getInput(0), iny = getInput(1);
-                double valx = inx.data(), valy = iny.data();
-                return valx / valy;
+            public String compute() {
+                Tensor inx = getInput(0).one(), iny = getInput(1).one();
+                String valx = inx.getVarId(), valy = iny.getVarId();
+                return valx + "/" + valy;
             }
 
-            public void gradient(double grad) {
-                Tensor inx = getInput(0), iny = getInput(1);
-                double valx = inx.data(), valy = iny.data();
-                inx.grad(grad / valy);
-                iny.grad(-grad * valx / Math.pow(valy, 2));
+            public void gradient(String grad) {
+                Tensor inx = getInput(0).one(), iny = getInput(1).one();
+                String valx = inx.getVarId(), valy = iny.getVarId();
+                inx.setGrad(grad + "/" + valy);
+                iny.setGrad("-" + grad + "*" + valx + " / Math.pow(" + valy + ", 2)");
             }
 
         };
     }
 
     default Tensor exp(Tensor... input) {
-        return new ScalarOperator("Exp", input) {
+        return new TensorOperator("Exp", input) {
 
-            public double compute() {
-                Tensor inx = getInput(0);
-                double valx = inx.data();
-                return Math.exp(valx);
+            public String compute() {
+                Tensor inx = getInput(0).one();
+                String valx = inx.getVarId();
+                return "Math.exp(" + valx + ")";
             }
 
-            public void gradient(double grad) {
-                Tensor inx = getInput(0);
-                double valx = inx.data();
-                inx.grad(grad * Math.exp(valx));
+            public void gradient(String grad) {
+                Tensor inx = getInput(0).one();
+                inx.setGrad(grad + " * " + inx.getVarId());
             }
 
         };
     }
 
     default Tensor pow(Tensor... input) {
-        return new ScalarOperator("Pow", input) {
+        return new TensorOperator("Pow", input) {
 
-            public double compute() {
-                Tensor inx = getInput(0), iny = getInput(1);
-                double valx = inx.data(), valy = iny.data();
-                return Math.pow(valx, valy);
+            public String compute() {
+                Tensor inx = getInput(0).one(), iny = getInput(1).one();
+                String valx = inx.getVarId(), valy = iny.getVarId();
+                return "Math.pow(" + valx + ", " + valy + ")";
             }
 
-            public void gradient(double grad) {
-                Tensor inx = getInput(0), iny = getInput(1);
-                double valx = inx.data(), valy = iny.data();
-                inx.grad(grad * valy * Math.pow(valx, valy - 1));
+            public void gradient(String grad) {
+                Tensor inx = getInput(0).one(), iny = getInput(1).one();
+                String valx = inx.getVarId(), valy = iny.getVarId();
+                inx.setGrad(grad + "*" + valy + " * Math.pow(" + valx + ", " + valy + " -1)");
             }
 
         };
     }
 
     default Tensor log(Tensor... input) {
-        return new ScalarOperator("Log", input) {
+        return new TensorOperator("Log", input) {
 
-            public double compute() {
-                Tensor inx = getInput(0);
-                double valx = inx.data();
-                return Math.log(valx);
+            public String compute() {
+                Tensor inx = getInput(0).one();
+                String valx = inx.getVarId();
+                return "Math.log(" + valx + ")";
             }
 
-            public void gradient(double grad) {
-                Tensor inx = getInput(0);
-                double valx = inx.data();
-                inx.grad(grad / valx);
-            }
-
-        };
-    }
-
-    default Tensor sum(Tensor input) {
-        return new ScalarOperator("Sum", input) {
-
-            public double compute() {
-                Tenser<Tensor> A = getInput(0).getOutput();
-                return A.stream().mapToDouble(Tensor::data).sum();
-            }
-
-            public void gradient(double grad) {
-                Tenser<Tensor> A = getInput(0).getOutput();
-                A.stream().forEach(a -> a.grad(grad));
+            public void gradient(String grad) {
+                Tensor inx = getInput(0).one();
+                String valx = inx.getVarId();
+                inx.setGrad(grad + "/" + valx);
             }
 
         };
     }
 
     default Tensor sin(Tensor... input) {
-        return new ScalarOperator("Sin", input) {
+        return new TensorOperator("Sin", input) {
 
-            public double compute() {
-                Tensor inx = getInput(0);
-                double valx = inx.data();
-                return Math.sin(valx);
+            public String compute() {
+                Tensor inx = getInput(0).one();
+                String valx = inx.getVarId();
+                return "Math.sin(" + valx + ")";
             }
 
-            public void gradient(double grad) {
-                Tensor inx = getInput(0);
-                double valx = inx.data();
-                inx.grad(grad * Math.cos(valx));
+            public void gradient(String grad) {
+                Tensor inx = getInput(0).one();
+                String valx = inx.getVarId();
+                inx.setGrad(grad + " * Math.cos(" + valx + ")");
             }
 
         };
     }
 
     default Tensor cos(Tensor... input) {
-        return new ScalarOperator("Cos", input) {
+        return new TensorOperator("Cos", input) {
 
-            public double compute() {
-                Tensor inx = getInput(0);
-                double valx = inx.data();
-                return Math.cos(valx);
+            public String compute() {
+                Tensor inx = getInput(0).one();
+                String valx = inx.getVarId();
+                return "Math.cos(" + valx + ")";
             }
 
-            public void gradient(double grad) {
-                Tensor inx = getInput(0);
-                double valx = inx.data();
-                inx.grad(grad * -Math.sin(valx));
+            public void gradient(String grad) {
+                Tensor inx = getInput(0).one();
+                String valx = inx.getVarId();
+                inx.setGrad(grad + "*-Math.sin(" + valx + ")");
             }
 
         };
     }
 
     default Tensor tan(Tensor... input) {
-        return new ScalarOperator("Tan", input) {
+        return new TensorOperator("Tan", input) {
 
-            public double compute() {
-                Tensor inx = getInput(0);
-                double valx = inx.data();
-                return Math.tan(valx);
+            public String compute() {
+                Tensor inx = getInput(0).one();
+                String valx = inx.getVarId();
+                return "Math.tan(" + valx + ")";
             }
 
-            public void gradient(double grad) {
-                Tensor inx = getInput(0);
-                double valx = inx.data();
-                inx.grad(grad * Math.pow(1 / Math.cos(valx), 2));
+            public void gradient(String grad) {
+                Tensor inx = getInput(0).one();
+                String valx = inx.getVarId();
+                inx.setGrad(grad + " * Math.pow( 1 / Math.cos(" + valx + "), 2)");
             }
 
         };
     }
 
     default Tensor cot(Tensor... input) {
-        return new ScalarOperator("Cot", input) {
+        return new TensorOperator("Cot", input) {
 
-            public double compute() {
-                Tensor inx = getInput(0);
-                double valx = inx.data();
-                return Math.cos(valx) / Math.sin(valx);
+            public String compute() {
+                Tensor inx = getInput(0).one();
+                String valx = inx.getVarId();
+                return "Math.cos(" + valx + ") / Math.sin(" + valx + ")";
             }
 
-            public void gradient(double grad) {
-                Tensor inx = getInput(0);
-                double valx = inx.data();
-                inx.grad(grad * -Math.pow(1 / Math.sin(valx), 2));
+            public void gradient(String grad) {
+                Tensor inx = getInput(0).one();
+                String valx = inx.getVarId();
+                inx.setGrad(grad + "* -Math.pow(1 / Math.sin(" + valx + "), 2)");
             }
 
         };
     }
 
     default Tensor sec(Tensor... input) {
-        return new ScalarOperator("Sec", input) {
+        return new TensorOperator("Sec", input) {
 
-            public double compute() {
-                Tensor inx = getInput(0);
-                double valx = inx.data();
-                return 1 / Math.cos(valx);
+            public String compute() {
+                Tensor inx = getInput(0).one();
+                String valx = inx.getVarId();
+                return "1 /" + " Math.cos(" + valx + ")";
             }
 
-            public void gradient(double grad) {
-                Tensor inx = getInput(0);
-                double valx = inx.data();
-                inx.grad(grad * Math.tan(valx) / Math.cos(valx));
+            public void gradient(String grad) {
+                Tensor inx = getInput(0).one();
+                String valx = inx.getVarId();
+                inx.setGrad(grad + " * Math.tan(" + valx + ") / Math.cos(" + valx + ")");
             }
 
         };
     }
 
     default Tensor csc(Tensor... input) {
-        return new ScalarOperator("Csc", input) {
+        return new TensorOperator("Csc", input) {
 
-            public double compute() {
-                Tensor inx = getInput(0);
-                double valx = inx.data();
-                return 1 / Math.sin(valx);
+            public String compute() {
+                Tensor inx = getInput(0).one();
+                String valx = inx.getVarId();
+                return "1 / Math.sin(" + valx + ")";
             }
 
-            public void gradient(double grad) {
-                Tensor inx = getInput(0);
-                double valx = inx.data();
-                inx.grad(grad * -Math.cos(valx) / Math.pow(Math.sin(valx), 2));
+            public void gradient(String grad) {
+                Tensor inx = getInput(0).one();
+                String valx = inx.getVarId();
+                inx.setGrad(grad + "* -Math.cos(" + valx + ") / Math.pow(Math.sin(" + valx + "), 2)");
             }
 
         };
     }
 
     default Tensor arcsin(Tensor... input) {
-        return new ScalarOperator("Arcsin", input) {
+        return new TensorOperator("Arcsin", input) {
 
-            public double compute() {
-                Tensor inx = getInput(0);
-                double valx = inx.data();
-                return Math.asin(valx);
+            public String compute() {
+                Tensor inx = getInput(0).one();
+                String valx = inx.getVarId();
+                return "Math.asin(" + valx + ")";
             }
 
-            public void gradient(double grad) {
-                Tensor inx = getInput(0);
-                double valx = inx.data();
-                inx.grad(grad / Math.pow(1 - Math.pow(valx, 2), -2));
+            public void gradient(String grad) {
+                Tensor inx = getInput(0).one();
+                String valx = inx.getVarId();
+                inx.setGrad(grad + " / Math.pow(1 - Math.pow(" + valx + ", 2), -2)");
             }
 
         };
     }
 
     default Tensor arccos(Tensor... input) {
-        return new ScalarOperator("Arccos", input) {
+        return new TensorOperator("Arccos", input) {
 
-            public double compute() {
-                Tensor inx = getInput(0);
-                double valx = inx.data();
-                return Math.acos(valx);
+            public String compute() {
+                Tensor inx = getInput(0).one();
+                String valx = inx.getVarId();
+                return "Math.acos(" + valx + ")";
             }
 
-            public void gradient(double grad) {
-                Tensor inx = getInput(0);
-                double valx = inx.data();
-                inx.grad(grad / -Math.pow(1 - Math.pow(valx, 2), -2));
+            public void gradient(String grad) {
+                Tensor inx = getInput(0).one();
+                String valx = inx.getVarId();
+                inx.setGrad(grad + "/-Math.pow(1 - Math.pow(" + valx + ", 2), -2)");
             }
 
         };
     }
 
     default Tensor arctan(Tensor... input) {
-        return new ScalarOperator("Arctan", input) {
+        return new TensorOperator("Arctan", input) {
 
-            public double compute() {
-                Tensor inx = getInput(0);
-                double valx = inx.data();
-                return Math.atan(valx);
+            public String compute() {
+                Tensor inx = getInput(0).one();
+                String valx = inx.getVarId();
+                return "Math.atan(" + valx + ")";
             }
 
-            public void gradient(double grad) {
-                Tensor inx = getInput(0);
-                double valx = inx.data();
-                inx.grad(grad / (1 + Math.pow(valx, 2)));
+            public void gradient(String grad) {
+                Tensor inx = getInput(0).one();
+                String valx = inx.getVarId();
+                inx.setGrad(grad + "/(1 + Math.pow(" + valx + ", 2))");
             }
 
         };
     }
 
     default Tensor arccot(Tensor... input) {
-        return new ScalarOperator("Arccot", input) {
+        return new TensorOperator("Arccot", input) {
 
-            public double compute() {
-                Tensor inx = getInput(0);
-                double valx = inx.data();
-                return atan(1 / valx);
+            public String compute() {
+                Tensor inx = getInput(0).one();
+                String valx = inx.getVarId();
+                return "atan(1/" + valx + ")";
             }
 
-            public void gradient(double grad) {
-                Tensor inx = getInput(0);
-                double valx = inx.data();
-                inx.grad(grad / -(1 + Math.pow(valx, 2)));
+            public void gradient(String grad) {
+                Tensor inx = getInput(0).one();
+                String valx = inx.getVarId();
+                inx.setGrad(grad + "/-(1 + Math.pow(" + valx + ", 2))");
             }
 
         };
     }
 
     default Tensor relu(Tensor input) {
-        return new ScalarOperator("Relu", input) {
+        return new TensorOperator("Relu", input) {
 
-            public double compute() {
-                Tensor inx = getInput(0);
-                double valx = inx.data();
-                return valx > 0 ? valx : 0.1 * valx;
+            public String compute() {
+                Tensor inx = getInput(0).one();
+                String valx = inx.getVarId();
+                return valx + "> 0 ? " + valx + " : 0.1 *" + valx;
             }
 
-            public void gradient(double grad) {
-                Tensor inx = getInput(0);
-                double valx = inx.data();
-                inx.grad(valx > 0 ? grad : 0.1 * grad);
+            public void gradient(String grad) {
+                Tensor inx = getInput(0).one();
+                String valx = inx.getVarId();
+                inx.setGrad(valx + " > 0 ? " + grad + " : 0.1 *" + grad);
             }
 
         };
     }
 
     default Tensor max(Tensor... input) {
-        return new ScalarOperator("Max", input) {
+        return new TensorOperator("Max", input) {
 
-            public double compute() {
-                Tensor inx = getInput(0), iny = getInput(1);
-                double valx = inx.data(), valy = iny.data();
-                return Math.max(valx, valy);
+            public String compute() {
+                Tensor inx = getInput(0).one(), iny = getInput(1).one();
+                String valx = inx.getVarId(), valy = iny.getVarId();
+                return "Math.max(" + valx + "," + valy + ")";
             }
 
-            public void gradient(double grad) {
-                Tensor inx = getInput(0), iny = getInput(1);
-                double valx = inx.data(), valy = iny.data();
-                inx.grad(valx > valy ? grad : 0);
-                iny.grad(valx < valy ? grad : 0);
+            public void gradient(String grad) {
+                Tensor inx = getInput(0).one(), iny = getInput(1).one();
+                String valx = inx.getVarId(), valy = iny.getVarId();
+                inx.setGrad(valx + " > " + valy + " ? " + grad + " : 0");
+                iny.setGrad(valx + " < " + valy + " ? " + grad + " : 0");
             }
 
         };
     }
 
     default Tensor min(Tensor... input) {
-        return new ScalarOperator("Min", input) {
+        return new TensorOperator("Min", input) {
 
-            public double compute() {
-                Tensor inx = getInput(0), iny = getInput(1);
-                double valx = inx.data(), valy = iny.data();
-                return Math.min(valx, valy);
+            public String compute() {
+                Tensor inx = getInput(0).one(), iny = getInput(1).one();
+                String valx = inx.getVarId(), valy = iny.getVarId();
+                return "Math.min(" + valx + ", " + valy + ")";
             }
 
-            public void gradient(double grad) {
-                Tensor inx = getInput(0), iny = getInput(1);
-                double valx = inx.data(), valy = iny.data();
-                inx.grad(valx < valy ? grad : 0);
-                iny.grad(valx > valy ? grad : 0);
+            public void gradient(String grad) {
+                Tensor inx = getInput(0).one(), iny = getInput(1).one();
+                String valx = inx.getVarId(), valy = iny.getVarId();
+                inx.setGrad(valx + "<" + valy + "?" + grad + " : 0");
+                iny.setGrad(valx + ">" + valy + "?" + grad + " : 0");
+            }
+
+        };
+    }
+
+    default Tensor sum(Tensor input) {
+        return new TensorOperator("Sum", input) {
+
+            public String compute() {
+                Tenser<Tensor> A = getInput(0);
+                return A.stream().map(Tensor::getVarId).collect(Collectors.joining("+"));
+            }
+
+            public void gradient(String grad) {
+                Tenser<Tensor> A = getInput(0);
+                A.stream().forEach(a -> a.setGrad(grad));
             }
 
         };
