@@ -5,6 +5,7 @@ import com.deep.framework.lang.Tenser;
 import lombok.Data;
 
 import java.io.Serializable;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.IntStream;
 
@@ -17,6 +18,7 @@ public class Tensor implements Serializable {
     public Tensor(String value) {
         this.name = "None";
         this.data = value;
+        this.id = ID.getAndIncrement();
         this.output = new Tenser<>(this);
     }
 
@@ -30,6 +32,7 @@ public class Tensor implements Serializable {
     public Tensor(String name, Tensor... input) {
         this.name = name;
         this.input = input;
+        this.id = ID.getAndIncrement();
         output = new Tenser<>(this);
     }
 
@@ -48,9 +51,9 @@ public class Tensor implements Serializable {
         System.out.println("double ".concat(getGradId()).concat("=").concat(this.grad));
     }
 
-    public String getVarId() {return "a" + id;}
+    public String getVarId() {return "a" + Optional.ofNullable(id).orElse(0);}
 
-    public String getGradId() {return "g" + id;}
+    public String getGradId() {return "g" + Optional.ofNullable(id).orElse(0);}
 
     public void setGrad(String grad) {
         if (grad.equals("0d")) return;
@@ -80,9 +83,9 @@ public class Tensor implements Serializable {
         return (E) fill(Shape.shape(Tensor.class, a), o -> new Tensor("0d"));
     }
 
-    private int id = ID.getAndIncrement();
-    public static AtomicInteger ID = new AtomicInteger();
+    public static AtomicInteger ID = new AtomicInteger(1);
 
+    private int id;
     protected int[] shape;
     protected String data = "", grad = "0d";
     protected boolean[] reduce;
