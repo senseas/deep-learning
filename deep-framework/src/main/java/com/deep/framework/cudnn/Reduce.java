@@ -28,7 +28,7 @@ public class Reduce {
     }
 
     public static void sumBackward(Tensor input, Tensor output) {
-        Arrays.stream(Shape.shapes(input.getShape())).forEach(i -> input.getData()[i] += output.grad());
+        Arrays.stream(Shape.shapes(input.getShape())).forEach(i -> input.getGrad()[i] += output.grad());
     }
 
     public static void reduce(double[] input, int[] input_shape, double[] output, int[] output_shape, int op) {
