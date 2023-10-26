@@ -882,7 +882,7 @@ public class TensorFlow implements Serializable {
         return new TensorFunction("SelfAttention", input[0].getShape(), input) {
 
             public Tenser<Tensor> compute() {
-                Tensor A = getInput()[0];
+                Tensor A = Tensor(getInput(0));
                 Tenser<Tensor> B = getInput(1);
                 Tensor C0 = matmul(A, Tensor(B.get(0)));
                 Tensor C1 = matmul(A, Tensor(B.get(1)));
@@ -901,7 +901,7 @@ public class TensorFlow implements Serializable {
         return new TensorFunction("MultiHeadAttention", new int[]{input[0].shape(0), input[0].shape(1)}, input) {
 
             public Tenser<Tensor> compute() {
-                Tensor A = getInput()[0], C = getInput()[2], M = getInput()[3], N = getInput()[4];
+                Tensor A = Tensor(getInput(0)), C = Tensor(getInput(2)), M = Tensor(getInput(3)), N = Tensor(getInput(4));
                 Tenser<Tensor> B = getInput(1);
                 Tensor[] arr = new Tensor[B.shape(0)];
                 forEach(arr.length, i -> arr[i] = selfAttention(scaler, A, Tensor(B.get(i))));
@@ -923,8 +923,9 @@ public class TensorFlow implements Serializable {
                 Tensor tensor = Tensor(A), mean = mean(tensor), std = standard(tensor, mean);
                 Tenser<Tensor> D = zeroTensors(A.shape);
                 Tensor epsilon = cons(eps), cons2 = cons(0.5);
+                Tensor pow = pow(add(std, epsilon), cons2);
                 forEach(A, B, C, D, (Tensor a, Tensor b, Tensor c) -> {
-                    return add(div(mul(b, minus(a, mean)), pow(add(std, epsilon), cons2)), c);
+                    return add(mul(b, div(minus(a, mean), pow)), c);
                 });
                 return D;
             }
@@ -1093,7 +1094,7 @@ public class TensorFlow implements Serializable {
         return new TensorFunction("Linear", new int[]{input[0].shape(0), input[1].shape(1),}, input) {
 
             public Tenser<Tensor> compute() {
-                Tensor tensor1 = matmul(getInput()[0], getInput()[1]);
+                Tensor tensor1 = matmul(Tensor(getInput(0)), Tensor(getInput(1)));
                 Tensor tensor2 = new Tensor("bias", tensor1.getShape());
                 Tensor tensor3 = addx(tensor1, tensor2);
                 Tensor tensor4 = relux(tensor3);

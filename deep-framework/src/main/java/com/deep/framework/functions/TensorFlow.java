@@ -69,6 +69,7 @@ public class TensorFlow implements Operator {
         Tensor layerNormal = tf.layerNormal(data1, data2,data3);
 
         layerNormal.forward();
+        forEach(layerNormal.getOutput(), (Tensor out) -> out.setGrad("1d"));
         layerNormal.backward();
         layerNormal.reducer();
     }

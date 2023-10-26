@@ -3,22 +3,32 @@ package com.deep.framework.functions;
 import com.deep.framework.lang.Shape;
 import com.deep.framework.lang.Tenser;
 import lombok.Data;
+import lombok.experimental.Accessors;
 
 import java.io.Serializable;
-import java.util.Optional;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import static com.deep.framework.lang.ForEach.fill;
 import static com.deep.framework.lang.Shape.size;
 
 @Data
+@Accessors(chain = true)
 public class Tensor implements Serializable {
 
     public Tensor(String value) {
         this.name = "None";
         this.data = value;
-        this.id = ID.getAndIncrement();
+        this.output = new Tenser<>(this);
+    }
+
+    public Tensor(String name, String value) {
+        this.name = name;
+        this.data = value;
         this.output = new Tenser<>(this);
     }
 
@@ -32,7 +42,6 @@ public class Tensor implements Serializable {
     public Tensor(String name, Tensor... input) {
         this.name = name;
         this.input = input;
-        this.id = ID.getAndIncrement();
         output = new Tenser<>(this);
     }
 
@@ -48,20 +57,25 @@ public class Tensor implements Serializable {
     public void backward() {}
 
     public void reducer() {
-        System.out.println("double ".concat(getGradId()).concat("=").concat(this.grad));
+        if (reduces) return;
+        System.out.println("double ".concat(getGradId()).concat("=").concat(getGrad()));
+        reduces = true;
     }
 
-    public String getVarId() {return "a" + Optional.ofNullable(id).orElse(0);}
+    public String getVarId() {return name.equals("Cons") ? data:"a" + id;}
 
-    public String getGradId() {return "g" + Optional.ofNullable(id).orElse(0);}
+    public String getGradId() {return name.equals("Cons") ? "0d":"g" + id;}
 
     public void setGrad(String grad) {
         if (grad.equals("0d")) return;
+        grads.add(grad);
         this.grad += "+" + grad;
+        this.grad = this.grad.replace("0d+", "").replace("+-", "-");
     }
 
     public void setGradx(String grad) {
         this.grad = grad;
+        this.grads = new ArrayList<>();
     }
 
     public int shape(int i) {return shape[i];}
@@ -83,16 +97,25 @@ public class Tensor implements Serializable {
         return (E) fill(Shape.shape(Tensor.class, a), o -> new Tensor("0d"));
     }
 
-    public static AtomicInteger ID = new AtomicInteger(1);
+    public String getGrad() {
+        if(grads.isEmpty()) grads.add(grad);
+        Map<Object, List<String>> map = grads.stream().collect(Collectors.groupingBy(a -> a));
+        return map.values().stream().map(a -> {
+            if (a.size() == 1) return a.get(0);
+            return a.size() + "*(" + a.get(0)+")";
+        }).collect(Collectors.joining("+")).concat(";").replace("0d+","").replace("+-","-");
+    }
 
-    private int id;
     protected int[] shape;
     protected String data = "", grad = "0d";
-    protected boolean[] reduce;
+    protected boolean reduces;
     protected boolean status;
 
     private String name;
     private Tensor[] input;
     transient Tenser<Tensor> output;
     protected Tenser<Tensor> function;
+    transient List<String> grads = new ArrayList<>();
+    private int id = ID.getAndIncrement();
+    private static AtomicInteger ID = new AtomicInteger();
 }

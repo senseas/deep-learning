@@ -12,7 +12,7 @@ public interface Operator {
     }
 
     default Tensor cons(double input) {
-        return new Tensor(String.valueOf(input));
+        return new Tensor("Cons", String.valueOf(input));
     }
 
     default Tensor Tensor(Tenser input) {
@@ -101,7 +101,7 @@ public interface Operator {
                 Tensor inx = getInput(0).one(), iny = getInput(1).one();
                 String valx = inx.getVarId(), valy = iny.getVarId();
                 inx.setGrad(grad + "/" + valy);
-                iny.setGrad("-" + grad + "*" + valx + " / Math.pow(" + valy + ", 2)");
+                iny.setGrad("-" + grad + "*" + valx + "/Math.pow(" + valy + ",2)");
             }
 
         };
@@ -118,7 +118,7 @@ public interface Operator {
 
             public void gradient(String grad) {
                 Tensor inx = getInput(0).one();
-                inx.setGrad(grad + " * " + inx.getVarId());
+                inx.setGrad(grad + "*" + inx.getVarId());
             }
 
         };
@@ -130,13 +130,13 @@ public interface Operator {
             public String compute() {
                 Tensor inx = getInput(0).one(), iny = getInput(1).one();
                 String valx = inx.getVarId(), valy = iny.getVarId();
-                return "Math.pow(" + valx + ", " + valy + ")";
+                return "Math.pow(" + valx + "," + valy + ")";
             }
 
             public void gradient(String grad) {
                 Tensor inx = getInput(0).one(), iny = getInput(1).one();
                 String valx = inx.getVarId(), valy = iny.getVarId();
-                inx.setGrad(grad + "*" + valy + " * Math.pow(" + valx + ", " + valy + " -1)");
+                inx.setGrad(grad + "*" + valy + "*Math.pow(" + valx + "," + valy + "-1)");
             }
 
         };
@@ -172,7 +172,7 @@ public interface Operator {
             public void gradient(String grad) {
                 Tensor inx = getInput(0).one();
                 String valx = inx.getVarId();
-                inx.setGrad(grad + " * Math.cos(" + valx + ")");
+                inx.setGrad(grad + "*Math.cos(" + valx + ")");
             }
 
         };
@@ -208,7 +208,7 @@ public interface Operator {
             public void gradient(String grad) {
                 Tensor inx = getInput(0).one();
                 String valx = inx.getVarId();
-                inx.setGrad(grad + " * Math.pow( 1 / Math.cos(" + valx + "), 2)");
+                inx.setGrad(grad + "*Math.pow(1/Math.cos(" + valx + "),2)");
             }
 
         };
@@ -220,13 +220,13 @@ public interface Operator {
             public String compute() {
                 Tensor inx = getInput(0).one();
                 String valx = inx.getVarId();
-                return "Math.cos(" + valx + ") / Math.sin(" + valx + ")";
+                return "Math.cos(" + valx + ")/Math.sin(" + valx + ")";
             }
 
             public void gradient(String grad) {
                 Tensor inx = getInput(0).one();
                 String valx = inx.getVarId();
-                inx.setGrad(grad + "* -Math.pow(1 / Math.sin(" + valx + "), 2)");
+                inx.setGrad(grad + "*-Math.pow(1/Math.sin(" + valx + "),2)");
             }
 
         };
@@ -238,13 +238,13 @@ public interface Operator {
             public String compute() {
                 Tensor inx = getInput(0).one();
                 String valx = inx.getVarId();
-                return "1 /" + " Math.cos(" + valx + ")";
+                return "1/" + "Math.cos(" + valx + ")";
             }
 
             public void gradient(String grad) {
                 Tensor inx = getInput(0).one();
                 String valx = inx.getVarId();
-                inx.setGrad(grad + " * Math.tan(" + valx + ") / Math.cos(" + valx + ")");
+                inx.setGrad(grad + "*Math.tan(" + valx + ")/Math.cos(" + valx + ")");
             }
 
         };
@@ -256,13 +256,13 @@ public interface Operator {
             public String compute() {
                 Tensor inx = getInput(0).one();
                 String valx = inx.getVarId();
-                return "1 / Math.sin(" + valx + ")";
+                return "1/Math.sin(" + valx + ")";
             }
 
             public void gradient(String grad) {
                 Tensor inx = getInput(0).one();
                 String valx = inx.getVarId();
-                inx.setGrad(grad + "* -Math.cos(" + valx + ") / Math.pow(Math.sin(" + valx + "), 2)");
+                inx.setGrad(grad + "*-Math.cos(" + valx + ")/Math.pow(Math.sin(" + valx + "),2)");
             }
 
         };
@@ -280,7 +280,7 @@ public interface Operator {
             public void gradient(String grad) {
                 Tensor inx = getInput(0).one();
                 String valx = inx.getVarId();
-                inx.setGrad(grad + " / Math.pow(1 - Math.pow(" + valx + ", 2), -2)");
+                inx.setGrad(grad + "/Math.pow(1-Math.pow(" + valx + ",2),-2)");
             }
 
         };
@@ -298,7 +298,7 @@ public interface Operator {
             public void gradient(String grad) {
                 Tensor inx = getInput(0).one();
                 String valx = inx.getVarId();
-                inx.setGrad(grad + "/-Math.pow(1 - Math.pow(" + valx + ", 2), -2)");
+                inx.setGrad(grad + "/-Math.pow(1-Math.pow(" + valx + ",2),-2)");
             }
 
         };
@@ -316,7 +316,7 @@ public interface Operator {
             public void gradient(String grad) {
                 Tensor inx = getInput(0).one();
                 String valx = inx.getVarId();
-                inx.setGrad(grad + "/(1 + Math.pow(" + valx + ", 2))");
+                inx.setGrad(grad + "/(1+Math.pow(" + valx + ",2))");
             }
 
         };
@@ -334,7 +334,7 @@ public interface Operator {
             public void gradient(String grad) {
                 Tensor inx = getInput(0).one();
                 String valx = inx.getVarId();
-                inx.setGrad(grad + "/-(1 + Math.pow(" + valx + ", 2))");
+                inx.setGrad(grad + "/-(1+Math.pow(" + valx + ",2))");
             }
 
         };
@@ -346,13 +346,13 @@ public interface Operator {
             public String compute() {
                 Tensor inx = getInput(0).one();
                 String valx = inx.getVarId();
-                return valx + "> 0 ? " + valx + " : 0.1 *" + valx;
+                return valx + ">0? " + valx + " : 0.1*" + valx;
             }
 
             public void gradient(String grad) {
                 Tensor inx = getInput(0).one();
                 String valx = inx.getVarId();
-                inx.setGrad(valx + " > 0 ? " + grad + " : 0.1 *" + grad);
+                inx.setGrad(valx + ">0? " + grad + ":0.1*" + grad);
             }
 
         };
@@ -370,8 +370,8 @@ public interface Operator {
             public void gradient(String grad) {
                 Tensor inx = getInput(0).one(), iny = getInput(1).one();
                 String valx = inx.getVarId(), valy = iny.getVarId();
-                inx.setGrad(valx + " > " + valy + " ? " + grad + " : 0");
-                iny.setGrad(valx + " < " + valy + " ? " + grad + " : 0");
+                inx.setGrad(valx + ">" + valy + "?" + grad + ":0");
+                iny.setGrad(valx + "<" + valy + "?" + grad + ":0");
             }
 
         };
@@ -383,14 +383,14 @@ public interface Operator {
             public String compute() {
                 Tensor inx = getInput(0).one(), iny = getInput(1).one();
                 String valx = inx.getVarId(), valy = iny.getVarId();
-                return "Math.min(" + valx + ", " + valy + ")";
+                return "Math.min(" + valx + "," + valy + ")";
             }
 
             public void gradient(String grad) {
                 Tensor inx = getInput(0).one(), iny = getInput(1).one();
                 String valx = inx.getVarId(), valy = iny.getVarId();
-                inx.setGrad(valx + "<" + valy + "?" + grad + " : 0");
-                iny.setGrad(valx + ">" + valy + "?" + grad + " : 0");
+                inx.setGrad(valx + "<" + valy + "?" + grad + ":0");
+                iny.setGrad(valx + ">" + valy + "?" + grad + ":0");
             }
 
         };

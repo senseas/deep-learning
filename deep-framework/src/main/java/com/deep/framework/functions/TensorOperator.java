@@ -18,13 +18,17 @@ public class TensorOperator extends Tensor {
     }
 
     public void backward() {
-        gradient(getGradId());
+        gradient(grad);
+        grad = "0d";
+        grads.clear();
         for (Tensor o : getInput()) o.backward();
     }
 
     public void reducer() {
-        System.out.println("double ".concat(getGradId()).concat("=").concat(this.grad));
+        if (reduces) return;
+        System.out.println("double ".concat(getGradId()).concat("=").concat(getGrad()));
         for (Tensor o : getInput()) o.reducer();
+        reduces = true;
     }
 
     public Tenser<Tensor> getInput(int i) {
