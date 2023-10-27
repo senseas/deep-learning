@@ -108,7 +108,7 @@ public class Matmul {
         cudaMemcpy(Pointer.to(A.getGrad()), GA, A.getGrad().length * Sizeof.DOUBLE, cudaMemcpyDeviceToHost);
 
         //GB= NK_T[GC_T=NM * DA=MK]
-        cublasDgemm(handle, CUBLAS_OP_N, CUBLAS_OP_N, K, N, M, alpha, DA, K, GC, N, beta, GB, N);
+        cublasDgemm(handle, CUBLAS_OP_N, CUBLAS_OP_N, K, N, M, alpha, DA, K, GC, N, beta, GB, K);
         // Copy the result from the device to the host
         cudaMemcpy(Pointer.to(B.getGrad()), GB, B.getGrad().length * Sizeof.DOUBLE, cudaMemcpyDeviceToHost);
 
