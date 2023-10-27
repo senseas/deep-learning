@@ -98,9 +98,9 @@ public class CudnnTest {
         };
         double[] filter_grad = new double[3 * 9];
 
-        double[] ouput = new double[5 * 5];
-        double[] ouput_grad = new double[5 * 5];
-        Arrays.fill(ouput_grad, 1);
+        double[] output = new double[5 * 5];
+        double[] output_grad = new double[5 * 5];
+        Arrays.fill(output_grad, 1);
 
         int[] input_shape = {1, 3, 7, 7};// input batch_size, channels, height, width
         int[] filter_shape = {3, 3};// filter batch_size, channels, height, width
@@ -108,10 +108,10 @@ public class CudnnTest {
         int[] stride = {1, 1};// vertical stride, horizontal stride
         int[] output_shape = {1, 1, 5, 5};// output batch_size, channels, height, width
 
-        convForward(input, input_shape, filter, filter_shape, padding, stride, ouput, output_shape);
-        System.out.println(JSONObject.toJSONString(ouput));
+        convForward(input, input_shape, filter, filter_shape, padding, stride, output, output_shape);
+        System.out.println(JSONObject.toJSONString(output));
 
-        convBackward(input, input_grad, input_shape, filter, filter_grad, filter_shape, padding, stride, ouput, ouput_grad, output_shape);
+        convBackward(input, input_grad, input_shape, filter, filter_grad, filter_shape, padding, stride, output, output_grad, output_shape);
         System.out.println(JSONObject.toJSONString(input_grad));
         System.out.println(JSONObject.toJSONString(filter_grad));
     }

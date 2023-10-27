@@ -31,7 +31,7 @@ public class Pooling {
         poolingBackward(input.getData(), input.getGrad(), Shape.shapes(input.getShape()), window, padding, stride, output.getData(), output.getGrad(), Shape.shapes(output.getShape()), CUDNN_POOLING_MAX);
     }
 
-    public static void poolingForward(double[] input, int[] input_shape, int[] window, int[] padding, int[] stride, double[] ouput, int[] output_shape, int mode) {
+    public static void poolingForward(double[] input, int[] input_shape, int[] window, int[] padding, int[] stride, double[] output, int[] output_shape, int mode) {
         // Define input tensor
         cudnnTensorDescriptor input_desc = new cudnnTensorDescriptor();
         cudnnCreateTensorDescriptor(input_desc);
@@ -49,11 +49,11 @@ public class Pooling {
 
         // allocate memory on device
         Pointer device_input = createDevicePointer(input);
-        Pointer device_output = createDevicePointer(ouput);
+        Pointer device_output = createDevicePointer(output);
 
         Pointer alpha = Pointer.to(new double[]{1}), beta = Pointer.to(new double[]{0});
         cudnnPoolingForward(handle, pool_desc, alpha, input_desc, device_input, beta, output_desc, device_output);
-        cudaMemcpy(Pointer.to(ouput), device_output, ouput.length * DATA_TYPE_SZIE, cudaMemcpyDeviceToHost);
+        cudaMemcpy(Pointer.to(output), device_output, output.length * DATA_TYPE_SZIE, cudaMemcpyDeviceToHost);
 
         // clean up
         cudaFree(device_input);
@@ -64,7 +64,7 @@ public class Pooling {
         cudnnDestroyPoolingDescriptor(pool_desc);
     }
 
-    public static void poolingBackward(double[] input, double[] input_grad, int[] input_shape, int[] window, int[] padding, int[] stride, double[] ouput, double[] ouput_grad, int[] output_shape, int mode) {
+    public static void poolingBackward(double[] input, double[] input_grad, int[] input_shape, int[] window, int[] padding, int[] stride, double[] output, double[] output_grad, int[] output_shape, int mode) {
         // define input tensor
         cudnnTensorDescriptor input_desc = new cudnnTensorDescriptor();
         cudnnCreateTensorDescriptor(input_desc);
@@ -92,8 +92,8 @@ public class Pooling {
         Pointer device_input = createDevicePointer(input);
         Pointer device_input_grad = createDevicePointer(input_grad);
 
-        Pointer device_output = createDevicePointer(ouput);
-        Pointer device_output_grad = createDevicePointer(ouput_grad);
+        Pointer device_output = createDevicePointer(output);
+        Pointer device_output_grad = createDevicePointer(output_grad);
 
         Pointer alpha = Pointer.to(new double[]{1}), beta = Pointer.to(new double[]{0});
 

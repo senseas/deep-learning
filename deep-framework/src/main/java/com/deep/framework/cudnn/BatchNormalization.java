@@ -30,7 +30,7 @@ public class BatchNormalization {
         normalBackward(mean, var, input.getData(), input.getGrad(), Shape.shapes(input.getShape()), weight.getData(), weight.getGrad(), bias.getData(), bias.getGrad(), output.getData(), output.getGrad(), Shape.shapes(output.getShape()));
     }
 
-    public static void normalForward(double[] mean, double[] var, double[] input, int[] input_shape, double[] weight, double[] bias, double[] ouput, int[] output_shape) {
+    public static void normalForward(double[] mean, double[] var, double[] input, int[] input_shape, double[] weight, double[] bias, double[] output, int[] output_shape) {
         // Define input tensor
         cudnnTensorDescriptor input_desc = new cudnnTensorDescriptor();
         cudnnCreateTensorDescriptor(input_desc);
@@ -48,7 +48,7 @@ public class BatchNormalization {
 
         // allocate memory on device
         Pointer device_input = createDevicePointer(input);
-        Pointer device_output = createDevicePointer(ouput);
+        Pointer device_output = createDevicePointer(output);
         Pointer device_weight = createDevicePointer(weight);
         Pointer device_bias = createDevicePointer(bias);
         Pointer device_mean = Pointer.to(mean);
@@ -56,7 +56,7 @@ public class BatchNormalization {
 
         Pointer alpha = Pointer.to(new double[]{1}), beta = Pointer.to(new double[]{0});
         cudnnBatchNormalizationForwardInference(handle, FWD_MODE, alpha, beta, input_desc, device_input, output_desc, device_output, weight_bias_mean_var_desc, device_weight, device_bias, device_mean, device_var, epsilon);
-        cudaMemcpy(Pointer.to(ouput), device_output, ouput.length * DATA_TYPE_SZIE, cudaMemcpyDeviceToHost);
+        cudaMemcpy(Pointer.to(output), device_output, output.length * DATA_TYPE_SZIE, cudaMemcpyDeviceToHost);
 
         // clean up
         cudaFree(device_input);

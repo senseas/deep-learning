@@ -36,7 +36,7 @@ public class Convolution {
         convBackward(input.getData(), input.getGrad(), Shape.shapes(input.getShape()), filter.getData(), filter.getGrad(), filter.getShape(), padding, stride, output.getData(), output.getGrad(), Shape.shapes(output.getShape()));
     }
 
-    public static void convForward(double[] input, int[] input_shape, double[] filter, int[] filter_shape, int[] padding, int[] stride, double[] ouput, int[] output_shape) {
+    public static void convForward(double[] input, int[] input_shape, double[] filter, int[] filter_shape, int[] padding, int[] stride, double[] output, int[] output_shape) {
         // Define input tensor
         cudnnTensorDescriptor input_desc = new cudnnTensorDescriptor();
         cudnnCreateTensorDescriptor(input_desc);
@@ -60,7 +60,7 @@ public class Convolution {
         // allocate memory on device
         Pointer device_input = createDevicePointer(input);
         Pointer device_filter = createDevicePointer(filter);
-        Pointer device_output = createDevicePointer(ouput);
+        Pointer device_output = createDevicePointer(output);
 
         // Allocate workspace memory on GPU
         long[] workspaceSize = {0};
@@ -70,7 +70,7 @@ public class Convolution {
 
         Pointer alpha = Pointer.to(new double[]{1}), beta = Pointer.to(new double[]{0});
         cudnnConvolutionForward(handle, alpha, input_desc, device_input, filter_desc, device_filter, conv_desc, FWD_ALGO, workSpace, workspaceSize[0], beta, output_desc, device_output);
-        cudaMemcpy(Pointer.to(ouput), device_output, ouput.length * DATA_TYPE_SZIE, cudaMemcpyDeviceToHost);
+        cudaMemcpy(Pointer.to(output), device_output, output.length * DATA_TYPE_SZIE, cudaMemcpyDeviceToHost);
 
         // clean up
         cudaFree(device_input);
@@ -83,7 +83,7 @@ public class Convolution {
         cudnnDestroyConvolutionDescriptor(conv_desc);
     }
 
-    public static void convBackward(double[] input, double[] input_grad, int[] input_shape, double[] filter, double[] filter_grad, int[] filter_shape, int[] padding, int[] stride, double[] ouput, double[] ouput_grad, int[] output_shape) {
+    public static void convBackward(double[] input, double[] input_grad, int[] input_shape, double[] filter, double[] filter_grad, int[] filter_shape, int[] padding, int[] stride, double[] output, double[] output_grad, int[] output_shape) {
         // Define input tensor
         cudnnTensorDescriptor input_desc = new cudnnTensorDescriptor();
         cudnnCreateTensorDescriptor(input_desc);
@@ -123,8 +123,8 @@ public class Convolution {
         Pointer device_filter = createDevicePointer(filter);
         Pointer device_filter_grad = createDevicePointer(filter_grad);
 
-        Pointer device_output = createDevicePointer(ouput);
-        Pointer device_output_grad = createDevicePointer(ouput_grad);
+        Pointer device_output = createDevicePointer(output);
+        Pointer device_output_grad = createDevicePointer(output_grad);
 
         Pointer alpha = Pointer.to(new double[]{1}), beta = Pointer.to(new double[]{0});
 
