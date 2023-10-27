@@ -8,7 +8,7 @@ import java.util.stream.Collectors;
 public interface Operator {
 
     default Tensor cons(String input) {
-        return new Tensor(input);
+        return new Tensor("Cons", input);
     }
 
     default Tensor cons(double input) {
