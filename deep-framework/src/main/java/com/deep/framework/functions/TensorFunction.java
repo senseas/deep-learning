@@ -52,12 +52,12 @@ public class TensorFunction extends Tensor {
         return function = compute();
     }
 
-    public Tenser<Tensor> getInput(int i) {
-        return getInput()[i].getOutput();
-    }
-
     public void clearGrad() {
         forEach(getOutput(), (Tensor out) -> out.setGradx("0d"));
+    }
+
+    public Tenser<Tensor> getInput(int i) {
+        return getInput()[i].getOutput();
     }
 
 }
