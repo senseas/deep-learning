@@ -18,7 +18,7 @@ public class TensorOperator extends Tensor {
     }
 
     public void backward() {
-        gradient("("+grad+")");
+        gradient(grad.startsWith("(") && grad.endsWith(")") ? grad : "(" + grad + ")");
         clearGrad();
         for (Tensor o : getInput()) o.backward();
     }

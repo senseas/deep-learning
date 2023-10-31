@@ -63,7 +63,7 @@ public interface Operator {
 
             public void gradient(String grad) {
                 Tensor inx = getInput(0).one();
-                inx.setGrad("-" + "(" + grad + ")");
+                inx.setGrad("-" +  grad );
             }
 
         };
@@ -238,7 +238,7 @@ public interface Operator {
             public String compute() {
                 Tensor inx = getInput(0).one();
                 String valx = inx.getVarId();
-                return "1/" + "Math.cos(" + valx + ")";
+                return "1/Math.cos(" + valx + ")";
             }
 
             public void gradient(String grad) {
