@@ -943,17 +943,15 @@ public class TensorFlow implements Serializable {
                 double[] bias_grad = getInput()[2].getGrad();
 
                 double grad_scale_sum = IntStream.range(0, length).parallel().mapToDouble(i -> getGrad()[i] * scale[i]).sum();
-                double grad_input_sub_mean_sum = IntStream.range(0, length).parallel().mapToDouble(i -> getGrad()[i] * input_sub_mean[i]).sum();
-                double[] scale_input_sub_mean = IntStream.range(0, length).mapToDouble(i -> scale[i] * input_sub_mean[i]).toArray();
-                double scale_input_sub_mean_sum = DoubleStream.of(scale_input_sub_mean).parallel().sum();
-                double grad_scale_input_sub_mean_sum = IntStream.range(0, length).mapToDouble(i -> getGrad()[i] * scale_input_sub_mean[i]).sum();
+                double grad_input_sub_mean_sum = IntStream.range(0, length).parallel().mapToDouble(i -> getGrad()[i] * scale[i] * input_sub_mean[i]).sum();
+                double input_sub_mean_sum = DoubleStream.of(input_sub_mean).parallel().sum();
 
                 double a = std + 1.0E-7;
                 double b = Math.pow(a, 0.5);
                 IntStream.range(0, length).forEach(i -> {
-                    input_grad[i] = getGrad()[i] * scale[i] / b - grad_scale_sum / b / length - grad_scale_input_sub_mean_sum * input_sub_mean[i] * Math.pow(a, -1.5) / length + grad_input_sub_mean_sum * scale_input_sub_mean_sum / length * Math.pow(a, -1.5) / length;
+                    input_grad[i] = getGrad()[i] * scale[i] / b - grad_scale_sum / b / length + (-input_sub_mean[i] + input_sub_mean_sum / length) * grad_input_sub_mean_sum * Math.pow(a, -1.5) / length;
                     scale_grad[i] = getGrad()[i] * input_sub_mean[i] / b;
-                    bias_grad[i] = getGrad()[i];
+                    bias_grad[i]  = getGrad()[i];
                 });
             }
 

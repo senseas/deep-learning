@@ -62,34 +62,32 @@ public class Tensor implements Serializable {
         reduces = true;
     }
 
-    public String getVarId() {return name.equals("Cons") ? data:"a" + id;}
+    public String getVarId() {return "a" + id;}
 
-    public String getGradId() {return name.equals("Cons") ? "0d":"g" + id;}
+    public String getGradId() {return "g" + id;}
 
     public void setGrad(String grad) {
-        if (grad.equals("0d")) return;
-        grads.add(grad);
-        this.grad += "+" + grad;
-        this.grad = this.grad.replace("0d+", "").replace("+-", "-");
+        this.grads.add(grad);
+        if (this.grad.equals("0d")) {
+            this.grad = grad;
+        } else {
+            this.grad += "+" + grad;
+        }
     }
 
     public void setGradx(String grad) {
         this.grad = grad;
-        this.grads = new ArrayList<>();
+        this.grads.clear();
     }
 
     public int shape(int i) {return shape[i];}
 
     public Tenser<Tensor> Tensors() {
-        Tensor[] tensors = IntStream.range(0, size(shape)).mapToObj(i -> new Tensor(i + "")).toArray(Tensor[]::new);
-        return new Tenser<>(tensors, shape);
+        return new Tenser<>(IntStream.range(0, size(shape)).mapToObj(i -> new Tensor(i + "")).toArray(Tensor[]::new), shape);
     }
 
     public static <E> E getOutput(Object a) {
-        Object c = fill(a, Shape.shape(Object.class, a), b -> {
-            Tensor o = (Tensor) b;
-            return o.getOutput();
-        });
+        Object c = fill(a, Shape.shape(Object.class, a), b -> ((Tensor) b).getOutput());
         return (E) fill(c, Shape.shape(Tensor.class, c), b -> b);
     }
 
@@ -98,12 +96,13 @@ public class Tensor implements Serializable {
     }
 
     public String getGrad() {
-        if(grads.isEmpty()) grads.add(grad);
+        if (grads.isEmpty()) grads.add(grad);
         Map<Object, List<String>> map = grads.stream().collect(Collectors.groupingBy(a -> a));
         return map.values().stream().map(a -> {
             if (a.size() == 1) return a.get(0);
-            return a.size() + "*(" + a.get(0)+")";
-        }).collect(Collectors.joining("+")).concat(";").replace("0d+","").replace("+-","-");
+            String str = grad.startsWith("(") && grad.endsWith(")") ? a.get(0) : "*(" + a.get(0) + ")";
+            return a.size() + str;
+        }).collect(Collectors.joining("+")).concat(";");
     }
 
     protected int[] shape;
