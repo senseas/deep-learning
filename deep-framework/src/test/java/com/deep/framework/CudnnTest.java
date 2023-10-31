@@ -10,6 +10,8 @@ import org.junit.Test;
 import java.util.Arrays;
 
 import static com.deep.framework.cudnn.Activation.*;
+import static com.deep.framework.cudnn.BatchNormal.normalBackward;
+import static com.deep.framework.cudnn.BatchNormal.normalForward;
 import static com.deep.framework.cudnn.Convolution.convBackward;
 import static com.deep.framework.cudnn.Convolution.convForward;
 import static com.deep.framework.cudnn.Reduce.reduce;
@@ -114,6 +116,22 @@ public class CudnnTest {
         convBackward(input, input_grad, input_shape, filter, filter_grad, filter_shape, padding, stride, output, output_grad, output_shape);
         System.out.println(JSONObject.toJSONString(input_grad));
         System.out.println(JSONObject.toJSONString(filter_grad));
+    }
+
+    @Test
+    public void batchNormalTest() {
+        Tensor input = new Tensor(new double[]{-0.04976376334757029, -0.03794349033548409, -0.010064684799984737, 0.07645589251434087, 0.07582835718990744, 0.08298664791825114}, new int[]{1, 1, 3, 2});
+        Tensor scale = new Tensor(new double[]{-0.11638942929027168, 0.00272052007755666, -0.06962990835464268, -0.08540677407104012, 0.009078374800942644, 0.14757164208870013}, new int[]{1, 1, 3, 2});
+        Tensor bias = new Tensor(new double[]{-0.003444951583010782, 0.016457531606025765, -0.060589160254410995, -0.0038500237038360235, 0.0362456731331325, -0.032999063080729654}, new int[]{1, 1, 3, 2});
+        Tensor output = new Tensor(new double[]{0.1455162977531491, 0.01354193737864609, -0.020149704441370354, -0.08437101790796131, 0.044704389950437844, 0.12310168212752819}, new int[]{1, 1, 3, 2});
+
+        normalForward(input, scale, bias, output);
+        System.out.println(com.alibaba.fastjson2.JSONObject.toJSONString(output.getData()));
+        Arrays.fill(output.getGrad(), 1);
+        normalBackward(input, scale, bias, output);
+        System.out.println(com.alibaba.fastjson2.JSONObject.toJSONString(input.getGrad()));
+        System.out.println(com.alibaba.fastjson2.JSONObject.toJSONString(scale.getGrad()));
+        System.out.println(com.alibaba.fastjson2.JSONObject.toJSONString(bias.getGrad()));
     }
 
 }

@@ -68,11 +68,7 @@ public class Tensor implements Serializable {
 
     public void setGrad(String grad) {
         this.grads.add(grad);
-        if (this.grad.equals("0d")) {
-            this.grad = grad;
-        } else {
-            this.grad += "+" + grad;
-        }
+        this.grad = this.grad.equals("0d") ? grad : this.grad + "+" + grad;
     }
 
     public void setGradx(String grad) {
