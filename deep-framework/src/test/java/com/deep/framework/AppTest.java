@@ -198,21 +198,30 @@ public class AppTest {
         System.out.println("data2" + JSONObject.toJSONString(data2.getGrad()));
     }
 
+    /**
+     * output     [0.1455162977531491,0.01354193737864609,-0.020149704441370354,-0.08437101790796131,0.044704389950437844,0.12310168212752819]
+     * input grad [-0.7045232088118772,1.2276654309349004,-0.4361541749459134,-1.9236250323226096,-0.25102939569684746,2.087666380842347]
+     * scale grad [-1.2798520470845771,-1.0717047271337228,-0.580777093760806,0.9427940005923778,0.9317435116720499,1.0577963557146783]
+     * bias  grad [1.0,1.0,1.0,1.0,1.0,1.0]
+     */
     @Test
     public void layerNormalTest() {
+        double[] inputData = {-0.04976376334757029, -0.03794349033548409, -0.010064684799984737, 0.07645589251434087, 0.07582835718990744, 0.08298664791825114};
+        double[] weightData = {-0.11638942929027168, 0.00272052007755666, -0.06962990835464268, -0.08540677407104012, 0.009078374800942644, 0.14757164208870013};
+        double[] biasData = {-0.003444951583010782, 0.016457531606025765, -0.060589160254410995, -0.0038500237038360235, 0.0362456731331325, -0.032999063080729654};
         TensorFlow tf = new TensorFlow();
-        Tensor data1 = new Tensor(new int[]{3, 2});
-        Tensor data2 = new Tensor(new int[]{3, 2});
-        Tensor data3 = new Tensor(new int[]{3, 2});
-        Tensor layerNormal = tf.layerNormal(data1, data2,data3);
+        Tensor input = new Tensor(inputData, new int[]{3, 2});
+        Tensor scale = new Tensor(weightData, new int[]{3, 2});
+        Tensor bias = new Tensor(biasData, new int[]{3, 2});
+        Tensor layerNormal = tf.layerNormal(input, scale, bias);
         layerNormal.forward();
         Arrays.fill(layerNormal.getGrad(), 1);
         layerNormal.backward();
 
-        System.out.println("getData" + JSONObject.toJSONString(layerNormal.getData()));
-        System.out.println("data1" + JSONObject.toJSONString(data1.getGrad()));
-        System.out.println("data2" + JSONObject.toJSONString(data2.getGrad()));
-        System.out.println("data2" + JSONObject.toJSONString(data3.getGrad()));
+        System.out.println("output    " + JSONObject.toJSONString(layerNormal.getData()));
+        System.out.println("input Grad" + JSONObject.toJSONString(input.getGrad()));
+        System.out.println("scale Grad" + JSONObject.toJSONString(scale.getGrad()));
+        System.out.println("bias  Grad" + JSONObject.toJSONString(bias.getGrad()));
         System.out.println(" ");
     }
 

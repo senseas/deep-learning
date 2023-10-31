@@ -7,8 +7,9 @@ import com.deep.framework.lang.Tenser;
 
 import java.io.Serializable;
 import java.util.Arrays;
+import java.util.stream.DoubleStream;
+import java.util.stream.IntStream;
 
-import static com.deep.framework.core.TensorExecutor.eps;
 import static com.deep.framework.cuda.Matmul.*;
 import static com.deep.framework.cudnn.Softmax.softmaxBackward;
 import static com.deep.framework.cudnn.Softmax.softmaxForward;
@@ -878,7 +879,7 @@ public class TensorFlow implements Serializable {
         };
     }
 
-    public Tensor selfAttention(int scaler, Tensor... input) {
+    public Tensor selfAttention(double scaler, Tensor... input) {
         return new TensorFunction("SelfAttention", input[0].getShape(), input) {
 
             public Tenser<Tensor> compute() {
@@ -897,7 +898,7 @@ public class TensorFlow implements Serializable {
         };
     }
 
-    public Tensor multiHeadAttention(int scaler, Tensor... input) {
+    public Tensor multiHeadAttention(double scaler, Tensor... input) {
         return new TensorFunction("MultiHeadAttention", new int[]{input[0].shape(0), input[0].shape(1)}, input) {
 
             public Tenser<Tensor> compute() {
@@ -916,21 +917,45 @@ public class TensorFlow implements Serializable {
     }
 
     public Tensor layerNormal(Tensor... input) {
-        return new TensorFunction("LayerNormal", input[0].getShape(), input) {
+        return new TensorOperator("LayerNormal", input[0].getShape(), input) {
+            int length;
+            double mean, std;
+            double[] input_sub_mean;
 
             public Tenser<Tensor> compute() {
-                Tenser<Tensor> A = getInput(0), B = getInput(1), C = getInput(2);
-                Tensor tensor = Tensor(A), mean = mean(tensor), std = standard(tensor, mean);
-                Tenser<Tensor> D = zeroTensors(A.shape);
-                Tensor epsilon = cons(eps), cons2 = cons(0.5);
-                Tensor pow = pow(add(std, epsilon), cons2);
-                forEach(A, B, C, D, (Tensor a, Tensor b, Tensor c) -> {
-                    return add(mul(b, div(minus(a, mean), pow)), c);
-                });
-                return D;
+                double[] input_data = getInput()[0].getData();
+                double[] scale = getInput()[1].getData();
+                double[] bias = getInput()[2].getData();
+                length = input_data.length;
+
+                mean = DoubleStream.of(input_data).parallel().sum() / length;
+                input_sub_mean = DoubleStream.of(input_data).map(a -> a - mean).toArray();
+                std = DoubleStream.of(input_sub_mean).parallel().map(a -> Math.pow(a, 2)).sum() / length;
+                double a = Math.pow(std + 1.0E-7, 0.5);
+                IntStream.range(0, length).forEach(i -> data[i] = scale[i] * (input_data[i] - mean) / a + bias[i]);
+                return getOutput();
             }
 
-            public void gradient() {}
+            public void gradient() {
+                double[] input_grad = getInput()[0].getGrad();
+                double[] scale = getInput()[1].getData();
+                double[] scale_grad = getInput()[1].getGrad();
+                double[] bias_grad = getInput()[2].getGrad();
+
+                double grad_scale_sum = IntStream.range(0, length).parallel().mapToDouble(i -> getGrad()[i] * scale[i]).sum();
+                double grad_input_sub_mean_sum = IntStream.range(0, length).parallel().mapToDouble(i -> getGrad()[i] * input_sub_mean[i]).sum();
+                double[] scale_input_sub_mean = IntStream.range(0, length).mapToDouble(i -> scale[i] * input_sub_mean[i]).toArray();
+                double scale_input_sub_mean_sum = DoubleStream.of(scale_input_sub_mean).parallel().sum();
+                double grad_scale_input_sub_mean_sum = IntStream.range(0, length).mapToDouble(i -> getGrad()[i] * scale_input_sub_mean[i]).sum();
+
+                double a = std + 1.0E-7;
+                double b = Math.pow(a, 0.5);
+                IntStream.range(0, length).forEach(i -> {
+                    input_grad[i] = getGrad()[i] * scale[i] / b - grad_scale_sum / b / length - grad_scale_input_sub_mean_sum * input_sub_mean[i] * Math.pow(a, -1.5) / length + grad_input_sub_mean_sum * scale_input_sub_mean_sum / length * Math.pow(a, -1.5) / length;
+                    scale_grad[i] = getGrad()[i] * input_sub_mean[i] / b;
+                    bias_grad[i] = getGrad()[i];
+                });
+            }
 
         };
     }
@@ -1011,7 +1036,7 @@ public class TensorFlow implements Serializable {
     }
 
     public Tensor positionalEmbedding(int[] shape, Tensor... input) {
-        return new TensorOperator("Mean", shape, input) {
+        return new TensorOperator("PositionalEmbedding", shape, input) {
 
             public Tenser compute() {
                 Tensor inx = getInput()[0];

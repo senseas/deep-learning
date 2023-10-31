@@ -17,7 +17,7 @@ import static com.deep.framework.lang.util.Sequence.*;
 public class TransformerTest {
     int batch_size = 500;
     int num = getWordDicSize(), dim = 512;
-    String data = "10月13日，@京东发言人 发文称，我们关注到有谣言称“刘姓商人涉嫌违法被抓”，该谣言被别有用心的人刻意发布在京东相关新闻动态下，以混淆视听、操纵舆论。我们对此恶劣行径表示强烈愤慨，并已向公安机关报案。";
+    String data = "10月13日，@京东发言人发文称，我们关注到有谣言称“刘姓商人涉嫌违法被抓”，该谣言被别有用心的人刻意发布在京东相关新闻动态下，以混淆视听、操纵舆论。我们对此恶劣行径表示强烈愤慨，并已向公安机关报案。";
     List<String> list = getWordIndexList2(data);
 
     /**
@@ -36,13 +36,13 @@ public class TransformerTest {
         Tensor tensor13 = tf.addx(tensor11, tensor12);//500*512
 
         //MultiHeadAttention & Linear Add & Normal
-        Tensor tensor14 = tf.multiHeadAttention(64, tensor13, new Tensor(new int[]{8, 3, dim, dim}), new Tensor(new int[]{dim * 8, dim}), new Tensor(new int[]{batch_size, dim}), new Tensor(new int[]{batch_size, dim}));//500*512
+        Tensor tensor14 = tf.multiHeadAttention(1/Math.pow(512,0.5), tensor13, new Tensor(new int[]{8, 3, dim, dim}), new Tensor(new int[]{dim * 8, dim}), new Tensor(new int[]{batch_size, dim}), new Tensor(new int[]{batch_size, dim}));//500*512
         Tensor tensor15 = tf.linear(tensor14, new Tensor(new int[]{dim, dim}));//500*512
         Tensor tensor16 = tf.addx(tensor14, tensor15);//500*512
         Tensor tensor17 = tf.layerNormal(tensor16, new Tensor(tensor16.getShape()), new Tensor(tensor16.getShape()));//500*512
 
         //MultiHeadAttention & Linear Add & Normal
-        Tensor tensor21 = tf.multiHeadAttention(8, tensor17, new Tensor(new int[]{8, 3, dim, dim}), new Tensor(new int[]{dim * 8, dim}), new Tensor(new int[]{batch_size, dim}), new Tensor(new int[]{batch_size, dim}));//500*512
+        Tensor tensor21 = tf.multiHeadAttention(1/Math.pow(512,0.5), tensor17, new Tensor(new int[]{8, 3, dim, dim}), new Tensor(new int[]{dim * 8, dim}), new Tensor(new int[]{batch_size, dim}), new Tensor(new int[]{batch_size, dim}));//500*512
         Tensor tensor22 = tf.linear(tensor21, new Tensor(new int[]{dim, dim}));//500*512
         Tensor tensor23 = tf.addx(tensor21, tensor22);//500*512
         Tensor tensor24 = tf.layerNormal(tensor23, new Tensor(tensor23.getShape()), new Tensor(tensor23.getShape()));//500*512
@@ -61,13 +61,13 @@ public class TransformerTest {
             List<String> data = list.stream().limit(i).collect(Collectors.toList());
             double[] inxSet = pad(data);
             double[] inySet = getWordIndex(data);
-            double[] labSet = oneHot(list.get(i + 1));
+            double[] labSet = oneHot(list.get(i));
             executor.run(inxSet, inySet, labSet);
 
             log.info("---------{}------------", i);
-            log("输入：", data);
-            log("标签：", list.get(i + 1));
-            log("输出：", softmax.data());
+            log("输入：", String.join("", data));
+            log("输出：", list.get(i));
+            log("损失：", crossx.data());
         });
     }
 
