@@ -17,7 +17,6 @@ import static jcuda.runtime.cudaMemcpyKind.cudaMemcpyDeviceToHost;
 
 public class CudnnOpTensor {
 
-    // 声明softmax算法和算法描述符
     private static final int DATA_TYPE = CUDNN_DATA_DOUBLE;
     private static final int DATA_TYPE_SZIE = Sizeof.DOUBLE;
 
