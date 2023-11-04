@@ -51,7 +51,6 @@ public interface Operator {
         };
     }
 
-
     default Tensor minus(Tensor input) {
         return new TensorOperator("Minusx", input) {
 
@@ -63,7 +62,7 @@ public interface Operator {
 
             public void gradient(String grad) {
                 Tensor inx = getInput(0).one();
-                inx.setGrad("-" +  grad );
+                inx.setGrad("-" + grad);
             }
 
         };

@@ -79,7 +79,7 @@ public class Matmul {
 
         int M = A.shape(0), K = A.shape(1), N = B.shape(0);
         // DC= [AD=NK * DB=KM]
-        cublasDgemm(handle, CUBLAS_OP_T, CUBLAS_OP_N, N, M, K, alpha, DB , K, DA, K, beta, DC, N);
+        cublasDgemm(handle, CUBLAS_OP_T, CUBLAS_OP_N, N, M, K, alpha, DB, K, DA, K, beta, DC, N);
         // Copy the result from the device to the host
         cudaMemcpy(Pointer.to(C.getData()), DC, C.getData().length * Sizeof.DOUBLE, cudaMemcpyDeviceToHost);
 
