@@ -1,10 +1,10 @@
-package com.deep.framework.cuda;
+package com.deep.framework.cublas;
 
 import com.deep.framework.graph.Tensor;
 import jcuda.Pointer;
 import jcuda.Sizeof;
 
-import static com.deep.framework.cuda.CublasConfig.handle;
+import static com.deep.framework.cublas.CublasConfig.handle;
 import static com.deep.framework.cuda.Cuda.createDevicePointer;
 import static jcuda.jcublas.JCublas2.cublasDgemm;
 import static jcuda.jcublas.cublasOperation.CUBLAS_OP_N;

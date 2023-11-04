@@ -65,11 +65,11 @@ public class Convolution {
         // Allocate workspace memory on GPU
         long[] workspaceSize = {0};
         cudnnGetConvolutionForwardWorkspaceSize(handle, input_desc, filter_desc, conv_desc, output_desc, FWD_ALGO, workspaceSize);
-        Pointer workSpace = new Pointer();
-        cudaMalloc(workSpace, workspaceSize[0]);
+        Pointer workspace = new Pointer();
+        cudaMalloc(workspace, workspaceSize[0]);
 
         Pointer alpha = Pointer.to(new double[]{1}), beta = Pointer.to(new double[]{0});
-        cudnnConvolutionForward(handle, alpha, input_desc, device_input, filter_desc, device_filter, conv_desc, FWD_ALGO, workSpace, workspaceSize[0], beta, output_desc, device_output);
+        cudnnConvolutionForward(handle, alpha, input_desc, device_input, filter_desc, device_filter, conv_desc, FWD_ALGO, workspace, workspaceSize[0], beta, output_desc, device_output);
         cudaMemcpy(Pointer.to(output), device_output, output.length * DATA_TYPE_SZIE, cudaMemcpyDeviceToHost);
 
         // clean up
@@ -89,27 +89,15 @@ public class Convolution {
         cudnnCreateTensorDescriptor(input_desc);
         cudnnSetTensor4dDescriptor(input_desc, CUDNN_TENSOR_NCHW, DATA_TYPE, input_shape[0], input_shape[1], input_shape[2], input_shape[3]);
 
-        cudnnTensorDescriptor input_grad_desc = new cudnnTensorDescriptor();
-        cudnnCreateTensorDescriptor(input_grad_desc);
-        cudnnSetTensor4dDescriptor(input_grad_desc, CUDNN_TENSOR_NCHW, DATA_TYPE, input_shape[0], input_shape[1], input_shape[2], input_shape[3]);
-
         // Define filter tensor
         cudnnFilterDescriptor filter_desc = new cudnnFilterDescriptor();
         cudnnCreateFilterDescriptor(filter_desc);
         cudnnSetFilter4dDescriptor(filter_desc, DATA_TYPE, CUDNN_TENSOR_NCHW, output_shape[1], input_shape[1], filter_shape[0], filter_shape[1]);
 
-        cudnnFilterDescriptor filter_grad_desc = new cudnnFilterDescriptor();
-        cudnnCreateFilterDescriptor(filter_grad_desc);
-        cudnnSetFilter4dDescriptor(filter_grad_desc, DATA_TYPE, CUDNN_TENSOR_NCHW, output_shape[1], input_shape[1], filter_shape[0], filter_shape[1]);
-
         // Define output tensor
         cudnnTensorDescriptor output_desc = new cudnnTensorDescriptor();
         cudnnCreateTensorDescriptor(output_desc);
         cudnnSetTensor4dDescriptor(output_desc, CUDNN_TENSOR_NCHW, DATA_TYPE, output_shape[0], output_shape[1], output_shape[2], output_shape[3]);
-
-        cudnnTensorDescriptor output_grad_desc = new cudnnTensorDescriptor();
-        cudnnCreateTensorDescriptor(output_grad_desc);
-        cudnnSetTensor4dDescriptor(output_grad_desc, CUDNN_TENSOR_NCHW, DATA_TYPE, output_shape[0], output_shape[1], output_shape[2], output_shape[3]);
 
         // Define convolution descriptor
         cudnnConvolutionDescriptor conv_desc = new cudnnConvolutionDescriptor();
@@ -130,22 +118,22 @@ public class Convolution {
 
         // Allocate workspace memory on GPU
         long[] filterWorkspaceSize = {0};
-        cudnnGetConvolutionBackwardFilterWorkspaceSize(handle, input_desc, output_grad_desc, conv_desc, filter_grad_desc, BWD_FILTER_ALGO, filterWorkspaceSize);
-        Pointer filterWorkSpace = new Pointer();
-        cudaMalloc(filterWorkSpace, filterWorkspaceSize[0]);
+        cudnnGetConvolutionBackwardFilterWorkspaceSize(handle, input_desc, output_desc, conv_desc, filter_desc, BWD_FILTER_ALGO, filterWorkspaceSize);
+        Pointer filterWorkspace = new Pointer();
+        cudaMalloc(filterWorkspace, filterWorkspaceSize[0]);
 
         // Perform BackwardFilter operation
-        cudnnConvolutionBackwardFilter(handle, alpha, input_desc, device_input, output_grad_desc, device_output_grad, conv_desc, BWD_FILTER_ALGO, filterWorkSpace, filterWorkspaceSize[0], beta, filter_grad_desc, device_filter_grad);
+        cudnnConvolutionBackwardFilter(handle, alpha, input_desc, device_input, output_desc, device_output_grad, conv_desc, BWD_FILTER_ALGO, filterWorkspace, filterWorkspaceSize[0], beta, filter_desc, device_filter_grad);
         cudaMemcpy(Pointer.to(filter_grad), device_filter_grad, filter_grad.length * DATA_TYPE_SZIE, cudaMemcpyDeviceToHost);
 
         // Allocate workspace memory on GPU
         long[] dataWorkspaceSize = {0};
-        cudnnGetConvolutionBackwardDataWorkspaceSize(handle, filter_desc, output_grad_desc, conv_desc, input_grad_desc, BWD_DATA_ALGO, dataWorkspaceSize);
+        cudnnGetConvolutionBackwardDataWorkspaceSize(handle, filter_desc, output_desc, conv_desc, input_desc, BWD_DATA_ALGO, dataWorkspaceSize);
         Pointer dataWorkSpace = new Pointer();
         cudaMalloc(dataWorkSpace, dataWorkspaceSize[0]);
 
         // Perform BackwardData operation
-        cudnnConvolutionBackwardData(handle, alpha, filter_desc, device_filter, output_grad_desc, device_output_grad, conv_desc, BWD_DATA_ALGO, dataWorkSpace, dataWorkspaceSize[0], beta, input_grad_desc, device_input_grad);
+        cudnnConvolutionBackwardData(handle, alpha, filter_desc, device_filter, output_desc, device_output_grad, conv_desc, BWD_DATA_ALGO, dataWorkSpace, dataWorkspaceSize[0], beta, input_desc, device_input_grad);
         cudaMemcpy(Pointer.to(input_grad), device_input_grad, input_grad.length * DATA_TYPE_SZIE, cudaMemcpyDeviceToHost);
 
         // clean up
@@ -158,17 +146,14 @@ public class Convolution {
         cudaFree(device_output);
         cudaFree(device_output_grad);
 
-        cudaFree(filterWorkSpace);
+        cudaFree(filterWorkspace);
         cudaFree(dataWorkSpace);
 
         cudnnDestroyTensorDescriptor(input_desc);
-        cudnnDestroyTensorDescriptor(input_grad_desc);
-
         cudnnDestroyTensorDescriptor(output_desc);
-        cudnnDestroyTensorDescriptor(output_grad_desc);
 
         cudnnDestroyFilterDescriptor(filter_desc);
-        cudnnDestroyFilterDescriptor(filter_grad_desc);
+        cudnnDestroyFilterDescriptor(filter_desc);
 
         cudnnDestroyConvolutionDescriptor(conv_desc);
     }

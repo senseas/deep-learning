@@ -70,18 +70,10 @@ public class Pooling {
         cudnnCreateTensorDescriptor(input_desc);
         cudnnSetTensor4dDescriptor(input_desc, CUDNN_TENSOR_NCHW, DATA_TYPE, input_shape[0], input_shape[1], input_shape[2], input_shape[3]);
 
-        cudnnTensorDescriptor input_grad_desc = new cudnnTensorDescriptor();
-        cudnnCreateTensorDescriptor(input_grad_desc);
-        cudnnSetTensor4dDescriptor(input_grad_desc, CUDNN_TENSOR_NCHW, DATA_TYPE, input_shape[0], input_shape[1], input_shape[2], input_shape[3]);
-
         // define output tensor
         cudnnTensorDescriptor output_desc = new cudnnTensorDescriptor();
         cudnnCreateTensorDescriptor(output_desc);
         cudnnSetTensor4dDescriptor(output_desc, CUDNN_TENSOR_NCHW, DATA_TYPE, output_shape[0], output_shape[1], output_shape[2], output_shape[3]);
-
-        cudnnTensorDescriptor output_grad_desc = new cudnnTensorDescriptor();
-        cudnnCreateTensorDescriptor(output_grad_desc);
-        cudnnSetTensor4dDescriptor(output_grad_desc, CUDNN_TENSOR_NCHW, DATA_TYPE, output_shape[0], output_shape[1], output_shape[2], output_shape[3]);
 
         // define pooling descriptor
         cudnnPoolingDescriptor pool_desc = new cudnnPoolingDescriptor();
@@ -98,7 +90,7 @@ public class Pooling {
         Pointer alpha = Pointer.to(new double[]{1}), beta = Pointer.to(new double[]{0});
 
         // perform BackwardData operation
-        cudnnPoolingBackward(handle, pool_desc, alpha, output_desc, device_output, output_grad_desc, device_output_grad, input_desc, device_input, beta, input_grad_desc, device_input_grad);
+        cudnnPoolingBackward(handle, pool_desc, alpha, output_desc, device_output, output_desc, device_output_grad, input_desc, device_input, beta, input_desc, device_input_grad);
         cudaMemcpy(Pointer.to(input_grad), device_input_grad, input_grad.length * DATA_TYPE_SZIE, cudaMemcpyDeviceToHost);
 
         // clean up
@@ -108,9 +100,7 @@ public class Pooling {
         cudaFree(device_output_grad);
 
         cudnnDestroyTensorDescriptor(input_desc);
-        cudnnDestroyTensorDescriptor(input_grad_desc);
         cudnnDestroyTensorDescriptor(output_desc);
-        cudnnDestroyTensorDescriptor(output_grad_desc);
         cudnnDestroyPoolingDescriptor(pool_desc);
     }
 }

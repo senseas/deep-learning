@@ -10,7 +10,11 @@ import java.util.Arrays;
 import java.util.stream.DoubleStream;
 import java.util.stream.IntStream;
 
-import static com.deep.framework.cuda.Matmul.*;
+import static com.deep.framework.cublas.Matmul.*;
+import static com.deep.framework.cudnn.BatchNormal.normalBackward;
+import static com.deep.framework.cudnn.BatchNormal.normalForward;
+import static com.deep.framework.cudnn.OpTensor.addTensorBackward;
+import static com.deep.framework.cudnn.OpTensor.addTensorForward;
 import static com.deep.framework.cudnn.Softmax.softmaxBackward;
 import static com.deep.framework.cudnn.Softmax.softmaxForward;
 import static com.deep.framework.lang.ForEach.forEach;
@@ -49,18 +53,12 @@ public class TensorFlow implements Serializable {
         return new TensorOperator("Addx", inx.getShape(), inx, iny) {
 
             public Tenser<Tensor> compute() {
-                Tenser<Tensor> B = getOutput();
-                Arrays.stream(getInput()).map(Tensor::getOutput).forEach(A -> {
-                    forEach(A, B, (Tensor a, Tensor b) -> b.data(b.data() + a.data()));
-                });
-                return B;
+                Arrays.stream(getInput()).forEach(A -> addTensorForward(A, this));
+                return output;
             }
 
             public void gradient() {
-                Tenser<Tensor> B = getOutput();
-                Arrays.stream(getInput()).map(Tensor::getOutput).forEach(A -> {
-                    forEach(A, B, (Tensor a, Tensor b) -> a.grad(b.grad()));
-                });
+                Arrays.stream(getInput()).forEach(A -> addTensorBackward(A, this));
             }
 
         };
@@ -1095,20 +1093,19 @@ public class TensorFlow implements Serializable {
         };
     }
 
-    public Tensor batchNorm(Tensor... input) {
-        return new TensorFunction("BatchNorm", input[0].getShape(), input) {
+    public Tensor batchNormal(Tensor... input) {
+        return new TensorOperator("BatchNormal", input[0].getShape(), input) {
 
             public Tenser<Tensor> compute() {
-                Tenser A = getInput(0), B = zeroTensors(A);
-                Tensor C = mul(cons(1d / A.shape(0)), sum(Tensor(A)));
-                Tensor[] D = {cons(0)};
-                forEach(A, a -> D[0] = add(D[0], pow(minus((Tensor) a, C), cons(2))));
-                Tensor E = pow(add(mul(cons(1d / A.shape(0)), D[0]), cons(Math.E)), cons(0.5));
-                forEach(A, B, (Tensor a, Tenser<Tensor> b, int i) -> b.set(add(mul(new Tensor(0.9), div(minus(a, C), E)), new Tensor(0.9)), i));
-                return B;
+                Tensor A = getInput()[0], B = getInput()[1], C = getInput()[2];
+                normalForward(A, B, C, this);
+                return output;
             }
 
-            public void gradient() { }
+            public void gradient() {
+                Tensor A = getInput()[0], B = getInput()[1], C = getInput()[2];
+                normalBackward(A, B, C, this);
+            }
 
         };
     }

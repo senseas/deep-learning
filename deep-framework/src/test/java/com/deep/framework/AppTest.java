@@ -3,7 +3,7 @@ package com.deep.framework;
 import com.alibaba.fastjson2.JSONObject;
 import com.deep.framework.core.TensorExecutor;
 import com.deep.framework.core.TensorFlow;
-import com.deep.framework.cuda.Matmul;
+import com.deep.framework.cublas.Matmul;
 import com.deep.framework.graph.Tensor;
 import org.junit.Test;
 
@@ -112,7 +112,7 @@ public class AppTest {
     @Test
     public void batchNormTest() {
         TensorFlow tf = new TensorFlow();
-        Tensor tensor = tf.batchNorm(new Tensor(new int[]{2, 2}));
+        Tensor tensor = tf.batchNormal(new Tensor(new int[]{2, 2}));
         TensorExecutor executor = new TensorExecutor(tensor);
         executor.run();
     }

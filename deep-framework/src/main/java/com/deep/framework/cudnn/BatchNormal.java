@@ -90,20 +90,10 @@ public class BatchNormal {
         cudnnCreateTensorDescriptor(input_desc);
         cudnnSetTensor4dDescriptor(input_desc, CUDNN_TENSOR_NCHW, DATA_TYPE, input_shape[0], input_shape[1], input_shape[2], input_shape[3]);
 
-        // Define input tensor
-        cudnnTensorDescriptor input_grad_desc = new cudnnTensorDescriptor();
-        cudnnCreateTensorDescriptor(input_grad_desc);
-        cudnnSetTensor4dDescriptor(input_grad_desc, CUDNN_TENSOR_NCHW, DATA_TYPE, input_shape[0], input_shape[1], input_shape[2], input_shape[3]);
-
         // Define output tensor
         cudnnTensorDescriptor output_desc = new cudnnTensorDescriptor();
         cudnnCreateTensorDescriptor(output_desc);
         cudnnSetTensor4dDescriptor(output_desc, CUDNN_TENSOR_NCHW, DATA_TYPE, output_shape[0], output_shape[1], output_shape[2], output_shape[3]);
-
-        // Define output tensor
-        cudnnTensorDescriptor output_grad_desc = new cudnnTensorDescriptor();
-        cudnnCreateTensorDescriptor(output_grad_desc);
-        cudnnSetTensor4dDescriptor(output_grad_desc, CUDNN_TENSOR_NCHW, DATA_TYPE, output_shape[0], output_shape[1], output_shape[2], output_shape[3]);
 
         // Define scale_bias_mean_var descriptor
         cudnnTensorDescriptor scale_bias_mean_var_desc = new cudnnTensorDescriptor();
@@ -145,9 +135,7 @@ public class BatchNormal {
         cudaFree(device_bias_grad);
 
         cudnnDestroyTensorDescriptor(input_desc);
-        cudnnDestroyTensorDescriptor(input_grad_desc);
         cudnnDestroyTensorDescriptor(output_desc);
-        cudnnDestroyTensorDescriptor(output_grad_desc);
         cudnnDestroyTensorDescriptor(scale_bias_mean_var_desc);
     }
 }

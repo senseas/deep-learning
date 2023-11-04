@@ -99,20 +99,10 @@ public class Activation {
         cudnnCreateTensorDescriptor(input_desc);
         cudnnSetTensor4dDescriptor(input_desc, CUDNN_TENSOR_NCHW, DATA_TYPE, batch_size, channels, height, width);
 
-        // 创建描述符句柄,指定输入描述符
-        cudnnTensorDescriptor input_grad_desc = new cudnnTensorDescriptor();
-        cudnnCreateTensorDescriptor(input_grad_desc);
-        cudnnSetTensor4dDescriptor(input_grad_desc, CUDNN_TENSOR_NCHW, DATA_TYPE, batch_size, channels, height, width);
-
         // 创建输出数据和描述符句柄
         cudnnTensorDescriptor output_desc = new cudnnTensorDescriptor();
         cudnnCreateTensorDescriptor(output_desc);
         cudnnSetTensor4dDescriptor(output_desc, CUDNN_TENSOR_NCHW, DATA_TYPE, batch_size, channels, height, width);
-
-        // 创建输出梯度数据和描述符句柄
-        cudnnTensorDescriptor output_grad_desc = new cudnnTensorDescriptor();
-        cudnnCreateTensorDescriptor(output_grad_desc);
-        cudnnSetTensor4dDescriptor(output_grad_desc, CUDNN_TENSOR_NCHW, DATA_TYPE, batch_size, channels, height, width);
 
         // 创建激活函数描述符句柄
         cudnnActivationDescriptor activation_desc = new cudnnActivationDescriptor();
@@ -127,7 +117,7 @@ public class Activation {
 
         // 执行激活函数
         Pointer alpha = Pointer.to(new double[]{1}), beta = Pointer.to(new double[]{0});
-        cudnnActivationBackward(handle, activation_desc, alpha, output_desc, device_output, output_grad_desc, device_output_grad, input_desc, device_input, beta, input_grad_desc, device_input_grad);
+        cudnnActivationBackward(handle, activation_desc, alpha, output_desc, device_output, output_desc, device_output_grad, input_desc, device_input, beta, input_desc, device_input_grad);
         cudaMemcpy(Pointer.to(input_grad), device_input_grad, input_grad.length * DATA_TYPE_SZIE, cudaMemcpyDeviceToHost);
         // 释放资源
         cudaFree(device_input);
@@ -136,9 +126,7 @@ public class Activation {
         cudaFree(device_output_grad);
 
         cudnnDestroyTensorDescriptor(input_desc);
-        cudnnDestroyTensorDescriptor(input_grad_desc);
         cudnnDestroyTensorDescriptor(output_desc);
-        cudnnDestroyTensorDescriptor(output_grad_desc);
         cudnnDestroyActivationDescriptor(activation_desc);
     }
 }

@@ -67,21 +67,15 @@ public class Softmax {
     public static void softmaxBackward(double[] input_grad, double[] output, double[] output_grad, int[] shape) {
         // 设置输入张量描述符
         int batch_size = shape[0], channels = shape[1], height = shape[2], width = shape[3];
+        // 声明输出张量描述符
+        cudnnTensorDescriptor input_grad_desc = new cudnnTensorDescriptor();
+        cudnnCreateTensorDescriptor(input_grad_desc);
+        cudnnSetTensor4dDescriptor(input_grad_desc, CUDNN_TENSOR_NCHW, DATA_TYPE, batch_size, channels, height, width);
 
         // 声明输出张量描述符
         cudnnTensorDescriptor output_desc = new cudnnTensorDescriptor();
         cudnnCreateTensorDescriptor(output_desc);
         cudnnSetTensor4dDescriptor(output_desc, CUDNN_TENSOR_NCHW, DATA_TYPE, batch_size, channels, height, width);
-
-        // 声明输出张量描述符
-        cudnnTensorDescriptor output_grad_desc = new cudnnTensorDescriptor();
-        cudnnCreateTensorDescriptor(output_grad_desc);
-        cudnnSetTensor4dDescriptor(output_grad_desc, CUDNN_TENSOR_NCHW, DATA_TYPE, batch_size, channels, height, width);
-
-        // 声明输出张量描述符
-        cudnnTensorDescriptor input_grad_desc = new cudnnTensorDescriptor();
-        cudnnCreateTensorDescriptor(input_grad_desc);
-        cudnnSetTensor4dDescriptor(input_grad_desc, CUDNN_TENSOR_NCHW, DATA_TYPE, batch_size, channels, height, width);
 
         // 分配设备内存
         Pointer device_output = createDevicePointer(output);
@@ -90,7 +84,7 @@ public class Softmax {
 
         // 执行SoftmaxBackward操作
         Pointer alpha = Pointer.to(new double[]{1}), beta = Pointer.to(new double[]{0});
-        cudnnSoftmaxBackward(handle, softmaxAlgo, softmaxMode, alpha, output_desc, device_output, output_grad_desc, device_output_grad, beta, input_grad_desc, device_input_grad);
+        cudnnSoftmaxBackward(handle, softmaxAlgo, softmaxMode, alpha, output_desc, device_output, output_desc, device_output_grad, beta, input_grad_desc, device_input_grad);
 
         // 将输出数据复制到主机内存
         cudaMemcpy(Pointer.to(input_grad), device_input_grad, input_grad.length * DATA_TYPE_SZIE, cudaMemcpyDeviceToHost);
@@ -101,7 +95,6 @@ public class Softmax {
         cudaFree(device_input_grad);
 
         cudnnDestroyTensorDescriptor(output_desc);
-        cudnnDestroyTensorDescriptor(output_grad_desc);
         cudnnDestroyTensorDescriptor(input_grad_desc);
     }
 

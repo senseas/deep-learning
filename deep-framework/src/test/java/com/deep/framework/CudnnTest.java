@@ -14,7 +14,7 @@ import static com.deep.framework.cudnn.BatchNormal.normalBackward;
 import static com.deep.framework.cudnn.BatchNormal.normalForward;
 import static com.deep.framework.cudnn.Convolution.convBackward;
 import static com.deep.framework.cudnn.Convolution.convForward;
-import static com.deep.framework.cudnn.CudnnOpTensor.opTensor;
+import static com.deep.framework.cudnn.OpTensor.opTensor;
 import static com.deep.framework.cudnn.Reduce.reduce;
 import static com.deep.framework.cudnn.Softmax.softmaxBackward;
 import static com.deep.framework.cudnn.Softmax.softmaxForward;
