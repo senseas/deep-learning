@@ -972,7 +972,6 @@ public class TensorFlow implements Serializable {
         };
     }
 
-
     public Tensor mean(Tensor... input) {
         return new ScalarOperator("Mean", input) {
 
