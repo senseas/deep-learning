@@ -27,12 +27,9 @@ public class BatchNormal {
 
     public static void normalForward(Tensor input, Tensor scale, Tensor bias, Tensor output) {
         int length = input.getData().length;
-        double a = DoubleStream.of(input.getData()).sum() / length;
-        double b = DoubleStream.of(input.getData()).map(c -> Math.pow(c - a, 2)).sum() / length;
         double[] mean = new double[length], var = new double[length];
-        Arrays.fill(mean, a);
-        Arrays.fill(var, b);
-        normalForward(mean, var, input.getData(), Shape.shapes(input.getShape()), scale.getData(), bias.getData(), output.getData(), Shape.shapes(output.getShape()));
+        double[] meanx = new double[length], varx = new double[length];
+        normalForward(mean, var, meanx, varx, input.getData(), Shape.shapes(input.getShape()), scale.getData(), bias.getData(), output.getData(), Shape.shapes(output.getShape()));
     }
 
     public static void normalBackward(Tensor input, Tensor scale, Tensor bias, Tensor output) {
@@ -45,7 +42,7 @@ public class BatchNormal {
         normalBackward(mean, var, input.getData(), input.getGrad(), Shape.shapes(input.getShape()), scale.getData(), scale.getGrad(), bias.getData(), bias.getGrad(), output.getData(), output.getGrad(), Shape.shapes(output.getShape()));
     }
 
-    public static void normalForward(double[] mean, double[] var, double[] input, int[] input_shape, double[] scale, double[] bias, double[] output, int[] output_shape) {
+    public static void normalForward(double[] mean, double[] var, double[] meanx, double[] varx, double[] input, int[] input_shape, double[] scale, double[] bias, double[] output, int[] output_shape) {
         // Define input tensor
         cudnnTensorDescriptor input_desc = new cudnnTensorDescriptor();
         cudnnCreateTensorDescriptor(input_desc);
@@ -68,10 +65,16 @@ public class BatchNormal {
         Pointer device_output = createDevicePointer(output);
         Pointer device_mean = createDevicePointer(mean);
         Pointer device_var = createDevicePointer(var);
+        Pointer device_meanx = createDevicePointer(meanx);
+        Pointer device_varx = createDevicePointer(varx);
 
         Pointer alpha = Pointer.to(new double[]{1}), beta = Pointer.to(new double[]{0});
-        cudnnBatchNormalizationForwardInference(handle, FWD_MODE, alpha, beta, input_desc, device_input, output_desc, device_output, scale_bias_mean_var_desc, device_scale, device_bias, device_mean, device_var, epsilon);
+        cudnnBatchNormalizationForwardTraining(handle, FWD_MODE, alpha, beta, input_desc, device_input, output_desc, device_output, scale_bias_mean_var_desc, device_scale, device_bias, 0.1, device_mean, device_var, epsilon, device_meanx, device_varx);
         cudaMemcpy(Pointer.to(output), device_output, output.length * DATA_TYPE_SZIE, cudaMemcpyDeviceToHost);
+        cudaMemcpy(Pointer.to(mean), device_mean, mean.length * DATA_TYPE_SZIE, cudaMemcpyDeviceToHost);
+        cudaMemcpy(Pointer.to(var), device_var, var.length * DATA_TYPE_SZIE, cudaMemcpyDeviceToHost);
+        cudaMemcpy(Pointer.to(meanx), device_meanx, meanx.length * DATA_TYPE_SZIE, cudaMemcpyDeviceToHost);
+        cudaMemcpy(Pointer.to(varx), device_varx, varx.length * DATA_TYPE_SZIE, cudaMemcpyDeviceToHost);
 
         // clean up
         cudaFree(device_input);
