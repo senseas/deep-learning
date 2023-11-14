@@ -13,8 +13,10 @@ public class TensorOperator extends Tensor {
     public void gradient(String grad) {}
 
     public void forward() {
+        if (status) return;
         for (Tensor o : getInput()) o.forward();
         data = "double ".concat(getVarId()).concat("=").concat(compute()).concat(";");
+        status = true;
     }
 
     public void backward() {
