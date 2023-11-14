@@ -6,11 +6,8 @@ import lombok.Data;
 import lombok.experimental.Accessors;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import static com.deep.framework.lang.ForEach.fill;
@@ -18,16 +15,10 @@ import static com.deep.framework.lang.Shape.size;
 
 @Data
 @Accessors(chain = true)
-public class Tensor implements Serializable {
+public class Tensor implements Serializable, Operator {
 
     public Tensor(String value) {
         this.name = "None";
-        this.data = value;
-        this.output = new Tenser<>(this);
-    }
-
-    public Tensor(String name, String value) {
-        this.name = name;
         this.data = value;
         this.output = new Tenser<>(this);
     }
@@ -52,29 +43,22 @@ public class Tensor implements Serializable {
         this.output = Tensors();
     }
 
-    public void forward() {}
+    public void forward() {grad = null;}
 
     public void backward() {}
 
-    public void reducer() {
-        if (reduces) return;
-        System.out.println("double ".concat(getGradId()).concat("=").concat(getGrad()));
-        reduces = true;
-    }
+    public void reducer() {}
 
-    public String getVarId() {return "a" + id;}
+    public String getVarId() {return this instanceof TensorConst ? data : "a" + id;}
 
     public String getGradId() {return "g" + id;}
 
-    public void setGrad(String grad) {
-        this.grads.add(grad);
-        this.grad = this.grad.equals("0d") ? grad : this.grad + "+" + grad;
+    public void setGrad(Tensor grad) {
+        if (Objects.nonNull(grad)) grad.setId(id);
+        this.grad = Objects.nonNull(this.grad) ? add(this.grad, grad) : grad;
     }
 
-    public void setGradx(String grad) {
-        this.grad = grad;
-        this.grads.clear();
-    }
+    public void setGradx(Tensor grad) {this.grad = grad;}
 
     public int shape(int i) {return shape[i];}
 
@@ -91,18 +75,9 @@ public class Tensor implements Serializable {
         return (E) fill(Shape.shape(Tensor.class, a), o -> new Tensor("0d"));
     }
 
-    public String getGrad() {
-        if (grads.isEmpty()) grads.add(grad);
-        Map<Object, List<String>> map = grads.stream().collect(Collectors.groupingBy(a -> a));
-        return map.values().stream().map(a -> {
-            if (a.size() == 1) return a.get(0);
-            String str = grad.startsWith("(") && grad.endsWith(")") ? a.get(0) : "*(" + a.get(0) + ")";
-            return a.size() + str;
-        }).collect(Collectors.joining("+")).concat(";");
-    }
-
     protected int[] shape;
-    protected String data = "", grad = "0d";
+    protected String data = "";
+    protected Tensor grad;
     protected boolean reduces;
     protected boolean status;
 
@@ -110,7 +85,6 @@ public class Tensor implements Serializable {
     private Tensor[] input;
     transient Tenser<Tensor> output;
     protected Tenser<Tensor> function;
-    transient List<String> grads = new ArrayList<>();
     private int id = ID.getAndIncrement();
     private static AtomicInteger ID = new AtomicInteger();
 }

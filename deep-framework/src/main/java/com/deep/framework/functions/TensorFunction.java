@@ -41,10 +41,8 @@ public class TensorFunction extends Tensor {
     }
 
     public void reducer() {
-        if (reduces) return;
         forEach(getFunction(), Tensor::reducer);
         for (Tensor o : getInput()) o.reducer();
-        reduces = true;
     }
 
     public Tenser<Tensor> getFunction() {
@@ -53,7 +51,7 @@ public class TensorFunction extends Tensor {
     }
 
     public void clearGrad() {
-        forEach(getOutput(), (Tensor out) -> out.setGradx("0d"));
+        forEach(getOutput(), (Tensor out) -> out.setGradx(null));
     }
 
     public Tenser<Tensor> getInput(int i) {
