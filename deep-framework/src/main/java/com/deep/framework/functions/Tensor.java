@@ -49,12 +49,14 @@ public class Tensor implements Serializable, Operator {
 
     public void reducer() {}
 
-    public String getVarId() {return this instanceof TensorConst ? data : "a" + id;}
+    public String getVarId() {
+        if (!reduces) return "a" + id;
+        return (this instanceof TensorOperator || this instanceof TensorConst) ? data : "a" + id;
+    }
 
     public String getGradId() {return "g" + id;}
 
     public void setGrad(Tensor grad) {
-        if (Objects.nonNull(grad)) grad.setId(id);
         this.grad = Objects.nonNull(this.grad) ? add(this.grad, grad) : grad;
     }
 
@@ -63,7 +65,7 @@ public class Tensor implements Serializable, Operator {
     public int shape(int i) {return shape[i];}
 
     public Tenser<Tensor> Tensors() {
-        return new Tenser<>(IntStream.range(0, size(shape)).mapToObj(i -> new Tensor(i + "")).toArray(Tensor[]::new), shape);
+        return new Tenser<>(IntStream.range(0, size(shape)).mapToObj(i -> new Tensor("")).toArray(Tensor[]::new), shape);
     }
 
     public static <E> E getOutput(Object a) {
@@ -78,7 +80,7 @@ public class Tensor implements Serializable, Operator {
     protected int[] shape;
     protected String data = "";
     protected Tensor grad;
-    protected boolean reduces;
+    public static boolean reduces;
     protected boolean status;
 
     private String name;

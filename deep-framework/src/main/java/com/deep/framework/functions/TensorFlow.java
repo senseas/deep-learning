@@ -72,7 +72,8 @@ public class TensorFlow implements Operator {
         forEach(layerNormal.getOutput(), (Tensor out) -> out.setGrad(tf.cons(1)));
         layerNormal.backward();
         Tensor grad = layerNormal.getInput()[0].getOutput().one().grad;
-        //grad.forward();
+        Tensor.reduces = true;
+        grad.forward();
         grad.reducer();
     }
 }
