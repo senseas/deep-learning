@@ -23,7 +23,7 @@ public interface Operator {
         return new TensorOperator("Add", input) {
 
             public String compute() {
-                return "("+ Arrays.stream(getInput()).map(a -> a.getOutput().one().getVarId()).collect(Collectors.joining("+"))+")";
+                return "(" + Arrays.stream(getInput()).map(a -> a.getOutput().one().getVarId()).collect(Collectors.joining("+")) + ")";
             }
 
             public void gradient(Tensor grad) {

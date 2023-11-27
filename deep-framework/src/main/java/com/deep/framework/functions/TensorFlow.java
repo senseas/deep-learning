@@ -61,6 +61,28 @@ public class TensorFlow implements Operator {
         };
     }
 
+    public Tensor sigmoidCross(Tensor... input) {
+        return new TensorFunction("SigmoidCross", new int[]{1}, input) {
+
+            public Tenser<Tensor> compute() {
+                Tensor a = getInput(0).one(), b = getInput(1).one();
+                return new Tenser<>(minus(add(mul(a, log(b)), mul(minus(cons(1), a), log(minus(cons(1), b))))));
+            }
+
+        };
+    }
+
+    public Tensor square(Tensor... input) {
+        return new TensorFunction("Square", new int[]{1}, input) {
+
+            public Tenser<Tensor> compute() {
+                Tensor a = getInput(0).one(), b = getInput(1).one();
+                return new Tenser<>(mul(cons(0.5), pow(minus(a, b), cons(2d))));
+            }
+
+        };
+    }
+
     public static void main(String[] args) {
         TensorFlow tf = new TensorFlow();
         Tensor data1 = new Tensor(new int[]{3, 1});
@@ -74,15 +96,6 @@ public class TensorFlow implements Operator {
         Tensor grad = layerNormal.getInput()[0].getOutput().one().grad;
         Tensor.reduces = true;
         grad.forward();
-        grad.reducer();
-        grad.reducer();
-        grad.reducer();
-        grad.reducer();
-        grad.reducer();
-        grad.reducer();
-        grad.reducer();
-        grad.reducer();
-        grad.reducer();
         grad.reducer();
         grad.reducer();
         grad.reducer();
