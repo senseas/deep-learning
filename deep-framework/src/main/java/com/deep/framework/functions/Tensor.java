@@ -33,7 +33,7 @@ public class Tensor implements Serializable, Operator {
     public Tensor(String name, Tensor... input) {
         this.name = name;
         this.input = input;
-        output = new Tenser<>(this);
+        this.output = new Tenser<>(this);
     }
 
     public Tensor(String name, int[] shape, Tensor... input) {
@@ -65,7 +65,7 @@ public class Tensor implements Serializable, Operator {
     public int shape(int i) {return shape[i];}
 
     public Tenser<Tensor> Tensors() {
-        return new Tenser<>(IntStream.range(0, size(shape)).mapToObj(i -> new Tensor("")).toArray(Tensor[]::new), shape);
+        return new Tenser<>(IntStream.range(0, size(shape)).mapToObj(i -> new Tensor("")).map(a->a.setData(a.getVarId())).toArray(Tensor[]::new), shape);
     }
 
     public static <E> E getOutput(Object a) {

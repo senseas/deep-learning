@@ -75,5 +75,19 @@ public class TensorFlow implements Operator {
         Tensor.reduces = true;
         grad.forward();
         grad.reducer();
+        grad.reducer();
+        grad.reducer();
+        grad.reducer();
+        grad.reducer();
+        grad.reducer();
+        grad.reducer();
+        grad.reducer();
+        grad.reducer();
+        grad.reducer();
+        grad.reducer();
+        grad.reducer();
+        grad.reducer();
+        grad.reducer();
+        grad.reducer();
     }
 }

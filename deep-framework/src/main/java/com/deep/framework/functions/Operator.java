@@ -23,7 +23,7 @@ public interface Operator {
         return new TensorOperator("Add", input) {
 
             public String compute() {
-                return Arrays.stream(getInput()).map(a -> a.getOutput().one().getVarId()).collect(Collectors.joining("+"));
+                return "("+ Arrays.stream(getInput()).map(a -> a.getOutput().one().getVarId()).collect(Collectors.joining("+"))+")";
             }
 
             public void gradient(Tensor grad) {
@@ -72,7 +72,12 @@ public interface Operator {
         return new TensorOperator("Mul", input) {
 
             public String compute() {
-                return Arrays.stream(getInput()).map(a ->"("+ a.getOutput().one().getVarId()+")").collect(Collectors.joining("*"));
+                return Arrays.stream(getInput()).map(a -> {
+                    Tensor one = a.getOutput().one();
+                    String varId = one.getVarId();
+                    if (one instanceof TensorConst) return varId;
+                    return varId.startsWith("(") && varId.endsWith(")") ? varId : "(" + varId + ")";
+                }).collect(Collectors.joining("*"));
             }
 
             public void gradient(Tensor grad) {
@@ -128,7 +133,7 @@ public interface Operator {
 
             public void gradient(Tensor grad) {
                 Tensor inx = getInput(0).one(), iny = getInput(1).one();
-                inx.setGrad(mul(grad, iny, pow(inx, minus(iny, cons(1)))));
+                inx.setGrad(mul(grad, iny, iny.getData().equals("2.0") ? inx : pow(inx, minus(iny, cons(1)))));
             }
 
         };
