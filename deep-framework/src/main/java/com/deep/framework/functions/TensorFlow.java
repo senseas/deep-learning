@@ -38,7 +38,6 @@ public class TensorFlow implements Operator {
         };
     }
 
-
     public Tensor mean(Tensor... input) {
         return new TensorFunction("Mean", new int[]{1}, input) {
 
