@@ -116,7 +116,7 @@ public interface Operator {
 
             public void gradient(Tensor grad) {
                 Tensor inx = getInput(0).one();
-                inx.setGrad(mul(grad, inx));
+                inx.setGrad(mul(grad, exp(inx)));
             }
 
         };

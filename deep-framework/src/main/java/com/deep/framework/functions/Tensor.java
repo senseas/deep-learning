@@ -89,4 +89,9 @@ public class Tensor implements Serializable, Operator {
     protected Tenser<Tensor> function;
     private int id = ID.getAndIncrement();
     private static AtomicInteger ID = new AtomicInteger();
+
+    @Override
+    public String toString() {
+        return "double a" + id + " = " + data + ";";
+    }
 }

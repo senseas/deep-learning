@@ -38,7 +38,6 @@ public class TensorFlow implements Operator {
         };
     }
 
-
     public Tensor mean(Tensor... input) {
         return new TensorFunction("Mean", new int[]{1}, input) {
 
@@ -83,24 +82,4 @@ public class TensorFlow implements Operator {
         };
     }
 
-    public static void main(String[] args) {
-        TensorFlow tf = new TensorFlow();
-        Tensor data1 = new Tensor(new int[]{3, 1});
-        Tensor data2 = new Tensor(new int[]{3, 1});
-        Tensor data3 = new Tensor(new int[]{3, 1});
-        Tensor layerNormal = tf.layerNormal(data1, data2, data3);
-
-        layerNormal.forward();
-        forEach(layerNormal.getOutput(), (Tensor out) -> out.setGrad(tf.cons(1)));
-        layerNormal.backward();
-        Tensor grad = layerNormal.getInput()[0].getOutput().one().grad;
-        Tensor.reduces = true;
-        grad.forward();
-        grad.reducer();
-        grad.reducer();
-        grad.reducer();
-        grad.reducer();
-        grad.reducer();
-        grad.reducer();
-    }
 }

@@ -67,47 +67,47 @@ public class Tensorx {
 
     /**
      * 遍历树结构
-     * @param root     节点树结构
-     * @param getInput 加载树的子节点列表函数 接收一个节点 返回节点的子结构
-     * @param consumer 遍历到的节点行为
-     * @param <M>      树节点对象
+     * @param root        节点树结构
+     * @param getChildren 加载树的子节点列表函数 接收一个节点 返回节点的子结构
+     * @param consumer    遍历到的节点行为
+     * @param <M>         树节点对象
      */
-    public static <M> void forEach(M[] root, Function<M, M[]> getInput, Function<M, Tenser<M>> getFunction, Consumer<M> consumer) {
+    public static <M> void forEach(M[] root, Function<M, M[]> getChildren, Function<M, Tenser<M>> getFunction, Consumer<M> consumer) {
         Stack<M> stack = new Stack<>();
         for (M a : root) stack.push(a);
         while (!stack.isEmpty()) {
             M o = stack.pop();
             consumer.accept(o);
-            M[] input = getInput.apply(o);
+            M[] input = getChildren.apply(o);
+            if (Objects.nonNull(input)) {
+                for (M a : input) stack.add(0, a);
+            }
+
             Tenser<M> function = getFunction.apply(o);
             if (Objects.nonNull(function)) {
-                function.forEach(stack::push);
-            }
-            if (Objects.nonNull(input)) {
-                for (M a : input) stack.push(a);
+                function.forEach(a -> stack.add(0, a));
             }
         }
     }
 
     /**
      * 遍历树结构
-     * @param root     节点树结构
-     * @param getInput 加载树的子节点列表函数 接收一个节点 返回节点的子结构
-     * @param consumer 遍历到的节点行为
-     * @param <M>      树节点对象
+     * @param root        节点树结构
+     * @param getChildren 加载树的子节点列表函数 接收一个节点 返回节点的子结构
+     * @param consumer    遍历到的节点行为
+     * @param <M>         树节点对象
      */
-    public static <M> void forEach(M[] root, Function<M, M[]> getInput, Func0<M> consumer) {
+    public static <M> void forEach(M[] root, Function<M, M[]> getChildren, Func0<M> consumer) {
         Stack<M> stack = new Stack<>();
         for (M a : root) stack.push(a);
         while (!stack.isEmpty()) {
             M o = stack.pop();
-            if(!consumer.apply(o)){
-                M[] input = getInput.apply(o);
+            if (!consumer.apply(o)) {
+                M[] input = getChildren.apply(o);
                 if (Objects.nonNull(input)) {
                     for (M a : input) stack.push(a);
                 }
             }
         }
     }
-
 }

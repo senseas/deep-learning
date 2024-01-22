@@ -1,11 +1,10 @@
 package com.deep.framework.functions;
 
 import com.deep.framework.lang.Tenser;
+import lombok.Data;
+import lombok.experimental.Accessors;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -68,46 +67,39 @@ public class TensorOperator extends Tensor {
                 if (List.of("Add", "Mul").contains(name) && tensors.size() == 1) {
                     list.addAll(tensors);
                 } else if ("Add".equals(tensor.getName()) && "Mul".equals(name) && child.size() > 1) {
-                    Map<String, List<Tensor>> mapx = child.stream().flatMap(a -> {
+                    child.stream().flatMap(a -> {
                         Map<String, List<Tensor>> collect = Stream.of(a.getInput()).collect(Collectors.groupingBy(Tensor::getData));
                         return collect.values().stream().map(b -> b.get(0));
-                    }).collect(Collectors.groupingBy(Tensor::getData));
+                    }).collect(Collectors.groupingBy(Tensor::getData)).values().stream().map((m) -> {
+                        List<Tensor> parent = child.stream().filter(a -> Stream.of(a.getInput()).anyMatch(m::contains)).toList();
 
-                    List<List<Tensor>> lists = mapx.values().stream().sorted((m, n) -> {
-                        List<Tensor> parentm = child.stream().filter(a -> Stream.of(a.getInput()).anyMatch(m::contains)).toList();
-                        List<Tensor> parentn = child.stream().filter(a -> Stream.of(a.getInput()).anyMatch(n::contains)).toList();
-
-                        Map<String, List<Tensor>> mapm = parentm.stream().flatMap(a -> {
-                            Map<String, List<Tensor>> collect = Stream.of(a.getInput()).collect(Collectors.groupingBy(Tensor::getData));
-                            return collect.values().stream().map(b -> b.get(0));
-                        }).collect(Collectors.groupingBy(Tensor::getData));
-                        List<Tensor> commonm = mapm.values().stream().filter(a -> a.size() >= parentm.size()).map(a -> a.get(0)).collect(Collectors.toList());
-
-                        Map<String, List<Tensor>> mapn = parentn.stream().flatMap(a -> {
+                        Map<String, List<Tensor>> mapm = parent.stream().flatMap(a -> {
                             Map<String, List<Tensor>> collect = Stream.of(a.getInput()).collect(Collectors.groupingBy(Tensor::getData));
                             return collect.values().stream().map(b -> b.get(0));
                         }).collect(Collectors.groupingBy(Tensor::getData));
 
-                        List<Tensor> commonn = mapn.values().stream().filter(a -> a.size() >= parentn.size()).map(a -> a.get(0)).collect(Collectors.toList());
+                        List<Tensor> common = mapm.values().stream().filter(a -> a.size() >= parent.size()).map(a -> a.get(0)).toList();
 
-                        return parentm.size() * commonm.size() - parentn.size() * commonn.size();
-                    }).toList();
-
-                    lists.forEach((childx) -> {
-                        List<Tensor> parent = child.stream().filter(a -> Stream.of(a.getInput()).anyMatch(childx::contains)).toList();
+                        return new Sorted().setSize(parent.size() * common.size()).setChild(m);
+                    }).sorted(Comparator.comparingInt(Sorted::getSize).reversed()).map(Sorted::getChild).forEach((m) -> {
+                        List<Tensor> parent = child.stream().filter(a -> Stream.of(a.getInput()).anyMatch(m::contains)).toList();
                         if (parent.size() <= 1 || parent.stream().anyMatch(a -> a.getInput().length <= 1)) return;
-                        Map<String, List<Tensor>> mapi = parent.stream().flatMap(a -> {
+
+                        Map<String, List<Tensor>> mapm = parent.stream().flatMap(a -> {
                             Map<String, List<Tensor>> collect = Stream.of(a.getInput()).collect(Collectors.groupingBy(Tensor::getData));
                             return collect.values().stream().map(b -> b.get(0));
                         }).collect(Collectors.groupingBy(Tensor::getData));
 
-                        List<Tensor> common = mapi.values().stream().filter(a -> a.size() >= parent.size()).map(a -> a.get(0)).collect(Collectors.toList());
+                        List<Tensor> common = mapm.values().stream().filter(a -> a.size() >= parent.size()).map(a -> a.get(0)).collect(Collectors.toList());
                         child.removeAll(parent);
+
                         if (!common.isEmpty()) {
                             Tensor[] addInput = parent.stream().map(a -> {
                                 Map<String, List<Tensor>> collect = Stream.of(a.getInput()).collect(Collectors.groupingBy(Tensor::getData));
                                 common.stream().map(b -> collect.get(b.getData())).filter(Objects::nonNull).forEach(b -> b.remove(0));
-                                return mul(collect.values().stream().flatMap(List::stream).toArray(Tensor[]::new));
+                                Tensor[] input = collect.values().stream().flatMap(List::stream).toArray(Tensor[]::new);
+                                if (input.length == 0) return cons(1);
+                                return mul(input);
                             }).toArray(Tensor[]::new);
 
                             common.add(add(addInput));
@@ -126,5 +118,12 @@ public class TensorOperator extends Tensor {
             tensor.setStatus(false);
             tensor.forward();
         }
+    }
+
+    @Data
+    @Accessors(chain = true)
+    public static class Sorted {
+        private Integer size;
+        private List<Tensor> child;
     }
 }
