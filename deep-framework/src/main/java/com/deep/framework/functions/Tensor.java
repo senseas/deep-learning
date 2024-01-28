@@ -6,6 +6,8 @@ import lombok.Data;
 import lombok.experimental.Accessors;
 
 import java.io.Serializable;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.IntStream;
@@ -16,6 +18,12 @@ import static com.deep.framework.lang.Shape.size;
 @Data
 @Accessors(chain = true)
 public class Tensor implements Serializable, Operator {
+
+    public Tensor() {
+        this.name = "None";
+        this.data = "a" + id;
+        this.output = new Tenser<>(this);
+    }
 
     public Tensor(String value) {
         this.name = "None";
@@ -50,8 +58,9 @@ public class Tensor implements Serializable, Operator {
     public void reducer() {}
 
     public String getVarId() {
-        if (!reduces) return "a" + id;
-        return (this instanceof TensorOperator || this instanceof TensorConst) ? data : "a" + id;
+        if (!forwarded) return data;
+        if (Objects.isNull(input)) return data;
+        return "a" + id;
     }
 
     public String getGradId() {return "g" + id;}
@@ -65,7 +74,7 @@ public class Tensor implements Serializable, Operator {
     public int shape(int i) {return shape[i];}
 
     public Tenser<Tensor> Tensors() {
-        return new Tenser<>(IntStream.range(0, size(shape)).mapToObj(i -> new Tensor("")).map(a -> a.setData(a.getVarId())).toArray(Tensor[]::new), shape);
+        return new Tenser<>(IntStream.range(0, size(shape)).mapToObj(i -> new Tensor()).toArray(Tensor[]::new), shape);
     }
 
     public static <E> E getOutput(Object a) {
@@ -78,10 +87,10 @@ public class Tensor implements Serializable, Operator {
     }
 
     protected int[] shape;
-    protected String data = "";
+    protected String data;
     protected Tensor grad;
-    public static boolean reduces;
     protected boolean status;
+    protected boolean forwarded;
 
     private String name;
     private Tensor[] input;
@@ -89,6 +98,7 @@ public class Tensor implements Serializable, Operator {
     protected Tenser<Tensor> function;
     private int id = ID.getAndIncrement();
     private static AtomicInteger ID = new AtomicInteger();
+    public static Map<String, Integer> map = new HashMap<>();
 
     @Override
     public String toString() {

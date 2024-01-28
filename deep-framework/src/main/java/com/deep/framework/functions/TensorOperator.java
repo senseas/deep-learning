@@ -23,13 +23,15 @@ public class TensorOperator extends Tensor {
         if (status) return;
         for (Tensor o : getInput()) o.forward();
         data = compute();
+        Integer idx = map.get(getData());
+        if (Objects.nonNull(idx)) setId(idx); else map.put(getData(), getId());
         status = true;
     }
 
     public void backward() {
         gradient(grad);
         clearGrad();
-        for (Tensor o : getInput()) o.backward();
+        for (Tensor o : getInput()) o.setForwarded(true).backward();
     }
 
     public void reducer() {

@@ -3,6 +3,7 @@ package com.deep.framework.functions;
 import com.deep.framework.lang.Tenser;
 
 import java.util.Arrays;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 public interface Operator {
@@ -75,8 +76,10 @@ public interface Operator {
                 return Arrays.stream(getInput()).map(a -> {
                     Tensor one = a.getOutput().one();
                     String varId = one.getVarId();
-                    if (one instanceof TensorConst) return varId;
-                    return varId.startsWith("(") && varId.endsWith(")") ? varId : "(" + varId + ")";
+                    if (a.forwarded) return varId;
+                    if (Objects.isNull(a.getInput())) return varId;
+                    if (varId.startsWith("(") && varId.endsWith(")")) return varId;
+                    return "(" + varId + ")";
                 }).collect(Collectors.joining("*"));
             }
 
@@ -93,7 +96,8 @@ public interface Operator {
             public String compute() {
                 Tensor inx = getInput(0).one(), iny = getInput(1).one();
                 String valx = inx.getVarId(), valy = iny.getVarId();
-                return valx + "/" + valy;
+                if (Objects.isNull(inx.getInput())) return valx + "/" + valy;
+                return "(" + valx + ")/" + valy;
             }
 
             public void gradient(Tensor grad) {

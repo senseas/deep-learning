@@ -4,6 +4,9 @@ import com.deep.framework.functions.Tensor;
 import com.deep.framework.functions.TensorFlow;
 import org.junit.Test;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import static com.deep.framework.lang.ForEach.forEach;
 
 public class FunctionsTest {
@@ -17,18 +20,21 @@ public class FunctionsTest {
         Tensor layerNormal = tf.layerNormal(data1, data2, data3);
 
         layerNormal.forward();
-        forEach(layerNormal.getOutput(), (Tensor out) -> out.setGrad(new Tensor(System.nanoTime() + "")));
+        forEach(layerNormal.getOutput(), (Tensor out) -> {
+            Tensor grad = new Tensor();
+            grad.setData(grad.getGradId());
+            out.setGrad(grad);
+        });
         layerNormal.backward();
-        Tensor.reduces = true;
 
         forEach(layerNormal.getInput()[0].getOutput(), (Tensor out) -> {
             Tensor grad = out.getGrad();
-            grad.reducer();
-            grad.reducer();
-            grad.reducer();
-            grad.reducer();
-            grad.reducer();
-            grad.reducer();
+            List<String> list = new ArrayList<>();
+            while (true) {
+                grad.reducer();
+                if(list.contains(grad.getData())) return;
+                list.add(grad.getData());
+            }
         });
     }
 
