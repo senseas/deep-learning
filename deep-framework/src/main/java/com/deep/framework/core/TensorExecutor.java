@@ -47,11 +47,9 @@ public class TensorExecutor<E> implements Serializable {
     }
 
     public void run() {
-        long ss = System.currentTimeMillis();
         tensor.forward();
         this.backward();
         tensor.reducer();
-        //System.out.println(System.currentTimeMillis() - ss);
     }
 
     public void forward(E input, E label) {

@@ -1,12 +1,13 @@
 package com.deep.framework.graph;
 
-import com.deep.framework.core.TensorFlux;
 import com.deep.framework.lang.Tenser;
 
 import java.util.Arrays;
 import java.util.Objects;
 import java.util.stream.Stream;
 
+import static com.deep.framework.core.TensorFlux.syncFunctionGrad;
+import static com.deep.framework.core.TensorFlux.syncOutputData;
 import static com.deep.framework.lang.Shape.*;
 
 public class TensorFunction extends Tensor {
@@ -29,17 +30,15 @@ public class TensorFunction extends Tensor {
         if (status) return;
         for (Tensor o : getInput()) o.forward();
         clearOutput();
-
         forEach(getFunction(), Tensor::forward);
-        Tenser<Tensor> nones = TensorFlux.getOutput(getFunction());
+
         create();
-        forEach(getOutput(), nones, (Tensor out, Tensor none) -> out.data(none.data()));
+        syncOutputData(this);
         status = true;
     }
 
     public void backward() {
-        Tenser<Tensor> nones = TensorFlux.getOutput(getFunction());
-        forEach(getOutput(), nones, (Tensor out, Tensor none) -> none.grad(out.grad()));
+        syncFunctionGrad(this);
 
         forEach(getFunction(), Tensor::backward);
         clearGrad();

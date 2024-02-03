@@ -11,10 +11,11 @@ import java.util.stream.DoubleStream;
 import java.util.stream.IntStream;
 
 import static com.deep.framework.cublas.Matmul.*;
+import static com.deep.framework.cudnn.Activation.eluBackward;
+import static com.deep.framework.cudnn.Activation.eluForward;
 import static com.deep.framework.cudnn.BatchNormal.normalBackward;
 import static com.deep.framework.cudnn.BatchNormal.normalForward;
-import static com.deep.framework.cudnn.OpTensor.addTensorBackward;
-import static com.deep.framework.cudnn.OpTensor.addTensorForward;
+import static com.deep.framework.cudnn.OpTensor.*;
 import static com.deep.framework.cudnn.Softmax.softmaxBackward;
 import static com.deep.framework.cudnn.Softmax.softmaxForward;
 import static com.deep.framework.lang.ForEach.forEach;
@@ -427,18 +428,12 @@ public class TensorFlow implements Serializable {
         return new TensorOperator("Relux", input.getShape(), input) {
 
             public Tenser<Tensor> compute() {
-                Tenser<Tensor> A = getInput(0), B = getOutput();
-                forEach(A, B, (Tensor a, Tensor b) -> {
-                    b.data(a.data() > 0 ? a.data() : 0.1 * a.data());
-                });
-                return B;
+                eluForward(getInput()[0], this);
+                return output;
             }
 
             public void gradient() {
-                Tenser<Tensor> A = getInput(0), B = getOutput();
-                forEach(A, B, (Tensor a, Tensor b) -> {
-                    a.grad(a.data() > 0 ? b.grad() : 0.1 * b.grad());
-                });
+                eluBackward(getInput()[0], this);
             }
 
         };
@@ -483,12 +478,12 @@ public class TensorFlow implements Serializable {
         return new TensorOperator("MatmulTran", Shape.shape(input[0].shape(0), input[1].shape(0)), input) {
 
             public Tenser<Tensor> compute() {
-                matmulTranbForward(getInput()[0], getInput()[1], this);
+                matmulTranbForward(getInput()[0], getInput()[1], this, getInput()[2]);
                 return output;
             }
 
             public void gradient() {
-                matmulTranbBackward(getInput()[0], getInput()[1], this);
+                matmulTranbBackward(getInput()[0], getInput()[1], this, getInput()[2]);
             }
 
         };
@@ -535,16 +530,16 @@ public class TensorFlow implements Serializable {
     }
 
     public Tensor prod(Tensor... input) {
-        return new TensorFunction("Prod", input[0].getShape(), input) {
+        return new TensorOperator("Prod", input[0].getShape(), input) {
 
             public Tenser<Tensor> compute() {
-                Tenser<Tensor> A = getInput(0), C = zeroTensors(A);
-                Tensor b = getInput(1).one();
-                forEach(A, C, (Tensor a) -> mul(a, b));
-                return C;
+                mulTensorScalarForward(getInput()[0], getInput()[1], this);
+                return output;
             }
 
-            public void gradient() { }
+            public void gradient() {
+                mulTensorScalarBackward(getInput()[0], getInput()[1], this);
+            }
 
         };
     }
@@ -886,8 +881,8 @@ public class TensorFlow implements Serializable {
                 Tensor C0 = matmul(A, Tensor(B.get(0)));
                 Tensor C1 = matmul(A, Tensor(B.get(1)));
                 Tensor C2 = matmul(A, Tensor(B.get(2)));
-                Tensor C3 = matmulTran(C0, C1);
-                Tensor C4 = softmax(mask(prod(C3, cons(scaler))));
+                Tensor C3 = matmulTran(C0, C1, cons(scaler));
+                Tensor C4 = softmax(mask(C3));
                 return new Tenser<>(matmul(C4, C2));
             }
 

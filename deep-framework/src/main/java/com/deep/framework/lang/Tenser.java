@@ -12,12 +12,12 @@ import java.util.stream.Stream;
 public class Tenser<T> implements Serializable {
 
     public final T[] data;
-    public final int[] shape;
-    private final int[] nexts;
-    private final int start;
+    public final int[] shape, nexts;
+    private final int start, size;
 
     public Tenser(T[] data, int[] shape) {
         this.shape = shape;
+        this.size = Shape.size(shape);
         this.data = data;
         this.start = 0;
         this.nexts = next();
@@ -25,6 +25,7 @@ public class Tenser<T> implements Serializable {
 
     private Tenser(T[] data, int[] shape, int start) {
         this.shape = shape;
+        this.size = Shape.size(shape);
         this.data = data;
         this.start = start;
         this.nexts = next();
@@ -32,6 +33,7 @@ public class Tenser<T> implements Serializable {
 
     public Tenser(T data) {
         this.shape = new int[]{1};
+        this.size = Shape.size(shape);
         this.data = (T[]) new Object[]{data};
         this.start = 0;
         this.nexts = next();
@@ -39,6 +41,7 @@ public class Tenser<T> implements Serializable {
 
     public Tenser(Class clas, int[] shape) {
         this.shape = shape;
+        this.size = Shape.size(shape);
         this.data = (T[]) Array.newInstance(clas, size());
         this.start = 0;
         this.nexts = next();
@@ -53,8 +56,8 @@ public class Tenser<T> implements Serializable {
         }
     }
 
-    public <E> E data(int index) {
-        return (E) this.data[start + index];
+    public T data(int index) {
+        return this.data[start + index];
     }
 
     public void set(T[] data, int... index) {
@@ -108,15 +111,19 @@ public class Tenser<T> implements Serializable {
     }
 
     public int size() {
-        return Shape.size(shape);
+        return size;
     }
 
     public void forEach(For<T> func) {
-        IntStream.range(0, size()).forEach(i -> func.apply(data[start + i], i));
+        for (int i = 0; i < size(); i++) {
+            func.apply(data[start + i], i);
+        }
     }
 
     public void forEach(Func1<T> func) {
-        IntStream.range(0, size()).forEach(i -> func.apply(data[start + i]));
+        for (int i = 0; i < size(); i++) {
+            func.apply(data[start + i]);
+        }
     }
 
     public Stream<T> stream() {

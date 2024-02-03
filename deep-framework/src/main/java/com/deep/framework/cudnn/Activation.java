@@ -6,6 +6,7 @@ import jcuda.Pointer;
 import jcuda.Sizeof;
 import jcuda.jcudnn.cudnnActivationDescriptor;
 import jcuda.jcudnn.cudnnTensorDescriptor;
+import jcuda.runtime.cudaStream_t;
 
 import static com.deep.framework.cuda.Cuda.createDevicePointer;
 import static com.deep.framework.cudnn.CudnnConfig.handle;
@@ -14,8 +15,7 @@ import static jcuda.jcudnn.cudnnActivationMode.*;
 import static jcuda.jcudnn.cudnnDataType.CUDNN_DATA_DOUBLE;
 import static jcuda.jcudnn.cudnnNanPropagation.CUDNN_NOT_PROPAGATE_NAN;
 import static jcuda.jcudnn.cudnnTensorFormat.CUDNN_TENSOR_NCHW;
-import static jcuda.runtime.JCuda.cudaFree;
-import static jcuda.runtime.JCuda.cudaMemcpy;
+import static jcuda.runtime.JCuda.*;
 import static jcuda.runtime.cudaMemcpyKind.cudaMemcpyDeviceToHost;
 
 public class Activation {
@@ -32,11 +32,19 @@ public class Activation {
     }
 
     public static void eluForward(Tensor input, Tensor output) {
+        cudaStream_t stream = new cudaStream_t();
+        cudaStreamCreate(stream);
+        cudnnSetStream(handle, stream);
         activationForward(input.getData(), output.getData(), Shape.shapes(input.getShape()), CUDNN_ACTIVATION_ELU);
+        cudaStreamDestroy(stream);
     }
 
     public static void eluBackward(Tensor input, Tensor output) {
+        cudaStream_t stream = new cudaStream_t();
+        cudaStreamCreate(stream);
+        cudnnSetStream(handle, stream);
         activationBackward(input.getData(), input.getGrad(), output.getData(), output.getGrad(), Shape.shapes(input.getShape()), CUDNN_ACTIVATION_ELU);
+        cudaStreamDestroy(stream);
     }
 
     public static void reluForward(Tensor input, Tensor output) {
@@ -72,7 +80,7 @@ public class Activation {
         // 创建激活函数描述符句柄
         cudnnActivationDescriptor activation_desc = new cudnnActivationDescriptor();
         cudnnCreateActivationDescriptor(activation_desc);
-        cudnnSetActivationDescriptor(activation_desc, activation, CUDNN_NOT_PROPAGATE_NAN, 0);
+        cudnnSetActivationDescriptor(activation_desc, activation, CUDNN_NOT_PROPAGATE_NAN, 1);
 
         Pointer device_input = createDevicePointer(input);
         Pointer device_output = createDevicePointer(output);
@@ -107,7 +115,7 @@ public class Activation {
         // 创建激活函数描述符句柄
         cudnnActivationDescriptor activation_desc = new cudnnActivationDescriptor();
         cudnnCreateActivationDescriptor(activation_desc);
-        cudnnSetActivationDescriptor(activation_desc, activation, CUDNN_NOT_PROPAGATE_NAN, 0);
+        cudnnSetActivationDescriptor(activation_desc, activation, CUDNN_NOT_PROPAGATE_NAN, 1);
 
         Pointer device_input = createDevicePointer(input);
         Pointer device_input_grad = createDevicePointer(input_grad);

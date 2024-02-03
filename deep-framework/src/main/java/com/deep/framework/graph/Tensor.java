@@ -1,13 +1,15 @@
 package com.deep.framework.graph;
 
-import com.deep.framework.core.TensorExecutor;
+import com.deep.framework.optimizer.AdamOptimizer;
 import com.deep.framework.lang.Tenser;
+import jcuda.Pointer;
 import lombok.Data;
 
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Objects;
 
+import static com.deep.framework.cuda.Cuda.*;
 import static com.deep.framework.lang.Shape.*;
 
 @Data
@@ -72,13 +74,11 @@ public class Tensor implements Serializable {
 
     public void reducer() {
         if (Objects.nonNull(reduce)) {
+            createOptimizer();
             forEach(getOutput(), (Tensor none) -> {
                 if (!none.reduce()) {
                     none.reduce(true);
-                    double valu = Math.abs(none.data()), grad = Math.abs(none.grad());
-                    double rate = Math.min(valu / (grad + EX), grad / (valu + EX)) * TensorExecutor.rate;
-                    double value = none.data() - rate * none.grad();
-                    none.data(value);
+                    optimizer.adam(none);
                 }
             });
         }
@@ -138,6 +138,33 @@ public class Tensor implements Serializable {
         }
     }
 
+    public void dataSynchronize() {
+        if (Objects.isNull(deviceData)) return;
+        copyDataDeviceToHost(data, deviceData);
+    }
+
+    public void gradSynchronize() {
+        if (Objects.isNull(deviceGrad)) return;
+        copyDataDeviceToHost(grad, deviceGrad);
+    }
+
+    public Pointer getDeviceData() {
+        if (Objects.isNull(deviceData)) return deviceData = createDevicePointer(data);
+        copyDataHostToDevice(data, deviceData);
+        return deviceData;
+    }
+
+    public Pointer getDeviceGrad() {
+        if (Objects.isNull(deviceGrad)) return deviceGrad = createDevicePointer(grad);
+        copyDataHostToDevice(grad, deviceGrad);
+        return deviceGrad;
+    }
+
+    public void createOptimizer() {
+        if (Objects.nonNull(optimizer)) return;
+        optimizer = new AdamOptimizer(shape);
+    }
+
     public int shape(int i) {
         return shape[i];
     }
@@ -147,10 +174,12 @@ public class Tensor implements Serializable {
 
     protected int[] shape;
     protected double[] data, grad;
+    private Pointer deviceData, deviceGrad;
     transient protected boolean[] reduce;
     transient protected boolean status;
 
     private String name = "";
     private Tensor[] input;
     transient protected Tenser<Tensor> output, function;
+    private AdamOptimizer optimizer;
 }

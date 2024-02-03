@@ -143,22 +143,22 @@ public class CudnnTest {
     public void batchNormalTest() {
         Tensor input = new Tensor(new double[]{
             -0.04976376334757029, -0.03794349033548409, -0.010064684799984737, 0.07645589251434087, 0.07582835718990744, 0.08298664791825114,
-        }, new int[]{1, 2, 3, 1});
+        }, new int[]{1, 1, 3, 2});
         Tensor scale = new Tensor(new double[]{
-            -0.11638942929027168, 0.00272052007755666, -0.06962990835464268, -0.08540677407104012, 0.009078374800942644, 0.14757164208870013,
-        }, new int[]{1, 2, 3, 1});
+            -0.11638942929027168,
+        }, new int[]{1, 1, 1, 1});
         Tensor bias = new Tensor(new double[]{
-            -0.003444951583010782, 0.016457531606025765, -0.060589160254410995, -0.0038500237038360235, 0.0362456731331325, -0.032999063080729654,
-        }, new int[]{1, 2, 3, 1});
-        Tensor output = new Tensor(new int[]{1, 2, 3, 1});
+            -0.003444951583010782,
+        }, new int[]{1, 1, 1, 1});
+        Tensor output = new Tensor(new int[]{1, 1, 3, 2});
 
         normalForward(input, scale, bias, output);
-        System.out.println(com.alibaba.fastjson2.JSONObject.toJSONString(output.getData()));
+        System.out.println(JSONObject.toJSONString(output.getData()));
         Arrays.fill(output.getGrad(), 1);
         normalBackward(input, scale, bias, output);
-        System.out.println(com.alibaba.fastjson2.JSONObject.toJSONString(input.getGrad()));
-        System.out.println(com.alibaba.fastjson2.JSONObject.toJSONString(scale.getGrad()));
-        System.out.println(com.alibaba.fastjson2.JSONObject.toJSONString(bias.getGrad()));
+        System.out.println(JSONObject.toJSONString(input.getGrad()));
+        System.out.println(JSONObject.toJSONString(scale.getGrad()));
+        System.out.println(JSONObject.toJSONString(bias.getGrad()));
     }
 
 }

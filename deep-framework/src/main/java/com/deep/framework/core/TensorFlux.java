@@ -36,4 +36,28 @@ public class TensorFlux implements Serializable {
         return (E) fill(c, shape(Tensor.class, c), b -> b);
     }
 
+    public static void syncOutputData(Tensor tensor) {
+        final int[] i = {0};
+        double[] data = tensor.getData();
+        tensor.getFunction().forEach(a -> {
+            if (a.getShape() != null) {
+                a.getOutput().forEach(b -> data[i[0]++] = b.data());
+            } else {
+                data[i[0]++] = a.data();
+            }
+        });
+    }
+
+    public static void syncFunctionGrad(Tensor tensor) {
+        final int[] i = {0};
+        double[] grad = tensor.getGrad();
+        tensor.getFunction().forEach(a -> {
+            if (a.getShape() != null) {
+                a.getOutput().forEach(b -> b.grad(grad[i[0]++]));
+            } else {
+                a.grad(grad[i[0]++]);
+            }
+        });
+    }
+
 }

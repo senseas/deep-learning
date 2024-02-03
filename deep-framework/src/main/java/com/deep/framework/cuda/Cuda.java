@@ -11,6 +11,7 @@ import java.util.stream.Stream;
 import static jcuda.driver.JCudaDriver.*;
 import static jcuda.nvrtc.JNvrtc.*;
 import static jcuda.runtime.JCuda.*;
+import static jcuda.runtime.cudaMemcpyKind.cudaMemcpyDeviceToHost;
 import static jcuda.runtime.cudaMemcpyKind.cudaMemcpyHostToDevice;
 
 public class Cuda {
@@ -137,7 +138,7 @@ public class Cuda {
      */
     public static CUdeviceptr createDeviceData(double[] value) {
         CUdeviceptr deviceData = new CUdeviceptr();
-        cuMemAlloc(deviceData, value.length == 0 ? 1 : value.length * Sizeof.DOUBLE);
+        cudaMalloc(deviceData, value.length == 0 ? 1 : value.length * Sizeof.DOUBLE);
         cuMemcpyHtoD(deviceData, Pointer.to(value), value.length * Sizeof.DOUBLE);
         return deviceData;
     }
@@ -155,6 +156,26 @@ public class Cuda {
         cudaMalloc(deviceData, size);
         cudaMemcpy(deviceData, Pointer.to(data), size, cudaMemcpyHostToDevice);
         return deviceData;
+    }
+
+    /**
+     * copy host data to device
+     * @param data The value of the elements
+     * @return void
+     */
+    public static void copyDataHostToDevice(double[] data, Pointer deviceData) {
+        int size = data.length * Sizeof.DOUBLE;
+        cudaMemcpy(deviceData, Pointer.to(data), size, cudaMemcpyHostToDevice);
+    }
+
+    /**
+     * copy device data to host
+     * @param data The value of the elements
+     * @return void
+     */
+    public static void copyDataDeviceToHost(double[] data, Pointer deviceData) {
+        int size = data.length * Sizeof.DOUBLE;
+        cudaMemcpy(Pointer.to(data), deviceData, size, cudaMemcpyDeviceToHost);
     }
 
     /**

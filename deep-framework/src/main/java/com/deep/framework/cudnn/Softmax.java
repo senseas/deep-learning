@@ -5,6 +5,7 @@ import com.deep.framework.lang.Shape;
 import jcuda.Pointer;
 import jcuda.Sizeof;
 import jcuda.jcudnn.cudnnTensorDescriptor;
+import jcuda.runtime.cudaStream_t;
 
 import static com.deep.framework.cuda.Cuda.createDevicePointer;
 import static com.deep.framework.cudnn.CudnnConfig.handle;
@@ -13,8 +14,7 @@ import static jcuda.jcudnn.cudnnDataType.CUDNN_DATA_DOUBLE;
 import static jcuda.jcudnn.cudnnSoftmaxAlgorithm.CUDNN_SOFTMAX_ACCURATE;
 import static jcuda.jcudnn.cudnnSoftmaxMode.CUDNN_SOFTMAX_MODE_INSTANCE;
 import static jcuda.jcudnn.cudnnTensorFormat.CUDNN_TENSOR_NCHW;
-import static jcuda.runtime.JCuda.cudaFree;
-import static jcuda.runtime.JCuda.cudaMemcpy;
+import static jcuda.runtime.JCuda.*;
 import static jcuda.runtime.cudaMemcpyKind.cudaMemcpyDeviceToHost;
 
 public class Softmax {
@@ -26,11 +26,19 @@ public class Softmax {
     private static final int softmaxMode = CUDNN_SOFTMAX_MODE_INSTANCE;
 
     public static void softmaxForward(Tensor input, Tensor output) {
+        cudaStream_t stream = new cudaStream_t();
+        cudaStreamCreate(stream);
+        cudnnSetStream(handle, stream);
         softmaxForward(input.getData(), output.getData(), Shape.shapes(output.getShape()));
+        cudaStreamDestroy(stream);
     }
 
     public static void softmaxBackward(Tensor input, Tensor output) {
+        cudaStream_t stream = new cudaStream_t();
+        cudaStreamCreate(stream);
+        cudnnSetStream(handle, stream);
         softmaxBackward(input.getGrad(), output.getData(), output.getGrad(), Shape.shapes(output.getShape()));
+        cudaStreamDestroy(stream);
     }
 
     public static void softmaxForward(double[] input, double[] output, int[] shape) {
