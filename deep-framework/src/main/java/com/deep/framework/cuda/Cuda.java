@@ -21,13 +21,13 @@ public class Cuda {
      * for the first device
      */
     static {
-        JCudaDriver.setExceptionsEnabled(true);
+        /*JCudaDriver.setExceptionsEnabled(true);
         JNvrtc.setExceptionsEnabled(true);
         cuInit(0);
         CUdevice device = new CUdevice();
         cuDeviceGet(device, 0);
         CUcontext context = new CUcontext();
-        cuCtxCreate(context, 0, device);
+        cuCtxCreate(context, 0, device);*/
     }
 
     public static void run(CUfunction function, Dim grid, Dim block, double[] in, double[] out) {

@@ -16,14 +16,14 @@ public class Matmul {
 
     //MK*KN
     public static void matmulForward(Tensor A, Tensor B, Tensor C) {
+        cudaStream_t stream = new cudaStream_t();
+        cudaStreamCreate(stream);
+        cublasSetStream(handle, stream);
+
         // Allocate Copy the memory from the host to the device
         Pointer DA = A.getDeviceData();
         Pointer DB = B.getDeviceData();
         Pointer DC = C.getDeviceData();
-
-        cudaStream_t stream = new cudaStream_t();
-        cudaStreamCreate(stream);
-        cublasSetStream(handle, stream);
 
         //alpha, beta
         Pointer alpha = Pointer.to(new double[]{1}), beta = Pointer.to(new double[]{0});

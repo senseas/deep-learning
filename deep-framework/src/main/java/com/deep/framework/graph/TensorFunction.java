@@ -4,7 +4,6 @@ import com.deep.framework.lang.Tenser;
 
 import java.util.Arrays;
 import java.util.Objects;
-import java.util.stream.Stream;
 
 import static com.deep.framework.core.TensorFlux.syncFunctionGrad;
 import static com.deep.framework.core.TensorFlux.syncOutputData;
@@ -38,19 +37,25 @@ public class TensorFunction extends Tensor {
     }
 
     public void backward() {
-        syncFunctionGrad(this);
+        if (statusx) return;
+        for (Tensor o : getInput()) o.setStatus(o.statusx).setStatusx(true);
 
+        syncFunctionGrad(this);
         forEach(getFunction(), Tensor::backward);
         clearGrad();
-        for (Tensor o : getInput()) o.backward();
+
+        for (Tensor o : getInput()) o.setStatusx(o.status).setStatus(false).backward();
     }
 
     public void reducer() {
+        if(statusx) return;
         forEach(getFunction(), Tensor::reducer);
         for (Tensor o : getInput()) o.reducer();
+        statusx = true;
     }
 
     public void clearOutput() {
+        statusx = false;
         if (Objects.isNull(data)) return;
         Arrays.fill(data, 0d);
         Arrays.fill(grad, 0d);
@@ -74,11 +79,6 @@ public class TensorFunction extends Tensor {
 
     public Tenser<Tensor> getInput(int i) {
         return getInput()[i].getOutput();
-    }
-
-    public void addInput(Tensor in) {
-        Tensor[] tensors = Stream.concat(Stream.of(getInput()), Stream.of(in)).toArray(Tensor[]::new);
-        setInput(tensors);
     }
 
     public Tenser<Tensor> getOutput() {

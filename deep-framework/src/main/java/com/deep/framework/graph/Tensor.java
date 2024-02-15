@@ -1,9 +1,10 @@
 package com.deep.framework.graph;
 
-import com.deep.framework.optimizer.AdamOptimizer;
 import com.deep.framework.lang.Tenser;
+import com.deep.framework.optimizer.AdamOptimizer;
 import jcuda.Pointer;
 import lombok.Data;
+import lombok.experimental.Accessors;
 
 import java.io.Serializable;
 import java.util.Arrays;
@@ -13,14 +14,14 @@ import static com.deep.framework.cuda.Cuda.*;
 import static com.deep.framework.lang.Shape.*;
 
 @Data
+@Accessors(chain = true)
 public class Tensor implements Serializable {
-    static final double EX = 0.0000000001;
 
     public Tensor(double value) {
         this.name = "None";
         this.data = new double[]{value};
         this.grad = new double[]{0d};
-        this.reduce = new boolean[]{false};
+        this.reduce = true;
     }
 
     public Tensor(int[] shape) {
@@ -28,7 +29,7 @@ public class Tensor implements Serializable {
         this.shape = shape;
         this.data = random(shape);
         this.grad = zeros(shape);
-        this.reduce = booleans(shape);
+        this.reduce = true;
     }
 
     public Tensor(double[] data, int[] shape) {
@@ -36,7 +37,7 @@ public class Tensor implements Serializable {
         this.shape = shape;
         this.data = data;
         this.grad = zeros(shape);
-        this.reduce = booleans(shape);
+        this.reduce = true;
     }
 
     public Tensor(String name, int[] shape) {
@@ -44,7 +45,7 @@ public class Tensor implements Serializable {
         this.shape = shape;
         this.data = random(shape);
         this.grad = zeros(shape);
-        this.reduce = booleans(shape);
+        this.reduce = true;
     }
 
     public Tensor(int[] shape, double value) {
@@ -52,7 +53,7 @@ public class Tensor implements Serializable {
         this.shape = shape;
         this.data = values(shape, value);
         this.grad = zeros(shape);
-        this.reduce = booleans(shape);
+        this.reduce = true;
     }
 
     public Tensor(Tensor tensor, int idx) {
@@ -67,20 +68,14 @@ public class Tensor implements Serializable {
 
     public void forward() {
         if (Objects.nonNull(grad)) Arrays.fill(grad, 0d);
-        if (Objects.nonNull(reduce)) Arrays.fill(reduce, false);
     }
 
     public void backward() { }
 
     public void reducer() {
-        if (Objects.nonNull(reduce)) {
+        if (reduce) {
             createOptimizer();
-            forEach(getOutput(), (Tensor none) -> {
-                if (!none.reduce()) {
-                    none.reduce(true);
-                    optimizer.adam(none);
-                }
-            });
+            forEach(getOutput(), (Tensor none) -> optimizer.adam(none));
         }
     }
 
@@ -122,22 +117,6 @@ public class Tensor implements Serializable {
         }
     }
 
-    public boolean reduce() {
-        if (Objects.isNull(tensor)) {
-            return this.reduce[idx];
-        } else {
-            return tensor.getReduce()[idx];
-        }
-    }
-
-    public void reduce(boolean reduce) {
-        if (Objects.isNull(tensor)) {
-            this.reduce[idx] = reduce;
-        } else {
-            tensor.getReduce()[idx] = reduce;
-        }
-    }
-
     public void dataSynchronize() {
         if (Objects.isNull(deviceData)) return;
         copyDataDeviceToHost(data, deviceData);
@@ -165,21 +144,18 @@ public class Tensor implements Serializable {
         optimizer = new AdamOptimizer(shape);
     }
 
-    public int shape(int i) {
-        return shape[i];
-    }
-
-    transient private int idx;
-    transient private Tensor tensor;
-
-    protected int[] shape;
-    protected double[] data, grad;
-    private Pointer deviceData, deviceGrad;
-    transient protected boolean[] reduce;
-    transient protected boolean status;
+    public int shape(int i) { return shape[i]; }
 
     private String name = "";
     private Tensor[] input;
+    protected int[] shape;
+    protected double[] data, grad;
+
+    transient private int idx;
+    transient private Tensor tensor;
+    transient private Pointer deviceData, deviceGrad;
+    transient private AdamOptimizer optimizer;
+
+    transient protected boolean status, statusx, reduce;
     transient protected Tenser<Tensor> output, function;
-    private AdamOptimizer optimizer;
 }

@@ -30,17 +30,22 @@ public class ScalarFunction extends Tensor {
     }
 
     public void backward() {
+        if (statusx) return;
+        for (Tensor o : getInput()) o.setStatus(o.statusx).setStatusx(true);
+
         Tensor tensor = getFunction().one();
         tensor.grad(grad[0]);
         tensor.backward();
-
         clearGrad();
-        for (Tensor o : getInput()) o.backward();
+
+        for (Tensor o : getInput()) o.setStatusx(o.status).setStatus(false).backward();
     }
 
     public void reducer() {
+        if(statusx) return;
         forEach(getFunction(), Tensor::reducer);
         for (Tensor o : getInput()) o.reducer();
+        statusx = true;
     }
 
     public Tenser<Tensor> getFunction() {
@@ -49,6 +54,7 @@ public class ScalarFunction extends Tensor {
     }
 
     public void clearOutput() {
+        statusx = false;
         data[0] = 0;
         grad[0] = 0;
     }

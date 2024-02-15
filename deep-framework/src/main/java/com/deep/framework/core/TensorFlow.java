@@ -548,7 +548,7 @@ public class TensorFlow implements Serializable {
         return new ScalarFunction("Sigmoid", input) {
 
             public Tensor compute() {
-                Tensor A = getInput(0).one();
+                Tensor A = getInput()[0];
                 return div(cons(1d), add(cons(1d), exp(minus(A))));
             }
 
@@ -575,7 +575,7 @@ public class TensorFlow implements Serializable {
         return new ScalarFunction("Square", input) {
 
             public Tensor compute() {
-                Tensor a = getInput(0).one(), b = getInput(1).one();
+                Tensor a = getInput()[0], b = getInput()[1];
                 return mul(cons(0.5), pow(minus(a, b), cons(2d)));
             }
 
@@ -605,7 +605,7 @@ public class TensorFlow implements Serializable {
         return new ScalarFunction("SoftmaxCross", input) {
 
             public Tensor compute() {
-                Tensor a = getInput(0).one(), b = getInput(1).one();
+                Tensor a = getInput()[0], b = getInput()[1];
                 return minus(mul(a, log(b)));
             }
 
@@ -635,7 +635,7 @@ public class TensorFlow implements Serializable {
         return new ScalarFunction("SigmoidCross", input) {
 
             public Tensor compute() {
-                Tensor a = getInput(0).one(), b = getInput(1).one();
+                Tensor a = getInput()[0], b = getInput()[1];
                 return minus(add(mul(a, log(b)), mul(minus(cons(1), a), log(minus(cons(1), b)))));
             }
 
@@ -872,43 +872,6 @@ public class TensorFlow implements Serializable {
         };
     }
 
-    public Tensor selfAttention(double scaler, Tensor... input) {
-        return new TensorFunction("SelfAttention", input[0].getShape(), input) {
-
-            public Tenser<Tensor> compute() {
-                Tensor A = Tensor(getInput(0));
-                Tenser<Tensor> B = getInput(1);
-                Tensor C0 = matmul(A, Tensor(B.get(0)));
-                Tensor C1 = matmul(A, Tensor(B.get(1)));
-                Tensor C2 = matmul(A, Tensor(B.get(2)));
-                Tensor C3 = matmulTran(C0, C1, cons(scaler));
-                Tensor C4 = softmax(mask(C3));
-                return new Tenser<>(matmul(C4, C2));
-            }
-
-            public void gradient() { }
-
-        };
-    }
-
-    public Tensor multiHeadAttention(double scaler, Tensor... input) {
-        return new TensorFunction("MultiHeadAttention", new int[]{input[0].shape(0), input[0].shape(1)}, input) {
-
-            public Tenser<Tensor> compute() {
-                Tensor A = Tensor(getInput(0)), C = Tensor(getInput(2)), M = Tensor(getInput(3)), N = Tensor(getInput(4));
-                Tenser<Tensor> B = getInput(1);
-                Tensor[] arr = new Tensor[B.shape(0)];
-                forEach(arr.length, i -> arr[i] = selfAttention(scaler, A, Tensor(B.get(i))));
-                Tensor addx = addx(A, matmul(concat(arr), C));
-                Tensor normal = layerNormal(addx, M, N);
-                return new Tenser<>(normal);
-            }
-
-            public void gradient() {}
-
-        };
-    }
-
     public Tensor layerNormal(Tensor... input) {
         return new TensorOperator("LayerNormal", input[0].getShape(), input) {
             int length;
@@ -955,8 +918,8 @@ public class TensorFlow implements Serializable {
         return new ScalarFunction("Standard", input) {
 
             public Tensor compute() {
-                Tenser<Tensor> inx = getInput(0), iny = getInput(1);
-                Tensor mean = iny.one(), cons = cons(2);
+                Tenser<Tensor> inx = getInput(0);
+                Tensor mean = getInput()[1], cons = cons(2);
                 Tenser<Tensor> pows = zeroTensors(inx.shape);
                 forEach(inx, pows, (Tensor a) -> pow(minus(a, mean), cons));
                 return mean(Tensor(pows));
@@ -1108,13 +1071,50 @@ public class TensorFlow implements Serializable {
         return new TensorFunction("Linear", new int[]{input[0].shape(0), input[1].shape(1),}, input) {
 
             public Tenser<Tensor> compute() {
-                Tensor tensor1 = matmul(Tensor(getInput(0)), Tensor(getInput(1)));
-                Tensor tensor2 = new Tensor("bias", tensor1.getShape());
-                Tensor tensor3 = addx(tensor1, tensor2);
-                Tensor tensor4 = relux(tensor3);
-                addInput(tensor2);
-                return new Tenser<>(tensor4);
+                Tensor tensor1 = matmul(getInput()[0], getInput()[1]);
+                Tensor tensor2 = addx(tensor1, new Tensor(tensor1.getShape()));
+                Tensor tensor3 = relux(tensor2);
+                return new Tenser<>(tensor3);
             }
+
+        };
+    }
+
+    public Tensor selfAttention(int dim, double scaler, Tensor... input) {
+        return new TensorFunction("SelfAttention", input[0].getShape(), input) {
+
+            public Tenser<Tensor> compute() {
+                Tensor A = getInput()[0];
+                Tensor C0 = matmul(A, new Tensor(new int[]{dim, dim}));
+                Tensor C1 = matmul(A, new Tensor(new int[]{dim, dim}));
+                Tensor C2 = matmul(A, new Tensor(new int[]{dim, dim}));
+                Tensor C3 = matmulTran(C0, C1, cons(scaler));
+                Tensor C4 = softmax(mask(C3));
+                return new Tenser<>(matmul(C4, C2));
+            }
+
+            public void gradient() {}
+
+        };
+    }
+
+    public Tensor multiHeadAttention(int batch_size, int dim, int header_num, double scaler, Tensor... input) {
+        return new TensorFunction("MultiHeadAttention", new int[]{input[0].shape(0), input[0].shape(1)}, input) {
+
+            public Tenser<Tensor> compute() {
+                Tensor A = getInput()[0];
+                Tensor C = new Tensor(new int[]{header_num * dim, dim});
+                Tensor M = new Tensor(new int[]{batch_size, dim});
+                Tensor N = new Tensor(new int[]{batch_size, dim});
+
+                Tensor[] arr = new Tensor[header_num];
+                forEach(header_num, i -> arr[i] = selfAttention(dim, scaler, A));
+                Tensor addx = addx(A, matmul(concat(arr), C));
+                Tensor normal = layerNormal(addx, M, N);
+                return new Tenser<>(normal);
+            }
+
+            public void gradient() {}
 
         };
     }

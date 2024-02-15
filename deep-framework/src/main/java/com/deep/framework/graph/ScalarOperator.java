@@ -28,16 +28,20 @@ public class ScalarOperator extends Tensor {
     }
 
     public void backward() {
+        if(statusx) return;
         gradient(grad[0]);
         clearGrad();
         for (Tensor o : getInput()) o.backward();
     }
 
     public void reducer() {
+        if(statusx) return;
         for (Tensor o : getInput()) o.reducer();
+        statusx = true;
     }
 
     public void clearOutput() {
+        statusx = false;
         data[0] = 0;
         grad[0] = 0;
     }
