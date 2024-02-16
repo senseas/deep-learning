@@ -7,8 +7,6 @@ import org.junit.Test;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.deep.framework.lang.ForEach.forEach;
-
 public class FunctionsTest {
 
     @Test
@@ -20,19 +18,19 @@ public class FunctionsTest {
         Tensor layerNormal = tf.layerNormal(data1, data2, data3);
 
         layerNormal.forward();
-        forEach(layerNormal.getOutput(), (Tensor out) -> {
+        layerNormal.getOutput().forEach((Tensor out) -> {
             Tensor grad = new Tensor();
             grad.setData(grad.getGradId());
             out.setGrad(grad);
         });
         layerNormal.backward();
 
-        forEach(layerNormal.getInput()[0].getOutput(), (Tensor out) -> {
+        layerNormal.getInput()[0].getOutput().forEach((out) -> {
             Tensor grad = out.getGrad();
             List<String> list = new ArrayList<>();
             while (true) {
                 grad.reducer();
-                if(list.contains(grad.getData())) return;
+                if (list.contains(grad.getData())) return;
                 list.add(grad.getData());
             }
         });

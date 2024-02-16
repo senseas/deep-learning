@@ -4,8 +4,6 @@ import com.deep.framework.lang.Tenser;
 
 import java.util.Objects;
 
-import static com.deep.framework.lang.ForEach.forEach;
-
 public class ScalarFunction extends Tensor {
 
     public ScalarFunction(String name, Tensor... input) {
@@ -43,7 +41,7 @@ public class ScalarFunction extends Tensor {
 
     public void reducer() {
         if(statusx) return;
-        forEach(getFunction(), Tensor::reducer);
+        getFunction().forEach(Tensor::reducer);
         for (Tensor o : getInput()) o.reducer();
         statusx = true;
     }

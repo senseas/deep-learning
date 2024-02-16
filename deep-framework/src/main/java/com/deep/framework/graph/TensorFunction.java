@@ -7,7 +7,8 @@ import java.util.Objects;
 
 import static com.deep.framework.core.TensorFlux.syncFunctionGrad;
 import static com.deep.framework.core.TensorFlux.syncOutputData;
-import static com.deep.framework.lang.Shape.*;
+import static com.deep.framework.lang.Shape.Tensors;
+import static com.deep.framework.lang.Shape.zeros;
 
 public class TensorFunction extends Tensor {
 
@@ -29,7 +30,7 @@ public class TensorFunction extends Tensor {
         if (status) return;
         for (Tensor o : getInput()) o.forward();
         clearOutput();
-        forEach(getFunction(), Tensor::forward);
+        getFunction().forEach(Tensor::forward);
 
         create();
         syncOutputData(this);
@@ -41,7 +42,7 @@ public class TensorFunction extends Tensor {
         for (Tensor o : getInput()) o.setStatus(o.statusx).setStatusx(true);
 
         syncFunctionGrad(this);
-        forEach(getFunction(), Tensor::backward);
+        getFunction().forEach(Tensor::backward);
         clearGrad();
 
         for (Tensor o : getInput()) o.setStatusx(o.status).setStatus(false).backward();
@@ -49,7 +50,7 @@ public class TensorFunction extends Tensor {
 
     public void reducer() {
         if(statusx) return;
-        forEach(getFunction(), Tensor::reducer);
+        getFunction().forEach(Tensor::reducer);
         for (Tensor o : getInput()) o.reducer();
         statusx = true;
     }

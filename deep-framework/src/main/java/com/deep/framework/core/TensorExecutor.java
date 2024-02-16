@@ -59,7 +59,7 @@ public class TensorExecutor<E> implements Serializable {
     }
 
     public void backward() {
-        forEach(tensor.getOutput(), (Tensor none) -> none.grad(1d));
+        tensor.getOutput().forEach(none -> none.grad(1d));
         tensor.backward();
     }
 
