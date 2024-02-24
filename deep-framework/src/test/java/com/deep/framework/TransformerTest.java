@@ -18,8 +18,7 @@ public class TransformerTest {
     int batch_size = 500, header_num = 8, dim = 512;
     int num = getWordDicSize();
     double scaler = 1 / Math.pow(512, 0.5);
-    String data = "10月13日，@京东发言人发文称，我们关注到有谣言称“刘姓商人涉嫌违法被抓”，该谣言被别有用心的人刻意发布在京东相关新闻动态下，以混淆视听、操纵舆论。我们对此恶劣行径表示强烈愤慨，并已向公安机关报案。";
-    List<String> list = getWordIndexList2(data);
+    List<List<String>> list = getMedicalTokenList();
 
     /**
      * gpt decoder
@@ -58,26 +57,29 @@ public class TransformerTest {
         Tensor crossx = tf.softmaxCrossx(label, softmax);
 
         TensorExecutor executor = new TensorExecutor(crossx, input, inputx, label);
-        IntStream.range(2, 102).forEach(i -> {
-            List<String> data = list.stream().limit(i).collect(Collectors.toList());
-            double[] inxSet = pad(data);
-            double[] inySet = getWordIndex(data);
-            double[] labSet = oneHot(list.get(i));
+        list.forEach(words -> {
+            IntStream.range(1, words.size()).forEach(i -> {
+                List<String> data = getInput(words, i);
+                double[] inxSet = getFlatTokenOneHotList(data);
+                double[] inySet = getTokenIndex(data);
+                double[] labSet = oneHot(words.get(i));
 
-            long start = System.currentTimeMillis();
-            executor.run(inxSet, inySet, labSet);
-            System.out.println(System.currentTimeMillis() - start);
+                long start = System.currentTimeMillis();
+                executor.run(inxSet, inySet, labSet);
+                System.out.println(System.currentTimeMillis() - start);
 
-            log.info("---------{}------------", i);
-            log("输入：", String.join("", data));
-            log("输出：", list.get(i));
-            log("损失：", crossx.data());
+                log.info("---------{}------------", i);
+                log("输入：", String.join("", data));
+                log("输出：", list.get(i));
+                log("损失：", crossx.data());
+            });
         });
     }
 
-    public double[] pad(List<String> data) {
+    public List<String> getInput(List<String> words, int index) {
+        List<String> data = words.stream().limit(index).collect(Collectors.toList());
         IntStream.range(data.size(), batch_size).forEach(i -> data.add("<pad>"));
-        return getOneHotData(data);
+        return data;
     }
 
     public void log(String name, Object obj) {
