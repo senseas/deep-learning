@@ -25,19 +25,19 @@ public class Softmax {
     private static final int softmaxAlgo = CUDNN_SOFTMAX_ACCURATE;
     private static final int softmaxMode = CUDNN_SOFTMAX_MODE_INSTANCE;
 
-    public static void softmaxForward(Tensor input, Tensor output) {
+    public static void softmaxForward(Tensor input, Tensor output, int... shape) {
         cudaStream_t stream = new cudaStream_t();
         cudaStreamCreate(stream);
         cudnnSetStream(handle, stream);
-        softmaxForward(input.getData(), output.getData(), Shape.shapes(output.getShape()));
+        softmaxForward(input.getData(), output.getData(), Shape.shapes(shape));
         cudaStreamDestroy(stream);
     }
 
-    public static void softmaxBackward(Tensor input, Tensor output) {
+    public static void softmaxBackward(Tensor input, Tensor output, int... shape) {
         cudaStream_t stream = new cudaStream_t();
         cudaStreamCreate(stream);
         cudnnSetStream(handle, stream);
-        softmaxBackward(input.getGrad(), output.getData(), output.getGrad(), Shape.shapes(output.getShape()));
+        softmaxBackward(input.getGrad(), output.getData(), output.getGrad(), Shape.shapes(shape));
         cudaStreamDestroy(stream);
     }
 

@@ -857,16 +857,17 @@ public class TensorFlow implements Serializable {
         };
     }
 
-    public Tensor softmax(Tensor input) {
+    public Tensor softmax(Tensor input, int... shape) {
+        if (shape.length == 0) shape = input.getShape();
         return new TensorOperator("Softmax", input.getShape(), input) {
 
             public Tenser<Tensor> compute() {
-                softmaxForward(getInput()[0], this);
+                softmaxForward(getInput()[0], this, shape);
                 return output;
             }
 
             public void gradient() {
-                softmaxBackward(getInput()[0], this);
+                softmaxBackward(getInput()[0], this, shape);
             }
 
         };
@@ -1089,11 +1090,9 @@ public class TensorFlow implements Serializable {
                 Tensor C1 = matmul(A, new Tensor(new int[]{dim, dim}));
                 Tensor C2 = matmul(A, new Tensor(new int[]{dim, dim}));
                 Tensor C3 = matmulTran(C0, C1, cons(scaler));
-                Tensor C4 = softmax(mask(C3));
+                Tensor C4 = softmax(mask(C3), A.shape(0), A.shape(0), 1, 1);
                 return new Tenser<>(matmul(C4, C2));
             }
-
-            public void gradient() {}
 
         };
     }
@@ -1113,8 +1112,6 @@ public class TensorFlow implements Serializable {
                 Tensor normal = layerNormal(addx, M, N);
                 return new Tenser<>(normal);
             }
-
-            public void gradient() {}
 
         };
     }
