@@ -46,11 +46,18 @@ public class Sequence {
         return str.chars().mapToDouble(a -> wordTable.indexOf(String.valueOf((char) a).trim())).toArray();
     }
 
-    public static List<String> getTokenList(String str) {
-        List<String> strings = str.chars().mapToObj(a -> String.valueOf((char) a).trim()).collect(Collectors.toList());
-        strings.add(0, "<begin>");
-        strings.add("<end>");
-        return strings;
+    public static List<String> getTokenList(String... str) {
+        List<String> list = new ArrayList<>();
+        list.add("<begin>");
+        Stream.of(str).forEach(s -> {
+            if ("<mark>".equals(s)) {
+                list.add(s);
+            } else {
+                Stream.of(s.split("")).forEach(a -> list.add(a.toLowerCase()));
+            }
+        });
+        list.add("<end>");
+        return list;
     }
 
     public static double[] oneHot(int idx) {
@@ -102,12 +109,11 @@ public class Sequence {
     public static List<List<String>> getMedicalTokenList() {
         FileInputStream fileInputStream = null;
         try {
-            fileInputStream = new FileInputStream("/Users/chengdong/GitHub/deep-learning/deep-framework/src/main/resources/train_list.txt");
+            fileInputStream = new FileInputStream("D:\\github\\deep-learning\\deep-framework\\src\\main\\resources\\train_list.txt");
             String[] tycText = new String(fileInputStream.readAllBytes()).split("\\n");
             List<List<String>> words = Stream.of(tycText).map(s -> {
                 String[] split = s.split("\\t");
-                String str = split[1].concat(split[1].endsWith("?") ? "" : "?").concat(split[2]);
-                return getTokenList(str);
+                return getTokenList(split[1], "<mark>", split[2]);
             }).collect(Collectors.toList());
             return words;
         } catch (Exception e) {

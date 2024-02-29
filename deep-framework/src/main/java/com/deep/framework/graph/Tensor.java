@@ -151,11 +151,12 @@ public class Tensor implements Serializable {
     protected int[] shape;
     protected double[] data, grad;
 
-    transient private int idx;
-    transient private Tensor tensor;
+    private int idx;
+    private Tensor tensor;
+    protected Tenser<Tensor> output, function;
+
     transient private Pointer deviceData, deviceGrad;
     transient private AdamOptimizer optimizer;
 
-    transient protected boolean status, statusx, reduce;
-    transient protected Tenser<Tensor> output, function;
+    transient protected boolean status, states, reduce;
 }

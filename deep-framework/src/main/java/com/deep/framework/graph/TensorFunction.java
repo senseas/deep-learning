@@ -38,25 +38,25 @@ public class TensorFunction extends Tensor {
     }
 
     public void backward() {
-        if (statusx) return;
-        for (Tensor o : getInput()) o.setStatus(o.statusx).setStatusx(true);
+        if (states) return;
+        for (Tensor o : getInput()) o.setStatus(o.states).setStates(true);
 
         syncFunctionGrad(this);
         getFunction().forEach(Tensor::backward);
         clearGrad();
 
-        for (Tensor o : getInput()) o.setStatusx(o.status).setStatus(false).backward();
+        for (Tensor o : getInput()) o.setStates(o.status).setStatus(false).backward();
     }
 
     public void reducer() {
-        if(statusx) return;
+        if(states) return;
         getFunction().forEach(Tensor::reducer);
         for (Tensor o : getInput()) o.reducer();
-        statusx = true;
+        states = true;
     }
 
     public void clearOutput() {
-        statusx = false;
+        states = false;
         if (Objects.isNull(data)) return;
         Arrays.fill(data, 0d);
         Arrays.fill(grad, 0d);

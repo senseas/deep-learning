@@ -31,20 +31,20 @@ public class TensorOperator extends Tensor {
     }
 
     public void backward() {
-        if(statusx) return;
+        if(states) return;
         gradient();
         clearGrad();
         for (Tensor o : getInput()) o.backward();
     }
 
     public void reducer() {
-        if(statusx) return;
+        if(states) return;
         for (Tensor o : getInput()) o.reducer();
-        statusx = true;
+        states = true;
     }
 
     public void clearOutput() {
-        statusx = false;
+        states = false;
         if (Objects.isNull(data)) return;
         Arrays.fill(data, 0d);
         Arrays.fill(grad, 0d);

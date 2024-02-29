@@ -1116,4 +1116,18 @@ public class TensorFlow implements Serializable {
         };
     }
 
+    public Tensor transformer(int batch_size, int dim, int header_num, double scaler, Tensor... input) {
+        return new TensorFunction("Transformer", new int[]{input[0].shape(0), input[0].shape(1)}, input) {
+
+            public Tenser<Tensor> compute() {
+                Tensor tensor11 = multiHeadAttention(batch_size, dim, header_num, scaler, getInput()[0]);
+                Tensor tensor12 = linear(tensor11, new Tensor(new int[]{dim, dim}));
+                Tensor tensor13 = addx(tensor11, tensor12);
+                Tensor tensor14 = layerNormal(tensor13, new Tensor(tensor13.getShape()), new Tensor(tensor13.getShape()));
+                return new Tenser<>(tensor14);
+            }
+
+        };
+    }
+
 }

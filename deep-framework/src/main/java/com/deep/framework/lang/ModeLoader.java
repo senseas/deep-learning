@@ -15,7 +15,7 @@ public class ModeLoader {
 
     public static <E> E load(String name) {
         String src = DataLoader.MODEL_PATH.concat(name);
-        try (ObjectInputStream in = new ObjectInputStream(new FileInputStream(new File(src)))) {
+        try (ObjectInputStream in = new ObjectInputStream(new FileInputStream(src))) {
             Object o = in.readObject();
             return (E) o;
         } catch (Exception e) {
