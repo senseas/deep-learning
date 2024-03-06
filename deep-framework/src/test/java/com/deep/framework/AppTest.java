@@ -160,44 +160,6 @@ public class AppTest {
         tensor.forward();
     }
 
-    @Test
-    public void matmulTranTest() {
-        TensorFlow tf = new TensorFlow();
-        Tensor data1 = new Tensor(new int[]{3, 2});
-        Tensor data2 = new Tensor(new int[]{4, 2});
-        Tensor matTran = tf.matTran(data2);
-        Tensor matmul = tf.matmul(data1, matTran);
-        matmul.forward();
-        Arrays.fill(matmul.getGrad(), 1);
-        matmul.backward();
-
-        System.out.println("getData" + JSONObject.toJSONString(matmul.getData()));
-        System.out.println("data1" + JSONObject.toJSONString(data1.getGrad()));
-        System.out.println("data2" + JSONObject.toJSONString(data2.getGrad()));
-        System.out.println(" ");
-
-        Arrays.fill(data1.getGrad(), 0);
-        Arrays.fill(data2.getGrad(), 0);
-        Tensor matmulTran = tf.matmulTran(data1, data2);
-        matmulTran.forward();
-        Arrays.fill(matmulTran.getGrad(), 1);
-        matmulTran.backward();
-
-        System.out.println("getData" + JSONObject.toJSONString(matmulTran.getData()));
-        System.out.println("data1" + JSONObject.toJSONString(data1.getGrad()));
-        System.out.println("data2" + JSONObject.toJSONString(data2.getGrad()));
-        System.out.println(" ");
-
-        Tensor data3 = new Tensor(new int[]{3, 4});
-        Matmul.matmulTranbForward(data1, data2, data3);
-        Arrays.fill(data3.getGrad(), 1);
-        Matmul.matmulTranbBackward(data1, data2, data3);
-
-        System.out.println("data3" + JSONObject.toJSONString(data3.getData()));
-        System.out.println("data1" + JSONObject.toJSONString(data1.getGrad()));
-        System.out.println("data2" + JSONObject.toJSONString(data2.getGrad()));
-    }
-
     /**
      * output     [0.1455162977531491,0.01354193737864609,-0.020149704441370354,-0.08437101790796131,0.044704389950437844,0.12310168212752819]
      * input grad [-0.7045232088118772,1.2276654309349004,-0.4361541749459134,-1.9236250323226096,-0.25102939569684746,2.087666380842347]

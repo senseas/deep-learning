@@ -31,7 +31,7 @@ public class EmbeddingTest {
 
     @Test
     public void positionalEmbeddingTest() {
-        double[] index = Sequence.getTokenIndex("希望让普通读者也能轻易理解");
+        double[] index = Sequence.getWordIndex("希望让普通读者也能轻易理解");
         TensorFlow tf = new TensorFlow();
         Tensor input = new Tensor(index, new int[]{index.length});
         Tensor tensor = tf.positionalEmbedding(new int[]{index.length, 13}, input);

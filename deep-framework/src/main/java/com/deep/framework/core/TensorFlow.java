@@ -478,12 +478,14 @@ public class TensorFlow implements Serializable {
         return new TensorOperator("MatmulTran", Shape.shape(input[0].shape(0), input[1].shape(0)), input) {
 
             public Tenser<Tensor> compute() {
-                matmulTranbForward(getInput()[0], getInput()[1], this, getInput()[2]);
+                Tensor alpha = getInput().length == 3 ? getInput()[2] : cons(1);
+                matmulTranbForward(getInput()[0], getInput()[1], this, alpha);
                 return output;
             }
 
             public void gradient() {
-                matmulTranbBackward(getInput()[0], getInput()[1], this, getInput()[2]);
+                Tensor alpha = getInput().length == 3 ? getInput()[2] : cons(1);
+                matmulTranbBackward(getInput()[0], getInput()[1], this, alpha);
             }
 
         };

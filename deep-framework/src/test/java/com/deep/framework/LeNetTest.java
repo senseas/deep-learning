@@ -52,7 +52,7 @@ public class LeNetTest {
 
         Tensor tensor51 = tf.matmul(new Tensor("weight", new int[]{10, 32}), tensor43);//32*86
         Tensor tensor52 = tf.addx(tensor51, new Tensor("bias", new int[]{10, 1}));//10
-        Tensor tensor53 = tf.sigmoidx(tensor52);//10
+        Tensor tensor53 = tf.relux(tensor52);//10
 
         Tensor softmax = tf.softmax(tensor53);
         Tensor crossx = tf.softmaxCrossx(label, softmax);

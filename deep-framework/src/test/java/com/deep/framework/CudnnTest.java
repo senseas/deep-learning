@@ -56,25 +56,19 @@ public class CudnnTest {
         double[] input_grad = new double[size];
         softmaxBackward(input_grad, output, output_grad, shape);
         System.out.println(JSONObject.toJSONString(input_grad));
-
-        TensorFlow tf = new TensorFlow();
-        Tensor input1 = new Tensor(input, new int[]{10});
-        Tensor tensor = tf.softmax(input1);
-        tensor.forward();
-        tensor.setGrad(output_grad);
-        tensor.backward();
-
-        System.out.println(JSONObject.toJSONString(tensor.getData()));
-        System.out.println(JSONObject.toJSONString(input1.getGrad()));
     }
 
     @Test
     public void sigmoidTest() {
         Tensor input = new Tensor(new double[]{0.076957673826347, 0.14118730589648895}, new int[]{2});
         Tensor output = new Tensor(new int[]{2});
+
         sigmoidForward(input, output);
+        System.out.println(JSONObject.toJSONString(output.getData()));
+
         output.setGrad(new double[]{0.1, 0.51});
         sigmoidBackward(input, output);
+        System.out.println(JSONObject.toJSONString(input.getGrad()));
     }
 
     @Test
@@ -82,22 +76,13 @@ public class CudnnTest {
         double[] data = {0.2731f, 0.1389f, 0.7491f, -0.2307f, 0.3411f, 0.6492f, 0.2313f, -0.5270f, 0.6267f, 0.2598f};
         Tensor input = new Tensor(data, new int[]{1, 1, 2, 5});
         Tensor output = new Tensor(new int[]{1, 1, 2, 5}, 0);
-        output.setGrad(data);
 
         eluForward(input, output);
-        eluBackward(input, output);
         System.out.println(JSONObject.toJSONString(output.getData()));
+
+        output.setGrad(data);
+        eluBackward(input, output);
         System.out.println(JSONObject.toJSONString(input.getGrad()));
-
-        TensorFlow tf = new TensorFlow();
-        Tensor input1 = new Tensor(data, new int[]{1, 1, 2, 5});
-        Tensor tensor = tf.relux(input1);
-        tensor.forward();
-        tensor.setGrad(data);
-        tensor.backward();
-
-        System.out.println(JSONObject.toJSONString(tensor.getData()));
-        System.out.println(JSONObject.toJSONString(input1.getGrad()));
     }
 
     /**

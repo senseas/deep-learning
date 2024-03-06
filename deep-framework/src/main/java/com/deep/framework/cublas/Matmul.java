@@ -110,12 +110,12 @@ public class Matmul {
 
         int M = A.shape(0), K = A.shape(1), N = B.shape(0);
         //GA= KM_T[DB=KN * GC_T=NM]
-        cublasDgemm(handle, CUBLAS_OP_N, CUBLAS_OP_T, K, M, N, alpha, DB, K, GC, M, beta, GA, K);
+        cublasDgemm(handle, CUBLAS_OP_N, CUBLAS_OP_N, K, M, N, alpha, DB, K, GC, N, beta, GA, K);
         // Copy the result from the device to the host
         A.gradSynchronize();
 
         //GB= NK_T[GC_T=NM * DA=MK]
-        cublasDgemm(handle, CUBLAS_OP_N, CUBLAS_OP_N, K, N, M, alpha, DA, K, GC, N, beta, GB, K);
+        cublasDgemm(handle, CUBLAS_OP_N, CUBLAS_OP_T, K, N, M, alpha, DA, K, GC, N, beta, GB, K);
         // Copy the result from the device to the host
         B.gradSynchronize();
 
