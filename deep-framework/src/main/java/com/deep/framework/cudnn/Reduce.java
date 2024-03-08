@@ -17,6 +17,7 @@ import static jcuda.jcudnn.cudnnIndicesType.CUDNN_32BIT_INDICES;
 import static jcuda.jcudnn.cudnnNanPropagation.CUDNN_NOT_PROPAGATE_NAN;
 import static jcuda.jcudnn.cudnnReduceTensorIndices.CUDNN_REDUCE_TENSOR_NO_INDICES;
 import static jcuda.jcudnn.cudnnReduceTensorOp.CUDNN_REDUCE_TENSOR_ADD;
+import static jcuda.jcudnn.cudnnReduceTensorOp.CUDNN_REDUCE_TENSOR_AVG;
 import static jcuda.jcudnn.cudnnTensorFormat.CUDNN_TENSOR_NCHW;
 import static jcuda.runtime.JCuda.*;
 import static jcuda.runtime.cudaMemcpyKind.cudaMemcpyDeviceToHost;
@@ -29,6 +30,18 @@ public class Reduce {
 
     public static void sumBackward(Tensor input, Tensor output) {
         Arrays.stream(Shape.shapes(input.getShape())).forEach(i -> input.getGrad()[i] += output.grad());
+    }
+
+    public static double sum(Tensor input) {
+        double[] output = new double[1];
+        reduce(input.getData(), Shape.shapes(input.getShape()), output, Shape.shapes(new int[]{1}), CUDNN_REDUCE_TENSOR_ADD);
+        return output[0];
+    }
+
+    public static double mean(Tensor input) {
+        double[] output = new double[1];
+        reduce(input.getData(), Shape.shapes(input.getShape()), output, Shape.shapes(new int[]{1}), CUDNN_REDUCE_TENSOR_AVG);
+        return output[0];
     }
 
     public static void reduce(double[] input, int[] input_shape, double[] output, int[] output_shape, int op) {

@@ -37,6 +37,15 @@ public class AppTest {
     }
 
     @Test
+    public void eluTest() {
+        TensorFlow tf = new TensorFlow();
+        Tensor input = new Tensor(new double[]{-0.1, 0.1, 0.1, -0.2, 0.1, 0.3, -0.2, 0.2, 0.2}, new int[]{3, 3});
+        Tensor elu = tf.elu(input);
+        TensorExecutor executor = new TensorExecutor(elu);
+        executor.run();
+    }
+
+    @Test
     public void matmulTest() {
         TensorFlow tf = new TensorFlow();
         Tensor tensor = tf.matmul(new Tensor(new int[]{6, 4}), new Tensor(new int[]{4, 1}));
@@ -73,7 +82,6 @@ public class AppTest {
         TensorFlow tf = new TensorFlow();
         Tensor softmaxCrossx = tf.softmaxCrossx(new Tensor(new int[]{2}), new Tensor(new int[]{2}));
         TensorExecutor executor = new TensorExecutor(softmaxCrossx);
-        executor.run();
         executor.run();
     }
 

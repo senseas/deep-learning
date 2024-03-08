@@ -11,8 +11,7 @@ import java.util.stream.DoubleStream;
 import java.util.stream.IntStream;
 
 import static com.deep.framework.cublas.Matmul.*;
-import static com.deep.framework.cudnn.Activation.eluBackward;
-import static com.deep.framework.cudnn.Activation.eluForward;
+import static com.deep.framework.cudnn.Activation.*;
 import static com.deep.framework.cudnn.BatchNormal.normalBackward;
 import static com.deep.framework.cudnn.BatchNormal.normalForward;
 import static com.deep.framework.cudnn.OpTensor.*;
@@ -428,6 +427,21 @@ public class TensorFlow implements Serializable {
         return new TensorOperator("Relux", input.getShape(), input) {
 
             public Tenser<Tensor> compute() {
+                reluForward(getInput()[0], this);
+                return output;
+            }
+
+            public void gradient() {
+                reluBackward(getInput()[0], this);
+            }
+
+        };
+    }
+
+    public Tensor elu(Tensor input) {
+        return new TensorOperator("Elu", input.getShape(), input) {
+
+            public Tenser<Tensor> compute() {
                 eluForward(getInput()[0], this);
                 return output;
             }
@@ -476,15 +490,14 @@ public class TensorFlow implements Serializable {
 
     public Tensor matmulTran(Tensor... input) {
         return new TensorOperator("MatmulTran", Shape.shape(input[0].shape(0), input[1].shape(0)), input) {
+            final Tensor alpha = getInput().length == 3 ? getInput()[2] : cons(1);
 
             public Tenser<Tensor> compute() {
-                Tensor alpha = getInput().length == 3 ? getInput()[2] : cons(1);
                 matmulTranbForward(getInput()[0], getInput()[1], this, alpha);
                 return output;
             }
 
             public void gradient() {
-                Tensor alpha = getInput().length == 3 ? getInput()[2] : cons(1);
                 matmulTranbBackward(getInput()[0], getInput()[1], this, alpha);
             }
 
@@ -878,7 +891,7 @@ public class TensorFlow implements Serializable {
     public Tensor layerNormal(Tensor... input) {
         return new TensorOperator("LayerNormal", input[0].getShape(), input) {
             int length;
-            double mean, std;
+            double std;
             double[] input_sub_mean;
 
             public Tenser<Tensor> compute() {
@@ -887,11 +900,11 @@ public class TensorFlow implements Serializable {
                 double[] bias = getInput()[2].getData();
                 length = input_data.length;
 
-                mean = DoubleStream.of(input_data).parallel().sum() / length;
+                double mean = DoubleStream.of(input_data).parallel().sum() / length;
                 input_sub_mean = DoubleStream.of(input_data).map(a -> a - mean).toArray();
                 std = DoubleStream.of(input_sub_mean).parallel().map(a -> Math.pow(a, 2)).sum() / length;
                 double a = Math.pow(std + 1.0E-7, 0.5);
-                IntStream.range(0, length).forEach(i -> data[i] = scale[i] * (input_data[i] - mean) / a + bias[i]);
+                IntStream.range(0, length).forEach(i -> data[i] = scale[i] * input_sub_mean[i] / a + bias[i]);
                 return getOutput();
             }
 
