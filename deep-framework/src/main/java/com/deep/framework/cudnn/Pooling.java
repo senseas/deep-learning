@@ -4,11 +4,12 @@ import com.deep.framework.graph.Tensor;
 import com.deep.framework.lang.Shape;
 import jcuda.Pointer;
 import jcuda.Sizeof;
+import jcuda.jcudnn.cudnnHandle;
 import jcuda.jcudnn.cudnnPoolingDescriptor;
 import jcuda.jcudnn.cudnnTensorDescriptor;
 
 import static com.deep.framework.cuda.Cuda.createDevicePointer;
-import static com.deep.framework.cudnn.CudnnConfig.handle;
+import static com.deep.framework.cudnn.CudnnConfig.getCudnnHandle;
 import static jcuda.jcudnn.JCudnn.*;
 import static jcuda.jcudnn.cudnnDataType.CUDNN_DATA_DOUBLE;
 import static jcuda.jcudnn.cudnnNanPropagation.CUDNN_NOT_PROPAGATE_NAN;
@@ -24,14 +25,16 @@ public class Pooling {
     private static final int DATA_TYPE_SZIE = Sizeof.DOUBLE;
 
     public static void maxPoolingForward(int[] window, int[] padding, int[] stride, Tensor input, Tensor output) {
-        poolingForward(input.getData(), Shape.shapes(input.getShape()), window, padding, stride, output.getData(), Shape.shapes(output.getShape()), CUDNN_POOLING_MAX);
+        cudnnHandle handle = getCudnnHandle(output);
+        poolingForward(input.getData(), Shape.shapes(input.getShape()), window, padding, stride, output.getData(), Shape.shapes(output.getShape()), CUDNN_POOLING_MAX, handle);
     }
 
     public static void maxPoolingBackward(int[] window, int[] padding, int[] stride, Tensor input, Tensor output) {
-        poolingBackward(input.getData(), input.getGrad(), Shape.shapes(input.getShape()), window, padding, stride, output.getData(), output.getGrad(), Shape.shapes(output.getShape()), CUDNN_POOLING_MAX);
+        cudnnHandle handle = getCudnnHandle(output);
+        poolingBackward(input.getData(), input.getGrad(), Shape.shapes(input.getShape()), window, padding, stride, output.getData(), output.getGrad(), Shape.shapes(output.getShape()), CUDNN_POOLING_MAX, handle);
     }
 
-    public static void poolingForward(double[] input, int[] input_shape, int[] window, int[] padding, int[] stride, double[] output, int[] output_shape, int mode) {
+    public static void poolingForward(double[] input, int[] input_shape, int[] window, int[] padding, int[] stride, double[] output, int[] output_shape, int mode, cudnnHandle handle) {
         // Define input tensor
         cudnnTensorDescriptor input_desc = new cudnnTensorDescriptor();
         cudnnCreateTensorDescriptor(input_desc);
@@ -64,7 +67,7 @@ public class Pooling {
         cudnnDestroyPoolingDescriptor(pool_desc);
     }
 
-    public static void poolingBackward(double[] input, double[] input_grad, int[] input_shape, int[] window, int[] padding, int[] stride, double[] output, double[] output_grad, int[] output_shape, int mode) {
+    public static void poolingBackward(double[] input, double[] input_grad, int[] input_shape, int[] window, int[] padding, int[] stride, double[] output, double[] output_grad, int[] output_shape, int mode, cudnnHandle handle) {
         // define input tensor
         cudnnTensorDescriptor input_desc = new cudnnTensorDescriptor();
         cudnnCreateTensorDescriptor(input_desc);

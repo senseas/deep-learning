@@ -1,10 +1,13 @@
 package com.deep.framework.cuda;
 
+import com.deep.framework.graph.Tensor;
 import jcuda.Pointer;
 import jcuda.Sizeof;
-import jcuda.driver.*;
-import jcuda.nvrtc.JNvrtc;
+import jcuda.driver.CUdeviceptr;
+import jcuda.driver.CUfunction;
+import jcuda.driver.CUmodule;
 import jcuda.nvrtc.nvrtcProgram;
+import jcuda.runtime.cudaStream_t;
 
 import java.util.stream.Stream;
 
@@ -130,6 +133,18 @@ public class Cuda {
     }
 
     /**
+     * Create cuda Stream
+     * @param tensor
+     * @return cudaStream_t
+     */
+    public static cudaStream_t createCudaStream(Tensor tensor) {
+        cudaSetDevice(tensor.getDeviceId());
+        cudaStream_t stream = new cudaStream_t();
+        cudaStreamCreate(stream);
+        return stream;
+    }
+
+    /**
      * Create device data containing the given float value, the given number
      * of times
      *
@@ -159,13 +174,29 @@ public class Cuda {
     }
 
     /**
+     * Create device data containing the given float value, the given number
+     * of times
+     *
+     * @param data The value of the elements
+     * @return The pointer to the data
+     */
+    public static Pointer createDevicePointer(double[] data, int deviceId) {
+        int size = data.length * Sizeof.DOUBLE;
+        Pointer deviceData = new Pointer();
+        cudaSetDevice(deviceId);
+        cudaMalloc(deviceData, size);
+        cudaMemcpy(deviceData, Pointer.to(data), size, cudaMemcpyHostToDevice);
+        return deviceData;
+    }
+
+    /**
      * copy host data to device
      * @param data The value of the elements
      * @return void
      */
-    public static void copyDataHostToDevice(double[] data, Pointer deviceData) {
+    public static void copyDataHostToDevice(double[] data, Pointer deviceData, cudaStream_t stream) {
         int size = data.length * Sizeof.DOUBLE;
-        cudaMemcpy(deviceData, Pointer.to(data), size, cudaMemcpyHostToDevice);
+        cudaMemcpyAsync(deviceData, Pointer.to(data), size, cudaMemcpyHostToDevice, stream);
     }
 
     /**
@@ -173,9 +204,9 @@ public class Cuda {
      * @param data The value of the elements
      * @return void
      */
-    public static void copyDataDeviceToHost(double[] data, Pointer deviceData) {
+    public static void copyDataDeviceToHost(double[] data, Pointer deviceData, cudaStream_t stream) {
         int size = data.length * Sizeof.DOUBLE;
-        cudaMemcpy(Pointer.to(data), deviceData, size, cudaMemcpyDeviceToHost);
+        cudaMemcpyAsync(Pointer.to(data), deviceData, size, cudaMemcpyDeviceToHost, stream);
     }
 
     /**

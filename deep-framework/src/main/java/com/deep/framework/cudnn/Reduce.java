@@ -4,13 +4,14 @@ import com.deep.framework.graph.Tensor;
 import com.deep.framework.lang.Shape;
 import jcuda.Pointer;
 import jcuda.Sizeof;
+import jcuda.jcudnn.cudnnHandle;
 import jcuda.jcudnn.cudnnReduceTensorDescriptor;
 import jcuda.jcudnn.cudnnTensorDescriptor;
 
 import java.util.Arrays;
 
 import static com.deep.framework.cuda.Cuda.createDevicePointer;
-import static com.deep.framework.cudnn.CudnnConfig.handle;
+import static com.deep.framework.cudnn.CudnnConfig.getCudnnHandle;
 import static jcuda.jcudnn.JCudnn.*;
 import static jcuda.jcudnn.cudnnDataType.CUDNN_DATA_DOUBLE;
 import static jcuda.jcudnn.cudnnIndicesType.CUDNN_32BIT_INDICES;
@@ -25,7 +26,8 @@ import static jcuda.runtime.cudaMemcpyKind.cudaMemcpyDeviceToHost;
 public class Reduce {
 
     public static void sumForward(Tensor input, Tensor output) {
-        reduce(input.getData(), Shape.shapes(input.getShape()), output.getData(), Shape.shapes(output.getShape()), CUDNN_REDUCE_TENSOR_ADD);
+        cudnnHandle handle = getCudnnHandle(output);
+        reduce(input.getData(), Shape.shapes(input.getShape()), output.getData(), Shape.shapes(output.getShape()), CUDNN_REDUCE_TENSOR_ADD, handle);
     }
 
     public static void sumBackward(Tensor input, Tensor output) {
@@ -33,18 +35,20 @@ public class Reduce {
     }
 
     public static double sum(Tensor input) {
+        cudnnHandle handle = getCudnnHandle(input);
         double[] output = new double[1];
-        reduce(input.getData(), Shape.shapes(input.getShape()), output, Shape.shapes(new int[]{1}), CUDNN_REDUCE_TENSOR_ADD);
+        reduce(input.getData(), Shape.shapes(input.getShape()), output, Shape.shapes(new int[]{1}), CUDNN_REDUCE_TENSOR_ADD, handle);
         return output[0];
     }
 
     public static double mean(Tensor input) {
+        cudnnHandle handle = getCudnnHandle(input);
         double[] output = new double[1];
-        reduce(input.getData(), Shape.shapes(input.getShape()), output, Shape.shapes(new int[]{1}), CUDNN_REDUCE_TENSOR_AVG);
+        reduce(input.getData(), Shape.shapes(input.getShape()), output, Shape.shapes(new int[]{1}), CUDNN_REDUCE_TENSOR_AVG, handle);
         return output[0];
     }
 
-    public static void reduce(double[] input, int[] input_shape, double[] output, int[] output_shape, int op) {
+    public static void reduce(double[] input, int[] input_shape, double[] output, int[] output_shape, int op, cudnnHandle handle) {
         int batch_size = input_shape[0], channels = input_shape[1], height = input_shape[2], width = input_shape[3];
 
         // Define input tensor

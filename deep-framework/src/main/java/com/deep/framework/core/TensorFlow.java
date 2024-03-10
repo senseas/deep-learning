@@ -19,7 +19,6 @@ import static com.deep.framework.cudnn.Softmax.softmaxBackward;
 import static com.deep.framework.cudnn.Softmax.softmaxForward;
 import static com.deep.framework.lang.ForEach.forEach;
 import static com.deep.framework.lang.Shape.*;
-import static jcuda.jcudnn.cudnnReduceTensorOp.CUDNN_REDUCE_TENSOR_AVG;
 
 public class TensorFlow implements Serializable {
 
@@ -81,7 +80,6 @@ public class TensorFlow implements Serializable {
 
         };
     }
-
 
     public Tensor minus(Tensor input) {
         return new ScalarOperator("Minusx", input) {
@@ -951,9 +949,7 @@ public class TensorFlow implements Serializable {
 
             public double compute() {
                 Tensor inx = getInput(0);
-                int[] inShape = Shape.shapes(inx.getShape()), outShape = {1, 1, 1, 1};
-                Reduce.reduce(inx.getData(), inShape, data, outShape, CUDNN_REDUCE_TENSOR_AVG);
-                return data();
+                return Reduce.mean(inx);
             }
 
             public void gradient(double grad) {

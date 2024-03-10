@@ -2,122 +2,127 @@ package com.deep.framework.cublas;
 
 import com.deep.framework.graph.Tensor;
 import jcuda.Pointer;
+import jcuda.jcublas.cublasHandle;
 import jcuda.runtime.cudaStream_t;
 
-import static com.deep.framework.cublas.CublasConfig.handle;
+import static com.deep.framework.cublas.CublasConfig.getCublasHandle;
+import static com.deep.framework.cuda.Cuda.createCudaStream;
 import static jcuda.jcublas.JCublas2.cublasDgemm;
 import static jcuda.jcublas.JCublas2.cublasSetStream;
 import static jcuda.jcublas.cublasOperation.CUBLAS_OP_N;
 import static jcuda.jcublas.cublasOperation.CUBLAS_OP_T;
-import static jcuda.runtime.JCuda.cudaStreamCreate;
 import static jcuda.runtime.JCuda.cudaStreamDestroy;
 
 public class Matmul {
 
     //MK*KN
-    public static void matmulForward(Tensor A, Tensor B, Tensor C) {
-        cudaStream_t stream = new cudaStream_t();
-        cudaStreamCreate(stream);
+    public static void matmulForward(Tensor inputx, Tensor inputy, Tensor output) {
+        cublasHandle handle = getCublasHandle(output);
+        cudaStream_t stream = createCudaStream(output);
         cublasSetStream(handle, stream);
 
         // Allocate Copy the memory from the host to the device
-        Pointer DA = A.getDeviceData();
-        Pointer DB = B.getDeviceData();
-        Pointer DC = C.getDeviceData();
+        int deviceId = output.getDeviceId();
+        Pointer device_inputx = inputx.getDeviceData(deviceId, stream);
+        Pointer device_inputy = inputy.getDeviceData(deviceId, stream);
+        Pointer device_output = output.getDeviceData(deviceId, stream);
 
-        //alpha, beta
+        // alpha, beta
         Pointer alpha = Pointer.to(new double[]{1}), beta = Pointer.to(new double[]{0});
 
-        int M = A.shape(0), K = A.shape(1), N = B.shape(1);
-        // DC= [AD=NK * DB=KM]
-        cublasDgemm(handle, CUBLAS_OP_N, CUBLAS_OP_N, N, M, K, alpha, DB, N, DA, K, beta, DC, N);
+        int M = inputx.shape(0), K = inputx.shape(1), N = inputy.shape(1);
+        // NM = [NK * KM]
+        cublasDgemm(handle, CUBLAS_OP_N, CUBLAS_OP_N, N, M, K, alpha, device_inputy, N, device_inputx, K, beta, device_output, N);
         // Copy the result from the device to the host
-        C.dataSynchronize();
+        output.dataSync(deviceId, stream);
 
         cudaStreamDestroy(stream);
     }
 
     //MK*KN
-    public static void matmulBackward(Tensor A, Tensor B, Tensor C) {
-        cudaStream_t stream = new cudaStream_t();
-        cudaStreamCreate(stream);
+    public static void matmulBackward(Tensor inputx, Tensor inputy, Tensor output) {
+        cublasHandle handle = getCublasHandle(output);
+        cudaStream_t stream = createCudaStream(output);
         cublasSetStream(handle, stream);
 
         // Allocate Copy the memory from the host to the device
-        Pointer DA = A.getDeviceData();
-        Pointer DB = B.getDeviceData();
+        int deviceId = output.getDeviceId();
+        Pointer device_inputx = inputx.getDeviceData(deviceId, stream);
+        Pointer device_inputy = inputy.getDeviceData(deviceId, stream);
         // Allocate Copy the memory from the host to the device
-        Pointer GA = A.getDeviceGrad();
-        Pointer GB = B.getDeviceGrad();
-        Pointer GC = C.getDeviceGrad();
+        Pointer device_inputx_grad = inputx.getDeviceGrad(deviceId, stream);
+        Pointer device_inputy_grad = inputy.getDeviceGrad(deviceId, stream);
+        Pointer device_output_grad = output.getDeviceGrad(deviceId, stream);
 
-        //alpha, beta
+        // alpha, beta
         Pointer alpha = Pointer.to(new double[]{1}), beta = Pointer.to(new double[]{0});
 
-        int M = A.shape(0), K = A.shape(1), N = B.shape(1);
-        //GA= KM_T[DB=KN * GC_T=NM]
-        cublasDgemm(handle, CUBLAS_OP_T, CUBLAS_OP_N, K, M, N, alpha, DB, N, GC, N, beta, GA, K);
+        int M = inputx.shape(0), K = inputx.shape(1), N = inputy.shape(1);
+        // KM = KM_T[KN * NM]
+        cublasDgemm(handle, CUBLAS_OP_T, CUBLAS_OP_N, K, M, N, alpha, device_inputy, N, device_output_grad, N, beta, device_inputx_grad, K);
         // Copy the result from the device to the host
-        A.gradSynchronize();
+        inputx.gradSync(deviceId, stream);
 
-        //GB= NK_T[GC_T=NM * DA=MK]
-        cublasDgemm(handle, CUBLAS_OP_N, CUBLAS_OP_T, N, K, M, alpha, GC, N, DA, K, beta, GB, N);
+        // NK = [NM * MK]
+        cublasDgemm(handle, CUBLAS_OP_N, CUBLAS_OP_T, N, K, M, alpha, device_output_grad, N, device_inputx, K, beta, device_inputy_grad, N);
         // Copy the result from the device to the host
-        B.gradSynchronize();
+        inputy.gradSync(deviceId, stream);
 
         cudaStreamDestroy(stream);
     }
 
     //MK*NK
-    public static void matmulTranbForward(Tensor A, Tensor B, Tensor C, Tensor... alphas) {
-        cudaStream_t stream = new cudaStream_t();
-        cudaStreamCreate(stream);
+    public static void matmulTranbForward(Tensor inputx, Tensor inputy, Tensor output, Tensor... alphas) {
+        cublasHandle handle = getCublasHandle(output);
+        cudaStream_t stream = createCudaStream(output);
         cublasSetStream(handle, stream);
 
         // Allocate Copy the memory from the host to the device
-        Pointer DA = A.getDeviceData();
-        Pointer DB = B.getDeviceData();
-        Pointer DC = C.getDeviceData();
+        int deviceId = output.getDeviceId();
+        Pointer device_inputx = inputx.getDeviceData(deviceId, stream);
+        Pointer device_inputy = inputy.getDeviceData(deviceId, stream);
+        Pointer device_output = output.getDeviceData(deviceId, stream);
 
-        //alpha, beta
+        // alpha, beta
         Pointer alpha = Pointer.to(new double[]{alphas.length == 1 ? alphas[0].data() : 1}), beta = Pointer.to(new double[]{0});
 
-        int M = A.shape(0), K = A.shape(1), N = B.shape(0);
-        // DC= [AD=NK * DB=KM]
-        cublasDgemm(handle, CUBLAS_OP_T, CUBLAS_OP_N, N, M, K, alpha, DB, K, DA, K, beta, DC, N);
+        int M = inputx.shape(0), K = inputx.shape(1), N = inputy.shape(0);
+        // NM = [NK * KM]
+        cublasDgemm(handle, CUBLAS_OP_T, CUBLAS_OP_N, N, M, K, alpha, device_inputy, K, device_inputx, K, beta, device_output, N);
         // Copy the result from the device to the host
-        C.dataSynchronize();
+        output.dataSync(deviceId, stream);
 
         cudaStreamDestroy(stream);
     }
 
     //MK*NK
-    public static void matmulTranbBackward(Tensor A, Tensor B, Tensor C, Tensor... alphas) {
-        cudaStream_t stream = new cudaStream_t();
-        cudaStreamCreate(stream);
+    public static void matmulTranbBackward(Tensor inputx, Tensor inputy, Tensor output, Tensor... alphas) {
+        cublasHandle handle = getCublasHandle(output);
+        cudaStream_t stream = createCudaStream(output);
         cublasSetStream(handle, stream);
 
         // Allocate Copy the memory from the host to the device
-        Pointer DA = A.getDeviceData();
-        Pointer DB = B.getDeviceData();
+        int deviceId = output.getDeviceId();
+        Pointer device_inputx = inputx.getDeviceData(deviceId, stream);
+        Pointer device_inputy = inputy.getDeviceData(deviceId, stream);
         // Allocate Copy the memory from the host to the device
-        Pointer GA = A.getDeviceGrad();
-        Pointer GB = B.getDeviceGrad();
-        Pointer GC = C.getDeviceGrad();
+        Pointer device_inputx_grad = inputx.getDeviceGrad(deviceId, stream);
+        Pointer device_inputy_grad = inputy.getDeviceGrad(deviceId, stream);
+        Pointer output_device_grad = output.getDeviceGrad(deviceId, stream);
 
-        //alpha, beta
+        // alpha, beta
         Pointer alpha = Pointer.to(new double[]{alphas.length == 1 ? alphas[0].data() : 1}), beta = Pointer.to(new double[]{0});
 
-        int M = A.shape(0), K = A.shape(1), N = B.shape(0);
-        //GA= KM_T[DB=KN * GC_T=NM]
-        cublasDgemm(handle, CUBLAS_OP_N, CUBLAS_OP_N, K, M, N, alpha, DB, K, GC, N, beta, GA, K);
+        int M = inputx.shape(0), K = inputx.shape(1), N = inputy.shape(0);
+        // KM = KM_T[KN * NM]
+        cublasDgemm(handle, CUBLAS_OP_N, CUBLAS_OP_N, K, M, N, alpha, device_inputy, K, output_device_grad, N, beta, device_inputx_grad, K);
         // Copy the result from the device to the host
-        A.gradSynchronize();
+        inputx.gradSync(deviceId, stream);
 
-        //GB= NK_T[GC_T=NM * DA=MK]
-        cublasDgemm(handle, CUBLAS_OP_N, CUBLAS_OP_T, K, N, M, alpha, DA, K, GC, N, beta, GB, K);
+        // NK = [GC_T=NM * MK]
+        cublasDgemm(handle, CUBLAS_OP_N, CUBLAS_OP_T, K, N, M, alpha, device_inputx, K, output_device_grad, N, beta, device_inputy_grad, K);
         // Copy the result from the device to the host
-        B.gradSynchronize();
+        inputy.gradSync(deviceId, stream);
 
         cudaStreamDestroy(stream);
     }

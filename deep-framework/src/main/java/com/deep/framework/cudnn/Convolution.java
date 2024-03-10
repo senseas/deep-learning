@@ -6,10 +6,11 @@ import jcuda.Pointer;
 import jcuda.Sizeof;
 import jcuda.jcudnn.cudnnConvolutionDescriptor;
 import jcuda.jcudnn.cudnnFilterDescriptor;
+import jcuda.jcudnn.cudnnHandle;
 import jcuda.jcudnn.cudnnTensorDescriptor;
 
 import static com.deep.framework.cuda.Cuda.createDevicePointer;
-import static com.deep.framework.cudnn.CudnnConfig.handle;
+import static com.deep.framework.cudnn.CudnnConfig.getCudnnHandle;
 import static jcuda.jcudnn.JCudnn.*;
 import static jcuda.jcudnn.cudnnConvolutionBwdDataAlgo.CUDNN_CONVOLUTION_BWD_DATA_ALGO_0;
 import static jcuda.jcudnn.cudnnConvolutionBwdFilterAlgo.CUDNN_CONVOLUTION_BWD_FILTER_ALGO_0;
@@ -29,14 +30,16 @@ public class Convolution {
     private static final int BWD_DATA_ALGO = CUDNN_CONVOLUTION_BWD_DATA_ALGO_0;
 
     public static void convForward(Tensor filter, int[] padding, int[] stride, Tensor input, Tensor output) {
-        convForward(input.getData(), Shape.shapes(input.getShape()), filter.getData(), filter.getShape(), padding, stride, output.getData(), Shape.shapes(output.getShape()));
+        cudnnHandle handle = getCudnnHandle(output);
+        convForward(input.getData(), Shape.shapes(input.getShape()), filter.getData(), filter.getShape(), padding, stride, output.getData(), Shape.shapes(output.getShape()), handle);
     }
 
     public static void convBackward(Tensor filter, int[] padding, int[] stride, Tensor input, Tensor output) {
-        convBackward(input.getData(), input.getGrad(), Shape.shapes(input.getShape()), filter.getData(), filter.getGrad(), filter.getShape(), padding, stride, output.getData(), output.getGrad(), Shape.shapes(output.getShape()));
+        cudnnHandle handle = getCudnnHandle(output);
+        convBackward(input.getData(), input.getGrad(), Shape.shapes(input.getShape()), filter.getData(), filter.getGrad(), filter.getShape(), padding, stride, output.getData(), output.getGrad(), Shape.shapes(output.getShape()), handle);
     }
 
-    public static void convForward(double[] input, int[] input_shape, double[] filter, int[] filter_shape, int[] padding, int[] stride, double[] output, int[] output_shape) {
+    public static void convForward(double[] input, int[] input_shape, double[] filter, int[] filter_shape, int[] padding, int[] stride, double[] output, int[] output_shape, cudnnHandle handle) {
         // Define input tensor
         cudnnTensorDescriptor input_desc = new cudnnTensorDescriptor();
         cudnnCreateTensorDescriptor(input_desc);
@@ -83,7 +86,7 @@ public class Convolution {
         cudnnDestroyConvolutionDescriptor(conv_desc);
     }
 
-    public static void convBackward(double[] input, double[] input_grad, int[] input_shape, double[] filter, double[] filter_grad, int[] filter_shape, int[] padding, int[] stride, double[] output, double[] output_grad, int[] output_shape) {
+    public static void convBackward(double[] input, double[] input_grad, int[] input_shape, double[] filter, double[] filter_grad, int[] filter_shape, int[] padding, int[] stride, double[] output, double[] output_grad, int[] output_shape, cudnnHandle handle) {
         // Define input tensor
         cudnnTensorDescriptor input_desc = new cudnnTensorDescriptor();
         cudnnCreateTensorDescriptor(input_desc);
