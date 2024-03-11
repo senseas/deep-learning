@@ -2,8 +2,9 @@ package com.deep.framework.cuda;
 
 import jcuda.Pointer;
 import jcuda.Sizeof;
-import jcuda.driver.*;
-import jcuda.nvrtc.JNvrtc;
+import jcuda.driver.CUdeviceptr;
+import jcuda.driver.CUfunction;
+import jcuda.driver.CUmodule;
 import jcuda.nvrtc.nvrtcProgram;
 
 import java.util.stream.Stream;

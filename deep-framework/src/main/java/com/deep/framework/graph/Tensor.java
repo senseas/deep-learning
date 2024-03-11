@@ -117,14 +117,9 @@ public class Tensor implements Serializable {
         }
     }
 
-    public void dataSynchronize() {
-        if (Objects.isNull(deviceData)) return;
-        copyDataDeviceToHost(data, deviceData);
-    }
-
-    public void gradSynchronize() {
-        if (Objects.isNull(deviceGrad)) return;
-        copyDataDeviceToHost(grad, deviceGrad);
+    public void createOptimizer() {
+        if (Objects.nonNull(optimizer)) return;
+        optimizer = new AdamOptimizer(shape);
     }
 
     public Pointer getDeviceData() {
@@ -139,24 +134,30 @@ public class Tensor implements Serializable {
         return deviceGrad;
     }
 
-    public void createOptimizer() {
-        if (Objects.nonNull(optimizer)) return;
-        optimizer = new AdamOptimizer(shape);
+    public void dataSynchronize() {
+        if (Objects.isNull(deviceData)) return;
+        copyDataDeviceToHost(data, deviceData);
+    }
+
+    public void gradSynchronize() {
+        if (Objects.isNull(deviceGrad)) return;
+        copyDataDeviceToHost(grad, deviceGrad);
     }
 
     public int shape(int i) { return shape[i]; }
 
-    private String name = "";
-    private Tensor[] input;
-    protected int[] shape;
-    protected double[] data, grad;
-
     private int idx;
     private Tensor tensor;
+    private String name = "";
+    private Tensor[] input;
+
+    protected int[] shape;
+    protected double[] data, grad;
+    protected boolean reduce;
     protected Tenser<Tensor> output, function;
 
     transient private Pointer deviceData, deviceGrad;
     transient private AdamOptimizer optimizer;
 
-    transient protected boolean status, states, reduce;
+    transient protected boolean status, states;
 }
