@@ -36,8 +36,4 @@ public class CublasConfig {
     public static cublasHandle getCublasHandle(int id) {
         return cublasHandles.get(id);
     }
-
-   public void synchronize(Tensor tensor,Tensor... input){
-
-   }
 }

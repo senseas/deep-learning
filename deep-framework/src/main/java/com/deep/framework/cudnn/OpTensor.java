@@ -39,7 +39,6 @@ public class OpTensor {
     public static void addTensorForward(Tensor input, Tensor output) {
         cudnnHandle handle = getCudnnHandle(output);
         cudaStream_t stream = createCudaStream(output);
-        cudnnSetStream(handle, stream);
         addTensorForward(input, output, Shape.shapes(input.getShape()), handle, stream);
         cudaStreamDestroy(stream);
     }
@@ -47,7 +46,6 @@ public class OpTensor {
     public static void addTensorBackward(Tensor input, Tensor output) {
         cudnnHandle handle = getCudnnHandle(output);
         cudaStream_t stream = createCudaStream(output);
-        cudnnSetStream(handle, stream);
         addTensorBackward(input, output, Shape.shapes(input.getShape()), handle, stream);
         cudaStreamDestroy(stream);
     }
@@ -55,7 +53,6 @@ public class OpTensor {
     public static void mulTensorScalarForward(Tensor input, Tensor inputy, Tensor output) {
         cudnnHandle handle = getCudnnHandle(output);
         cudaStream_t stream = createCudaStream(output);
-        cudnnSetStream(handle, stream);
         mulTensorScalar(input.getData(), inputy.data(), output.getData(), Shape.shapes(input.getShape()), handle);
         cudaStreamDestroy(stream);
     }
@@ -63,7 +60,6 @@ public class OpTensor {
     public static void mulTensorScalarBackward(Tensor input, Tensor inputy, Tensor output) {
         cudnnHandle handle = getCudnnHandle(output);
         cudaStream_t stream = createCudaStream(output);
-        cudnnSetStream(handle, stream);
         mulTensorScalar(output.getGrad(), inputy.data(), input.getGrad(), Shape.shapes(input.getShape()), handle);
         cudaStreamDestroy(stream);
     }
@@ -71,7 +67,6 @@ public class OpTensor {
     public static void subTensor(Tensor input, Tensor output) {
         cudnnHandle handle = getCudnnHandle(output);
         cudaStream_t stream = createCudaStream(output);
-        cudnnSetStream(handle, stream);
         subTensor(input.getData(), output.getData(), Shape.shapes(input.getShape()), handle);
         cudaStreamDestroy(stream);
     }
