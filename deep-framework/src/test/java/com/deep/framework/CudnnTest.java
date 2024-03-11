@@ -46,15 +46,15 @@ public class CudnnTest {
         int[] shape = {1, 1, 1, 10};
         int size = Shape.size(shape);
 
-        double[] input = {0.2731f, 0.1389f, 0.7491f, 0.2307f, 0.3411f, 0.6492f, 0.2313f, 0.5270f, 0.6267f, 0.2598f};
-        double[] output = new double[size];
-        softmaxForward(input, output, shape);
-        System.out.println(JSONObject.toJSONString(output));
+        Tensor input = new Tensor(new double[]{0.2731f, 0.1389f, 0.7491f, 0.2307f, 0.3411f, 0.6492f, 0.2313f, 0.5270f, 0.6267f, 0.2598f}, new int[size]);
+        Tensor output = new Tensor(new double[size], new int[size]);
 
-        double[] output_grad = new double[]{0.1f, 0.2f, 0.3f, 0.4f, 0.5f, 0.6f, 0.7f, 0.8f, 0.9f, 0.15f};
-        double[] input_grad = new double[size];
-        softmaxBackward(input_grad, output, output_grad, shape);
-        System.out.println(JSONObject.toJSONString(input_grad));
+        softmaxForward(input, output, shape);
+        System.out.println(JSONObject.toJSONString(output.getData()));
+
+        output.setGrad(new double[]{0.1f, 0.2f, 0.3f, 0.4f, 0.5f, 0.6f, 0.7f, 0.8f, 0.9f, 0.15f});
+        softmaxBackward(input, output, shape);
+        System.out.println(JSONObject.toJSONString(output.getGrad()));
     }
 
     @Test

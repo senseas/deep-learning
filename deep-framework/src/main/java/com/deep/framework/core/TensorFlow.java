@@ -404,25 +404,7 @@ public class TensorFlow implements Serializable {
     }
 
     public Tensor relu(Tensor input) {
-        return new ScalarOperator("Relu", input) {
-
-            public double compute() {
-                Tensor inx = getInput(0);
-                double valx = inx.data();
-                return valx > 0 ? valx : 0.1 * valx;
-            }
-
-            public void gradient(double grad) {
-                Tensor inx = getInput(0);
-                double valx = inx.data();
-                inx.grad(valx > 0 ? grad : 0.1 * grad);
-            }
-
-        };
-    }
-
-    public Tensor relux(Tensor input) {
-        return new TensorOperator("Relux", input.getShape(), input) {
+        return new TensorOperator("Relu", input.getShape(), input) {
 
             public Tenser<Tensor> compute() {
                 reluForward(getInput()[0], this);
@@ -557,29 +539,19 @@ public class TensorFlow implements Serializable {
         };
     }
 
-    public Tensor sigmoid(Tensor input) {
-        return new ScalarFunction("Sigmoid", input) {
-
-            public Tensor compute() {
-                Tensor A = getInput()[0];
-                return div(cons(1d), add(cons(1d), exp(minus(A))));
-            }
-
-            public void gradient() { }
-
-        };
-    }
-
-    public Tensor sigmoidx(Tensor input) {
-        return new TensorFunction("Sigmoidx", input.getShape(), input) {
+   public Tensor sigmoid(Tensor input) {
+        return new TensorOperator("Sigmoid", input.getShape(), input) {
 
             public Tenser<Tensor> compute() {
-                Tenser<Tensor> A = getInput(0), B = zeroTensors(shape);
-                forEach(A, B, (Tensor a) -> sigmoid(a));
-                return B;
+                Tensor A = getInput()[0];
+                sigmoidForward(A, this);
+                return output;
             }
 
-            public void gradient() { }
+            public void gradient() {
+                Tensor A = getInput()[0];
+                sigmoidBackward(A, this);
+            }
 
         };
     }
@@ -1085,7 +1057,7 @@ public class TensorFlow implements Serializable {
             public Tenser<Tensor> compute() {
                 Tensor tensor1 = matmul(getInput()[0], getInput()[1]);
                 Tensor tensor2 = addx(tensor1, new Tensor(tensor1.getShape()));
-                Tensor tensor3 = relux(tensor2);
+                Tensor tensor3 = relu(tensor2);
                 return new Tenser<>(tensor3);
             }
 
