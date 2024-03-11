@@ -13,7 +13,7 @@ public class TensorFunction extends Tensor {
     }
 
     public TensorFunction(Tenser<Tensor> function) {
-        super(function.one().getName(), function.shape);
+        super(function.data(0).getName(), function.shape);
         this.function = function;
     }
 
@@ -32,12 +32,16 @@ public class TensorFunction extends Tensor {
     }
 
     public void backward() {
+        if (states) return;
+        for (Tensor o : getInput()) o.setStatus(o.states).setStates(true);
+
         Tenser<Tensor> nones = getOutput(getFunction());
         forEach(getOutput(), nones, (Tensor out, Tensor none) -> none.setGrad(out.grad));
 
         getFunction().forEach(Tensor::backward);
         clearGrad();
-        for (Tensor o : getInput()) o.backward();
+
+        for (Tensor o : getInput()) o.setStates(o.status).setStatus(false).backward();
     }
 
     public void reducer() {

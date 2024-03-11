@@ -79,7 +79,7 @@ public class BatchNormal {
         cudaMemcpy(Pointer.to(save_mean), device_save_mean, save_mean.length * DATA_TYPE_SZIE, cudaMemcpyDeviceToHost);
         cudaMemcpy(Pointer.to(save_inv_var), device_save_inv_var, save_inv_var.length * DATA_TYPE_SZIE, cudaMemcpyDeviceToHost);
 
-        // clean up
+        // Release resources
         cudaFree(device_input);
         cudaFree(device_output);
         cudaFree(device_scale);
@@ -128,7 +128,7 @@ public class BatchNormal {
         cudaMemcpy(Pointer.to(scale_grad), device_scale_grad, scale_grad.length * DATA_TYPE_SZIE, cudaMemcpyDeviceToHost);
         cudaMemcpy(Pointer.to(bias_grad), device_bias_grad, bias_grad.length * DATA_TYPE_SZIE, cudaMemcpyDeviceToHost);
 
-        // clean up
+        // Release resources
         cudaFree(device_input);
         cudaFree(device_input_grad);
 

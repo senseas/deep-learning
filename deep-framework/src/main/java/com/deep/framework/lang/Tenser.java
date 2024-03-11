@@ -106,10 +106,6 @@ public class Tenser<T> implements Serializable {
         return shape[0];
     }
 
-    public T one() {
-        return data[start];
-    }
-
     public int size() {
         return size;
     }

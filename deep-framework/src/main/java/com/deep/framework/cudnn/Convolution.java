@@ -72,7 +72,7 @@ public class Convolution {
         cudnnConvolutionForward(handle, alpha, input_desc, device_input, filter_desc, device_filter, conv_desc, FWD_ALGO, workspace, workspaceSize[0], beta, output_desc, device_output);
         cudaMemcpy(Pointer.to(output), device_output, output.length * DATA_TYPE_SZIE, cudaMemcpyDeviceToHost);
 
-        // clean up
+        // Release resources
         cudaFree(device_input);
         cudaFree(device_filter);
         cudaFree(device_output);
@@ -136,7 +136,7 @@ public class Convolution {
         cudnnConvolutionBackwardData(handle, alpha, filter_desc, device_filter, output_desc, device_output_grad, conv_desc, BWD_DATA_ALGO, dataWorkSpace, dataWorkspaceSize[0], beta, input_desc, device_input_grad);
         cudaMemcpy(Pointer.to(input_grad), device_input_grad, input_grad.length * DATA_TYPE_SZIE, cudaMemcpyDeviceToHost);
 
-        // clean up
+        // Release resources
         cudaFree(device_input);
         cudaFree(device_input_grad);
 

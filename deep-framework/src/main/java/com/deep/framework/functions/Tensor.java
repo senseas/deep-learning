@@ -89,7 +89,7 @@ public class Tensor implements Serializable, Operator {
     protected int[] shape;
     protected String data;
     protected Tensor grad;
-    protected boolean status;
+    protected boolean status, states;
     protected boolean forwarded;
 
     private String name;

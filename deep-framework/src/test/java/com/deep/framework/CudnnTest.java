@@ -1,7 +1,6 @@
 package com.deep.framework;
 
 import com.alibaba.fastjson.JSONObject;
-import com.deep.framework.core.TensorFlow;
 import com.deep.framework.graph.Tensor;
 import com.deep.framework.lang.Shape;
 import lombok.extern.slf4j.Slf4j;

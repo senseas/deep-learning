@@ -55,7 +55,7 @@ public class Pooling {
         cudnnPoolingForward(handle, pool_desc, alpha, input_desc, device_input, beta, output_desc, device_output);
         cudaMemcpy(Pointer.to(output), device_output, output.length * DATA_TYPE_SZIE, cudaMemcpyDeviceToHost);
 
-        // clean up
+        // Release resources
         cudaFree(device_input);
         cudaFree(device_output);
 
@@ -93,7 +93,7 @@ public class Pooling {
         cudnnPoolingBackward(handle, pool_desc, alpha, output_desc, device_output, output_desc, device_output_grad, input_desc, device_input, beta, input_desc, device_input_grad);
         cudaMemcpy(Pointer.to(input_grad), device_input_grad, input_grad.length * DATA_TYPE_SZIE, cudaMemcpyDeviceToHost);
 
-        // clean up
+        // Release resources
         cudaFree(device_input);
         cudaFree(device_input_grad);
         cudaFree(device_output);

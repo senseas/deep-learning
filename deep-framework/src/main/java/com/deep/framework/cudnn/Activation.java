@@ -161,6 +161,7 @@ public class Activation {
         Pointer alpha = Pointer.to(new double[]{1}), beta = Pointer.to(new double[]{0});
         cudnnActivationForward(handle, activation_desc, alpha, input_desc, device_input, beta, output_desc, device_output);
         cudaMemcpy(Pointer.to(output), device_output, output.length * DATA_TYPE_SZIE, cudaMemcpyDeviceToHost);
+
         // 释放资源
         cudaFree(device_input);
         cudaFree(device_output);
@@ -199,6 +200,7 @@ public class Activation {
         Pointer alpha = Pointer.to(new double[]{1}), beta = Pointer.to(new double[]{0});
         cudnnActivationBackward(handle, activation_desc, alpha, output_desc, device_output, output_desc, device_output_grad, input_desc, device_input, beta, input_desc, device_input_grad);
         cudaMemcpy(Pointer.to(input_grad), device_input_grad, input_grad.length * DATA_TYPE_SZIE, cudaMemcpyDeviceToHost);
+
         // 释放资源
         cudaFree(device_input);
         cudaFree(device_input_grad);
