@@ -26,7 +26,6 @@ public class Softmax {
     public static void softmaxForward(Tensor input, Tensor output, int... shape) {
         cudnnHandle handle = getCudnnHandle(output);
         cudaStream_t stream = createCudaStream(output);
-        cudnnSetStream(handle, stream);
         softmaxForward(input, output, Shape.shapes(shape), handle, stream);
         cudaStreamDestroy(stream);
     }
@@ -34,7 +33,6 @@ public class Softmax {
     public static void softmaxBackward(Tensor input, Tensor output, int... shape) {
         cudnnHandle handle = getCudnnHandle(output);
         cudaStream_t stream = createCudaStream(output);
-        cudnnSetStream(handle, stream);
         softmaxBackward(input, output, Shape.shapes(shape), handle, stream);
         cudaStreamDestroy(stream);
     }
