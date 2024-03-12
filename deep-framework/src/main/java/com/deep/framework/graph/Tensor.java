@@ -146,13 +146,13 @@ public class Tensor implements Serializable {
         return deviceGrad;
     }
 
-    public void dataSync(int deviceId, cudaStream_t stream) {
+    public void dataSynchronize(int deviceId, cudaStream_t stream) {
         Pointer deviceData = deviceDataMap.get(deviceId);
         if (Objects.isNull(deviceData)) return;
         copyDataDeviceToHost(data, deviceData, stream);
     }
 
-    public void gradSync(int deviceId, cudaStream_t stream) {
+    public void gradSynchronize(int deviceId, cudaStream_t stream) {
         Pointer deviceGrad = deviceGradMap.get(deviceId);
         if (Objects.isNull(deviceGrad)) return;
         copyDataDeviceToHost(grad, deviceGrad, stream);
@@ -168,9 +168,7 @@ public class Tensor implements Serializable {
         return deviceGradMap = new HashMap<>();
     }
 
-    public int shape(int i) {
-        return shape[i];
-    }
+    public int shape(int i) { return shape[i]; }
 
     private int idx;
     private Tensor tensor;

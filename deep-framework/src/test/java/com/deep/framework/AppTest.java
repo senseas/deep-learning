@@ -3,7 +3,6 @@ package com.deep.framework;
 import com.alibaba.fastjson2.JSONObject;
 import com.deep.framework.core.TensorExecutor;
 import com.deep.framework.core.TensorFlow;
-import com.deep.framework.cublas.Matmul;
 import com.deep.framework.graph.Tensor;
 import org.junit.Test;
 
@@ -31,7 +30,7 @@ public class AppTest {
     @Test
     public void sigmoidxTest() {
         TensorFlow tf = new TensorFlow();
-        Tensor sigmoidx = tf.sigmoidx(new Tensor(new int[]{3}));
+        Tensor sigmoidx = tf.sigmoid(new Tensor(new int[]{3}));
         TensorExecutor executor = new TensorExecutor(sigmoidx);
         executor.run();
     }

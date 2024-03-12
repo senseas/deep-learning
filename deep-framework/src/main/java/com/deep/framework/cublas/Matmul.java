@@ -34,7 +34,7 @@ public class Matmul {
         // NM = [NK * KM]
         cublasDgemm(handle, CUBLAS_OP_N, CUBLAS_OP_N, N, M, K, alpha, device_inputy, N, device_inputx, K, beta, device_output, N);
         // Copy the result from the device to the host
-        output.dataSync(deviceId, stream);
+        output.dataSynchronize(deviceId, stream);
 
         cudaStreamDestroy(stream);
     }
@@ -61,12 +61,12 @@ public class Matmul {
         // KM = KM_T[KN * NM]
         cublasDgemm(handle, CUBLAS_OP_T, CUBLAS_OP_N, K, M, N, alpha, device_inputy, N, device_output_grad, N, beta, device_inputx_grad, K);
         // Copy the result from the device to the host
-        inputx.gradSync(deviceId, stream);
+        inputx.gradSynchronize(deviceId, stream);
 
         // NK = [NM * MK]
         cublasDgemm(handle, CUBLAS_OP_N, CUBLAS_OP_T, N, K, M, alpha, device_output_grad, N, device_inputx, K, beta, device_inputy_grad, N);
         // Copy the result from the device to the host
-        inputy.gradSync(deviceId, stream);
+        inputy.gradSynchronize(deviceId, stream);
 
         cudaStreamDestroy(stream);
     }
@@ -90,7 +90,7 @@ public class Matmul {
         // NM = [NK * KM]
         cublasDgemm(handle, CUBLAS_OP_T, CUBLAS_OP_N, N, M, K, alpha, device_inputy, K, device_inputx, K, beta, device_output, N);
         // Copy the result from the device to the host
-        output.dataSync(deviceId, stream);
+        output.dataSynchronize(deviceId, stream);
 
         cudaStreamDestroy(stream);
     }
@@ -117,12 +117,12 @@ public class Matmul {
         // KM = KM_T[KN * NM]
         cublasDgemm(handle, CUBLAS_OP_N, CUBLAS_OP_N, K, M, N, alpha, device_inputy, K, output_device_grad, N, beta, device_inputx_grad, K);
         // Copy the result from the device to the host
-        inputx.gradSync(deviceId, stream);
+        inputx.gradSynchronize(deviceId, stream);
 
         // NK = [GC_T=NM * MK]
         cublasDgemm(handle, CUBLAS_OP_N, CUBLAS_OP_T, K, N, M, alpha, device_inputx, K, output_device_grad, N, beta, device_inputy_grad, K);
         // Copy the result from the device to the host
-        inputy.gradSync(deviceId, stream);
+        inputy.gradSynchronize(deviceId, stream);
 
         cudaStreamDestroy(stream);
     }

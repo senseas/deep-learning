@@ -90,4 +90,5 @@ public class Reduce {
         cudnnDestroyTensorDescriptor(output_desc);
         cudnnDestroyReduceTensorDescriptor(reduce_desc);
     }
+
 }

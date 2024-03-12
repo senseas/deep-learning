@@ -15,8 +15,8 @@ import static jcuda.jcudnn.cudnnActivationMode.*;
 import static jcuda.jcudnn.cudnnDataType.CUDNN_DATA_DOUBLE;
 import static jcuda.jcudnn.cudnnNanPropagation.CUDNN_NOT_PROPAGATE_NAN;
 import static jcuda.jcudnn.cudnnTensorFormat.CUDNN_TENSOR_NCHW;
-import static jcuda.runtime.JCuda.cudaStreamCreate;
 import static jcuda.runtime.JCuda.cudaStreamDestroy;
+import static jcuda.runtime.JCuda.cudaStreamSynchronize;
 
 public class Activation {
 
@@ -27,6 +27,7 @@ public class Activation {
         cudaStream_t stream = createCudaStream(output);
         activationForward(input, output, Shape.shapes(input.getShape()), CUDNN_ACTIVATION_SIGMOID, handle, stream);
         cudaStreamDestroy(stream);
+        cudaStreamSynchronize(stream);
     }
 
     public static void sigmoidBackward(Tensor input, Tensor output) {
@@ -34,6 +35,7 @@ public class Activation {
         cudaStream_t stream = createCudaStream(output);
         activationBackward(input, output, Shape.shapes(input.getShape()), CUDNN_ACTIVATION_SIGMOID, handle, stream);
         cudaStreamDestroy(stream);
+        cudaStreamSynchronize(stream);
     }
 
     public static void reluForward(Tensor input, Tensor output) {
@@ -41,6 +43,7 @@ public class Activation {
         cudaStream_t stream = createCudaStream(output);
         activationForward(input, output, Shape.shapes(input.getShape()), CUDNN_ACTIVATION_RELU, handle, stream);
         cudaStreamDestroy(stream);
+        cudaStreamSynchronize(stream);
     }
 
     public static void reluBackward(Tensor input, Tensor output) {
@@ -48,6 +51,7 @@ public class Activation {
         cudaStream_t stream = createCudaStream(output);
         activationBackward(input, output, Shape.shapes(input.getShape()), CUDNN_ACTIVATION_RELU, handle, stream);
         cudaStreamDestroy(stream);
+        cudaStreamSynchronize(stream);
     }
 
     public static void tanhForward(Tensor input, Tensor output) {
@@ -55,6 +59,7 @@ public class Activation {
         cudaStream_t stream = createCudaStream(output);
         activationForward(input, output, Shape.shapes(input.getShape()), CUDNN_ACTIVATION_TANH, handle, stream);
         cudaStreamDestroy(stream);
+        cudaStreamSynchronize(stream);
     }
 
     public static void tanhBackward(Tensor input, Tensor output) {
@@ -62,6 +67,7 @@ public class Activation {
         cudaStream_t stream = createCudaStream(output);
         activationBackward(input, output, Shape.shapes(input.getShape()), CUDNN_ACTIVATION_TANH, handle, stream);
         cudaStreamDestroy(stream);
+        cudaStreamSynchronize(stream);
     }
 
     public static void clippedReluForward(Tensor input, Tensor output) {
@@ -69,6 +75,7 @@ public class Activation {
         cudaStream_t stream = createCudaStream(output);
         activationForward(input, output, Shape.shapes(input.getShape()), CUDNN_ACTIVATION_CLIPPED_RELU, handle, stream);
         cudaStreamDestroy(stream);
+        cudaStreamSynchronize(stream);
     }
 
     public static void clippedReluBackward(Tensor input, Tensor output) {
@@ -76,6 +83,7 @@ public class Activation {
         cudaStream_t stream = createCudaStream(output);
         activationBackward(input, output, Shape.shapes(input.getShape()), CUDNN_ACTIVATION_CLIPPED_RELU, handle, stream);
         cudaStreamDestroy(stream);
+        cudaStreamSynchronize(stream);
     }
 
     public static void eluForward(Tensor input, Tensor output) {
@@ -83,6 +91,7 @@ public class Activation {
         cudaStream_t stream = createCudaStream(output);
         activationForward(input, output, Shape.shapes(input.getShape()), CUDNN_ACTIVATION_ELU, handle, stream);
         cudaStreamDestroy(stream);
+        cudaStreamSynchronize(stream);
     }
 
     public static void eluBackward(Tensor input, Tensor output) {
@@ -90,6 +99,7 @@ public class Activation {
         cudaStream_t stream = createCudaStream(output);
         activationBackward(input, output, Shape.shapes(input.getShape()), CUDNN_ACTIVATION_ELU, handle, stream);
         cudaStreamDestroy(stream);
+        cudaStreamSynchronize(stream);
     }
 
     public static void identityForward(Tensor input, Tensor output) {
@@ -97,6 +107,7 @@ public class Activation {
         cudaStream_t stream = createCudaStream(output);
         activationForward(input, output, Shape.shapes(input.getShape()), CUDNN_ACTIVATION_IDENTITY, handle, stream);
         cudaStreamDestroy(stream);
+        cudaStreamSynchronize(stream);
     }
 
     public static void identityBackward(Tensor input, Tensor output) {
@@ -104,6 +115,7 @@ public class Activation {
         cudaStream_t stream = createCudaStream(output);
         activationBackward(input, output, Shape.shapes(input.getShape()), CUDNN_ACTIVATION_IDENTITY, handle, stream);
         cudaStreamDestroy(stream);
+        cudaStreamSynchronize(stream);
     }
 
     public static void swishForward(Tensor input, Tensor output) {
@@ -111,6 +123,7 @@ public class Activation {
         cudaStream_t stream = createCudaStream(output);
         activationForward(input, output, Shape.shapes(input.getShape()), CUDNN_ACTIVATION_SWISH, handle, stream);
         cudaStreamDestroy(stream);
+        cudaStreamSynchronize(stream);
     }
 
     public static void swishBackward(Tensor input, Tensor output) {
@@ -118,6 +131,7 @@ public class Activation {
         cudaStream_t stream = createCudaStream(output);
         activationBackward(input, output, Shape.shapes(input.getShape()), CUDNN_ACTIVATION_SWISH, handle, stream);
         cudaStreamDestroy(stream);
+        cudaStreamSynchronize(stream);
     }
 
     public static void activationForward(Tensor input, Tensor output, int[] shape, int activation, cudnnHandle handle, cudaStream_t stream) {
@@ -146,7 +160,7 @@ public class Activation {
         // 执行激活函数
         Pointer alpha = Pointer.to(new double[]{1}), beta = Pointer.to(new double[]{0});
         cudnnActivationForward(handle, activation_desc, alpha, input_desc, device_input, beta, output_desc, device_output);
-        output.dataSync(deviceId, stream);
+        output.dataSynchronize(deviceId, stream);
 
         // 释放资源
         cudnnDestroyTensorDescriptor(input_desc);
@@ -183,7 +197,7 @@ public class Activation {
         // 执行激活函数
         Pointer alpha = Pointer.to(new double[]{1}), beta = Pointer.to(new double[]{0});
         cudnnActivationBackward(handle, activation_desc, alpha, output_desc, device_output, output_desc, device_output_grad, input_desc, device_input, beta, input_desc, device_input_grad);
-        input.gradSync(deviceId, stream);
+        input.gradSynchronize(deviceId, stream);
 
         // 释放资源
         cudnnDestroyTensorDescriptor(input_desc);

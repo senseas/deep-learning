@@ -15,6 +15,7 @@ import static jcuda.jcudnn.cudnnSoftmaxAlgorithm.CUDNN_SOFTMAX_ACCURATE;
 import static jcuda.jcudnn.cudnnSoftmaxMode.CUDNN_SOFTMAX_MODE_INSTANCE;
 import static jcuda.jcudnn.cudnnTensorFormat.CUDNN_TENSOR_NCHW;
 import static jcuda.runtime.JCuda.cudaStreamDestroy;
+import static jcuda.runtime.JCuda.cudaStreamSynchronize;
 
 public class Softmax {
 
@@ -28,6 +29,7 @@ public class Softmax {
         cudaStream_t stream = createCudaStream(output);
         softmaxForward(input, output, Shape.shapes(shape), handle, stream);
         cudaStreamDestroy(stream);
+        cudaStreamSynchronize(stream);
     }
 
     public static void softmaxBackward(Tensor input, Tensor output, int... shape) {
@@ -35,6 +37,7 @@ public class Softmax {
         cudaStream_t stream = createCudaStream(output);
         softmaxBackward(input, output, Shape.shapes(shape), handle, stream);
         cudaStreamDestroy(stream);
+        cudaStreamSynchronize(stream);
     }
 
     public static void softmaxForward(Tensor input, Tensor output, int[] shape, cudnnHandle handle, cudaStream_t stream) {
@@ -61,7 +64,7 @@ public class Softmax {
         cudnnSoftmaxForward(handle, softmaxAlgo, softmaxMode, alpha, input_desc, device_input, beta, output_desc, device_output);
 
         // 将输出数据复制到主机内存
-        output.dataSync(deviceId, stream);
+        output.dataSynchronize(deviceId, stream);
 
         cudnnDestroyTensorDescriptor(input_desc);
         cudnnDestroyTensorDescriptor(output_desc);
@@ -91,9 +94,10 @@ public class Softmax {
         cudnnSoftmaxBackward(handle, softmaxAlgo, softmaxMode, alpha, output_desc, device_output, output_desc, device_output_grad, beta, input_grad_desc, device_input_grad);
 
         // 将输出数据复制到主机内存
-        input.gradSync(deviceId, stream);
+        input.gradSynchronize(deviceId, stream);
 
         cudnnDestroyTensorDescriptor(output_desc);
         cudnnDestroyTensorDescriptor(input_grad_desc);
     }
+
 }

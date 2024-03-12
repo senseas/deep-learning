@@ -41,6 +41,7 @@ public class OpTensor {
         cudaStream_t stream = createCudaStream(output);
         addTensorForward(input, output, Shape.shapes(input.getShape()), handle, stream);
         cudaStreamDestroy(stream);
+        cudaStreamSynchronize(stream);
     }
 
     public static void addTensorBackward(Tensor input, Tensor output) {
@@ -48,6 +49,7 @@ public class OpTensor {
         cudaStream_t stream = createCudaStream(output);
         addTensorBackward(input, output, Shape.shapes(input.getShape()), handle, stream);
         cudaStreamDestroy(stream);
+        cudaStreamSynchronize(stream);
     }
 
     public static void mulTensorScalarForward(Tensor input, Tensor inputy, Tensor output) {
@@ -55,6 +57,7 @@ public class OpTensor {
         cudaStream_t stream = createCudaStream(output);
         mulTensorScalar(input.getData(), inputy.data(), output.getData(), Shape.shapes(input.getShape()), handle);
         cudaStreamDestroy(stream);
+        cudaStreamSynchronize(stream);
     }
 
     public static void mulTensorScalarBackward(Tensor input, Tensor inputy, Tensor output) {
@@ -62,6 +65,7 @@ public class OpTensor {
         cudaStream_t stream = createCudaStream(output);
         mulTensorScalar(output.getGrad(), inputy.data(), input.getGrad(), Shape.shapes(input.getShape()), handle);
         cudaStreamDestroy(stream);
+        cudaStreamSynchronize(stream);
     }
 
     public static void subTensor(Tensor input, Tensor output) {
@@ -69,6 +73,7 @@ public class OpTensor {
         cudaStream_t stream = createCudaStream(output);
         subTensor(input.getData(), output.getData(), Shape.shapes(input.getShape()), handle);
         cudaStreamDestroy(stream);
+        cudaStreamSynchronize(stream);
     }
 
     public static void addTensorForward(Tensor input, Tensor output, int[] shape, cudnnHandle handle, cudaStream_t stream) {
@@ -87,7 +92,7 @@ public class OpTensor {
         Pointer alpha = Pointer.to(new double[]{1}), beta = Pointer.to(new double[]{1});
         cudnnAddTensor(handle, alpha, data_desc, device_input, beta, data_desc, device_output);
         // copy device memory to host
-        output.dataSync(deviceId, stream);
+        output.dataSynchronize(deviceId, stream);
 
         // clear up
         cudnnDestroyTensorDescriptor(data_desc);
@@ -109,7 +114,7 @@ public class OpTensor {
         Pointer alpha = Pointer.to(new double[]{1}), beta = Pointer.to(new double[]{1});
         cudnnAddTensor(handle, alpha, data_desc, device_output_grad, beta, data_desc, device_input_grad);
         // copy device memory to host
-        input.gradSync(deviceId, stream);
+        input.gradSynchronize(deviceId, stream);
 
         // clear up
         cudnnDestroyTensorDescriptor(data_desc);

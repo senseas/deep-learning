@@ -40,15 +40,15 @@ public class NNTest{
 
         Tensor tensor11 = tf.matmul(new Tensor("weight", new int[]{4, 2}), input);
         Tensor tensor12 = tf.addx(tensor11, new Tensor("bias", new int[]{4, 1}));
-        Tensor tensor13 = tf.sigmoidx(tensor12);
+        Tensor tensor13 = tf.sigmoid(tensor12);
 
         Tensor tensor21 = tf.matmul(new Tensor("weight", new int[]{6, 4}), tensor13);
         Tensor tensor22 = tf.addx(tensor21, new Tensor("bias", new int[]{6, 1}));
-        Tensor tensor23 = tf.sigmoidx(tensor22);
+        Tensor tensor23 = tf.sigmoid(tensor22);
 
         Tensor tensor31 = tf.matmul(new Tensor("weight", new int[]{1, 6}), tensor23);
         Tensor tensor32 = tf.addx(tensor31, new Tensor("bias", new int[]{1, 1}));
-        Tensor tensor33 = tf.sigmoidx(tensor32);
+        Tensor tensor33 = tf.sigmoid(tensor32);
         Tensor tensor34 = tf.squarex(label, tensor33);
 
         TensorExecutor executor = new TensorExecutor(tensor34, input, label);
