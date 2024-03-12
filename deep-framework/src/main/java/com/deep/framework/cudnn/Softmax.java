@@ -42,12 +42,12 @@ public class Softmax {
         cudnnSetTensor4dDescriptor(output_desc, CUDNN_TENSOR_NCHW, DATA_TYPE, batch_size, channels, height, width);
 
         // 分配设备内存
-        Pointer device_input = input.getDeviceData();
-        Pointer device_output = output.getDeviceData();
+        Pointer input_data = input.getDeviceData();
+        Pointer output_data = output.getDeviceData();
 
         // 执行SoftmaxForward操作
         Pointer alpha = Pointer.to(new double[]{1}), beta = Pointer.to(new double[]{0});
-        cudnnSoftmaxForward(handle, softmaxAlgo, softmaxMode, alpha, input_desc, device_input, beta, output_desc, device_output);
+        cudnnSoftmaxForward(handle, softmaxAlgo, softmaxMode, alpha, input_desc, input_data, beta, output_desc, output_data);
 
         // 将输出数据复制到主机内存
         output.dataSynchronize();
@@ -77,13 +77,13 @@ public class Softmax {
         cudnnSetTensor4dDescriptor(output_desc, CUDNN_TENSOR_NCHW, DATA_TYPE, batch_size, channels, height, width);
 
         // 分配设备内存
-        Pointer device_output = output.getDeviceData();
-        Pointer device_output_grad = output.getDeviceGrad();
-        Pointer device_input_grad = input.getDeviceGrad();
+        Pointer output_data = output.getDeviceData();
+        Pointer output_grad = output.getDeviceGrad();
+        Pointer input_grad = input.getDeviceGrad();
 
         // 执行SoftmaxBackward操作
         Pointer alpha = Pointer.to(new double[]{1}), beta = Pointer.to(new double[]{0});
-        cudnnSoftmaxBackward(handle, softmaxAlgo, softmaxMode, alpha, output_desc, device_output, output_desc, device_output_grad, beta, input_grad_desc, device_input_grad);
+        cudnnSoftmaxBackward(handle, softmaxAlgo, softmaxMode, alpha, output_desc, output_data, output_desc, output_grad, beta, input_grad_desc, input_grad);
 
         // 将输出数据复制到主机内存
         input.gradSynchronize();

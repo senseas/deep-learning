@@ -152,12 +152,12 @@ public class Activation {
         cudnnCreateActivationDescriptor(activation_desc);
         cudnnSetActivationDescriptor(activation_desc, activation, CUDNN_NOT_PROPAGATE_NAN, 1);
 
-        Pointer device_input = input.getDeviceData();
-        Pointer device_output = output.getDeviceData();
+        Pointer input_data = input.getDeviceData();
+        Pointer output_data = output.getDeviceData();
 
         // 执行激活函数
         Pointer alpha = Pointer.to(new double[]{1}), beta = Pointer.to(new double[]{0});
-        cudnnActivationForward(handle, activation_desc, alpha, input_desc, device_input, beta, output_desc, device_output);
+        cudnnActivationForward(handle, activation_desc, alpha, input_desc, input_data, beta, output_desc, output_data);
         output.dataSynchronize();
 
         // 释放资源
@@ -185,15 +185,15 @@ public class Activation {
         cudnnCreateActivationDescriptor(activation_desc);
         cudnnSetActivationDescriptor(activation_desc, activation, CUDNN_NOT_PROPAGATE_NAN, 1);
 
-        Pointer device_input = input.getDeviceData();
-        Pointer device_input_grad = input.getDeviceGrad();
+        Pointer input_data = input.getDeviceData();
+        Pointer input_grad = input.getDeviceGrad();
 
-        Pointer device_output = output.getDeviceData();
-        Pointer device_output_grad = output.getDeviceGrad();
+        Pointer output_data = output.getDeviceData();
+        Pointer output_grad = output.getDeviceGrad();
 
         // 执行激活函数
         Pointer alpha = Pointer.to(new double[]{1}), beta = Pointer.to(new double[]{0});
-        cudnnActivationBackward(handle, activation_desc, alpha, output_desc, device_output, output_desc, device_output_grad, input_desc, device_input, beta, input_desc, device_input_grad);
+        cudnnActivationBackward(handle, activation_desc, alpha, output_desc, output_data, output_desc, output_grad, input_desc, input_data, beta, input_desc, input_grad);
         input.gradSynchronize();
 
         // 释放资源

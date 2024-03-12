@@ -63,8 +63,8 @@ public class Reduce {
         cudnnSetReduceTensorDescriptor(reduce_desc, op, CUDNN_DATA_DOUBLE, CUDNN_NOT_PROPAGATE_NAN, CUDNN_REDUCE_TENSOR_NO_INDICES, CUDNN_32BIT_INDICES);
 
         // Allocate memory on GPU
-        Pointer device_input = createDevicePointer(input);
-        Pointer device_output = createDevicePointer(output);
+        Pointer input_data = createDevicePointer(input);
+        Pointer output_data = createDevicePointer(output);
 
         // Allocate workspace memory on GPU
         long[] workspaceSize = new long[1];
@@ -74,12 +74,12 @@ public class Reduce {
 
         // Perform reduce operation
         Pointer alpha = Pointer.to(new double[]{1}), beta = Pointer.to(new double[]{0});
-        cudnnReduceTensor(handle, reduce_desc, null, 0l, workspace, workspaceSize[0], alpha, input_desc, device_input, beta, output_desc, device_output);
-        cudaMemcpy(Pointer.to(output), device_output, Sizeof.DOUBLE, cudaMemcpyDeviceToHost);
+        cudnnReduceTensor(handle, reduce_desc, null, 0l, workspace, workspaceSize[0], alpha, input_desc, input_data, beta, output_desc, output_data);
+        cudaMemcpy(Pointer.to(output), output_data, Sizeof.DOUBLE, cudaMemcpyDeviceToHost);
 
         // Release resources
-        cudaFree(device_input);
-        cudaFree(device_output);
+        cudaFree(input_data);
+        cudaFree(output_data);
         cudaFree(workspace);
 
         cudnnDestroyTensorDescriptor(input_desc);
@@ -107,8 +107,8 @@ public class Reduce {
         cudnnSetReduceTensorDescriptor(reduce_desc, op, CUDNN_DATA_DOUBLE, CUDNN_NOT_PROPAGATE_NAN, CUDNN_REDUCE_TENSOR_NO_INDICES, CUDNN_32BIT_INDICES);
 
         // Allocate memory on GPU
-        Pointer device_input = input.getDeviceData();
-        Pointer device_output = output.getDeviceData();
+        Pointer input_data = input.getDeviceData();
+        Pointer output_data = output.getDeviceData();
 
         // Allocate workspace memory on GPU
         long[] workspaceSize = new long[1];
@@ -118,7 +118,7 @@ public class Reduce {
 
         // Perform reduce operation
         Pointer alpha = Pointer.to(new double[]{1}), beta = Pointer.to(new double[]{0});
-        cudnnReduceTensor(handle, reduce_desc, null, 0l, workspace, workspaceSize[0], alpha, input_desc, device_input, beta, output_desc, device_output);
+        cudnnReduceTensor(handle, reduce_desc, null, 0l, workspace, workspaceSize[0], alpha, input_desc, input_data, beta, output_desc, output_data);
         output.dataSynchronize();
 
         // Release resources

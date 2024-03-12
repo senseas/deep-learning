@@ -48,16 +48,16 @@ public class Pooling {
         cudnnSetPooling2dDescriptor(pool_desc, mode, CUDNN_NOT_PROPAGATE_NAN, window[0], window[1], padding[0], padding[1], stride[0], stride[1]);
 
         // allocate memory on device
-        Pointer device_input = createDevicePointer(input);
-        Pointer device_output = createDevicePointer(output);
+        Pointer device_input_data = createDevicePointer(input);
+        Pointer device_output_data = createDevicePointer(output);
 
         Pointer alpha = Pointer.to(new double[]{1}), beta = Pointer.to(new double[]{0});
-        cudnnPoolingForward(handle, pool_desc, alpha, input_desc, device_input, beta, output_desc, device_output);
-        cudaMemcpy(Pointer.to(output), device_output, output.length * DATA_TYPE_SZIE, cudaMemcpyDeviceToHost);
+        cudnnPoolingForward(handle, pool_desc, alpha, input_desc, device_input_data, beta, output_desc, device_output_data);
+        cudaMemcpy(Pointer.to(output), device_output_data, output.length * DATA_TYPE_SZIE, cudaMemcpyDeviceToHost);
 
         // Release resources
-        cudaFree(device_input);
-        cudaFree(device_output);
+        cudaFree(device_input_data);
+        cudaFree(device_output_data);
 
         cudnnDestroyTensorDescriptor(input_desc);
         cudnnDestroyTensorDescriptor(output_desc);
@@ -81,22 +81,22 @@ public class Pooling {
         cudnnSetPooling2dDescriptor(pool_desc, mode, CUDNN_NOT_PROPAGATE_NAN, window[0], window[1], padding[0], padding[1], stride[0], stride[1]);
 
         // allocate memory on device
-        Pointer device_input = createDevicePointer(input);
+        Pointer device_input_data = createDevicePointer(input);
         Pointer device_input_grad = createDevicePointer(input_grad);
 
-        Pointer device_output = createDevicePointer(output);
+        Pointer device_output_data = createDevicePointer(output);
         Pointer device_output_grad = createDevicePointer(output_grad);
 
         Pointer alpha = Pointer.to(new double[]{1}), beta = Pointer.to(new double[]{0});
 
         // perform BackwardData operation
-        cudnnPoolingBackward(handle, pool_desc, alpha, output_desc, device_output, output_desc, device_output_grad, input_desc, device_input, beta, input_desc, device_input_grad);
+        cudnnPoolingBackward(handle, pool_desc, alpha, output_desc, device_output_data, output_desc, device_output_grad, input_desc, device_input_data, beta, input_desc, device_input_grad);
         cudaMemcpy(Pointer.to(input_grad), device_input_grad, input_grad.length * DATA_TYPE_SZIE, cudaMemcpyDeviceToHost);
 
         // Release resources
-        cudaFree(device_input);
+        cudaFree(device_input_data);
         cudaFree(device_input_grad);
-        cudaFree(device_output);
+        cudaFree(device_output_data);
         cudaFree(device_output_grad);
 
         cudnnDestroyTensorDescriptor(input_desc);

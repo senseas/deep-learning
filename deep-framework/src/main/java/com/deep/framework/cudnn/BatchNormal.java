@@ -107,13 +107,13 @@ public class BatchNormal {
         cudnnSetTensor4dDescriptor(output_desc, CUDNN_TENSOR_NCHW, DATA_TYPE, output_shape[0], output_shape[1], output_shape[2], output_shape[3]);
 
         // allocate memory on device
-        Pointer device_input = createDevicePointer(input);
+        Pointer device_input_data = createDevicePointer(input);
         Pointer device_input_grad = createDevicePointer(input_grad);
 
-        Pointer device_output = createDevicePointer(output);
+        Pointer device_output_data = createDevicePointer(output);
         Pointer device_output_grad = createDevicePointer(output_grad);
 
-        Pointer device_scale = createDevicePointer(scale);
+        Pointer device_scale_data = createDevicePointer(scale);
         Pointer device_scale_grad = createDevicePointer(scale_grad);
 
         Pointer device_bias_grad = createDevicePointer(bias_grad);
@@ -122,20 +122,20 @@ public class BatchNormal {
         Pointer device_save_inv_var = createDevicePointer(save_inv_var);
 
         Pointer alpha = Pointer.to(new double[]{1}), beta = Pointer.to(new double[]{0});
-        cudnnBatchNormalizationBackward(handle, FWD_MODE, alpha, beta, alpha, beta, input_desc, device_input, input_desc, device_output_grad, input_desc, device_input_grad, scale_bias_mean_var_desc, device_scale, device_scale_grad, device_bias_grad, epsilon, device_save_mean, device_save_inv_var);
+        cudnnBatchNormalizationBackward(handle, FWD_MODE, alpha, beta, alpha, beta, input_desc, device_input_data, input_desc, device_output_grad, input_desc, device_input_grad, scale_bias_mean_var_desc, device_scale_data, device_scale_grad, device_bias_grad, epsilon, device_save_mean, device_save_inv_var);
 
         cudaMemcpy(Pointer.to(input_grad), device_input_grad, input_grad.length * DATA_TYPE_SZIE, cudaMemcpyDeviceToHost);
         cudaMemcpy(Pointer.to(scale_grad), device_scale_grad, scale_grad.length * DATA_TYPE_SZIE, cudaMemcpyDeviceToHost);
         cudaMemcpy(Pointer.to(bias_grad), device_bias_grad, bias_grad.length * DATA_TYPE_SZIE, cudaMemcpyDeviceToHost);
 
         // Release resources
-        cudaFree(device_input);
+        cudaFree(device_input_data);
         cudaFree(device_input_grad);
 
-        cudaFree(device_output);
+        cudaFree(device_output_data);
         cudaFree(device_output_grad);
 
-        cudaFree(device_scale);
+        cudaFree(device_scale_data);
         cudaFree(device_scale_grad);
 
         cudaFree(device_bias_grad);
