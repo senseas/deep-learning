@@ -14,11 +14,10 @@ import static com.deep.framework.cudnn.BatchNormal.normalForward;
 import static com.deep.framework.cudnn.Convolution.convBackward;
 import static com.deep.framework.cudnn.Convolution.convForward;
 import static com.deep.framework.cudnn.OpTensor.opTensor;
-import static com.deep.framework.cudnn.Reduce.reduce;
+import static com.deep.framework.cudnn.Reduce.sum;
 import static com.deep.framework.cudnn.Softmax.softmaxBackward;
 import static com.deep.framework.cudnn.Softmax.softmaxForward;
 import static jcuda.jcudnn.cudnnOpTensorOp.CUDNN_OP_TENSOR_ADD;
-import static jcuda.jcudnn.cudnnReduceTensorOp.CUDNN_REDUCE_TENSOR_ADD;
 
 @Slf4j
 public class CudnnTest {
@@ -27,7 +26,7 @@ public class CudnnTest {
     public void cudnnReduceTest() {
         double input[] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48};
         double output[] = new double[1];
-        reduce(input, new int[]{1, 1, 12, 4}, output, new int[]{1, 1, 1, 1}, CUDNN_REDUCE_TENSOR_ADD);
+        sum(new Tensor(input, new int[]{1, 1, 12, 4}) ,new Tensor(output, new int[]{1, 1, 1, 1}));
         System.out.println(output[0]);
     }
 

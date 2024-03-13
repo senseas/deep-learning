@@ -211,13 +211,14 @@ public class TensorFlow implements Serializable {
         return new ScalarOperator("Sum", input) {
 
             public double compute() {
-                Tenser<Tensor> A = getInput(0).getOutput();
-                return A.stream().mapToDouble(Tensor::data).sum();
+                Tensor A = getInput(0);
+                Reduce.sum(A, this);
+                return data();
             }
 
             public void gradient(double grad) {
-                Tenser<Tensor> A = getInput(0).getOutput();
-                A.stream().forEach(a -> a.grad(grad));
+                Tensor A = getInput(0);
+                addTensorScalar(A.getGrad(), grad(), Shape.shapes(input.getShape()));
             }
 
         };
@@ -921,7 +922,8 @@ public class TensorFlow implements Serializable {
 
             public double compute() {
                 Tensor inx = getInput(0);
-                return Reduce.mean(inx);
+                Reduce.mean(inx,this);
+                return data();
             }
 
             public void gradient(double grad) {
