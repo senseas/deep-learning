@@ -114,7 +114,7 @@ public class Matmul {
         // Copy the result from the device to the host
         inputx.gradSynchronize();
 
-        // NK = NK[NM * MK]
+        // NK = [NM * MK]
         cublasDgemm(handle, CUBLAS_OP_N, CUBLAS_OP_T, K, N, M, alpha, inputx_data, K, output_grad, N, beta, inputy_grad, K);
         // Copy the result from the device to the host
         inputy.gradSynchronize();
