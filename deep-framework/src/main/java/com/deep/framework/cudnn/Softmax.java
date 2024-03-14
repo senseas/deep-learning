@@ -28,16 +28,16 @@ public class Softmax {
         cudnnHandle handle = getCudnnHandle(output);
         cudaStream_t stream = createCudaStream(output);
         softmaxForward(input, output, Shape.shapes(shape), handle, stream);
-        cudaStreamDestroy(stream);
         cudaStreamSynchronize(stream);
+        cudaStreamDestroy(stream);
     }
 
     public static void softmaxBackward(Tensor input, Tensor output, int... shape) {
         cudnnHandle handle = getCudnnHandle(output);
         cudaStream_t stream = createCudaStream(output);
         softmaxBackward(input, output, Shape.shapes(shape), handle, stream);
-        cudaStreamDestroy(stream);
         cudaStreamSynchronize(stream);
+        cudaStreamDestroy(stream);
     }
 
     public static void softmaxForward(Tensor input, Tensor output, int[] shape, cudnnHandle handle, cudaStream_t stream) {
@@ -56,12 +56,12 @@ public class Softmax {
 
         // 分配设备内存
         int deviceId = output.getDeviceId();
-        Pointer device_input = input.getDeviceData(deviceId, stream);
-        Pointer device_output = output.getDeviceData(deviceId, stream);
+        Pointer input_data = input.getDeviceData(deviceId, stream);
+        Pointer output_data = output.getDeviceData(deviceId, stream);
 
         // 执行SoftmaxForward操作
         Pointer alpha = Pointer.to(new double[]{1}), beta = Pointer.to(new double[]{0});
-        cudnnSoftmaxForward(handle, softmaxAlgo, softmaxMode, alpha, input_desc, device_input, beta, output_desc, device_output);
+        cudnnSoftmaxForward(handle, softmaxAlgo, softmaxMode, alpha, input_desc, input_data, beta, output_desc, output_data);
 
         // 将输出数据复制到主机内存
         output.dataSynchronize(deviceId, stream);
@@ -85,13 +85,13 @@ public class Softmax {
 
         // 分配设备内存
         int deviceId = output.getDeviceId();
-        Pointer device_output = output.getDeviceData(deviceId, stream);
-        Pointer device_output_grad = output.getDeviceGrad(deviceId, stream);
-        Pointer device_input_grad = input.getDeviceGrad(deviceId, stream);
+        Pointer output_data = output.getDeviceData(deviceId, stream);
+        Pointer output_grad = output.getDeviceGrad(deviceId, stream);
+        Pointer input_grad = input.getDeviceGrad(deviceId, stream);
 
         // 执行SoftmaxBackward操作
         Pointer alpha = Pointer.to(new double[]{1}), beta = Pointer.to(new double[]{0});
-        cudnnSoftmaxBackward(handle, softmaxAlgo, softmaxMode, alpha, output_desc, device_output, output_desc, device_output_grad, beta, input_grad_desc, device_input_grad);
+        cudnnSoftmaxBackward(handle, softmaxAlgo, softmaxMode, alpha, output_desc, output_data, output_desc, output_grad, beta, input_grad_desc, input_grad);
 
         // 将输出数据复制到主机内存
         input.gradSynchronize(deviceId, stream);

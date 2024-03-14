@@ -921,7 +921,8 @@ public class TensorFlow implements Serializable {
 
             public double compute() {
                 Tensor inx = getInput(0);
-                return Reduce.mean(inx);
+                Reduce.mean(inx,this);
+                return data();
             }
 
             public void gradient(double grad) {

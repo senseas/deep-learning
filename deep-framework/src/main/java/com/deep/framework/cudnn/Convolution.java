@@ -61,9 +61,9 @@ public class Convolution {
         cudnnSetConvolution2dDescriptor(conv_desc, padding[0], padding[1], stride[0], stride[1], 1, 1, CUDNN_CROSS_CORRELATION, DATA_TYPE);
 
         // allocate memory on device
-        Pointer device_input = createDevicePointer(input);
-        Pointer device_filter = createDevicePointer(filter);
-        Pointer device_output = createDevicePointer(output);
+        Pointer device_input_data = createDevicePointer(input);
+        Pointer device_filter_data = createDevicePointer(filter);
+        Pointer device_output_data = createDevicePointer(output);
 
         // Allocate workspace memory on GPU
         long[] workspaceSize = {0};
@@ -72,13 +72,13 @@ public class Convolution {
         cudaMalloc(workspace, workspaceSize[0]);
 
         Pointer alpha = Pointer.to(new double[]{1}), beta = Pointer.to(new double[]{0});
-        cudnnConvolutionForward(handle, alpha, input_desc, device_input, filter_desc, device_filter, conv_desc, FWD_ALGO, workspace, workspaceSize[0], beta, output_desc, device_output);
-        cudaMemcpy(Pointer.to(output), device_output, output.length * DATA_TYPE_SZIE, cudaMemcpyDeviceToHost);
+        cudnnConvolutionForward(handle, alpha, input_desc, device_input_data, filter_desc, device_filter_data, conv_desc, FWD_ALGO, workspace, workspaceSize[0], beta, output_desc, device_output_data);
+        cudaMemcpy(Pointer.to(output), device_output_data, output.length * DATA_TYPE_SZIE, cudaMemcpyDeviceToHost);
 
-        // clean up
-        cudaFree(device_input);
-        cudaFree(device_filter);
-        cudaFree(device_output);
+        // Release resources
+        cudaFree(device_input_data);
+        cudaFree(device_filter_data);
+        cudaFree(device_output_data);
 
         cudnnDestroyTensorDescriptor(input_desc);
         cudnnDestroyTensorDescriptor(output_desc);
@@ -108,13 +108,13 @@ public class Convolution {
         cudnnSetConvolution2dDescriptor(conv_desc, padding[0], padding[1], stride[0], stride[1], 1, 1, CUDNN_CROSS_CORRELATION, DATA_TYPE);
 
         // allocate memory on device
-        Pointer device_input = createDevicePointer(input);
+        Pointer device_input_data = createDevicePointer(input);
         Pointer device_input_grad = createDevicePointer(input_grad);
 
-        Pointer device_filter = createDevicePointer(filter);
+        Pointer device_filter_data = createDevicePointer(filter);
         Pointer device_filter_grad = createDevicePointer(filter_grad);
 
-        Pointer device_output = createDevicePointer(output);
+        Pointer device_output_data = createDevicePointer(output);
         Pointer device_output_grad = createDevicePointer(output_grad);
 
         Pointer alpha = Pointer.to(new double[]{1}), beta = Pointer.to(new double[]{0});
@@ -126,7 +126,7 @@ public class Convolution {
         cudaMalloc(filterWorkspace, filterWorkspaceSize[0]);
 
         // Perform BackwardFilter operation
-        cudnnConvolutionBackwardFilter(handle, alpha, input_desc, device_input, output_desc, device_output_grad, conv_desc, BWD_FILTER_ALGO, filterWorkspace, filterWorkspaceSize[0], beta, filter_desc, device_filter_grad);
+        cudnnConvolutionBackwardFilter(handle, alpha, input_desc, device_input_data, output_desc, device_output_grad, conv_desc, BWD_FILTER_ALGO, filterWorkspace, filterWorkspaceSize[0], beta, filter_desc, device_filter_grad);
         cudaMemcpy(Pointer.to(filter_grad), device_filter_grad, filter_grad.length * DATA_TYPE_SZIE, cudaMemcpyDeviceToHost);
 
         // Allocate workspace memory on GPU
@@ -136,17 +136,17 @@ public class Convolution {
         cudaMalloc(dataWorkSpace, dataWorkspaceSize[0]);
 
         // Perform BackwardData operation
-        cudnnConvolutionBackwardData(handle, alpha, filter_desc, device_filter, output_desc, device_output_grad, conv_desc, BWD_DATA_ALGO, dataWorkSpace, dataWorkspaceSize[0], beta, input_desc, device_input_grad);
+        cudnnConvolutionBackwardData(handle, alpha, filter_desc, device_filter_data, output_desc, device_output_grad, conv_desc, BWD_DATA_ALGO, dataWorkSpace, dataWorkspaceSize[0], beta, input_desc, device_input_grad);
         cudaMemcpy(Pointer.to(input_grad), device_input_grad, input_grad.length * DATA_TYPE_SZIE, cudaMemcpyDeviceToHost);
 
-        // clean up
-        cudaFree(device_input);
+        // Release resources
+        cudaFree(device_input_data);
         cudaFree(device_input_grad);
 
-        cudaFree(device_filter);
+        cudaFree(device_filter_data);
         cudaFree(device_filter_grad);
 
-        cudaFree(device_output);
+        cudaFree(device_output_data);
         cudaFree(device_output_grad);
 
         cudaFree(filterWorkspace);

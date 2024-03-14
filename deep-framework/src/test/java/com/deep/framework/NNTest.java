@@ -58,7 +58,7 @@ public class NNTest{
             executor.run(inSet, labSet);
             if (i % 1000 == 0) {
                 log.info("---------{}------------", i);
-                Tensor loss = tensor34.getOutput().one();
+                Tensor loss = tensor34;
                 log("输入：", inSet);
                 log("标签：", labSet);
                 log("输出：", tensor33.data());

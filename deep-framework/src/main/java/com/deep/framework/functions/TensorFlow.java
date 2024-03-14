@@ -28,8 +28,8 @@ public class TensorFlow implements Operator {
         return new TensorFunction("Standard", new int[]{1}, input) {
 
             public Tenser<Tensor> compute() {
-                Tenser<Tensor> inx = getInput(0), iny = getInput(1);
-                Tensor mean = iny.one(), cons = cons(2);
+                Tenser<Tensor> inx = getInput(0);
+                Tensor mean = getInput()[1], cons = cons(2);
                 Tenser<Tensor> pows = zeroTensors(inx.shape);
                 forEach(inx, pows, (Tensor a) -> pow(minus(a, mean), cons));
                 return new Tenser<>(mean(Tensor(pows)));
@@ -53,8 +53,8 @@ public class TensorFlow implements Operator {
         return new TensorFunction("Sigmoid", new int[]{1}, input) {
 
             public Tenser<Tensor> compute() {
-                Tenser<Tensor> input = getInput(0);
-                return new Tenser<>(div(cons(1d), add(cons(1d), exp(minus(input.one())))));
+                Tensor input = getInput()[0];
+                return new Tenser<>(div(cons(1d), add(cons(1d), exp(minus(input)))));
             }
 
         };
@@ -64,7 +64,7 @@ public class TensorFlow implements Operator {
         return new TensorFunction("SigmoidCross", new int[]{1}, input) {
 
             public Tenser<Tensor> compute() {
-                Tensor a = getInput(0).one(), b = getInput(1).one();
+                Tensor a = getInput()[0], b = getInput()[1];
                 return new Tenser<>(minus(add(mul(a, log(b)), mul(minus(cons(1), a), log(minus(cons(1), b))))));
             }
 
@@ -75,7 +75,7 @@ public class TensorFlow implements Operator {
         return new TensorFunction("Square", new int[]{1}, input) {
 
             public Tenser<Tensor> compute() {
-                Tensor a = getInput(0).one(), b = getInput(1).one();
+                Tensor a = getInput()[0], b = getInput()[1];
                 return new Tenser<>(mul(cons(0.5), pow(minus(a, b), cons(2d))));
             }
 

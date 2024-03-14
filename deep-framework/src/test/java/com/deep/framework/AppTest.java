@@ -22,14 +22,6 @@ public class AppTest {
     @Test
     public void sigmoidTest() {
         TensorFlow tf = new TensorFlow();
-        Tensor tensor = tf.sigmoid(new Tensor(-0.6354469361189982));
-        TensorExecutor executor = new TensorExecutor(tensor);
-        executor.run();
-    }
-
-    @Test
-    public void sigmoidxTest() {
-        TensorFlow tf = new TensorFlow();
         Tensor sigmoidx = tf.sigmoid(new Tensor(new int[]{3}));
         TensorExecutor executor = new TensorExecutor(sigmoidx);
         executor.run();
