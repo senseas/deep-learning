@@ -9,6 +9,8 @@ import jcuda.jcudnn.cudnnOpTensorDescriptor;
 import jcuda.jcudnn.cudnnTensorDescriptor;
 import jcuda.runtime.cudaStream_t;
 
+import java.util.Arrays;
+
 import static com.deep.framework.cuda.Cuda.createCudaStream;
 import static com.deep.framework.cuda.Cuda.createDevicePointer;
 import static com.deep.framework.cudnn.CudnnConfig.getCudnnHandle;
@@ -72,6 +74,14 @@ public class OpTensor {
         cudnnHandle handle = getCudnnHandle(output);
         cudaStream_t stream = createCudaStream(output);
         subTensor(input.getData(), output.getData(), Shape.shapes(input.getShape()), handle);
+        cudaStreamSynchronize(stream);
+        cudaStreamDestroy(stream);
+    }
+
+    public static void addTensorScalar(Tensor input, Tensor output) {
+        cudnnHandle handle = getCudnnHandle(output);
+        cudaStream_t stream = createCudaStream(output);
+        addTensorScalar(input.getGrad(), output.grad(), Shape.shapes(input.getShape()), handle);
         cudaStreamSynchronize(stream);
         cudaStreamDestroy(stream);
     }
@@ -182,6 +192,34 @@ public class OpTensor {
         // Release resources
         cudaFree(input_data);
         cudaFree(output_data);
+
+        cudnnDestroyTensorDescriptor(data_desc);
+    }
+
+    public static void addTensorScalar(double[] output, double scalar, int[] shape, cudnnHandle handle) {
+        double[] input = new double[output.length];
+        Arrays.fill(input, scalar);
+
+        int batch_size = shape[0], channels = shape[1], height = shape[2], width = shape[3];
+        // Define output tensor
+        cudnnTensorDescriptor data_desc = new cudnnTensorDescriptor();
+        cudnnCreateTensorDescriptor(data_desc);
+        cudnnSetTensor4dDescriptor(data_desc, CUDNN_TENSOR_NCHW, DATA_TYPE, batch_size, channels, height, width);
+
+        // allocate memory on device
+        Pointer input_data = createDevicePointer(input);
+        Pointer output_data = createDevicePointer(output);
+
+        // Perform op operation
+        Pointer alpha = Pointer.to(new double[]{1}), beta = Pointer.to(new double[]{1});
+        cudnnAddTensor(handle, alpha, data_desc, input_data, beta, data_desc, output_data);
+
+        // copy device memory to host
+        cudaMemcpy(Pointer.to(output), output_data, output.length * DATA_TYPE_SZIE, cudaMemcpyDeviceToHost);
+
+        // Release resources
+        cudaFree(output_data);
+        cudaFree(input_data);
 
         cudnnDestroyTensorDescriptor(data_desc);
     }
