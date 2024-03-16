@@ -56,7 +56,7 @@ public class CudaContext implements Serializable {
     public Pointer getDeviceGrad(Tensor tensor) {
         Pointer deviceGrad = tensor.getDeviceGradMap().get(deviceId);
         if (Objects.isNull(deviceGrad)) {
-            tensor.getDeviceDataMap().put(deviceId, deviceGrad = createDevicePointer(tensor.getGrad(), deviceId));
+            tensor.getDeviceGradMap().put(deviceId, deviceGrad = createDevicePointer(tensor.getGrad(), deviceId));
         } else {
             copyDataHostToDevice(tensor.getGrad(), deviceGrad, stream);
         }

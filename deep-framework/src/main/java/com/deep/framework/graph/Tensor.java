@@ -4,7 +4,6 @@ import com.deep.framework.lang.Palce;
 import com.deep.framework.lang.Tenser;
 import com.deep.framework.optimizer.AdamOptimizer;
 import jcuda.Pointer;
-import jcuda.runtime.cudaStream_t;
 import lombok.Data;
 import lombok.experimental.Accessors;
 
@@ -14,7 +13,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
-import static com.deep.framework.cuda.Cuda.*;
 import static com.deep.framework.lang.Shape.*;
 
 @Data
@@ -124,38 +122,6 @@ public class Tensor implements Serializable {
     public void createOptimizer() {
         if (Objects.nonNull(optimizer)) return;
         optimizer = new AdamOptimizer(shape);
-    }
-
-    public Pointer getDeviceData(int deviceId, cudaStream_t stream) {
-        Pointer deviceData = getDeviceDataMap().get(deviceId);
-        if (Objects.isNull(deviceData)) {
-            deviceDataMap.put(deviceId, deviceData = createDevicePointer(data, deviceId));
-        } else {
-            copyDataHostToDevice(data, deviceData, stream);
-        }
-        return deviceData;
-    }
-
-    public Pointer getDeviceGrad(int deviceId, cudaStream_t stream) {
-        Pointer deviceGrad = getDeviceGradMap().get(deviceId);
-        if (Objects.isNull(deviceGrad)) {
-            deviceGradMap.put(deviceId, deviceGrad = createDevicePointer(grad, deviceId));
-        } else {
-            copyDataHostToDevice(grad, deviceGrad, stream);
-        }
-        return deviceGrad;
-    }
-
-    public void dataSynchronize(int deviceId, cudaStream_t stream) {
-        Pointer deviceData = deviceDataMap.get(deviceId);
-        if (Objects.isNull(deviceData)) return;
-        copyDataDeviceToHost(data, deviceData, stream);
-    }
-
-    public void gradSynchronize(int deviceId, cudaStream_t stream) {
-        Pointer deviceGrad = deviceGradMap.get(deviceId);
-        if (Objects.isNull(deviceGrad)) return;
-        copyDataDeviceToHost(grad, deviceGrad, stream);
     }
 
     public Map<Integer, Pointer> getDeviceDataMap() {
