@@ -556,7 +556,7 @@ public class TensorFlow implements Serializable {
             }
 
         };
-    }
+   }
 
     public Tensor square(Tensor... input) {
         return new ScalarFunction("Square", input) {
