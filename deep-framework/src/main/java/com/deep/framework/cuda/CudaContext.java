@@ -63,13 +63,13 @@ public class CudaContext implements Serializable {
         return deviceGrad;
     }
 
-    public void dataSynchronize(Tensor tensor) {
+    public void copyDataToHost(Tensor tensor) {
         Pointer deviceData = tensor.getDeviceDataMap().get(deviceId);
         if (Objects.isNull(deviceData)) return;
         copyDataDeviceToHost(tensor.getData(), deviceData, stream);
     }
 
-    public void gradSynchronize(Tensor tensor) {
+    public void copyGradToHost(Tensor tensor) {
         Pointer deviceGrad = tensor.getDeviceGradMap().get(deviceId);
         if (Objects.isNull(deviceGrad)) return;
         copyDataDeviceToHost(tensor.getGrad(), deviceGrad, stream);

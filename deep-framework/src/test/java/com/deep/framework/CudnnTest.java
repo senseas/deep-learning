@@ -1,6 +1,7 @@
 package com.deep.framework;
 
 import com.alibaba.fastjson.JSONObject;
+import com.deep.framework.cuda.CudaContext;
 import com.deep.framework.graph.Tensor;
 import com.deep.framework.lang.Shape;
 import lombok.extern.slf4j.Slf4j;
@@ -27,17 +28,18 @@ public class CudnnTest {
     public void cudnnReduceTest() {
         double input[] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48};
         double output[] = new double[1];
-        sum(new Tensor(input, new int[]{1, 1, 12, 4}) ,new Tensor(output, new int[]{1, 1, 1, 1}));
+        sum(new Tensor(input, new int[]{1, 1, 12, 4}), new Tensor(output, new int[]{1, 1, 1, 1}));
         System.out.println(output[0]);
     }
 
     @Test
     public void cudnnOpTensorTest() {
         int[] shape = {1, 1, 1, 10};
-        double[] inputx = {0.2731f, 0.1389f, 0.7491f, 0.2307f, 0.3411f, 0.6492f, 0.2313f, 0.5270f, 0.6267f, 0.2598f};
-        double[] inputy = {0.2731f, 0.1389f, 0.7491f, 0.2307f, 0.3411f, 0.6492f, 0.2313f, 0.5270f, 0.6267f, 0.2598f};
-        double[] output = new double[shape.length];
-        opTensor(inputx, inputy, output, shape, CUDNN_OP_TENSOR_ADD, getCudnnHandle(0));
+        Tensor inputx = new Tensor(new double[]{0.2731f, 0.1389f, 0.7491f, 0.2307f, 0.3411f, 0.6492f, 0.2313f, 0.5270f, 0.6267f, 0.2598f}, shape);
+        Tensor inputy = new Tensor(new double[]{0.2731f, 0.1389f, 0.7491f, 0.2307f, 0.3411f, 0.6492f, 0.2313f, 0.5270f, 0.6267f, 0.2598f}, shape);
+        Tensor output = new Tensor(new double[shape.length], shape);
+        CudaContext cudaContext = new CudaContext(output);
+        opTensor(inputx, inputy, output, shape, CUDNN_OP_TENSOR_ADD, cudaContext);
         System.out.println(JSONObject.toJSONString(output));
     }
 

@@ -15,6 +15,7 @@ import static com.deep.framework.cudnn.Activation.*;
 import static com.deep.framework.cudnn.BatchNormal.normalBackward;
 import static com.deep.framework.cudnn.BatchNormal.normalForward;
 import static com.deep.framework.cudnn.OpTensor.*;
+import static com.deep.framework.cudnn.Reduce.sumBackward;
 import static com.deep.framework.cudnn.Softmax.softmaxBackward;
 import static com.deep.framework.cudnn.Softmax.softmaxForward;
 import static com.deep.framework.lang.ForEach.forEach;
@@ -218,7 +219,7 @@ public class TensorFlow implements Serializable {
 
             public void gradient(double grad) {
                 Tensor A = getInput(0);
-                addTensorScalar(A, this);
+                sumBackward(A, this);
             }
 
         };

@@ -28,7 +28,7 @@ public class Matmul {
         // NM = [NK * KM]
         cublasDgemm(handle, CUBLAS_OP_N, CUBLAS_OP_N, N, M, K, alpha, inputy_data, N, inputx_data, K, beta, output_data, N);
         // Copy the result from the device to the host
-        context.dataSynchronize(output);
+        context.copyDataToHost(output);
         context.clear();
     }
 
@@ -52,12 +52,12 @@ public class Matmul {
         // KM = [KN * NM]
         cublasDgemm(handle, CUBLAS_OP_T, CUBLAS_OP_N, K, M, N, alpha, inputy_data, N, output_grad, N, beta, inputx_grad, K);
         // Copy the result from the device to the host
-        context.dataSynchronize(inputx);
+        context.copyDataToHost(inputx);
 
         // NK = [NM * MK]
         cublasDgemm(handle, CUBLAS_OP_N, CUBLAS_OP_T, N, K, M, alpha, output_grad, N, inputx_data, K, beta, inputy_grad, N);
         // Copy the result from the device to the host
-        context.gradSynchronize(inputy);
+        context.copyGradToHost(inputy);
         context.clear();
     }
 
@@ -78,7 +78,7 @@ public class Matmul {
         // NM = [NK * KM]
         cublasDgemm(handle, CUBLAS_OP_T, CUBLAS_OP_N, N, M, K, alpha, inputy_data, K, inputx_data, K, beta, output_data, N);
         // Copy the result from the device to the host
-        context.dataSynchronize(output);
+        context.copyDataToHost(output);
         context.clear();
     }
 
@@ -102,12 +102,12 @@ public class Matmul {
         // KM = [KN * NM]
         cublasDgemm(handle, CUBLAS_OP_N, CUBLAS_OP_N, K, M, N, alpha, inputy_data, K, output_grad, N, beta, inputx_grad, K);
         // Copy the result from the device to the host
-        context.gradSynchronize(inputx);
+        context.copyGradToHost(inputx);
 
         // NK = [NM * MK]
         cublasDgemm(handle, CUBLAS_OP_N, CUBLAS_OP_T, K, N, M, alpha, inputx_data, K, output_grad, N, beta, inputy_grad, K);
         // Copy the result from the device to the host
-        context.gradSynchronize(inputy);
+        context.copyGradToHost(inputy);
         context.clear();
     }
 

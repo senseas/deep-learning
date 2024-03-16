@@ -128,7 +128,7 @@ public class Activation {
         // 执行激活函数
         Pointer alpha = Pointer.to(new double[]{1}), beta = Pointer.to(new double[]{0});
         cudnnActivationForward(handle, activation_desc, alpha, input_desc, input_data, beta, output_desc, output_data);
-        context.dataSynchronize(output);
+        context.copyDataToHost(output);
 
         // 释放资源
         cudnnDestroyTensorDescriptor(input_desc);
@@ -165,7 +165,7 @@ public class Activation {
         // 执行激活函数
         Pointer alpha = Pointer.to(new double[]{1}), beta = Pointer.to(new double[]{0});
         cudnnActivationBackward(handle, activation_desc, alpha, output_desc, output_data, output_desc, output_grad, input_desc, input_data, beta, input_desc, input_grad);
-        context.gradSynchronize(input);
+        context.copyGradToHost(input);
 
         // 释放资源
         cudnnDestroyTensorDescriptor(input_desc);

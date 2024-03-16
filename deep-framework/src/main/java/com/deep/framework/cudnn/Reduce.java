@@ -8,6 +8,9 @@ import jcuda.jcudnn.cudnnHandle;
 import jcuda.jcudnn.cudnnReduceTensorDescriptor;
 import jcuda.jcudnn.cudnnTensorDescriptor;
 
+import java.util.Arrays;
+
+import static com.deep.framework.cudnn.OpTensor.addTensorBackward;
 import static jcuda.jcudnn.JCudnn.*;
 import static jcuda.jcudnn.cudnnDataType.CUDNN_DATA_DOUBLE;
 import static jcuda.jcudnn.cudnnIndicesType.CUDNN_32BIT_INDICES;
@@ -76,6 +79,14 @@ public class Reduce {
         context.clear();
     }
 
+    public static void sumBackward(Tensor input, Tensor output) {
+        CudaContext context = new CudaContext(output);
+        Tensor tensor = new Tensor(input.getShape());
+        Arrays.fill(tensor.getGrad(), output.grad());
+        addTensorBackward(input, tensor, Shape.shapes(input.getShape()), context);
+        context.clear();
+    }
+
     public static void reduce(Tensor input, Tensor output, int op, CudaContext context) {
         int[] input_shape = Shape.shapes(input.getShape()), output_shape = Shape.shapes(output.getShape());
         int batch_size = input_shape[0], channels = input_shape[1], height = input_shape[2], width = input_shape[3];
@@ -109,7 +120,7 @@ public class Reduce {
         // Perform reduce operation
         Pointer alpha = Pointer.to(new double[]{1}), beta = Pointer.to(new double[]{0});
         cudnnReduceTensor(handle, reduce_desc, null, 0l, workspace, workspaceSize[0], alpha, input_desc, input_data, beta, output_desc, output_data);
-        context.dataSynchronize(output);
+        context.copyDataToHost(output);
 
         // Release resources
         cudaFree(workspace);

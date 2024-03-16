@@ -56,7 +56,7 @@ public class Softmax {
         cudnnSoftmaxForward(handle, softmaxAlgo, softmaxMode, alpha, input_desc, input_data, beta, output_desc, output_data);
 
         // 将输出数据复制到主机内存
-        context.dataSynchronize(output);
+        context.copyDataToHost(output);
 
         cudnnDestroyTensorDescriptor(input_desc);
         cudnnDestroyTensorDescriptor(output_desc);
@@ -87,7 +87,7 @@ public class Softmax {
         cudnnSoftmaxBackward(handle, softmaxAlgo, softmaxMode, alpha, output_desc, output_data, output_desc, output_grad, beta, input_grad_desc, input_grad);
 
         // 将输出数据复制到主机内存
-        context.gradSynchronize(input);
+        context.copyGradToHost(input);
 
         cudnnDestroyTensorDescriptor(output_desc);
         cudnnDestroyTensorDescriptor(input_grad_desc);
