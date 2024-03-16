@@ -29,10 +29,6 @@ public class CublasConfig {
         cublasHandles.put(id, cublasHandle);
     }
 
-    public static cublasHandle getCublasHandle(Tensor tensor) {
-        return getCublasHandle(tensor.getDeviceId());
-    }
-
     public static cublasHandle getCublasHandle(int id) {
         return cublasHandles.get(id);
     }

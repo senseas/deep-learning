@@ -1,5 +1,6 @@
 package com.deep.framework.cudnn;
 
+import com.deep.framework.cuda.CudaContext;
 import com.deep.framework.graph.Tensor;
 import com.deep.framework.lang.Shape;
 import jcuda.Pointer;
@@ -7,19 +8,17 @@ import jcuda.Sizeof;
 import jcuda.jcudnn.cudnnHandle;
 import jcuda.jcudnn.cudnnOpTensorDescriptor;
 import jcuda.jcudnn.cudnnTensorDescriptor;
-import jcuda.runtime.cudaStream_t;
 
 import java.util.Arrays;
 
-import static com.deep.framework.cuda.Cuda.createCudaStream;
 import static com.deep.framework.cuda.Cuda.createDevicePointer;
-import static com.deep.framework.cudnn.CudnnConfig.getCudnnHandle;
 import static jcuda.jcudnn.JCudnn.*;
 import static jcuda.jcudnn.cudnnDataType.CUDNN_DATA_DOUBLE;
 import static jcuda.jcudnn.cudnnNanPropagation.CUDNN_NOT_PROPAGATE_NAN;
 import static jcuda.jcudnn.cudnnOpTensorOp.CUDNN_OP_TENSOR_ADD;
 import static jcuda.jcudnn.cudnnTensorFormat.CUDNN_TENSOR_NCHW;
-import static jcuda.runtime.JCuda.*;
+import static jcuda.runtime.JCuda.cudaFree;
+import static jcuda.runtime.JCuda.cudaMemcpy;
 import static jcuda.runtime.cudaMemcpyKind.cudaMemcpyDeviceToHost;
 
 public class OpTensor {
@@ -28,89 +27,80 @@ public class OpTensor {
     private static final int DATA_TYPE_SZIE = Sizeof.DOUBLE;
 
     public static void addForward(Tensor inputx, Tensor inputy, Tensor output) {
-        cudnnHandle handle = getCudnnHandle(output);
-        opTensor(inputx.getData(), inputy.getData(), output.getData(), Shape.shapes(inputx.getShape()), CUDNN_OP_TENSOR_ADD, handle);
+        CudaContext context = new CudaContext(output);
+        opTensor(inputx.getData(), inputy.getData(), output.getData(), Shape.shapes(inputx.getShape()), CUDNN_OP_TENSOR_ADD, context.getCudnnHandle());
     }
 
     public static void addBackward(Tensor inputx, Tensor inputy, Tensor output) {
-        cudnnHandle handle = getCudnnHandle(output);
-        addTensor(output.getGrad(), inputx.getGrad(), Shape.shapes(inputx.getShape()), handle);
-        addTensor(output.getGrad(), inputy.getGrad(), Shape.shapes(inputy.getShape()), handle);
+        CudaContext context = new CudaContext(output);
+        addTensor(output.getGrad(), inputx.getGrad(), Shape.shapes(inputx.getShape()), context.getCudnnHandle());
+        addTensor(output.getGrad(), inputy.getGrad(), Shape.shapes(inputy.getShape()), context.getCudnnHandle());
     }
 
     public static void addTensorForward(Tensor input, Tensor output) {
-        cudnnHandle handle = getCudnnHandle(output);
-        cudaStream_t stream = createCudaStream(output);
-        addTensorForward(input, output, Shape.shapes(input.getShape()), handle, stream);
-        cudaStreamSynchronize(stream);
-        cudaStreamDestroy(stream);
+        CudaContext context = new CudaContext(output);
+        addTensorForward(input, output, Shape.shapes(input.getShape()), context);
+        context.clear();
     }
 
     public static void addTensorBackward(Tensor input, Tensor output) {
-        cudnnHandle handle = getCudnnHandle(output);
-        cudaStream_t stream = createCudaStream(output);
-        addTensorBackward(input, output, Shape.shapes(input.getShape()), handle, stream);
-        cudaStreamSynchronize(stream);
-        cudaStreamDestroy(stream);
+        CudaContext context = new CudaContext(output);
+        addTensorBackward(input, output, Shape.shapes(input.getShape()), context);
+        context.clear();
     }
 
     public static void mulTensorScalarForward(Tensor input, Tensor inputy, Tensor output) {
-        cudnnHandle handle = getCudnnHandle(output);
-        cudaStream_t stream = createCudaStream(output);
-        mulTensorScalar(input.getData(), inputy.data(), output.getData(), Shape.shapes(input.getShape()), handle);
-        cudaStreamSynchronize(stream);
-        cudaStreamDestroy(stream);
+        CudaContext context = new CudaContext(output);
+        mulTensorScalar(input.getData(), inputy.data(), output.getData(), Shape.shapes(input.getShape()), context.getCudnnHandle());
+        context.clear();
     }
 
     public static void mulTensorScalarBackward(Tensor input, Tensor inputy, Tensor output) {
-        cudnnHandle handle = getCudnnHandle(output);
-        cudaStream_t stream = createCudaStream(output);
-        mulTensorScalar(output.getGrad(), inputy.data(), input.getGrad(), Shape.shapes(input.getShape()), handle);
-        cudaStreamSynchronize(stream);
-        cudaStreamDestroy(stream);
+        CudaContext context = new CudaContext(output);
+        mulTensorScalar(output.getGrad(), inputy.data(), input.getGrad(), Shape.shapes(input.getShape()), context.getCudnnHandle());
+        context.clear();
     }
 
     public static void subTensor(Tensor input, Tensor output) {
-        cudnnHandle handle = getCudnnHandle(output);
-        cudaStream_t stream = createCudaStream(output);
-        subTensor(input.getData(), output.getData(), Shape.shapes(input.getShape()), handle);
-        cudaStreamSynchronize(stream);
-        cudaStreamDestroy(stream);
+        CudaContext context = new CudaContext(output);
+        subTensor(input.getData(), output.getData(), Shape.shapes(input.getShape()), context.getCudnnHandle());
+        context.clear();
     }
 
     public static void addTensorScalar(Tensor input, Tensor output) {
-        cudnnHandle handle = getCudnnHandle(output);
-        cudaStream_t stream = createCudaStream(output);
-        addTensorScalar(input.getGrad(), output.grad(), Shape.shapes(input.getShape()), handle);
-        cudaStreamSynchronize(stream);
-        cudaStreamDestroy(stream);
+        CudaContext context = new CudaContext(output);
+        addTensorScalar(input.getGrad(), output.grad(), Shape.shapes(input.getShape()), context.getCudnnHandle());
+        context.clear();
     }
 
-    public static void addTensorForward(Tensor input, Tensor output, int[] shape, cudnnHandle handle, cudaStream_t stream) {
+    public static void addTensorForward(Tensor input, Tensor output, int[] shape, CudaContext context) {
         int batch_size = shape[0], channels = shape[1], height = shape[2], width = shape[3];
+
+        cudnnHandle handle = context.getCudnnHandle();
         // Define input tensor
         cudnnTensorDescriptor data_desc = new cudnnTensorDescriptor();
         cudnnCreateTensorDescriptor(data_desc);
         cudnnSetTensor4dDescriptor(data_desc, CUDNN_TENSOR_NCHW, DATA_TYPE, batch_size, channels, height, width);
 
         // allocate memory on device
-        int deviceId = output.getDeviceId();
-        Pointer input_data = input.getDeviceData(deviceId, stream);
-        Pointer output_data = output.getDeviceData(deviceId, stream);
+        Pointer input_data = context.getDeviceData(input);
+        Pointer output_data = context.getDeviceData(output);
 
         // Perform op operation
         Pointer alpha = Pointer.to(new double[]{1}), beta = Pointer.to(new double[]{1});
         cudnnAddTensor(handle, alpha, data_desc, input_data, beta, data_desc, output_data);
 
         // copy device memory to host
-        output.dataSynchronize(deviceId, stream);
+        context.dataSynchronize(output);
 
         // Release resources
         cudnnDestroyTensorDescriptor(data_desc);
     }
 
-    public static void addTensorBackward(Tensor input, Tensor output, int[] shape, cudnnHandle handle, cudaStream_t stream) {
+    public static void addTensorBackward(Tensor input, Tensor output, int[] shape, CudaContext context) {
         int batch_size = shape[0], channels = shape[1], height = shape[2], width = shape[3];
+
+        cudnnHandle handle = context.getCudnnHandle();
         // Define input tensor
         cudnnTensorDescriptor data_desc = new cudnnTensorDescriptor();
         cudnnCreateTensorDescriptor(data_desc);
@@ -118,15 +108,15 @@ public class OpTensor {
 
         // allocate memory on device
         int deviceId = output.getDeviceId();
-        Pointer input_grad = input.getDeviceGrad(deviceId, stream);
-        Pointer output_grad = output.getDeviceGrad(deviceId, stream);
+        Pointer input_grad = context.getDeviceGrad(input);
+        Pointer output_grad = context.getDeviceGrad(output);
 
         // Perform op operation
         Pointer alpha = Pointer.to(new double[]{1}), beta = Pointer.to(new double[]{1});
         cudnnAddTensor(handle, alpha, data_desc, output_grad, beta, data_desc, input_grad);
 
         // copy device memory to host
-        input.gradSynchronize(deviceId, stream);
+        context.gradSynchronize(input);
 
         // Release resources
         cudnnDestroyTensorDescriptor(data_desc);

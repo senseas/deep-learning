@@ -1,5 +1,6 @@
 package com.deep.framework.cudnn;
 
+import com.deep.framework.cuda.CudaContext;
 import com.deep.framework.graph.Tensor;
 import com.deep.framework.lang.Shape;
 import jcuda.Pointer;
@@ -11,7 +12,6 @@ import java.util.Arrays;
 import java.util.stream.DoubleStream;
 
 import static com.deep.framework.cuda.Cuda.createDevicePointer;
-import static com.deep.framework.cudnn.CudnnConfig.getCudnnHandle;
 import static jcuda.jcudnn.JCudnn.*;
 import static jcuda.jcudnn.cudnnBatchNormMode.CUDNN_BATCHNORM_SPATIAL;
 import static jcuda.jcudnn.cudnnDataType.CUDNN_DATA_DOUBLE;
@@ -28,7 +28,7 @@ public class BatchNormal {
     static double[] save_mean, save_inv_var;
 
     public static void normalForward(Tensor input, Tensor scale, Tensor bias, Tensor output) {
-        cudnnHandle handle = getCudnnHandle(output);
+        CudaContext context = new CudaContext(output);
         int length = input.getData().length;
         double a = DoubleStream.of(input.getData()).sum() / length;
         double b = 1 / DoubleStream.of(input.getData()).map(c -> Math.pow(c - a, 2)).sum() / length;
@@ -36,16 +36,16 @@ public class BatchNormal {
 
         save_mean = new double[input.shape(0)];
         save_inv_var = new double[input.shape(0)];
-        normalForward(mean, var, save_mean, save_inv_var, input.getData(), Shape.shapes(input.getShape()), scale.getData(), Shape.shapes(scale.getShape()), bias.getData(), output.getData(), Shape.shapes(output.getShape()), handle);
+        normalForward(mean, var, save_mean, save_inv_var, input.getData(), Shape.shapes(input.getShape()), scale.getData(), Shape.shapes(scale.getShape()), bias.getData(), output.getData(), Shape.shapes(output.getShape()), context.getCudnnHandle());
     }
 
     public static void normalBackward(Tensor input, Tensor scale, Tensor bias, Tensor output) {
-        cudnnHandle handle = getCudnnHandle(output);
+        CudaContext context = new CudaContext(output);
         int length = input.shape(0);
         double[] mean = new double[length], var = new double[length];
         Arrays.fill(mean, save_mean[0]);
         Arrays.fill(var, save_inv_var[0]);
-        normalBackward(mean, var, input.getData(), input.getGrad(), Shape.shapes(input.getShape()), scale.getData(), scale.getGrad(), Shape.shapes(scale.getShape()), bias.getGrad(), output.getData(), output.getGrad(), Shape.shapes(output.getShape()), handle);
+        normalBackward(mean, var, input.getData(), input.getGrad(), Shape.shapes(input.getShape()), scale.getData(), scale.getGrad(), Shape.shapes(scale.getShape()), bias.getGrad(), output.getData(), output.getGrad(), Shape.shapes(output.getShape()), context.getCudnnHandle());
     }
 
     public static void normalForward(double[] mean, double[] var, double[] save_mean, double[] save_inv_var, double[] input, int[] input_shape, double[] scale, int[] scale_shape, double[] bias, double[] output, int[] output_shape, cudnnHandle handle) {

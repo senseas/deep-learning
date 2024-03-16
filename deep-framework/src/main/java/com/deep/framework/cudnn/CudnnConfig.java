@@ -1,6 +1,5 @@
 package com.deep.framework.cudnn;
 
-import com.deep.framework.graph.Tensor;
 import jcuda.jcudnn.JCudnn;
 import jcuda.jcudnn.cudnnHandle;
 
@@ -27,10 +26,6 @@ public class CudnnConfig {
         cudnnHandle cudnnHandle = new cudnnHandle();
         cudnnCreate(cudnnHandle);
         cudnnHandles.put(id, cudnnHandle);
-    }
-
-    public static cudnnHandle getCudnnHandle(Tensor tensor) {
-        return getCudnnHandle(tensor.getDeviceId());
     }
 
     public static cudnnHandle getCudnnHandle(int id) {
