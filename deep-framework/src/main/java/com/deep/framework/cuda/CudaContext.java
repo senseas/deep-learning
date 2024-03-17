@@ -38,13 +38,13 @@ public class CudaContext implements Serializable {
     }
 
     public cudnnHandle getCudnnHandle() {
-        cudnnHandle cudnn = CudnnConfig.getCudnnHandle(deviceId);
-        cudnnSetStream(cudnn, stream);
-        return cudnn;
+        cudnnHandle handle = CudnnConfig.getCudnnHandle(deviceId);
+        cudnnSetStream(handle, stream);
+        return handle;
     }
 
     public Pointer getDeviceData(Tensor tensor) {
-        jcuda.Pointer deviceData = tensor.getDeviceDataMap().get(deviceId);
+        Pointer deviceData = tensor.getDeviceDataMap().get(deviceId);
         if (Objects.isNull(deviceData)) {
             tensor.getDeviceDataMap().put(deviceId, deviceData = createDevicePointer(tensor.getData(), deviceId));
         } else {

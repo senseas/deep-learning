@@ -17,7 +17,7 @@ import static com.deep.framework.lang.Shape.size;
 
 @Data
 @Accessors(chain = true)
-public class Tensor implements Serializable, Operator {
+public class Tensor implements Operator {
 
     public Tensor() {
         this.name = "None";

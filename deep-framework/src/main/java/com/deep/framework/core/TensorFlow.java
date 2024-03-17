@@ -541,7 +541,7 @@ public class TensorFlow implements Serializable {
         };
     }
 
-   public Tensor sigmoid(Tensor input) {
+    public Tensor sigmoid(Tensor input) {
         return new TensorOperator("Sigmoid", input.getShape(), input) {
 
             public Tenser<Tensor> compute() {
@@ -556,7 +556,7 @@ public class TensorFlow implements Serializable {
             }
 
         };
-   }
+    }
 
     public Tensor square(Tensor... input) {
         return new ScalarFunction("Square", input) {

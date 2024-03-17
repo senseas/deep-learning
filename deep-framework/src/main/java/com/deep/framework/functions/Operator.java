@@ -2,11 +2,12 @@ package com.deep.framework.functions;
 
 import com.deep.framework.lang.Tenser;
 
+import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-public interface Operator {
+public interface Operator extends Serializable{
 
     default Tensor cons(String input) {
         return new TensorConst(input);
