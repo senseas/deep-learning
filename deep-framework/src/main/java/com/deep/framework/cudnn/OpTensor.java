@@ -118,45 +118,6 @@ public class OpTensor {
         cudnnDestroyTensorDescriptor(data_desc);
     }
 
-    public static void opTensor(double[] inputx, double[] inputy, double[] output, int[] shape, int op) {
-        int batch_size = shape[0], channels = shape[1], height = shape[2], width = shape[3];
-        // Define input tensor
-        cudnnTensorDescriptor input_desc = new cudnnTensorDescriptor();
-        cudnnCreateTensorDescriptor(input_desc);
-        cudnnSetTensor4dDescriptor(input_desc, CUDNN_TENSOR_NCHW, DATA_TYPE, batch_size, channels, height, width);
-
-        // Define output tensor
-        cudnnTensorDescriptor output_desc = new cudnnTensorDescriptor();
-        cudnnCreateTensorDescriptor(output_desc);
-        cudnnSetTensor4dDescriptor(output_desc, CUDNN_TENSOR_NCHW, DATA_TYPE, batch_size, channels, height, width);
-
-        // Define op tensor
-        cudnnOpTensorDescriptor op_tensor_desc = new cudnnOpTensorDescriptor();
-        cudnnCreateOpTensorDescriptor(op_tensor_desc);
-        cudnnSetOpTensorDescriptor(op_tensor_desc, op, DATA_TYPE, CUDNN_NOT_PROPAGATE_NAN);
-
-        // allocate memory on device
-        Pointer inputx_data = createDevicePointer(inputx);
-        Pointer inputy_data = createDevicePointer(inputy);
-        Pointer output_data = createDevicePointer(output);
-
-        // Perform op operation
-        Pointer alpha = Pointer.to(new double[]{1}), beta = Pointer.to(new double[]{1});
-        cudnnOpTensor(handle, op_tensor_desc, alpha, input_desc, inputx_data, alpha, input_desc, inputy_data, beta, output_desc, output_data);
-
-        // copy device memory to host
-        cudaMemcpy(Pointer.to(output), output_data, output.length * DATA_TYPE_SZIE, cudaMemcpyDeviceToHost);
-
-        // Release resources
-        cudaFree(inputx_data);
-        cudaFree(inputy_data);
-        cudaFree(output_data);
-
-        cudnnDestroyTensorDescriptor(input_desc);
-        cudnnDestroyTensorDescriptor(output_desc);
-        cudnnDestroyOpTensorDescriptor(op_tensor_desc);
-    }
-
     public static void addTensor(double[] input, double[] output, int[] shape) {
         int batch_size = shape[0], channels = shape[1], height = shape[2], width = shape[3];
         // Define input tensor
@@ -270,6 +231,45 @@ public class OpTensor {
 
         cudnnDestroyTensorDescriptor(input_desc);
         cudnnDestroyTensorDescriptor(output_desc);
+    }
+
+    public static void opTensor(double[] inputx, double[] inputy, double[] output, int[] shape, int op) {
+        int batch_size = shape[0], channels = shape[1], height = shape[2], width = shape[3];
+        // Define input tensor
+        cudnnTensorDescriptor input_desc = new cudnnTensorDescriptor();
+        cudnnCreateTensorDescriptor(input_desc);
+        cudnnSetTensor4dDescriptor(input_desc, CUDNN_TENSOR_NCHW, DATA_TYPE, batch_size, channels, height, width);
+
+        // Define output tensor
+        cudnnTensorDescriptor output_desc = new cudnnTensorDescriptor();
+        cudnnCreateTensorDescriptor(output_desc);
+        cudnnSetTensor4dDescriptor(output_desc, CUDNN_TENSOR_NCHW, DATA_TYPE, batch_size, channels, height, width);
+
+        // Define op tensor
+        cudnnOpTensorDescriptor op_tensor_desc = new cudnnOpTensorDescriptor();
+        cudnnCreateOpTensorDescriptor(op_tensor_desc);
+        cudnnSetOpTensorDescriptor(op_tensor_desc, op, DATA_TYPE, CUDNN_NOT_PROPAGATE_NAN);
+
+        // allocate memory on device
+        Pointer inputx_data = createDevicePointer(inputx);
+        Pointer inputy_data = createDevicePointer(inputy);
+        Pointer output_data = createDevicePointer(output);
+
+        // Perform op operation
+        Pointer alpha = Pointer.to(new double[]{1}), beta = Pointer.to(new double[]{1});
+        cudnnOpTensor(handle, op_tensor_desc, alpha, input_desc, inputx_data, alpha, input_desc, inputy_data, beta, output_desc, output_data);
+
+        // copy device memory to host
+        cudaMemcpy(Pointer.to(output), output_data, output.length * DATA_TYPE_SZIE, cudaMemcpyDeviceToHost);
+
+        // Release resources
+        cudaFree(inputx_data);
+        cudaFree(inputy_data);
+        cudaFree(output_data);
+
+        cudnnDestroyTensorDescriptor(input_desc);
+        cudnnDestroyTensorDescriptor(output_desc);
+        cudnnDestroyOpTensorDescriptor(op_tensor_desc);
     }
 
 }
