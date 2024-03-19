@@ -10,7 +10,6 @@ import jcuda.jcudnn.cudnnPoolingDescriptor;
 import jcuda.jcudnn.cudnnTensorDescriptor;
 
 import static com.deep.framework.cuda.Cuda.createDevicePointer;
-import static com.deep.framework.cudnn.CudnnConfig.getCudnnHandle;
 import static jcuda.jcudnn.JCudnn.*;
 import static jcuda.jcudnn.cudnnDataType.CUDNN_DATA_DOUBLE;
 import static jcuda.jcudnn.cudnnNanPropagation.CUDNN_NOT_PROPAGATE_NAN;

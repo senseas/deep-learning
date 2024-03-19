@@ -4,6 +4,7 @@ import com.deep.framework.lang.Tenser;
 
 import static com.deep.framework.core.TensorExecutor.eps;
 import static com.deep.framework.lang.ForEach.forEach;
+import static com.deep.framework.lang.Shape.size;
 
 public class TensorFlow implements Operator {
 
@@ -12,7 +13,7 @@ public class TensorFlow implements Operator {
 
             public Tenser<Tensor> compute() {
                 Tenser<Tensor> A = getInput(0), B = getInput(1), C = getInput(2);
-                Tensor tensor = Tensor(A), mean = mean(tensor), std = standard(tensor, mean);
+                Tensor mean = mean(getInput()[0]), std = standard(getInput()[0], mean);
                 Tenser<Tensor> D = zeroTensors(A.shape);
                 Tensor pow = pow(add(std, cons(eps)), cons(0.5));
                 forEach(A, B, C, D, (Tensor a, Tensor b, Tensor c) -> {
@@ -42,8 +43,8 @@ public class TensorFlow implements Operator {
         return new TensorFunction("Mean", new int[]{1}, input) {
 
             public Tenser<Tensor> compute() {
-                Tenser<Tensor> inx = getInput(0);
-                return new Tenser<>(div(sum(Tensor(inx)), cons(inx.size())));
+                Tensor inx = getInput()[0];
+                return new Tenser<>(div(sum(inx), cons(size(inx.shape))));
             }
 
         };

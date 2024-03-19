@@ -62,4 +62,9 @@ public class TensorFunction extends Tensor {
         return getInput()[i].getOutput();
     }
 
+    public void setGrad(Tensor grad) {
+        Tensor o = output.data(0);
+        if (Objects.isNull(o.grad)) o.grad = grad;
+    }
+
 }

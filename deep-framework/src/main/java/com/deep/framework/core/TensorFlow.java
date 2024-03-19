@@ -1060,7 +1060,7 @@ public class TensorFlow implements Serializable {
             public Tenser<Tensor> compute() {
                 Tensor tensor1 = matmul(getInput()[0], getInput()[1]);
                 Tensor tensor2 = addx(tensor1, new Tensor(tensor1.getShape()));
-                Tensor tensor3 = relu(tensor2);
+                Tensor tensor3 = elu(tensor2);
                 return new Tenser<>(tensor3);
             }
 
