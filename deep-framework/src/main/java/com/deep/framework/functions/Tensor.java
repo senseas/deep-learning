@@ -50,7 +50,7 @@ public class Tensor implements Operator {
         this.output = Tensors();
     }
 
-    public void forward() {grad = null;}
+    public void forward() { grad = null; }
 
     public void backward() {}
 
@@ -62,15 +62,15 @@ public class Tensor implements Operator {
         return "a" + id;
     }
 
-    public String getGradId() {return "g" + id;}
+    public String getGradId() { return "g" + id; }
 
     public void setGrad(Tensor grad) {
         this.grad = Objects.nonNull(this.grad) ? add(this.grad, grad) : grad;
     }
 
-    public void setGradx(Tensor grad) {this.grad = grad;}
+    public void setGradx(Tensor grad) { this.grad = grad; }
 
-    public int shape(int i) {return shape[i];}
+    public int shape(int i) { return shape[i]; }
 
     public Tenser<Tensor> Tensors() {
         return new Tenser<>(IntStream.range(0, size(shape)).mapToObj(i -> new Tensor()).toArray(Tensor[]::new), shape);

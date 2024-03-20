@@ -17,9 +17,7 @@ public class TensorFunction extends Tensor {
         this.function = function;
     }
 
-    public Tenser<Tensor> compute() {
-        return null;
-    }
+    public Tenser<Tensor> compute() { return null; }
 
     public void forward() {
         if (status) return;
@@ -64,7 +62,12 @@ public class TensorFunction extends Tensor {
 
     public void setGrad(Tensor grad) {
         Tensor o = output.data(0);
-        if (Objects.isNull(o.grad)) o.grad = grad;
+        o.setGrad(grad);
+    }
+
+    public String getVarId() {
+        Tensor o = output.data(0);
+        return o.getVarId();
     }
 
 }

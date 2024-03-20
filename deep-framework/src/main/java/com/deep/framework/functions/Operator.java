@@ -7,7 +7,7 @@ import java.util.Arrays;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-public interface Operator extends Serializable{
+public interface Operator extends Serializable {
 
     default Tensor cons(String input) {
         return new TensorConst(input);

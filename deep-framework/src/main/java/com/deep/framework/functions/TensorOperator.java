@@ -15,7 +15,7 @@ public class TensorOperator extends Tensor {
         concat(this);
     }
 
-    public String compute() {return data;}
+    public String compute() { return data; }
 
     public void gradient(Tensor grad) {}
 
@@ -29,7 +29,7 @@ public class TensorOperator extends Tensor {
     }
 
     public void backward() {
-        if(states) return;
+        if (states) return;
         gradient(grad);
         clearGrad();
         for (Tensor o : getInput()) o.setForwarded(true).backward();
@@ -43,7 +43,7 @@ public class TensorOperator extends Tensor {
         merge(this);
     }
 
-    public void clearGrad() {grad = null;}
+    public void clearGrad() { grad = null; }
 
     public Tenser<Tensor> getInput(int i) {
         return getInput()[i].getOutput();
