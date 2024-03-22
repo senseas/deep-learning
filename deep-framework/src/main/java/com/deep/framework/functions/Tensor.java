@@ -57,7 +57,7 @@ public class Tensor implements Operator {
     public void reducer() {}
 
     public String getVarId() {
-        if (!forwarded) return data;
+        if (!forwed) return data;
         if (Objects.isNull(input)) return data;
         return "a" + id;
     }
@@ -88,8 +88,7 @@ public class Tensor implements Operator {
     protected int[] shape;
     protected String data;
     protected Tensor grad;
-    protected boolean status, states;
-    protected boolean forwarded;
+    protected boolean status, states, forwed;
 
     private String name;
     private Tensor[] input;

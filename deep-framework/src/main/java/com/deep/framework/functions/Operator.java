@@ -76,7 +76,7 @@ public interface Operator extends Serializable {
             public String compute() {
                 return Arrays.stream(getInput()).map(a -> {
                     String varId = a.getVarId();
-                    if (a.forwarded) return varId;
+                    if (a.forwed) return varId;
                     if (Objects.isNull(a.getInput())) return varId;
                     if (varId.startsWith("(") && varId.endsWith(")")) return varId;
                     return "(" + varId + ")";

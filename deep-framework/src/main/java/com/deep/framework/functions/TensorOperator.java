@@ -30,9 +30,10 @@ public class TensorOperator extends Tensor {
 
     public void backward() {
         if (states) return;
+        forwed = true;
         gradient(grad);
         clearGrad();
-        for (Tensor o : getInput()) o.setForwarded(true).backward();
+        for (Tensor o : getInput()) o.backward();
     }
 
     public void reducer() {
