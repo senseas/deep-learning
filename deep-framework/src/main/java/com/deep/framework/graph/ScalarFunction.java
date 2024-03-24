@@ -18,7 +18,7 @@ public class ScalarFunction extends Tensor {
 
     public void forward() {
         setCount(1);
-        if(status) return;
+        if (status) return;
         for (Tensor o : getInput()) o.forward();
         clearOutput();
 
@@ -38,7 +38,7 @@ public class ScalarFunction extends Tensor {
     }
 
     public void reducer() {
-        if(states) return;
+        if (states) return;
         getFunction().forEach(Tensor::reducer);
         for (Tensor o : getInput()) o.reducer();
         states = true;

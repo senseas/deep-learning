@@ -36,7 +36,7 @@ public class ScalarOperator extends Tensor {
     }
 
     public void reducer() {
-        if(states) return;
+        if (states) return;
         for (Tensor o : getInput()) o.reducer();
         states = true;
     }
