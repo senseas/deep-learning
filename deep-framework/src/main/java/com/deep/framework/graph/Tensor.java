@@ -136,10 +136,7 @@ public class Tensor implements Serializable {
 
     public int shape(int i) { return shape[i]; }
 
-    public int setCount(int count) {
-        this.count += count;
-        return this.count;
-    }
+    public boolean setCount(int count) { return (this.count += count) != 0; }
 
     private int idx;
     private Tensor tensor;

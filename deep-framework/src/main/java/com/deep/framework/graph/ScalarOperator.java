@@ -23,6 +23,7 @@ public class ScalarOperator extends Tensor {
         setCount(1);
         if (status) return;
         for (Tensor o : getInput()) o.forward();
+
         clearOutput();
         data[0] = compute();
         status = true;
@@ -31,7 +32,8 @@ public class ScalarOperator extends Tensor {
     public void backward() {
         gradient(grad[0]);
         clearGrad();
-        if (setCount(-1) != 0) return;
+
+        if (setCount(-1)) return;
         for (Tensor o : getInput()) o.backward();
     }
 

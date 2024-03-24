@@ -20,8 +20,8 @@ public class ScalarFunction extends Tensor {
         setCount(1);
         if (status) return;
         for (Tensor o : getInput()) o.forward();
-        clearOutput();
 
+        clearOutput();
         Tensor tensor = getFunction().data(0);
         tensor.forward();
         data[0] = tensor.data();
@@ -33,7 +33,8 @@ public class ScalarFunction extends Tensor {
         tensor.grad(grad[0]);
         tensor.backward();
         clearGrad();
-        if (setCount(-1) != 0) return;
+
+        if (setCount(-1)) return;
         for (Tensor o : getInput()) o.backward();
     }
 
