@@ -25,7 +25,7 @@ public interface Operator extends Serializable {
         return new TensorOperator("Add", input) {
 
             public String compute() {
-                return "(" + Arrays.stream(getInput()).map(a -> a.getVarId()).collect(Collectors.joining("+")) + ")";
+                return "(" + Arrays.stream(getInput()).map(Tensor::getVarId).collect(Collectors.joining("+")) + ")";
             }
 
             public void gradient(Tensor grad) {
@@ -408,7 +408,7 @@ public interface Operator extends Serializable {
 
             public void gradient(Tensor grad) {
                 Tenser<Tensor> A = getInput(0);
-                A.stream().forEach(a -> a.setGrad(grad));
+                A.forEach(a -> a.setGrad(grad));
             }
 
         };

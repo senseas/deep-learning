@@ -73,7 +73,7 @@ public class Tensor implements Operator {
     public int shape(int i) { return shape[i]; }
 
     public Tenser<Tensor> Tensors() {
-        return new Tenser<>(IntStream.range(0, size(shape)).mapToObj(i -> new Tensor()).toArray(Tensor[]::new), shape);
+        return new Tenser<>(IntStream.range(0, size(shape)).mapToObj(i -> new Tensor("a" + id + "[" + i + "]")).toArray(Tensor[]::new), shape);
     }
 
     public static <E> E getOutput(Object a) {

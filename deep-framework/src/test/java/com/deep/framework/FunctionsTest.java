@@ -18,13 +18,11 @@ public class FunctionsTest {
         Tensor layerNormal = tf.layerNormal(data1, data2, data3);
 
         layerNormal.forward();
-        layerNormal.getOutput().forEach((Tensor out) -> {
-            Tensor grad = new Tensor();
-            grad.setData(grad.getGradId());
+        layerNormal.getOutput().forEach((Tensor out, int i) -> {
+            Tensor grad = new Tensor("g" + layerNormal.getId() + "[" + i + "]");
             out.setGrad(grad);
         });
         layerNormal.backward();
-
         layerNormal.getInput()[0].getOutput().forEach((out) -> {
             Tensor grad = out.getGrad();
             List<String> list = new ArrayList<>();

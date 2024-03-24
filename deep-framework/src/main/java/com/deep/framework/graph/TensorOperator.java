@@ -22,7 +22,7 @@ public class TensorOperator extends Tensor {
     public void gradient() { }
 
     public void forward() {
-        if(status) return;
+        if (status) return;
         for (Tensor o : getInput()) o.forward();
         clearOutput();
         create();
@@ -31,14 +31,14 @@ public class TensorOperator extends Tensor {
     }
 
     public void backward() {
-        if(states) return;
+        if (states) return;
         gradient();
         clearGrad();
         for (Tensor o : getInput()) o.backward();
     }
 
     public void reducer() {
-        if(states) return;
+        if (states) return;
         for (Tensor o : getInput()) o.reducer();
         states = true;
     }

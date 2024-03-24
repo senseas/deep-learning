@@ -49,7 +49,7 @@ public class TensorFunction extends Tensor {
     }
 
     public void reducer() {
-        if(states) return;
+        if (states) return;
         getFunction().forEach(Tensor::reducer);
         for (Tensor o : getInput()) o.reducer();
         states = true;

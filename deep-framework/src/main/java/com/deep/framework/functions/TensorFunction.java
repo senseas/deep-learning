@@ -13,7 +13,7 @@ public class TensorFunction extends Tensor {
     }
 
     public TensorFunction(Tenser<Tensor> function) {
-        super(function.data(0).getName(), function.shape);
+        super("function", function.shape);
         this.function = function;
     }
 
