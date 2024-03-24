@@ -32,7 +32,6 @@ public class TensorOperator extends Tensor {
     }
 
     public void backward() {
-        if (states) return;
         gradient();
         clearGrad();
         if (setCount(-1) != 0) return;

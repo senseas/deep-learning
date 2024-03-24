@@ -39,14 +39,11 @@ public class TensorFunction extends Tensor {
     }
 
     public void backward() {
-        if (states) return;
-        for (Tensor o : getInput()) o.setStatus(o.states).setStates(true);
-
         syncFunctionGrad(this);
         getFunction().forEach(Tensor::backward);
         clearGrad();
         if (setCount(-1) != 0) return;
-        for (Tensor o : getInput()) o.setStates(o.status).setStatus(false).backward();
+        for (Tensor o : getInput()) o.backward();
     }
 
     public void reducer() {

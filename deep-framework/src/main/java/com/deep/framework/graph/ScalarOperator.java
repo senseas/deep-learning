@@ -29,7 +29,6 @@ public class ScalarOperator extends Tensor {
     }
 
     public void backward() {
-        if (states) return;
         gradient(grad[0]);
         clearGrad();
         if (setCount(-1) != 0) return;
