@@ -136,6 +136,11 @@ public class Tensor implements Serializable {
 
     public int shape(int i) { return shape[i]; }
 
+    public int setCount(int count) {
+        this.count += count;
+        return this.count;
+    }
+
     private int idx;
     private Tensor tensor;
     private String name = "";
@@ -149,6 +154,7 @@ public class Tensor implements Serializable {
     transient private AdamOptimizer optimizer;
     transient private Palce palce;
     transient protected boolean status, states;
+    transient protected int count;
 
     transient private int deviceId;
     transient private Map<Integer, Pointer> deviceDataMap;

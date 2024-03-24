@@ -17,6 +17,7 @@ public class ScalarFunction extends Tensor {
     public void gradient() { }
 
     public void forward() {
+        setCount(1);
         if(status) return;
         for (Tensor o : getInput()) o.forward();
         clearOutput();
@@ -35,7 +36,7 @@ public class ScalarFunction extends Tensor {
         tensor.grad(grad[0]);
         tensor.backward();
         clearGrad();
-
+        if (setCount(-1) != 0) return;
         for (Tensor o : getInput()) o.setStates(o.status).setStatus(false).backward();
     }
 
