@@ -22,7 +22,7 @@ public class TensorOperator extends Tensor {
     public void gradient() { }
 
     public void forward() {
-        setCount(1);
+        setRefcount(1);
         if (status) return;
         for (Tensor o : getInput()) o.forward();
 
@@ -36,7 +36,7 @@ public class TensorOperator extends Tensor {
         gradient();
         clearGrad();
 
-        if (setCount(-1)) return;
+        if (setRefcount(-1)) return;
         for (Tensor o : getInput()) o.backward();
     }
 

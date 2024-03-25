@@ -27,7 +27,7 @@ public class TensorFunction extends Tensor {
     public Tenser<Tensor> compute() { return null; }
 
     public void forward() {
-        setCount(1);
+        setRefcount(1);
         if (status) return;
         for (Tensor o : getInput()) o.forward();
 
@@ -43,7 +43,7 @@ public class TensorFunction extends Tensor {
         getFunction().forEach(Tensor::backward);
         clearGrad();
 
-        if (setCount(-1)) return;
+        if (setRefcount(-1)) return;
         for (Tensor o : getInput()) o.backward();
     }
 
