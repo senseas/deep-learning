@@ -136,7 +136,15 @@ public class Tensor implements Serializable {
 
     public int shape(int i) { return shape[i]; }
 
-    public boolean setRefcount(int count) { return (this.refcount += count) != 0; }
+    public Tensor setParent(Tensor parent) {
+        if (this.parent == null) this.parent = parent;
+        return this;
+    }
+
+    public boolean isParent(Tensor parent) {
+        if (parent == null) return true;
+        return this.parent == parent;
+    }
 
     private int idx;
     private Tensor tensor;
@@ -151,7 +159,7 @@ public class Tensor implements Serializable {
     transient private AdamOptimizer optimizer;
     transient private Palce palce;
     transient protected boolean status, states;
-    transient protected int refcount;
+    transient protected Tensor parent;
 
     transient private int deviceId;
     transient private Map<Integer, Pointer> deviceDataMap;

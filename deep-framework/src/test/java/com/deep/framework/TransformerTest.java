@@ -94,7 +94,7 @@ public class TransformerTest {
                 log("输出：", words.get(i));
                 log("损失：", crossx.data());
             });
-            ModeLoader.save(executor, "gpt.ml");
+            //ModeLoader.save(executor, "gpt.ml");
         });
     }
 

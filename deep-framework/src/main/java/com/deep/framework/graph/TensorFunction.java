@@ -27,9 +27,8 @@ public class TensorFunction extends Tensor {
     public Tenser<Tensor> compute() { return null; }
 
     public void forward() {
-        setRefcount(1);
         if (status) return;
-        for (Tensor o : getInput()) o.forward();
+        for (Tensor o : getInput()) o.setParent(this).forward();
 
         clearOutput();
         getFunction().forEach(Tensor::forward);
@@ -39,12 +38,12 @@ public class TensorFunction extends Tensor {
     }
 
     public void backward() {
+        if (!status) return;
         syncFunctionGrad(this);
         getFunction().forEach(Tensor::backward);
         clearGrad();
 
-        if (setRefcount(-1)) return;
-        for (Tensor o : getInput()) o.backward();
+        for (Tensor o : getInput()) if (o.isParent(this)) o.setStatus(true).backward();
     }
 
     public void reducer() {

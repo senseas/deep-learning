@@ -22,9 +22,8 @@ public class TensorOperator extends Tensor {
     public void gradient() { }
 
     public void forward() {
-        setRefcount(1);
         if (status) return;
-        for (Tensor o : getInput()) o.forward();
+        for (Tensor o : getInput()) o.setParent(this).forward();
 
         clearOutput();
         create();
@@ -33,11 +32,11 @@ public class TensorOperator extends Tensor {
     }
 
     public void backward() {
+        if (!status) return;
         gradient();
         clearGrad();
 
-        if (setRefcount(-1)) return;
-        for (Tensor o : getInput()) o.backward();
+        for (Tensor o : getInput()) if (o.isParent(this)) o.setStatus(true).backward();
     }
 
     public void reducer() {
