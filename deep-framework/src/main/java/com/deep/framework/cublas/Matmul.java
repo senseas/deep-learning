@@ -52,7 +52,7 @@ public class Matmul {
         // KM = [KN * NM]
         cublasDgemm(handle, CUBLAS_OP_T, CUBLAS_OP_N, K, M, N, alpha, inputy_data, N, output_grad, N, beta, inputx_grad, K);
         // Copy the result from the device to the host
-        context.copyDataToHost(inputx);
+        context.copyGradToHost(inputx);
 
         // NK = [NM * MK]
         cublasDgemm(handle, CUBLAS_OP_N, CUBLAS_OP_T, N, K, M, alpha, output_grad, N, inputx_data, K, beta, inputy_grad, N);
