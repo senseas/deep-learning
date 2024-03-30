@@ -76,7 +76,9 @@ public class TensorExecutor<E> implements Serializable {
 
     public void reduce() {
         for (Tensor o : tensors) {
-            for (Tensor a : o.getInput()) a.reducer();
+            for (Tensor a : o.getInput()) {
+                a.reducer();
+            }
         }
     }
 

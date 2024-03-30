@@ -18,13 +18,11 @@ public class ScalarFunction extends Tensor {
 
     public void forward() {
         clearOutput();
-        Tensor tensor = getFunction().data(0);
-        data[0] = tensor.data();
+        getFunction().forEach(a -> data[0] = a.data());
     }
 
     public void backward() {
-        Tensor tensor = getFunction().data(0);
-        tensor.grad(grad[0]);
+        getFunction().forEach(a -> a.grad(grad[0]));
         clearGrad();
     }
 
