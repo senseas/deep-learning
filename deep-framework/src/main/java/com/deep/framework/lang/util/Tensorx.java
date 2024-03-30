@@ -1,18 +1,67 @@
 package com.deep.framework.lang.util;
 
+import com.deep.framework.graph.Tensor;
 import com.deep.framework.lang.Tenser;
 import com.deep.framework.lang.function.Func0;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Stack;
+import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class Tensorx {
+
+    /**
+     * 平铺树结构
+     * @param root        节点树结构
+     * @return 平铺结构
+     */
+    public static List<Tensor> getTensor(Tensor root) {
+        List<Tensor> list = new LinkedList<>();
+        Stack<Tensor> stack = new Stack<>();
+        stack.push(root);
+
+        while (!stack.isEmpty()) {
+            Tensor o = stack.pop();
+            if (isNode(o)) {
+                if (!list.contains(o)) {
+                    list.add(o);
+                } else {
+                    list.remove(o);
+                    list.add(o);
+                }
+            }
+
+            Tensor[] input = o.getInput();
+            if (Objects.nonNull(input)) {
+                for (Tensor a : input) {
+                    addStack(stack, a);
+                }
+            }
+
+            Tenser<Tensor> function = o.getFunction();
+            if (Objects.nonNull(function)) {
+                function.forEach(a -> {
+                    addStack(stack, a);
+                });
+            }
+        }
+        return list;
+    }
+
+    private static void addStack(Stack<Tensor> stack, Tensor a) {
+        if (isNode(a)) {
+            if (!stack.contains(a)) {
+                stack.push(a);
+            }
+        }
+    }
+
+    private static boolean isNode(Tensor a) {
+        return Objects.nonNull(a.getInput()) || Objects.nonNull(a.getFunction());
+    }
+
     /**
      * 平铺树结构
      * @param root        节点树结构

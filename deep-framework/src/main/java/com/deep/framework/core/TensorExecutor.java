@@ -1,9 +1,11 @@
 package com.deep.framework.core;
 
 import com.deep.framework.graph.Tensor;
+import com.deep.framework.lang.util.Tensorx;
 import lombok.Data;
 
 import java.io.Serializable;
+import java.util.Objects;
 import java.util.stream.IntStream;
 
 import static com.deep.framework.lang.Shape.size;
@@ -14,6 +16,7 @@ public class TensorExecutor<E> implements Serializable {
     public static final double eps = 0.0000001d;
     private Tensor tensor;
     private Tensor input, inputx, label;
+    private Tensor[] tensors;
 
     public TensorExecutor(Tensor tensor) {
         this.tensor = tensor;
@@ -46,9 +49,10 @@ public class TensorExecutor<E> implements Serializable {
     }
 
     public void run() {
-        tensor.forward();
-        this.backward();
-        tensor.reducer();
+        if (Objects.isNull(tensors)) tensors = Tensorx.getTensor(tensor).toArray(Tensor[]::new);
+        forward();
+        backward();
+        reduce();
     }
 
     public void forward(E input, E label) {
@@ -57,13 +61,23 @@ public class TensorExecutor<E> implements Serializable {
         tensor.forward();
     }
 
+    public void forward() {
+        for (int i = tensors.length - 1; i >= 0; i--) {
+            tensors[i].forward();
+        }
+    }
+
     public void backward() {
         tensor.getOutput().forEach(none -> none.grad(1d));
-        tensor.backward();
+        for (Tensor o : tensors) {
+            o.backward();
+        }
     }
 
     public void reduce() {
-        tensor.reducer();
+        for (Tensor o : tensors) {
+            for (Tensor a : o.getInput()) a.reducer();
+        }
     }
 
     public void setInput(Object o) {

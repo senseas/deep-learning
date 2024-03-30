@@ -1,6 +1,5 @@
 package com.deep.framework.graph;
 
-import com.deep.framework.lang.Palce;
 import com.deep.framework.lang.Tenser;
 import com.deep.framework.optimizer.AdamOptimizer;
 import jcuda.Pointer;
@@ -75,10 +74,12 @@ public class Tensor implements Serializable {
     public void backward() { }
 
     public void reducer() {
+        if (states) return;
         if (reduce) {
             createOptimizer();
             getOutput().forEach(none -> optimizer.adam(none));
         }
+        states = true;
     }
 
     public Tenser<Tensor> getOutput() {
@@ -136,16 +137,6 @@ public class Tensor implements Serializable {
 
     public int shape(int i) { return shape[i]; }
 
-    public Tensor setParent(Tensor parent) {
-        if (this.parent == null) this.parent = parent;
-        return this;
-    }
-
-    public boolean isParent(Tensor parent) {
-        if (parent == null) return true;
-        return this.parent == parent;
-    }
-
     private int idx;
     private Tensor tensor;
     private String name = "";
@@ -157,9 +148,7 @@ public class Tensor implements Serializable {
     protected Tenser<Tensor> output, function;
 
     transient private AdamOptimizer optimizer;
-    transient private Palce palce;
-    transient protected boolean status, states;
-    transient protected Tensor parent;
+    transient protected boolean states;
 
     transient private int deviceId;
     transient private Map<Integer, Pointer> deviceDataMap;

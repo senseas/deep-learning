@@ -27,30 +27,14 @@ public class TensorFunction extends Tensor {
     public Tenser<Tensor> compute() { return null; }
 
     public void forward() {
-        if (status) return;
-        for (Tensor o : getInput()) o.setParent(this).forward();
-
         clearOutput();
-        getFunction().forEach(Tensor::forward);
         create();
         syncOutputData(this);
-        status = true;
     }
 
     public void backward() {
-        if (!status) return;
         syncFunctionGrad(this);
-        getFunction().forEach(Tensor::backward);
         clearGrad();
-
-        for (Tensor o : getInput()) if (o.isParent(this)) o.setStatus(true).backward();
-    }
-
-    public void reducer() {
-        if (states) return;
-        getFunction().forEach(Tensor::reducer);
-        for (Tensor o : getInput()) o.reducer();
-        states = true;
     }
 
     public void clearOutput() {
@@ -61,7 +45,6 @@ public class TensorFunction extends Tensor {
     }
 
     public void clearGrad() {
-        status = false;
         Arrays.fill(grad, 0d);
     }
 
