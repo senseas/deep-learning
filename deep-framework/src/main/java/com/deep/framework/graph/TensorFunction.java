@@ -38,7 +38,6 @@ public class TensorFunction extends Tensor {
     }
 
     public void clearOutput() {
-        states = false;
         if (Objects.isNull(data)) return;
         Arrays.fill(data, 0d);
         Arrays.fill(grad, 0d);

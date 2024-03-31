@@ -1,10 +1,11 @@
 package com.deep.framework.core;
 
-import com.deep.framework.graph.Tensor;
-import com.deep.framework.graph.TensorConst;
+import com.deep.framework.graph.*;
 
 import java.io.Serializable;
 import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Objects;
 import java.util.stream.Stream;
 
@@ -12,6 +13,43 @@ import static com.deep.framework.lang.Shape.fill;
 import static com.deep.framework.lang.Shape.shape;
 
 public class TensorFlux implements Serializable {
+    public static List<Tensor> operators = new LinkedList<>();
+    public static List<Tensor> params = new LinkedList<>();
+
+    public static void intit(TensorExecutor executor) {
+        forward(executor.getTensor());
+        executor.setOperators(operators.toArray(Tensor[]::new));
+        executor.setParams(params.toArray(Tensor[]::new));
+        operators = params = null;
+    }
+
+    public static void forward(Tensor tensor) {
+        if (operators.contains(tensor)) return;
+        if (tensor instanceof TensorFunction) {
+            for (Tensor o : tensor.getInput()) {
+                forward(o);
+            }
+            tensor.getFunction().forEach(TensorFlux::forward);
+        } else if (tensor instanceof ScalarFunction) {
+            for (Tensor o : tensor.getInput()) {
+                forward(o);
+            }
+            tensor.getFunction().forEach(TensorFlux::forward);
+        } else if (tensor instanceof TensorOperator) {
+            for (Tensor o : tensor.getInput()) {
+                forward(o);
+            }
+        } else if (tensor instanceof ScalarOperator) {
+            for (Tensor o : tensor.getInput()) {
+                forward(o);
+            }
+        }
+        if ((Objects.nonNull(tensor.getInput()) || Objects.nonNull(tensor.getFunction()))) {
+            operators.add(tensor);
+        } else if (tensor.isReduce() && !params.contains(tensor)) {
+            params.add(tensor);
+        }
+    }
 
     public static void concat(Tensor tensor) {
         if (Stream.of("Add", "Addx").anyMatch(a -> tensor.getName().contains(a))) {

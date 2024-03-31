@@ -48,6 +48,12 @@ public class ForEach implements Serializable {
         }
     }
 
+    public static void forBack(int a, Range1 r) {
+        for (int i = a - 1; i >= 0; i--) {
+            r.apply(i);
+        }
+    }
+
     public static Object fill(Object a, Func func) {
         if (BeanUtil.isTenser(a)) {
             forEach(Tensers.getLength(a), i -> {

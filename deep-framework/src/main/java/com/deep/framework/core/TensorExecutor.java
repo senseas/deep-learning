@@ -1,13 +1,12 @@
 package com.deep.framework.core;
 
 import com.deep.framework.graph.Tensor;
-import com.deep.framework.lang.util.Tensorx;
 import lombok.Data;
 
 import java.io.Serializable;
-import java.util.Objects;
 import java.util.stream.IntStream;
 
+import static com.deep.framework.lang.ForEach.*;
 import static com.deep.framework.lang.Shape.size;
 
 @Data
@@ -16,16 +15,19 @@ public class TensorExecutor<E> implements Serializable {
     public static final double eps = 0.0000001d;
     private Tensor tensor;
     private Tensor input, inputx, label;
-    private Tensor[] tensors;
+    private Tensor[] operators;
+    private Tensor[] params;
 
     public TensorExecutor(Tensor tensor) {
         this.tensor = tensor;
+        TensorFlux.intit(this);
     }
 
     public TensorExecutor(Tensor tensor, Tensor input, Tensor label) {
         this.tensor = tensor;
         this.input = input;
         this.label = label;
+        TensorFlux.intit(this);
     }
 
     public TensorExecutor(Tensor tensor, Tensor input, Tensor inputx, Tensor label) {
@@ -33,6 +35,7 @@ public class TensorExecutor<E> implements Serializable {
         this.input = input;
         this.inputx = inputx;
         this.label = label;
+        TensorFlux.intit(this);
     }
 
     public void run(E input, E label) {
@@ -49,7 +52,6 @@ public class TensorExecutor<E> implements Serializable {
     }
 
     public void run() {
-        if (Objects.isNull(tensors)) tensors = Tensorx.getTensor(tensor).toArray(Tensor[]::new);
         forward();
         backward();
         reduce();
@@ -62,24 +64,17 @@ public class TensorExecutor<E> implements Serializable {
     }
 
     public void forward() {
-        for (int i = tensors.length - 1; i >= 0; i--) {
-            tensors[i].forward();
-        }
+        forEach(operators.length, i -> operators[i].forward());
     }
 
     public void backward() {
         tensor.getOutput().forEach(none -> none.grad(1d));
-        for (Tensor o : tensors) {
-            o.backward();
-        }
+        forBack(operators.length, i -> operators[i].backward());
     }
 
     public void reduce() {
-        for (Tensor o : tensors) {
-            for (Tensor a : o.getInput()) {
-                a.reducer();
-            }
-        }
+        forEach(params.length, i -> params[i].reducer());
+
     }
 
     public void setInput(Object o) {

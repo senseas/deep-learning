@@ -32,7 +32,6 @@ public class ScalarFunction extends Tensor {
     }
 
     public void clearOutput() {
-        states = false;
         data[0] = 0;
         grad[0] = 0;
     }

@@ -74,12 +74,10 @@ public class Tensor implements Serializable {
     public void backward() { }
 
     public void reducer() {
-        if (states) return;
         if (reduce) {
             createOptimizer();
             getOutput().forEach(none -> optimizer.adam(none));
         }
-        states = true;
     }
 
     public Tenser<Tensor> getOutput() {
@@ -148,7 +146,6 @@ public class Tensor implements Serializable {
     protected Tenser<Tensor> output, function;
 
     transient private AdamOptimizer optimizer;
-    transient protected boolean states;
 
     transient private int deviceId;
     transient private Map<Integer, Pointer> deviceDataMap;
