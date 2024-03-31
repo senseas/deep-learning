@@ -23,6 +23,7 @@ public class TransformerTest {
 
     @Test
     public void TransformerTest() {
+        System.setProperty("java.util.concurrent.ForkJoinPool.common.parallelism", "16");
         TensorFlow tf = new TensorFlow();
         //Embedding
         Tensor input = new Tensor(new int[]{batch_size, num});//500*16224

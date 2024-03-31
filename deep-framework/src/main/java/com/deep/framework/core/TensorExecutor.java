@@ -5,8 +5,10 @@ import lombok.Data;
 
 import java.io.Serializable;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
-import static com.deep.framework.lang.ForEach.*;
+import static com.deep.framework.lang.ForEach.forBack;
+import static com.deep.framework.lang.ForEach.forEach;
 import static com.deep.framework.lang.Shape.size;
 
 @Data
@@ -65,6 +67,7 @@ public class TensorExecutor<E> implements Serializable {
 
     public void forward() {
         forEach(operators.length, i -> operators[i].forward());
+        Stream.of(params).parallel().forEach(Tensor::forward);
     }
 
     public void backward() {
@@ -73,8 +76,7 @@ public class TensorExecutor<E> implements Serializable {
     }
 
     public void reduce() {
-        forEach(params.length, i -> params[i].reducer());
-
+        Stream.of(params).parallel().forEach(Tensor::reducer);
     }
 
     public void setInput(Object o) {

@@ -8,9 +8,15 @@ import static com.deep.framework.lang.Shape.TensorConsts;
 
 public class TensorConst extends Tensor {
 
-    public TensorConst(double value) { super(value); }
+    public TensorConst(double value) {
+        super(value);
+        this.reduce = false;
+    }
 
-    public TensorConst(double value,int[] shape) { super(shape, value); }
+    public TensorConst(double value, int[] shape) {
+        super(shape, value);
+        this.reduce = false;
+    }
 
     public TensorConst(Tensor tensor, int idx) { super(tensor, idx); }
 

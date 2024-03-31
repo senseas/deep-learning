@@ -49,13 +49,7 @@ public class Sequence {
     public static List<String> getTokenList(String... str) {
         List<String> list = new ArrayList<>();
         list.add("<begin>");
-        Stream.of(str).forEach(s -> {
-            if ("<mark>".equals(s)) {
-                list.add(s);
-            } else {
-                Stream.of(s.split("")).forEach(a -> list.add(a.toLowerCase()));
-            }
-        });
+        Stream.of(str).forEach(s -> Stream.of(s.split("")).forEach(a -> list.add(a.toLowerCase())));
         list.add("<end>");
         return list;
     }
@@ -113,7 +107,7 @@ public class Sequence {
             String[] tycText = new String(fileInputStream.readAllBytes()).split("\\n");
             List<List<String>> words = Stream.of(tycText).map(s -> {
                 String[] split = s.split("\\t");
-                return getTokenList(split[1], "<mark>", split[2]);
+                return getTokenList(split[1], split[2]);
             }).collect(Collectors.toList());
             return words;
         } catch (Exception e) {
