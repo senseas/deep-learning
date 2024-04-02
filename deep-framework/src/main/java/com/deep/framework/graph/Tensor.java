@@ -144,6 +144,7 @@ public class Tensor implements Serializable {
     protected double[] data, grad;
     protected boolean reduce;
     protected Tenser<Tensor> output, function;
+    protected boolean status;
 
     transient private AdamOptimizer optimizer;
 

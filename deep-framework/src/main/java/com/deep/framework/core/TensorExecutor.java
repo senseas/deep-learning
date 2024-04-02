@@ -4,9 +4,11 @@ import com.deep.framework.graph.Tensor;
 import lombok.Data;
 
 import java.io.Serializable;
+import java.util.Objects;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
+import static com.deep.framework.core.TensorFlux.intit;
 import static com.deep.framework.lang.ForEach.forBack;
 import static com.deep.framework.lang.ForEach.forEach;
 import static com.deep.framework.lang.Shape.size;
@@ -22,14 +24,14 @@ public class TensorExecutor<E> implements Serializable {
 
     public TensorExecutor(Tensor tensor) {
         this.tensor = tensor;
-        TensorFlux.intit(this);
+        intit(this);
     }
 
     public TensorExecutor(Tensor tensor, Tensor input, Tensor label) {
         this.tensor = tensor;
         this.input = input;
         this.label = label;
-        TensorFlux.intit(this);
+       intit(this);
     }
 
     public TensorExecutor(Tensor tensor, Tensor input, Tensor inputx, Tensor label) {
@@ -37,7 +39,7 @@ public class TensorExecutor<E> implements Serializable {
         this.input = input;
         this.inputx = inputx;
         this.label = label;
-        TensorFlux.intit(this);
+        intit(this);
     }
 
     public void run(E input, E label) {
@@ -89,6 +91,17 @@ public class TensorExecutor<E> implements Serializable {
 
     public void setLabel(Object o) {
         IntStream.range(0, size(label.getShape())).forEach(i -> label.getData()[i] = ((double[]) o)[i]);
+    }
+
+    public void clearFunction() {
+        Stream.of(operators).forEach(o -> {
+            if (Stream.of(o.getInput()).anyMatch(a -> a.isReduce() && Objects.isNull(a.getTensor()) || a.isStatus())) {
+                o.setStatus(true);
+            }
+            if (Objects.nonNull(o.getFunction()) && !o.getFunction().data(0).isStatus()) {
+                o.setOutput(null).setFunction(null);
+            }
+        });
     }
 
 }
