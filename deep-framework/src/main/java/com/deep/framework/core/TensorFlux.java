@@ -25,25 +25,15 @@ public class TensorFlux implements Serializable {
 
     public static void forward(Tensor tensor) {
         if (operators.contains(tensor)) return;
-        if (tensor instanceof TensorFunction) {
-            for (Tensor o : tensor.getInput()) {
-                forward(o);
-            }
-            tensor.getFunction().forEach(TensorFlux::forward);
-        } else if (tensor instanceof ScalarFunction) {
-            for (Tensor o : tensor.getInput()) {
-                forward(o);
-            }
-            tensor.getFunction().forEach(TensorFlux::forward);
-        } else if (tensor instanceof TensorOperator) {
-            for (Tensor o : tensor.getInput()) {
-                forward(o);
-            }
-        } else if (tensor instanceof ScalarOperator) {
-            for (Tensor o : tensor.getInput()) {
-                forward(o);
-            }
+
+        if (Objects.nonNull(tensor.getInput())) {
+            for (Tensor o : tensor.getInput()) forward(o);
         }
+
+        if (Objects.nonNull(tensor.getFunction())) {
+            tensor.getFunction().forEach(TensorFlux::forward);
+        }
+
         if ((Objects.nonNull(tensor.getInput()) || Objects.nonNull(tensor.getFunction()))) {
             operators.add(tensor);
         } else if (tensor.isReduce() && !params.contains(tensor)) {
