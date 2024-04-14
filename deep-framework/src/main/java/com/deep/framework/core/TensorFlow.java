@@ -602,18 +602,26 @@ public class TensorFlow implements Serializable {
     }
 
     public Tensor softmaxCrossx(Tensor... input) {
-        return new ScalarFunction("SoftmaxCrossx", input) {
+        return new ScalarOperator("SoftmaxCrossx", input) {
 
-            public Tensor compute() {
-                Tenser<Tensor> A = getInput(0), B = getInput(1);
-                Tensor[] C = {cons(0d)};
+            public double compute() {
+                Tenser<Tensor> A = getInput(0).getOutput();
+                Tenser<Tensor> B = getInput(1).getOutput();
+                double[] C = {0d};
                 forEach(A, B, (Tensor a, Tensor b) -> {
-                    C[0] = add(C[0], softmaxCross(a, b));
+                    C[0] += -a.data() * Math.log(b.data());
                 });
                 return C[0];
             }
 
-            public void gradient() { }
+            public void gradient(double grad) {
+                Tenser<Tensor> A = getInput(0).getOutput();
+                Tenser<Tensor> B = getInput(1).getOutput();
+                forEach(A, B, (Tensor a, Tensor b) -> {
+                    a.grad(-grad * Math.log(b.data()));
+                    b.grad(-grad * a.data() / b.data());
+                });
+            }
 
         };
     }

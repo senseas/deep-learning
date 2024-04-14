@@ -50,7 +50,7 @@ public class Tensor implements Operator {
         this.output = Tensors();
     }
 
-    public void forward() { grad = null; }
+    public void forward() {}
 
     public void backward() {}
 

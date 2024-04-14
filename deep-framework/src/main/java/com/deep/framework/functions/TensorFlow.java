@@ -83,4 +83,14 @@ public class TensorFlow implements Operator {
         };
     }
 
+    public Tensor softmaxCross(Tensor... input) {
+        return new TensorFunction("SoftmaxCross", new int[]{1}, input) {
+
+            public Tenser<Tensor> compute() {
+                Tensor a = getInput()[0], b = getInput()[1];
+                return new Tenser<>(minus(mul(a, log(b))));
+            }
+        };
+    }
+
 }

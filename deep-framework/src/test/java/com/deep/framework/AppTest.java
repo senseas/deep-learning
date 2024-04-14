@@ -71,8 +71,16 @@ public class AppTest {
     @Test
     public void softmaxCrossxTest() {
         TensorFlow tf = new TensorFlow();
-        Tensor softmaxCrossx = tf.softmaxCrossx(new Tensor(new int[]{2}), new Tensor(new int[]{2}));
+        Tensor softmaxCrossx = tf.softmaxCrossx(new Tensor(new double[]{0.036184100918373034},new int[]{1}), new Tensor(new double[]{0.11160160342573584},new int[]{1}));
         TensorExecutor executor = new TensorExecutor(softmaxCrossx);
+        executor.run();
+    }
+
+    @Test
+    public void softmaxCrossTest() {
+        TensorFlow tf = new TensorFlow();
+        Tensor softmaxCross = tf.softmaxCross(new Tensor(new double[]{0.036184100918373034},new int[]{1}), new Tensor(new double[]{0.11160160342573584},new int[]{1}));
+        TensorExecutor executor = new TensorExecutor(softmaxCross);
         executor.run();
     }
 
