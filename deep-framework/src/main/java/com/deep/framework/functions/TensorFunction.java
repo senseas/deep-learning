@@ -31,8 +31,8 @@ public class TensorFunction extends Tensor {
     }
 
     public void reducer() {
-        getFunction().forEach(Tensor::reducer);
         for (Tensor o : getInput()) o.reducer();
+        getFunction().forEach(Tensor::reducer);
     }
 
     public Tenser<Tensor> getFunction() {

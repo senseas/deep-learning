@@ -32,10 +32,7 @@ public class TensorOperator extends Tensor {
     }
 
     public void reducer() {
-        for (Tensor o : getInput()) {
-            o.reducer();
-            concat(o);
-        }
+        for (Tensor o : getInput()) o.reducer();
         merge(this);
     }
 
@@ -58,6 +55,7 @@ public class TensorOperator extends Tensor {
     }
 
     public void merge(Tensor tensor) {
+        concat(this);
         if (List.of("Add", "Mul", "Minusx").contains(tensor.getName())) {
             Map<String, List<Tensor>> map = Stream.of(tensor.getInput()).collect(Collectors.groupingBy(Tensor::getName));
             List<Tensor> list = new ArrayList<>();
