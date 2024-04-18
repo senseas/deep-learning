@@ -4,6 +4,7 @@ import com.deep.framework.lang.Tenser;
 
 import java.io.Serializable;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -74,9 +75,18 @@ public interface Operator extends Serializable {
         return new TensorOperator("Mul", input) {
 
             public String compute() {
-                return Arrays.stream(getInput()).map(a -> {
+                List<Tensor> list = Arrays.stream(getInput()).toList();
+                List<Tensor> tensors = Arrays.stream(getInput()).filter(a -> a instanceof TensorConst).collect(Collectors.toList());
+
+                if (tensors.size() > 1) {
+                    double data = tensors.stream().mapToDouble(a -> Double.parseDouble(a.data)).reduce((a, b) -> a * b).getAsDouble();
+                    list = Arrays.stream(getInput()).filter(a -> !(a instanceof TensorConst)).collect(Collectors.toList());
+                    if (data != 1) list.add(new TensorConst(data + ""));
+                }
+
+                return list.stream().map(a -> {
                     String varId = a.getVarId();
-                    if (a.forwed) return varId;
+                    if (a.status) return varId;
                     if (Objects.isNull(a.getInput())) return varId;
                     if (varId.startsWith("(") && varId.endsWith(")")) return varId;
                     return "(" + varId + ")";

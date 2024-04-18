@@ -20,26 +20,14 @@ public class TensorFunction extends Tensor {
     public Tenser<Tensor> compute() { return null; }
 
     public void forward() {
-        if (status) return;
-        for (Tensor o : getInput()) o.forward();
-        getFunction().forEach(Tensor::forward);
-
         Tenser<Tensor> nones = getOutput(getFunction());
         forEach(getOutput(), nones, (Tensor out, Tensor none) -> out.setId(none.getId()).setData(none.getData()));
-        status = true;
     }
 
     public void backward() {
-        if (states) return;
-        for (Tensor o : getInput()) o.setStatus(o.states).setStates(true);
-
         Tenser<Tensor> nones = getOutput(getFunction());
         forEach(getOutput(), nones, (Tensor out, Tensor none) -> none.setGrad(out.grad));
-
-        getFunction().forEach(Tensor::backward);
         clearGrad();
-
-        for (Tensor o : getInput()) o.setStates(o.status).setStatus(false).backward();
     }
 
     public void reducer() {

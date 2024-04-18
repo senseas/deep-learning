@@ -5,9 +5,7 @@ import com.deep.framework.lang.Tenser;
 import lombok.Data;
 import lombok.experimental.Accessors;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.IntStream;
 
@@ -57,7 +55,7 @@ public class Tensor implements Operator {
     public void reducer() {}
 
     public String getVarId() {
-        if (!forwed) return data;
+        if (!status) return data;
         if (Objects.isNull(input)) return data;
         return "a" + id;
     }
@@ -88,7 +86,7 @@ public class Tensor implements Operator {
     protected int[] shape;
     protected String data;
     protected Tensor grad;
-    protected boolean status, states, forwed;
+    protected boolean status;
 
     private String name;
     private Tensor[] input;

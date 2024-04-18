@@ -20,20 +20,15 @@ public class TensorOperator extends Tensor {
     public void gradient(Tensor grad) {}
 
     public void forward() {
-        if (status) return;
-        for (Tensor o : getInput()) o.forward();
         data = compute();
         Integer idx = map.get(getData());
         if (Objects.nonNull(idx)) setId(idx); else map.put(getData(), getId());
-        status = true;
     }
 
     public void backward() {
-        if (states) return;
-        forwed = true;
+        status = true;
         gradient(grad);
         clearGrad();
-        for (Tensor o : getInput()) o.backward();
     }
 
     public void reducer() {
@@ -71,10 +66,13 @@ public class TensorOperator extends Tensor {
                 if (List.of("Add", "Mul").contains(name) && tensors.size() == 1) {
                     list.addAll(tensors);
                 } else if ("Add".equals(tensor.getName()) && "Mul".equals(name) && child.size() > 1) {
-                    child.stream().flatMap(a -> {
+
+                    Map<String, List<Tensor>> listMap = child.stream().flatMap(a -> {
                         Map<String, List<Tensor>> collect = Stream.of(a.getInput()).collect(Collectors.groupingBy(Tensor::getData));
                         return collect.values().stream().map(b -> b.get(0));
-                    }).collect(Collectors.groupingBy(Tensor::getData)).values().stream().map((m) -> {
+                    }).collect(Collectors.groupingBy(Tensor::getData));
+
+                    Stream<List<Tensor>> stream = listMap.values().stream().map((m) -> {
                         List<Tensor> parent = child.stream().filter(a -> Stream.of(a.getInput()).anyMatch(m::contains)).toList();
 
                         Map<String, List<Tensor>> mapm = parent.stream().flatMap(a -> {
@@ -85,7 +83,9 @@ public class TensorOperator extends Tensor {
                         List<Tensor> common = mapm.values().stream().filter(a -> a.size() >= parent.size()).map(a -> a.get(0)).toList();
 
                         return new Sorted().setSize(parent.size() * common.size()).setChild(m);
-                    }).sorted(Comparator.comparingInt(Sorted::getSize).reversed()).map(Sorted::getChild).forEach((m) -> {
+                    }).sorted(Comparator.comparingInt(Sorted::getSize).reversed()).map(Sorted::getChild);
+
+                    stream.forEach((m) -> {
                         List<Tensor> parent = child.stream().filter(a -> Stream.of(a.getInput()).anyMatch(m::contains)).toList();
                         if (parent.size() <= 1 || parent.stream().anyMatch(a -> a.getInput().length <= 1)) return;
 
@@ -95,14 +95,16 @@ public class TensorOperator extends Tensor {
                         }).collect(Collectors.groupingBy(Tensor::getData));
 
                         List<Tensor> common = mapm.values().stream().filter(a -> a.size() >= parent.size()).map(a -> a.get(0)).collect(Collectors.toList());
-                        child.removeAll(parent);
+                        if (common.size() == 1 && common.get(0) instanceof TensorConst) return;
 
+                        child.removeAll(parent);
                         if (!common.isEmpty()) {
                             Tensor[] addInput = parent.stream().map(a -> {
                                 Map<String, List<Tensor>> collect = Stream.of(a.getInput()).collect(Collectors.groupingBy(Tensor::getData));
                                 common.stream().map(b -> collect.get(b.getData())).filter(Objects::nonNull).forEach(b -> b.remove(0));
                                 Tensor[] input = collect.values().stream().flatMap(List::stream).toArray(Tensor[]::new);
                                 if (input.length == 0) return cons(1);
+                                if (input.length == 1) return input[0];
                                 return mul(input);
                             }).toArray(Tensor[]::new);
 
@@ -119,8 +121,7 @@ public class TensorOperator extends Tensor {
             });
 
             tensor.setInput(list.toArray(Tensor[]::new));
-            tensor.setStatus(false);
-            tensor.forward();
+            new TensorExecutor(tensor).forward();
         }
     }
 
