@@ -29,9 +29,9 @@ public class TensorFunction extends Tensor {
     public void forward() {
         if (status) return;
         for (Tensor o : getInput()) o.forward();
+
         clearOutput();
         getFunction().forEach(Tensor::forward);
-
         create();
         syncOutputData(this);
         status = true;

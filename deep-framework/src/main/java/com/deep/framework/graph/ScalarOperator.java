@@ -20,22 +20,23 @@ public class ScalarOperator extends Tensor {
     public void gradient(double grad) { }
 
     public void forward() {
-        if(status) return;
+        if (status) return;
         for (Tensor o : getInput()) o.forward();
+
         clearOutput();
         data[0] = compute();
         status = true;
     }
 
     public void backward() {
-        if(states) return;
+        if (states) return;
         gradient(grad[0]);
         clearGrad();
         for (Tensor o : getInput()) o.backward();
     }
 
     public void reducer() {
-        if(states) return;
+        if (states) return;
         for (Tensor o : getInput()) o.reducer();
         states = true;
     }

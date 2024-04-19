@@ -17,10 +17,10 @@ public class ScalarFunction extends Tensor {
     public void gradient() { }
 
     public void forward() {
-        if(status) return;
+        if (status) return;
         for (Tensor o : getInput()) o.forward();
-        clearOutput();
 
+        clearOutput();
         Tensor tensor = getFunction().data(0);
         tensor.forward();
         data[0] = tensor.data();
@@ -40,7 +40,7 @@ public class ScalarFunction extends Tensor {
     }
 
     public void reducer() {
-        if(states) return;
+        if (states) return;
         getFunction().forEach(Tensor::reducer);
         for (Tensor o : getInput()) o.reducer();
         states = true;

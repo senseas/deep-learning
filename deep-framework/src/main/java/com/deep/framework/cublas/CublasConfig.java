@@ -1,6 +1,5 @@
 package com.deep.framework.cublas;
 
-import com.deep.framework.graph.Tensor;
 import jcuda.jcublas.JCublas2;
 import jcuda.jcublas.cublasHandle;
 
