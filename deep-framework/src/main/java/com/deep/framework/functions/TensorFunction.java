@@ -21,17 +21,16 @@ public class TensorFunction extends Tensor {
 
     public void forward() {
         if (status) return;
-        for (Tensor o : getInput()) o.forward();
-        getFunction().forEach(Tensor::forward);
+        for (Tensor o : getInput()) o.setRefer(1).forward();
 
+        getFunction().forEach(Tensor::forward);
         Tenser<Tensor> nones = getOutput(getFunction());
         forEach(getOutput(), nones, (Tensor out, Tensor none) -> out.setId(none.getId()).setData(none.getData()));
         status = true;
     }
 
     public void backward() {
-        if (states) return;
-        for (Tensor o : getInput()) o.setStatus(o.states).setStates(true);
+        if (refer != 0) return;
 
         Tenser<Tensor> nones = getOutput(getFunction());
         forEach(getOutput(), nones, (Tensor out, Tensor none) -> none.setGrad(out.grad));
@@ -39,7 +38,7 @@ public class TensorFunction extends Tensor {
         getFunction().forEach(Tensor::backward);
         clearGrad();
 
-        for (Tensor o : getInput()) o.setStates(o.status).setStatus(false).backward();
+        for (Tensor o : getInput()) o.setRefer(-1).backward();
     }
 
     public void reducer() {

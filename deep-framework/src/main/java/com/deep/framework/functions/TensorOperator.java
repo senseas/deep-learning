@@ -21,7 +21,8 @@ public class TensorOperator extends Tensor {
 
     public void forward() {
         if (status) return;
-        for (Tensor o : getInput()) o.forward();
+        for (Tensor o : getInput()) o.setRefer(1).forward();
+
         data = compute();
         Integer idx = map.get(getData());
         if (Objects.nonNull(idx)) setId(idx); else map.put(getData(), getId());
@@ -29,11 +30,12 @@ public class TensorOperator extends Tensor {
     }
 
     public void backward() {
-        if (states) return;
+        if (refer != 0) return;
+
         forwed = true;
         gradient(grad);
         clearGrad();
-        for (Tensor o : getInput()) o.backward();
+        for (Tensor o : getInput()) o.setRefer(-1).backward();
     }
 
     public void reducer() {

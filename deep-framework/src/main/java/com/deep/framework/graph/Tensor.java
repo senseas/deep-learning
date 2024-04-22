@@ -136,6 +136,11 @@ public class Tensor implements Serializable {
 
     public int shape(int i) { return shape[i]; }
 
+    public Tensor setRefer(int refer) {
+        this.refer += refer;
+        return this;
+    }
+
     private int idx;
     private Tensor tensor;
     private String name = "";
@@ -145,6 +150,7 @@ public class Tensor implements Serializable {
     protected double[] data, grad;
     protected boolean reduce;
     protected Tenser<Tensor> output, function;
+    protected int refer;
 
     transient private AdamOptimizer optimizer;
     transient private Palce palce;

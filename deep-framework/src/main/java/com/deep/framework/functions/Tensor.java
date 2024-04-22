@@ -50,7 +50,7 @@ public class Tensor implements Operator {
         this.output = Tensors();
     }
 
-    public void forward() { grad = null; }
+    public void forward() {}
 
     public void backward() {}
 
@@ -85,10 +85,16 @@ public class Tensor implements Operator {
         return (E) fill(Shape.shape(Tensor.class, a), o -> new Tensor("0d"));
     }
 
+    public Tensor setRefer(int refer) {
+        this.refer += refer;
+        return this;
+    }
+
     protected int[] shape;
     protected String data;
     protected Tensor grad;
     protected boolean status, states, forwed;
+    protected int refer;
 
     private String name;
     private Tensor[] input;

@@ -23,7 +23,8 @@ public class TensorOperator extends Tensor {
 
     public void forward() {
         if (status) return;
-        for (Tensor o : getInput()) o.forward();
+        for (Tensor o : getInput()) o.setRefer(1).forward();
+
         clearOutput();
         create();
         compute();
@@ -31,10 +32,10 @@ public class TensorOperator extends Tensor {
     }
 
     public void backward() {
-        if (states) return;
+        if (refer != 0) return;
         gradient();
         clearGrad();
-        for (Tensor o : getInput()) o.backward();
+        for (Tensor o : getInput()) o.setRefer(-1).backward();
     }
 
     public void reducer() {
