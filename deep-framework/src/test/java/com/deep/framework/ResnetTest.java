@@ -15,12 +15,12 @@ import org.junit.Test;
 import static com.deep.framework.lang.ForEach.forEach;
 
 @Slf4j
-public class ResnetTest{
+public class ResnetTest {
 
     @Test
     public void DenseNetTest() {
-        double[][][][] inputSet = DataLoader.getImageData();
-        double[][][][] labelSet = DataLoader.getImageData();
+        double[][] inputSet = Shape.reshape(DataLoader.getImageData());
+        double[][] labelSet = Shape.reshape(DataLoader.getImageData());
 
         TensorFlow tf = new TensorFlow();
         Tensor input = new Tensor(new int[]{3, 140, 140});
@@ -28,7 +28,7 @@ public class ResnetTest{
 
         Tensor tensor11 = tf.convx(new int[]{2, 2}, new int[]{0, 0}, new Tensor("weight", new int[]{64, 5, 5}), input);//64*134*134
         Tensor tensor12 = tf.relu(tensor11);//64*134*134
-        Tensor tensor13 = tf.maxpoolx(new int[]{3, 3},new int[]{2, 2}, new int[]{0, 0}, tensor12);//64*68*68
+        Tensor tensor13 = tf.maxpoolx(new int[]{3, 3}, new int[]{2, 2}, new int[]{0, 0}, tensor12);//64*68*68
 
         Tensor tensor21 = tf.convx(new int[]{1, 1}, new int[]{1, 1}, new Tensor("weight", new int[]{64, 3, 3}), tensor13);//64*68*68
         Tensor tensor22 = tf.relu(tensor21);//64*68*68
@@ -60,7 +60,7 @@ public class ResnetTest{
         forEach(600, x -> {
             forEach(labelSet.length, i -> {
                 log.info("---------{}:{}------------", x, i);
-                Object inSet = inputSet[i], labSet = labelSet[i];
+                double[] inSet = inputSet[i], labSet = labelSet[i];
                 executor.run(inSet, labSet);
                 ModeLoader.save(executor, DataLoader.BASE_PATH.concat(i + "LetNet.obj"));
                 Double[][][] data = Shape.reshape(tensor74.getOutput(), new Double[3][140][140], (Func<Tensor>) (Tensor a) -> (double) a.data());

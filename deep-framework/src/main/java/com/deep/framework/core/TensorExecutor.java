@@ -1,16 +1,14 @@
 package com.deep.framework.core;
 
 import com.deep.framework.graph.Tensor;
-import com.deep.framework.lang.Tensers;
-import com.deep.framework.lang.function.Func2;
+import com.deep.framework.lang.Shape;
 import lombok.Data;
 
 import java.io.Serializable;
-
-import static com.deep.framework.lang.ForEach.forEach;
+import java.util.Arrays;
 
 @Data
-public class TensorExecutor<E> implements Serializable {
+public class TensorExecutor implements Serializable {
     public static double rate = 0.003;
     public static final double eps = 0.0000001d;
     private Tensor tensor;
@@ -33,13 +31,13 @@ public class TensorExecutor<E> implements Serializable {
         this.label = label;
     }
 
-    public void run(E input, E label) {
+    public void run(double[] input, double[] label) {
         setInput(input);
         setLabel(label);
         run();
     }
 
-    public void run(E input, E inputx, E label) {
+    public void run(double[] input, double[] inputx, double[] label) {
         setInput(input);
         setInputx(inputx);
         setLabel(label);
@@ -52,14 +50,14 @@ public class TensorExecutor<E> implements Serializable {
         tensor.reducer();
     }
 
-    public void forward(E input, E label) {
+    public void forward(double[] input, double[] label) {
         setInput(input);
         setLabel(label);
         tensor.forward();
     }
 
     public void backward() {
-        tensor.getOutput().forEach(none -> none.grad(1d));
+        Arrays.fill(tensor.getGrad(), 1d);
         tensor.backward();
     }
 
@@ -67,19 +65,16 @@ public class TensorExecutor<E> implements Serializable {
         tensor.reducer();
     }
 
-    public void setInput(Object o) {
-        Func2<Tensor, Double> func = Tensor::data;
-        forEach(input.getOutput(), Tensers.tenser(o, input.getShape()), func);
+    public void setInput(double[] data) {
+        Shape.copy(data, input.getData());
     }
 
-    public void setInputx(Object o) {
-        Func2<Tensor, Double> func = Tensor::data;
-        forEach(inputx.getOutput(), Tensers.tenser(o, inputx.getShape()), func);
+    public void setInputx(double[] data) {
+        Shape.copy(data, inputx.getData());
     }
 
-    public void setLabel(Object o) {
-        Func2<Tensor, Double> func = Tensor::data;
-        forEach(label.getOutput(), Tensers.tenser(o, label.getShape()), func);
+    public void setLabel(double[] data) {
+        Shape.copy(data, label.getData());
     }
 
 }
