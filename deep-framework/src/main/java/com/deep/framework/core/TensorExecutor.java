@@ -1,17 +1,16 @@
 package com.deep.framework.core;
 
 import com.deep.framework.graph.Tensor;
+import com.deep.framework.lang.Shape;
 import lombok.Data;
 
 import java.io.Serializable;
 import java.util.Objects;
-import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static com.deep.framework.core.TensorFlux.intit;
 import static com.deep.framework.lang.ForEach.forBack;
 import static com.deep.framework.lang.ForEach.forEach;
-import static com.deep.framework.lang.Shape.size;
 
 @Data
 public class TensorExecutor<E> implements Serializable {
@@ -31,7 +30,7 @@ public class TensorExecutor<E> implements Serializable {
         this.tensor = tensor;
         this.input = input;
         this.label = label;
-       intit(this);
+        intit(this);
     }
 
     public TensorExecutor(Tensor tensor, Tensor input, Tensor inputx, Tensor label) {
@@ -42,13 +41,13 @@ public class TensorExecutor<E> implements Serializable {
         intit(this);
     }
 
-    public void run(E input, E label) {
+    public void run(double[] input, double[] label) {
         setInput(input);
         setLabel(label);
         run();
     }
 
-    public void run(E input, E inputx, E label) {
+    public void run(double[] input, double[] inputx, double[] label) {
         setInput(input);
         setInputx(inputx);
         setLabel(label);
@@ -61,7 +60,7 @@ public class TensorExecutor<E> implements Serializable {
         reduce();
     }
 
-    public void forward(E input, E label) {
+    public void forward(double[] input, double[] label) {
         setInput(input);
         setLabel(label);
         tensor.forward();
@@ -69,7 +68,7 @@ public class TensorExecutor<E> implements Serializable {
 
     public void forward() {
         forEach(operators.length, i -> operators[i].forward());
-        Stream.of(params).parallel().forEach(Tensor::forward);
+        Stream.of(params).forEach(Tensor::forward);
     }
 
     public void backward() {
@@ -78,19 +77,19 @@ public class TensorExecutor<E> implements Serializable {
     }
 
     public void reduce() {
-        Stream.of(params).parallel().forEach(Tensor::reducer);
+        Stream.of(params).forEach(Tensor::reducer);
     }
 
-    public void setInput(Object o) {
-        IntStream.range(0, size(input.getShape())).forEach(i -> input.getData()[i] = ((double[]) o)[i]);
+    public void setInput(double[] data) {
+        Shape.copy(data, input.getData());
     }
 
-    public void setInputx(Object o) {
-        IntStream.range(0, size(inputx.getShape())).forEach(i -> inputx.getData()[i] = ((double[]) o)[i]);
+    public void setInputx(double[] data) {
+        Shape.copy(data, inputx.getData());
     }
 
-    public void setLabel(Object o) {
-        IntStream.range(0, size(label.getShape())).forEach(i -> label.getData()[i] = ((double[]) o)[i]);
+    public void setLabel(double[] data) {
+        Shape.copy(data, label.getData());
     }
 
     public void clearFunction() {

@@ -7,6 +7,7 @@ import org.apache.commons.math3.random.RandomDataGenerator;
 
 import java.lang.reflect.Array;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.IntStream;
 
 public class Shape extends ForEach {
@@ -67,6 +68,25 @@ public class Shape extends ForEach {
     public static <M> M reshape(Object A, Object B, Func fill) {
         ferEach(A, B, (a, b, i) -> b[i] = fill.apply(a));
         return (M) B;
+    }
+
+    public static double[][] reshape(Object A) {
+        int[] shape = shapes(A);
+        int size = size(shape);
+
+        double[] array = new double[size];
+        AtomicInteger index = new AtomicInteger();
+        arrayEach(A, (a, i) -> Array.set(array, index.getAndIncrement(), Array.get(a, i)));
+
+        double[][] data = new double[shape[0]][size / shape[0]];
+        for (int i = 0; i < data.length; i++) {
+            System.arraycopy(array, i * data[0].length, data[i], 0, data[0].length);
+        }
+        return data;
+    }
+
+    public static void copy(double[] src, double[] dest) {
+        System.arraycopy(src, 0, dest, 0, dest.length);
     }
 
     public static int[] shapes(Object arr) {

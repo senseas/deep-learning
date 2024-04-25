@@ -24,9 +24,8 @@ public class LeNetTest {
 
     @Test
     public void LeNetTest() {
-
-        double[][][][] inputSet = DataLoader.getMnistImages();
-        double[][][] labelSet = DataLoader.getMnistLabels();
+        double[][] inputSet = Shape.reshape(DataLoader.getMnistImages());
+        double[][] labelSet = Shape.reshape(DataLoader.getMnistLabels());
 
         TensorFlow tf = new TensorFlow();
         Tensor input = new Tensor(new int[]{1, 28, 28});
@@ -60,7 +59,7 @@ public class LeNetTest {
         TensorExecutor executor = new TensorExecutor(crossx, input, label);
         forEach(20, x -> {
             forEach(60000, i -> {
-                Object inSet = inputSet[i], labSet = labelSet[i];
+                double[] inSet = inputSet[i], labSet = labelSet[i];
                 executor.run(inSet, labSet);
                 if (i % 500 == 0) {
                     log.info("---------{}------------", i);
@@ -75,15 +74,15 @@ public class LeNetTest {
 
     @Test
     public void TrainTest() {
-        double[][][][] inputSet = DataLoader.getMnistImages();
-        double[][][] labelSet = DataLoader.getMnistLabels();
+        double[][] inputSet = Shape.reshape(DataLoader.getMnistImages());
+        double[][] labelSet = Shape.reshape(DataLoader.getMnistLabels());
 
         TensorExecutor executor = ModeLoader.load("LetNet.obj");
         Tensor crossx = executor.getTensor();
         Tensor softmax = crossx.getInput()[1];
         forEach(20, x -> {
             forEach(60000, i -> {
-                Object inSet = inputSet[i], labSet = labelSet[i];
+                double[] inSet = inputSet[i], labSet = labelSet[i];
                 executor.run(inSet, labSet);
                 if (i % 500 == 0) {
                     log.info("---------{}------------", i);
@@ -98,8 +97,8 @@ public class LeNetTest {
 
     @Test
     public void EvalTest() {
-        double[][][][] inputSet = DataLoader.getMnistImages();
-        double[][][] labelSet = DataLoader.getMnistLabels();
+        double[][] inputSet = Shape.reshape(DataLoader.getMnistImages());
+        double[][] labelSet = Shape.reshape(DataLoader.getMnistLabels());
 
         TensorExecutor executor = ModeLoader.load("LetNet.obj");
         Tensor crossx = executor.getTensor();
@@ -107,7 +106,7 @@ public class LeNetTest {
         List list = new ArrayList();
         forEach(60000, i -> {
             log.info("---------{}------------", i);
-            Object inSet = inputSet[i], labSet = labelSet[i];
+            double[] inSet = inputSet[i], labSet = labelSet[i];
             executor.forward(inSet, labSet);
             Double[] label = Shape.reshape(labSet, new Double[10]);
             Tensor[] output = Shape.reshape(softmax.getOutput(), new Tensor[10]);

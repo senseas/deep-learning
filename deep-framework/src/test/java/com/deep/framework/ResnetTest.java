@@ -19,8 +19,8 @@ public class ResnetTest{
 
     @Test
     public void DenseNetTest() {
-        double[][][][] inputSet = DataLoader.getImageData();
-        double[][][][] labelSet = DataLoader.getImageData();
+        double[][] inputSet = Shape.reshape(DataLoader.getImageData());
+        double[][] labelSet = Shape.reshape(DataLoader.getImageData());
 
         TensorFlow tf = new TensorFlow();
         Tensor input = new Tensor(new int[]{3, 140, 140});
@@ -60,7 +60,7 @@ public class ResnetTest{
         forEach(600, x -> {
             forEach(labelSet.length, i -> {
                 log.info("---------{}:{}------------", x, i);
-                Object inSet = inputSet[i], labSet = labelSet[i];
+                double[] inSet = inputSet[i], labSet = labelSet[i];
                 executor.run(inSet, labSet);
                 ModeLoader.save(executor, DataLoader.BASE_PATH.concat(i + "LetNet.obj"));
                 Double[][][] data = Shape.reshape(tensor74.getOutput(), new Double[3][140][140], (Func<Tensor>) (Tensor a) -> (double) a.data());

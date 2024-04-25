@@ -19,8 +19,8 @@ public class DenseNetTest{
 
     @Test
     public void DenseNetTest3() {
-        double[][][][] inputSet = DataLoader.getImageData();
-        double[][][][] labelSet = DataLoader.getImageData();
+        double[][] inputSet = Shape.reshape(DataLoader.getImageData());
+        double[][] labelSet = Shape.reshape(DataLoader.getImageData());
 
         TensorFlow tf = new TensorFlow();
         Tensor input = new Tensor(new int[]{3, 140, 140});
@@ -63,7 +63,7 @@ public class DenseNetTest{
         TensorExecutor executor = new TensorExecutor(squarex, input, label);
         forEach(600, labelSet.length, (x, i) -> {
             log.info("epoch = {{},{}}", x, i);
-            Object inSet = inputSet[i], labSet = labelSet[i];
+            double[] inSet = inputSet[i], labSet = labelSet[i];
             executor.run(inSet, labSet);
             if (x != 0 && x % 2 == 0) ModeLoader.save(executor, i + "LetNet.obj");
             img(tensor63, i);
@@ -73,8 +73,8 @@ public class DenseNetTest{
 
     @Test
     public void DenseNetTest5() {
-        double[][][][] inputSet = DataLoader.getImageData();
-        double[][][][] labelSet = DataLoader.getImageData();
+        double[][] inputSet = Shape.reshape(DataLoader.getImageData());
+        double[][] labelSet = Shape.reshape(DataLoader.getImageData());
 
         TensorFlow tf = new TensorFlow();
         Tensor input = new Tensor(new int[]{3, 140, 140});
@@ -110,7 +110,7 @@ public class DenseNetTest{
         TensorExecutor executor = new TensorExecutor(squarex, input, label);
         forEach(600, labelSet.length, (x, i) -> {
             log.info("epoch = {{},{}}", x, i);
-            Object inSet = inputSet[i], labSet = labelSet[i];
+            double[] inSet = inputSet[i], labSet = labelSet[i];
             executor.run(inSet, labSet);
             ModeLoader.save(executor, i + "LetNet.obj");
             img(tensor63, i);
@@ -120,8 +120,8 @@ public class DenseNetTest{
 
     @Test
     public void TrainTest() {
-        double[][][][] inputSet = DataLoader.getImageData();
-        double[][][][] labelSet = DataLoader.getImageData();
+        double[][] inputSet = Shape.reshape(DataLoader.getImageData());
+        double[][] labelSet = Shape.reshape(DataLoader.getImageData());
 
         TensorExecutor executor = ModeLoader.load("8LetNet.obj");
         TensorExecutor.rate = 0.003;
@@ -129,7 +129,7 @@ public class DenseNetTest{
         Tensor output = squarex.getInput()[1];
         forEach(600, labelSet.length, (x, i) -> {
             log.info("epoch = {{},{}}", x, i);
-            Object inSet = inputSet[i], labSet = labelSet[i];
+            double[] inSet = inputSet[i], labSet = labelSet[i];
             executor.run(inSet, labSet);
             ModeLoader.save(executor, i + "LetNet.obj");
             img(output, i);
@@ -139,13 +139,13 @@ public class DenseNetTest{
 
     @Test
     public void EvalTest() {
-        double[][][] inputSet = ImageUtil.image2RGB("d-140.jpg");
-        double[][][] labelSet = ImageUtil.image2RGB("d-140.jpg");
+        double[][] inputSet = Shape.reshape(ImageUtil.image2RGB("d-140.jpg"));
+        double[][] labelSet = Shape.reshape(ImageUtil.image2RGB("d-140.jpg"));
 
         TensorExecutor executor = ModeLoader.load("LetNet.obj");
         Tensor squarex = executor.getTensor();
         Tensor output = squarex.getInput()[1];
-        Object inSet = inputSet, labSet = labelSet;
+        double[] inSet = inputSet[0], labSet = labelSet[0];
         executor.forward(inSet, labSet);
         img(output, 0);
         log(squarex.getOutput());
