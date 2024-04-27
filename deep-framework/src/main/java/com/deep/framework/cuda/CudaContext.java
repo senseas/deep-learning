@@ -3,6 +3,7 @@ package com.deep.framework.cuda;
 import com.deep.framework.cublas.CublasConfig;
 import com.deep.framework.cudnn.CudnnConfig;
 import com.deep.framework.graph.Tensor;
+import com.deep.framework.lang.Tenserx;
 import jcuda.Pointer;
 import jcuda.jcublas.cublasHandle;
 import jcuda.jcudnn.cudnnHandle;
@@ -25,6 +26,14 @@ public class CudaContext implements Serializable {
 
     public CudaContext(Tensor output) {
         deviceId = output.getDeviceId();
+        cudaSetDevice(deviceId);
+
+        stream = new cudaStream_t();
+        cudaStreamCreate(stream);
+    }
+
+    public CudaContext(Tenserx output) {
+        deviceId = output.deviceId;
         cudaSetDevice(deviceId);
 
         stream = new cudaStream_t();
@@ -73,6 +82,10 @@ public class CudaContext implements Serializable {
         Pointer deviceGrad = tensor.getDeviceGradMap().get(deviceId);
         if (Objects.isNull(deviceGrad)) return;
         copyDataDeviceToHost(tensor.getGrad(), deviceGrad, stream);
+    }
+
+    public void copyDataToHost(Tenserx tensor) {
+        copyDataDeviceToHost(tensor.data, tensor.deviceData, tensor.size(), stream);
     }
 
     public void clear() {
