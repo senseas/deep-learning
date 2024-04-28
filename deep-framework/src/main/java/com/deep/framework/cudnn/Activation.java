@@ -3,6 +3,7 @@ package com.deep.framework.cudnn;
 import com.deep.framework.cuda.CudaContext;
 import com.deep.framework.graph.Tensor;
 import com.deep.framework.lang.Shape;
+import com.deep.framework.lang.Tenserx;
 import jcuda.Pointer;
 import jcuda.jcudnn.cudnnActivationDescriptor;
 import jcuda.jcudnn.cudnnHandle;
@@ -122,12 +123,12 @@ public class Activation {
         cudnnCreateActivationDescriptor(activation_desc);
         cudnnSetActivationDescriptor(activation_desc, activation, CUDNN_NOT_PROPAGATE_NAN, 1);
 
-        Pointer input_data = context.getDeviceData(input);
-        Pointer output_data = context.getDeviceData(output);
+        Tenserx input_data = context.getDeviceData(input);
+        Tenserx output_data = context.getDeviceData(output);
 
         // 执行激活函数
         Pointer alpha = Pointer.to(new double[]{1}), beta = Pointer.to(new double[]{0});
-        cudnnActivationForward(handle, activation_desc, alpha, input_desc, input_data, beta, output_desc, output_data);
+        cudnnActivationForward(handle, activation_desc, alpha, input_desc, input_data.deviceData, beta, output_desc, output_data.deviceData);
         context.copyDataToHost(output);
 
         // 释放资源
@@ -156,15 +157,15 @@ public class Activation {
         cudnnCreateActivationDescriptor(activation_desc);
         cudnnSetActivationDescriptor(activation_desc, activation, CUDNN_NOT_PROPAGATE_NAN, 1);
 
-        Pointer input_data = context.getDeviceData(input);
-        Pointer input_grad = context.getDeviceGrad(input);
+        Tenserx input_data = context.getDeviceData(input);
+        Tenserx input_grad = context.getDeviceGrad(input);
 
-        Pointer output_data = context.getDeviceData(output);
-        Pointer output_grad = context.getDeviceGrad(output);
+        Tenserx output_data = context.getDeviceData(output);
+        Tenserx output_grad = context.getDeviceGrad(output);
 
         // 执行激活函数
         Pointer alpha = Pointer.to(new double[]{1}), beta = Pointer.to(new double[]{0});
-        cudnnActivationBackward(handle, activation_desc, alpha, output_desc, output_data, output_desc, output_grad, input_desc, input_data, beta, input_desc, input_grad);
+        cudnnActivationBackward(handle, activation_desc, alpha, output_desc, output_data.deviceData, output_desc, output_grad.deviceData, input_desc, input_data.deviceData, beta, input_desc, input_grad.deviceData);
         context.copyGradToHost(input);
 
         // 释放资源

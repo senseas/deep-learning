@@ -10,7 +10,7 @@ import static com.deep.framework.cuda.Cuda.createDevicePointer;
 
 public class Tenserx implements Serializable {
 
-    public final Pointer data, deviceData;
+    public final Pointer deviceData;
     public final int[] shape, nexts;
     private final int start, size;
     public int deviceId;
@@ -19,22 +19,28 @@ public class Tenserx implements Serializable {
         this.start = 0;
         this.shape = shape;
         this.size = Shape.size(shape);
-        this.data = Pointer.to(data);
-        this.deviceData = createDevicePointer(this.data, this.size, deviceId);
+        this.deviceData = createDevicePointer(data, deviceId);
         this.nexts = next();
     }
 
-    private Tenserx(Pointer data, Pointer deviceData, int[] shape, int start) {
+    public Tenserx(double[] data, int[] shape, int deviceId) {
+        this.start = 0;
+        this.shape = shape;
+        this.size = Shape.size(shape);
+        this.deviceData = createDevicePointer(data, deviceId);
+        this.nexts = next();
+    }
+
+    private Tenserx(Pointer deviceData, int[] shape, int start) {
         this.start = start;
         this.shape = shape;
         this.size = Shape.size(shape);
-        this.data = data.withByteOffset(start * Sizeof.DOUBLE);
         this.deviceData = deviceData.withByteOffset(start * Sizeof.DOUBLE);
         this.nexts = next();
     }
 
     public Tenserx get(int... index) {
-        return new Tenserx(this.data, this.deviceData, getNext(index), start(index));
+        return new Tenserx(this.deviceData, getNext(index), start(index));
     }
 
     private int start(int[] index) {

@@ -3,6 +3,7 @@ package com.deep.framework.cudnn;
 import com.deep.framework.cuda.CudaContext;
 import com.deep.framework.graph.Tensor;
 import com.deep.framework.lang.Shape;
+import com.deep.framework.lang.Tenserx;
 import jcuda.Pointer;
 import jcuda.jcudnn.cudnnHandle;
 import jcuda.jcudnn.cudnnTensorDescriptor;
@@ -48,12 +49,12 @@ public class Softmax {
         cudnnSetTensor4dDescriptor(output_desc, CUDNN_TENSOR_NCHW, DATA_TYPE, batch_size, channels, height, width);
 
         // 分配设备内存
-        Pointer input_data = context.getDeviceData(input);
-        Pointer output_data = context.getDeviceData(output);
+        Tenserx input_data = context.getDeviceData(input);
+        Tenserx output_data = context.getDeviceData(output);
 
         // 执行SoftmaxForward操作
         Pointer alpha = Pointer.to(new double[]{1}), beta = Pointer.to(new double[]{0});
-        cudnnSoftmaxForward(handle, softmaxAlgo, softmaxMode, alpha, input_desc, input_data, beta, output_desc, output_data);
+        cudnnSoftmaxForward(handle, softmaxAlgo, softmaxMode, alpha, input_desc, input_data.deviceData, beta, output_desc, output_data.deviceData);
 
         // 将输出数据复制到主机内存
         context.copyDataToHost(output);
@@ -78,13 +79,13 @@ public class Softmax {
         cudnnSetTensor4dDescriptor(output_desc, CUDNN_TENSOR_NCHW, DATA_TYPE, batch_size, channels, height, width);
 
         // 分配设备内存
-        Pointer output_data = context.getDeviceData(output);
-        Pointer output_grad = context.getDeviceGrad(output);
-        Pointer input_grad = context.getDeviceGrad(input);
+        Tenserx output_data = context.getDeviceData(output);
+        Tenserx output_grad = context.getDeviceGrad(output);
+        Tenserx input_grad = context.getDeviceGrad(input);
 
         // 执行SoftmaxBackward操作
         Pointer alpha = Pointer.to(new double[]{1}), beta = Pointer.to(new double[]{0});
-        cudnnSoftmaxBackward(handle, softmaxAlgo, softmaxMode, alpha, output_desc, output_data, output_desc, output_grad, beta, input_grad_desc, input_grad);
+        cudnnSoftmaxBackward(handle, softmaxAlgo, softmaxMode, alpha, output_desc, output_data.deviceData, output_desc, output_grad.deviceData, beta, input_grad_desc, input_grad.deviceData);
 
         // 将输出数据复制到主机内存
         context.copyGradToHost(input);

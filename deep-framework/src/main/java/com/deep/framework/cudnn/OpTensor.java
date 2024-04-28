@@ -3,6 +3,7 @@ package com.deep.framework.cudnn;
 import com.deep.framework.cuda.CudaContext;
 import com.deep.framework.graph.Tensor;
 import com.deep.framework.lang.Shape;
+import com.deep.framework.lang.Tenserx;
 import jcuda.Pointer;
 import jcuda.jcudnn.cudnnHandle;
 import jcuda.jcudnn.cudnnOpTensorDescriptor;
@@ -77,12 +78,12 @@ public class OpTensor {
         cudnnSetTensor4dDescriptor(data_desc, CUDNN_TENSOR_NCHW, DATA_TYPE, batch_size, channels, height, width);
 
         // allocate memory on device
-        Pointer input_data = context.getDeviceData(input);
-        Pointer output_data = context.getDeviceData(output);
+        Tenserx input_data = context.getDeviceData(input);
+        Tenserx output_data = context.getDeviceData(output);
 
         // Perform op operation
         Pointer alpha = Pointer.to(new double[]{1}), beta = Pointer.to(new double[]{1});
-        cudnnAddTensor(handle, alpha, data_desc, input_data, beta, data_desc, output_data);
+        cudnnAddTensor(handle, alpha, data_desc, input_data.deviceData, beta, data_desc, output_data.deviceData);
 
         // copy device memory to host
         context.copyDataToHost(output);
@@ -101,12 +102,12 @@ public class OpTensor {
         cudnnSetTensor4dDescriptor(data_desc, CUDNN_TENSOR_NCHW, DATA_TYPE, batch_size, channels, height, width);
 
         // allocate memory on device
-        Pointer input_grad = context.getDeviceGrad(input);
-        Pointer output_grad = context.getDeviceGrad(output);
+        Tenserx input_grad = context.getDeviceGrad(input);
+        Tenserx output_grad = context.getDeviceGrad(output);
 
         // Perform op operation
         Pointer alpha = Pointer.to(new double[]{1}), beta = Pointer.to(new double[]{1});
-        cudnnAddTensor(handle, alpha, data_desc, output_grad, beta, data_desc, input_grad);
+        cudnnAddTensor(handle, alpha, data_desc, output_grad.deviceData, beta, data_desc, input_grad.deviceData);
 
         // copy device memory to host
         context.copyGradToHost(input);
@@ -129,12 +130,12 @@ public class OpTensor {
         cudnnSetTensor4dDescriptor(output_desc, CUDNN_TENSOR_NCHW, DATA_TYPE, batch_size, channels, height, width);
 
         // allocate memory on device
-        Pointer input_data = context.getDeviceData(input);
-        Pointer output_data = context.getDeviceData(output);
+        Tenserx input_data = context.getDeviceData(input);
+        Tenserx output_data = context.getDeviceData(output);
 
         // Perform op operation
         Pointer alpha = Pointer.to(new double[]{1}), beta = Pointer.to(new double[]{-1});
-        cudnnAddTensor(handle, alpha, input_desc, input_data, beta, output_desc, output_data);
+        cudnnAddTensor(handle, alpha, input_desc, input_data.deviceData, beta, output_desc, output_data.deviceData);
 
         // copy device memory to host
         context.copyDataToHost(output);
@@ -159,12 +160,12 @@ public class OpTensor {
         cudnnSetTensor4dDescriptor(output_desc, CUDNN_TENSOR_NCHW, DATA_TYPE, batch_size, channels, height, width);
 
         // allocate memory on device
-        Pointer input_grad = context.getDeviceGrad(input);
-        Pointer output_grad = context.getDeviceGrad(output);
+        Tenserx input_grad = context.getDeviceGrad(input);
+        Tenserx output_grad = context.getDeviceGrad(output);
 
         // Perform op operation
         Pointer alpha = Pointer.to(new double[]{1}), beta = Pointer.to(new double[]{-1});
-        cudnnAddTensor(handle, alpha, output_desc, output_grad, beta, input_desc, input_grad);
+        cudnnAddTensor(handle, alpha, output_desc, output_grad.deviceData, beta, input_desc, input_grad.deviceData);
 
         // copy device memory to host
         context.copyGradToHost(input);
@@ -189,12 +190,12 @@ public class OpTensor {
         cudnnSetTensor4dDescriptor(output_desc, CUDNN_TENSOR_NCHW, DATA_TYPE, batch_size, channels, height, width);
 
         // allocate memory on device
-        Pointer input_data = context.getDeviceData(input);
-        Pointer output_data = context.getDeviceData(output);
+        Tenserx input_data = context.getDeviceData(input);
+        Tenserx output_data = context.getDeviceData(output);
 
         // Perform op operation
         Pointer alpha = Pointer.to(new double[]{a}), beta = Pointer.to(new double[]{1});
-        cudnnAddTensor(handle, alpha, input_desc, input_data, beta, output_desc, output_data);
+        cudnnAddTensor(handle, alpha, input_desc, input_data.deviceData, beta, output_desc, output_data.deviceData);
 
         // copy device memory to host
         context.copyDataToHost(output);
@@ -219,12 +220,12 @@ public class OpTensor {
         cudnnSetTensor4dDescriptor(output_desc, CUDNN_TENSOR_NCHW, DATA_TYPE, batch_size, channels, height, width);
 
         // allocate memory on device
-        Pointer input_grad = context.getDeviceGrad(input);
-        Pointer output_grad = context.getDeviceGrad(output);
+        Tenserx input_grad = context.getDeviceGrad(input);
+        Tenserx output_grad = context.getDeviceGrad(output);
 
         // Perform op operation
         Pointer alpha = Pointer.to(new double[]{a}), beta = Pointer.to(new double[]{1});
-        cudnnAddTensor(handle, alpha, output_desc, output_grad, beta, input_desc, input_grad);
+        cudnnAddTensor(handle, alpha, output_desc, output_grad.deviceData, beta, input_desc, input_grad.deviceData);
 
         // copy device memory to host
         context.copyGradToHost(input);
@@ -254,13 +255,13 @@ public class OpTensor {
         cudnnSetOpTensorDescriptor(op_tensor_desc, op, DATA_TYPE, CUDNN_NOT_PROPAGATE_NAN);
 
         // allocate memory on device
-        Pointer inputx_data = context.getDeviceData(inputx);
-        Pointer inputy_data = context.getDeviceData(inputy);
-        Pointer output_data = context.getDeviceData(output);
+        Tenserx inputx_data = context.getDeviceData(inputx);
+        Tenserx inputy_data = context.getDeviceData(inputy);
+        Tenserx output_data = context.getDeviceData(output);
 
         // Perform op operation
         Pointer alpha = Pointer.to(new double[]{1}), beta = Pointer.to(new double[]{1});
-        cudnnOpTensor(handle, op_tensor_desc, alpha, input_desc, inputx_data, alpha, input_desc, inputy_data, beta, output_desc, output_data);
+        cudnnOpTensor(handle, op_tensor_desc, alpha, input_desc, inputx_data.deviceData, alpha, input_desc, inputy_data.deviceData, beta, output_desc, output_data.deviceData);
 
         // copy device memory to host
         context.copyDataToHost(output);

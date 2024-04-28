@@ -165,22 +165,6 @@ public class Cuda {
      * @param data The value of the elements
      * @return The pointer to the data
      */
-    public static Pointer createDevicePointer(Pointer data, int size, int deviceId) {
-        size = size * Sizeof.DOUBLE;
-        Pointer deviceData = new Pointer();
-        cudaSetDevice(deviceId);
-        cudaMalloc(deviceData, size);
-        cudaMemcpy(deviceData, data, size, cudaMemcpyHostToDevice);
-        return deviceData;
-    }
-
-    /**
-     * Create device data containing the given float value, the given number
-     * of times
-     *
-     * @param data The value of the elements
-     * @return The pointer to the data
-     */
     public static Pointer createDevicePointer(double[] data) {
         int size = data.length * Sizeof.DOUBLE;
         Pointer deviceData = new Pointer();
@@ -223,16 +207,6 @@ public class Cuda {
     public static void copyDataDeviceToHost(double[] data, Pointer deviceData, cudaStream_t stream) {
         int size = data.length * Sizeof.DOUBLE;
         cudaMemcpyAsync(Pointer.to(data), deviceData, size, cudaMemcpyDeviceToHost, stream);
-    }
-
-    /**
-     * copy device data to host
-     * @param data The value of the elements
-     * @return void
-     */
-    public static void copyDataDeviceToHost(Pointer data, Pointer deviceData, int size, cudaStream_t stream) {
-        size = size * Sizeof.DOUBLE;
-        cudaMemcpyAsync(data, deviceData, size, cudaMemcpyDeviceToHost, stream);
     }
 
     /**

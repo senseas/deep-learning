@@ -1,8 +1,8 @@
 package com.deep.framework.graph;
 
 import com.deep.framework.lang.Tenser;
+import com.deep.framework.lang.Tenserx;
 import com.deep.framework.optimizer.AdamOptimizer;
-import jcuda.Pointer;
 import lombok.Data;
 import lombok.experimental.Accessors;
 
@@ -123,12 +123,12 @@ public class Tensor implements Serializable {
         optimizer = new AdamOptimizer(shape);
     }
 
-    public Map<Integer, Pointer> getDeviceDataMap() {
+    public Map<Integer, Tenserx> getDeviceDataMap() {
         if (Objects.nonNull(deviceDataMap)) return deviceDataMap;
         return deviceDataMap = new HashMap<>();
     }
 
-    public Map<Integer, Pointer> getDeviceGradMap() {
+    public Map<Integer, Tenserx> getDeviceGradMap() {
         if (Objects.nonNull(deviceGradMap)) return deviceGradMap;
         return deviceGradMap = new HashMap<>();
     }
@@ -149,6 +149,6 @@ public class Tensor implements Serializable {
     transient private AdamOptimizer optimizer;
 
     transient private int deviceId;
-    transient private Map<Integer, Pointer> deviceDataMap;
-    transient private Map<Integer, Pointer> deviceGradMap;
+    transient private Map<Integer, Tenserx> deviceDataMap;
+    transient private Map<Integer, Tenserx> deviceGradMap;
 }

@@ -3,6 +3,7 @@ package com.deep.framework.cudnn;
 import com.deep.framework.cuda.CudaContext;
 import com.deep.framework.graph.Tensor;
 import com.deep.framework.lang.Shape;
+import com.deep.framework.lang.Tenserx;
 import jcuda.Pointer;
 import jcuda.jcudnn.cudnnHandle;
 import jcuda.jcudnn.cudnnReduceTensorDescriptor;
@@ -108,8 +109,8 @@ public class Reduce {
         cudnnSetReduceTensorDescriptor(reduce_desc, op, DATA_TYPE, CUDNN_NOT_PROPAGATE_NAN, CUDNN_REDUCE_TENSOR_NO_INDICES, CUDNN_32BIT_INDICES);
 
         // Allocate memory on GPU
-        Pointer input_data = context.getDeviceData(input);
-        Pointer output_data = context.getDeviceData(output);
+        Tenserx input_data = context.getDeviceData(input);
+        Tenserx output_data = context.getDeviceData(output);
 
         // Allocate workspace memory on GPU
         long[] workspaceSize = new long[1];
@@ -119,7 +120,7 @@ public class Reduce {
 
         // Perform reduce operation
         Pointer alpha = Pointer.to(new double[]{1}), beta = Pointer.to(new double[]{0});
-        cudnnReduceTensor(handle, reduce_desc, null, 0l, workspace, workspaceSize[0], alpha, input_desc, input_data, beta, output_desc, output_data);
+        cudnnReduceTensor(handle, reduce_desc, null, 0l, workspace, workspaceSize[0], alpha, input_desc, input_data.deviceData, beta, output_desc, output_data.deviceData);
         context.copyDataToHost(output);
 
         // Release resources

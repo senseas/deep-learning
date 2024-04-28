@@ -4,7 +4,6 @@ import com.deep.framework.cublas.CublasConfig;
 import com.deep.framework.cudnn.CudnnConfig;
 import com.deep.framework.graph.Tensor;
 import com.deep.framework.lang.Tenserx;
-import jcuda.Pointer;
 import jcuda.jcublas.cublasHandle;
 import jcuda.jcudnn.cudnnHandle;
 import jcuda.runtime.cudaStream_t;
@@ -13,7 +12,8 @@ import lombok.Data;
 import java.io.Serializable;
 import java.util.Objects;
 
-import static com.deep.framework.cuda.Cuda.*;
+import static com.deep.framework.cuda.Cuda.copyDataDeviceToHost;
+import static com.deep.framework.cuda.Cuda.copyDataHostToDevice;
 import static jcuda.jcublas.JCublas2.cublasSetStream;
 import static jcuda.jcudnn.JCudnn.cudnnSetStream;
 import static jcuda.runtime.JCuda.*;
@@ -32,14 +32,6 @@ public class CudaContext implements Serializable {
         cudaStreamCreate(stream);
     }
 
-    public CudaContext(Tenserx output) {
-        deviceId = output.deviceId;
-        cudaSetDevice(deviceId);
-
-        stream = new cudaStream_t();
-        cudaStreamCreate(stream);
-    }
-
     public cublasHandle getCublasHandle() {
         cublasHandle handle = CublasConfig.getCublasHandle(deviceId);
         cublasSetStream(handle, stream);
@@ -52,40 +44,36 @@ public class CudaContext implements Serializable {
         return handle;
     }
 
-    public Pointer getDeviceData(Tensor tensor) {
-        Pointer deviceData = tensor.getDeviceDataMap().get(deviceId);
+    public Tenserx getDeviceData(Tensor tensor) {
+        Tenserx deviceData = tensor.getDeviceDataMap().get(deviceId);
         if (Objects.isNull(deviceData)) {
-            tensor.getDeviceDataMap().put(deviceId, deviceData = createDevicePointer(tensor.getData(), deviceId));
+            tensor.getDeviceDataMap().put(deviceId, deviceData = new Tenserx(tensor.getData(), tensor.getShape(), deviceId));
         } else {
-            copyDataHostToDevice(tensor.getData(), deviceData, stream);
+            copyDataHostToDevice(tensor.getData(), deviceData.deviceData, stream);
         }
         return deviceData;
     }
 
-    public Pointer getDeviceGrad(Tensor tensor) {
-        Pointer deviceGrad = tensor.getDeviceGradMap().get(deviceId);
+    public Tenserx getDeviceGrad(Tensor tensor) {
+        Tenserx deviceGrad = tensor.getDeviceGradMap().get(deviceId);
         if (Objects.isNull(deviceGrad)) {
-            tensor.getDeviceGradMap().put(deviceId, deviceGrad = createDevicePointer(tensor.getGrad(), deviceId));
+            tensor.getDeviceGradMap().put(deviceId, deviceGrad = new Tenserx(tensor.getGrad(), tensor.getShape(), deviceId));
         } else {
-            copyDataHostToDevice(tensor.getGrad(), deviceGrad, stream);
+            copyDataHostToDevice(tensor.getGrad(), deviceGrad.deviceData, stream);
         }
         return deviceGrad;
     }
 
     public void copyDataToHost(Tensor tensor) {
-        Pointer deviceData = tensor.getDeviceDataMap().get(deviceId);
+        Tenserx deviceData = tensor.getDeviceDataMap().get(deviceId);
         if (Objects.isNull(deviceData)) return;
-        copyDataDeviceToHost(tensor.getData(), deviceData, stream);
+        copyDataDeviceToHost(tensor.getData(), deviceData.deviceData, stream);
     }
 
     public void copyGradToHost(Tensor tensor) {
-        Pointer deviceGrad = tensor.getDeviceGradMap().get(deviceId);
+        Tenserx deviceGrad = tensor.getDeviceGradMap().get(deviceId);
         if (Objects.isNull(deviceGrad)) return;
-        copyDataDeviceToHost(tensor.getGrad(), deviceGrad, stream);
-    }
-
-    public void copyDataToHost(Tenserx tensor) {
-        copyDataDeviceToHost(tensor.data, tensor.deviceData, tensor.size(), stream);
+        copyDataDeviceToHost(tensor.getGrad(), deviceGrad.deviceData, stream);
     }
 
     public void clear() {
