@@ -90,13 +90,12 @@ public class Reduce {
 
     public static void reduce(Tensor input, Tensor output, int op, CudaContext context) {
         int[] input_shape = Shape.shapes(input.getShape()), output_shape = Shape.shapes(output.getShape());
-        int batch_size = input_shape[0], channels = input_shape[1], height = input_shape[2], width = input_shape[3];
 
         cudnnHandle handle = context.getCudnnHandle();
         // Define input tensor
         cudnnTensorDescriptor input_desc = new cudnnTensorDescriptor();
         cudnnCreateTensorDescriptor(input_desc);
-        cudnnSetTensor4dDescriptor(input_desc, CUDNN_TENSOR_NCHW, DATA_TYPE, output_shape[0], output_shape[1], height, width);
+        cudnnSetTensor4dDescriptor(input_desc, CUDNN_TENSOR_NCHW, DATA_TYPE, input_shape[0], input_shape[1], input_shape[2], input_shape[3]);
 
         // Define output tensor
         cudnnTensorDescriptor output_desc = new cudnnTensorDescriptor();
