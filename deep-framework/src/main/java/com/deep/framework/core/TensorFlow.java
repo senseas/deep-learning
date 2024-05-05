@@ -1,15 +1,12 @@
 package com.deep.framework.core;
 
 import com.deep.framework.cudnn.Reduce;
-import com.deep.framework.graph.Tensors;
 import com.deep.framework.graph.*;
 import com.deep.framework.lang.Shape;
 import com.deep.framework.lang.Tenser;
 
 import java.io.Serializable;
 import java.util.Arrays;
-import java.util.stream.DoubleStream;
-import java.util.stream.IntStream;
 
 import static com.deep.framework.cublas.Matmul.*;
 import static com.deep.framework.cudnn.Activation.*;
@@ -66,341 +63,326 @@ public class TensorFlow implements Serializable {
     }
 
     public Tensor minus(Tensor... input) {
-        return new ScalarOperator("Minus", input) {
+        return new TensorOperator("Minus", input[0].getShape(), input) {
 
-            public double compute() {
-                Tensor inx = getInput(0), iny = getInput(1);
-                double valx = inx.data(), valy = iny.data();
-                return valx - valy;
+            public Tenser<Tensor> compute() {
+                Tenser<Tensor> A = getInput(0), B = getInput(1), O = getOutput();
+                forEach(A, B, O, (Tensor a, Tensor b, Tensor o) -> {
+                    double valx = a.data(), valy = b.data();
+                    o.data(valx - valy);
+                });
+                return output;
             }
 
-            public void gradient(double grad) {
-                Tensor inx = getInput(0), iny = getInput(1);
-                inx.grad(grad);
-                iny.grad(-grad);
+            public void gradient() {
+                Tenser<Tensor> A = getInput(0), B = getInput(1), O = getOutput();
+                forEach(A, B, O, (Tensor a, Tensor b, Tensor o) -> {
+                    a.grad(o.grad());
+                    b.grad(-o.grad());
+                });
             }
 
         };
     }
 
     public Tensor minus(Tensor input) {
-        return new ScalarOperator("Minusx", input) {
+        return new TensorOperator("Minusx", input.getShape(), input) {
 
-            public double compute() {
-                Tensor inx = getInput(0);
-                double valx = inx.data();
-                return -valx;
+            public Tenser<Tensor> compute() {
+                Tenser<Tensor> A = getInput(0), O = getOutput();
+                forEach(A, O, (Tensor a, Tensor o) -> o.data(-a.data()));
+                return output;
             }
 
-            public void gradient(double grad) {
-                Tensor inx = getInput(0);
-                inx.grad(-grad);
+            public void gradient() {
+                Tenser<Tensor> A = getInput(0), O = getOutput();
+                forEach(A, O, (Tensor a, Tensor o) -> a.grad(-o.grad()));
             }
 
         };
     }
 
     public Tensor mul(Tensor... input) {
-        return new ScalarOperator("Mul", input) {
+        return new TensorOperator("Mul", input[0].getShape(), input) {
 
-            public double compute() {
-                Tensor inx = getInput(0), iny = getInput(1);
-                double valx = inx.data(), valy = iny.data();
-                return valx * valy;
+            public Tenser<Tensor> compute() {
+                Tenser<Tensor> A = getInput(0), B = getInput(1), O = getOutput();
+                forEach(A, B, O, (Tensor a, Tensor b, Tensor o) -> {
+                    double valx = a.data(), valy = b.data();
+                    o.data(valx * valy);
+                });
+                return output;
             }
 
-            public void gradient(double grad) {
-                Tensor inx = getInput(0), iny = getInput(1);
-                double valx = inx.data(), valy = iny.data();
-                inx.grad(grad * valy);
-                iny.grad(grad * valx);
+            public void gradient() {
+                Tenser<Tensor> A = getInput(0), B = getInput(1), O = getOutput();
+                forEach(A, B, O, (Tensor a, Tensor b, Tensor o) -> {
+                    double valx = a.data(), valy = b.data();
+                    a.grad(o.grad() * valy);
+                    b.grad(o.grad() * valx);
+                });
             }
 
         };
     }
 
     public Tensor div(Tensor... input) {
-        return new ScalarOperator("Div", input) {
-
-            public double compute() {
-                Tensor inx = getInput(0), iny = getInput(1);
-                double valx = inx.data(), valy = iny.data();
-                return valx / valy;
-            }
-
-            public void gradient(double grad) {
-                Tensor inx = getInput(0), iny = getInput(1);
-                double valx = inx.data(), valy = iny.data();
-                inx.grad(grad / valy);
-                iny.grad(-grad * valx / Math.pow(valy, 2));
-            }
-
-        };
-    }
-
-    public Tensor exp(Tensor... input) {
-        return new ScalarOperator("Exp", input) {
-
-            public double compute() {
-                Tensor inx = getInput(0);
-                double valx = inx.data();
-                return Math.exp(valx);
-            }
-
-            public void gradient(double grad) {
-                Tensor inx = getInput(0);
-                double valx = inx.data();
-                inx.grad(grad * Math.exp(valx));
-            }
-
-        };
-    }
-
-    public Tensor expx(Tensor input) {
-        return new TensorOperator("Expx", input.getShape(), input) {
+        return new TensorOperator("Div", input[0].getShape(), input) {
 
             public Tenser<Tensor> compute() {
-                Tenser<Tensor> A = getInput(0), B = getOutput();
-                forEach(A, B, (Tensor a, Tensor b) -> b.data(Math.exp(a.data())));
-                return B;
+                Tenser<Tensor> A = getInput(0), B = getInput(1), O = getOutput();
+                forEach(A, B, O, (Tensor a, Tensor b, Tensor o) -> {
+                    double valx = a.data(), valy = b.data();
+                    o.data(valx / valy);
+                });
+                return output;
             }
 
             public void gradient() {
-                Tenser<Tensor> A = getInput(0), B = getOutput();
-                forEach(A, B, (Tensor a, Tensor b) -> a.grad(b.grad() * b.data()));
+                Tenser<Tensor> A = getInput(0), B = getInput(1), O = getOutput();
+                forEach(A, B, O, (Tensor a, Tensor b, Tensor o) -> {
+                    double valx = a.data(), valy = b.data();
+                    a.grad(o.grad() / valy);
+                    b.grad(-o.grad() * valx / Math.pow(valy, 2));
+                });
+            }
+
+        };
+    }
+
+    public Tensor exp(Tensor input) {
+        return new TensorOperator("Exp", input.getShape(), input) {
+
+            public Tenser<Tensor> compute() {
+                Tenser<Tensor> A = getInput(0), O = getOutput();
+                forEach(A, O, (Tensor a, Tensor o) -> o.data(Math.exp(a.data())));
+                return O;
+            }
+
+            public void gradient() {
+                Tenser<Tensor> A = getInput(0), O = getOutput();
+                forEach(A, O, (Tensor a, Tensor o) -> a.grad(o.grad() * o.data()));
             }
 
         };
     }
 
     public Tensor pow(Tensor... input) {
-        return new ScalarOperator("Pow", input) {
+        return new TensorOperator("Pow", input[0].getShape(), input) {
 
-            public double compute() {
-                Tensor inx = getInput(0), iny = getInput(1);
-                double valx = inx.data(), valy = iny.data();
-                return Math.pow(valx, valy);
+            public Tenser<Tensor> compute() {
+                Tenser<Tensor> A = getInput(0), B = getInput(1), O = getOutput();
+                forEach(A, B, O, (Tensor a, Tensor b, Tensor o) -> o.data(Math.pow(a.data(), b.data())));
+                return output;
             }
 
-            public void gradient(double grad) {
-                Tensor inx = getInput(0), iny = getInput(1);
-                double valx = inx.data(), valy = iny.data();
-                inx.grad(grad * valy * Math.pow(valx, valy - 1));
+            public void gradient() {
+                Tenser<Tensor> A = getInput(0), B = getInput(1), O = getOutput();
+                forEach(A, B, O, (Tensor a, Tensor b, Tensor o) -> a.grad(o.grad() * b.data() * Math.pow(a.data(), b.data() - 1)));
             }
 
         };
     }
 
-    public Tensor log(Tensor... input) {
-        return new ScalarOperator("Log", input) {
+    public Tensor log(Tensor input) {
+        return new TensorOperator("Log", input.getShape(), input) {
 
-            public double compute() {
-                Tensor inx = getInput(0);
-                double valx = inx.data();
-                return Math.log(valx);
+            public Tenser<Tensor> compute() {
+                Tenser<Tensor> A = getInput(0), O = getOutput();
+                forEach(A, O, (Tensor a, Tensor o) -> o.data(Math.log(a.data())));
+                return output;
             }
 
-            public void gradient(double grad) {
-                Tensor inx = getInput(0);
-                double valx = inx.data();
-                inx.grad(grad / valx);
+            public void gradient() {
+                Tenser<Tensor> A = getInput(0), O = getOutput();
+                forEach(A, O, (Tensor a, Tensor o) -> a.grad(o.grad() / a.data()));
             }
 
         };
     }
 
     public Tensor sum(Tensor input) {
-        return new ScalarOperator("Sum", input) {
+        return new TensorOperator("Sum", input.getShape(), input) {
 
-            public double compute() {
-                Tensor A = getInput(0);
+            public Tenser<Tensor> compute() {
+                Tensor A = getInput()[0];
                 Reduce.sum(A, this);
-                return data();
+                return output;
             }
 
-            public void gradient(double grad) {
-                Tensor A = getInput(0);
+            public void gradient() {
+                Tensor A = getInput()[0];
                 sumBackward(A, this);
             }
 
         };
     }
 
-    public Tensor sin(Tensor... input) {
-        return new ScalarOperator("Sin", input) {
+    public Tensor sin(Tensor input) {
+        return new TensorOperator("Sin", input.getShape(), input) {
 
-            public double compute() {
-                Tensor inx = getInput(0);
-                double valx = inx.data();
-                return Math.sin(valx);
+            public Tenser<Tensor> compute() {
+                Tenser<Tensor> A = getInput(0), O = getOutput();
+                forEach(A, O, (Tensor a, Tensor o) -> o.data(Math.sin(a.data())));
+                return output;
             }
 
-            public void gradient(double grad) {
-                Tensor inx = getInput(0);
-                double valx = inx.data();
-                inx.grad(grad * Math.cos(valx));
-            }
-
-        };
-    }
-
-    public Tensor cos(Tensor... input) {
-        return new ScalarOperator("Cos", input) {
-
-            public double compute() {
-                Tensor inx = getInput(0);
-                double valx = inx.data();
-                return Math.cos(valx);
-            }
-
-            public void gradient(double grad) {
-                Tensor inx = getInput(0);
-                double valx = inx.data();
-                inx.grad(grad * -Math.sin(valx));
+            public void gradient() {
+                Tenser<Tensor> A = getInput(0), O = getOutput();
+                forEach(A, O, (Tensor a, Tensor o) -> a.grad(o.grad() * Math.cos(a.data())));
             }
 
         };
     }
 
-    public Tensor tan(Tensor... input) {
-        return new ScalarOperator("Tan", input) {
+    public Tensor cos(Tensor input) {
+        return new TensorOperator("Cos", input.getShape(), input) {
 
-            public double compute() {
-                Tensor inx = getInput(0);
-                double valx = inx.data();
-                return Math.tan(valx);
+            public Tenser<Tensor> compute() {
+                Tenser<Tensor> A = getInput(0), O = getOutput();
+                forEach(A, O, (Tensor a, Tensor o) -> o.data(Math.cos(a.data())));
+                return output;
             }
 
-            public void gradient(double grad) {
-                Tensor inx = getInput(0);
-                double valx = inx.data();
-                inx.grad(grad * Math.pow(1 / Math.cos(valx), 2));
-            }
-
-        };
-    }
-
-    public Tensor cot(Tensor... input) {
-        return new ScalarOperator("Cot", input) {
-
-            public double compute() {
-                Tensor inx = getInput(0);
-                double valx = inx.data();
-                return Math.cos(valx) / Math.sin(valx);
-            }
-
-            public void gradient(double grad) {
-                Tensor inx = getInput(0);
-                double valx = inx.data();
-                inx.grad(grad * -Math.pow(1 / Math.sin(valx), 2));
+            public void gradient() {
+                Tenser<Tensor> A = getInput(0), O = getOutput();
+                forEach(A, O, (Tensor a, Tensor o) -> a.grad(o.grad() * -Math.sin(a.data())));
             }
 
         };
     }
 
-    public Tensor sec(Tensor... input) {
-        return new ScalarOperator("Sec", input) {
+    public Tensor tan(Tensor input) {
+        return new TensorOperator("Tan", input.getShape(), input) {
 
-            public double compute() {
-                Tensor inx = getInput(0);
-                double valx = inx.data();
-                return 1 / Math.cos(valx);
+            public Tenser<Tensor> compute() {
+                Tenser<Tensor> A = getInput(0), O = getOutput();
+                forEach(A, O, (Tensor a, Tensor o) -> o.data(Math.tan(a.data())));
+                return output;
             }
 
-            public void gradient(double grad) {
-                Tensor inx = getInput(0);
-                double valx = inx.data();
-                inx.grad(grad * Math.tan(valx) / Math.cos(valx));
-            }
-
-        };
-    }
-
-    public Tensor csc(Tensor... input) {
-        return new ScalarOperator("Csc", input) {
-
-            public double compute() {
-                Tensor inx = getInput(0);
-                double valx = inx.data();
-                return 1 / Math.sin(valx);
-            }
-
-            public void gradient(double grad) {
-                Tensor inx = getInput(0);
-                double valx = inx.data();
-                inx.grad(grad * -Math.cos(valx) / Math.pow(Math.sin(valx), 2));
+            public void gradient() {
+                Tenser<Tensor> A = getInput(0), O = getOutput();
+                forEach(A, O, (Tensor a, Tensor o) -> a.grad(o.grad() * Math.pow(1 / Math.cos(a.data()), 2)));
             }
 
         };
     }
 
-    public Tensor arcsin(Tensor... input) {
-        return new ScalarOperator("Arcsin", input) {
+    public Tensor cot(Tensor input) {
+        return new TensorOperator("Cot", input.getShape(), input) {
 
-            public double compute() {
-                Tensor inx = getInput(0);
-                double valx = inx.data();
-                return Math.asin(valx);
+            public Tenser<Tensor> compute() {
+                Tenser<Tensor> A = getInput(0), O = getOutput();
+                forEach(A, O, (Tensor a, Tensor o) -> o.data(Math.cos(a.data()) / Math.sin(a.data())));
+                return output;
             }
 
-            public void gradient(double grad) {
-                Tensor inx = getInput(0);
-                double valx = inx.data();
-                inx.grad(grad / Math.pow(1 - Math.pow(valx, 2), -2));
-            }
-
-        };
-    }
-
-    public Tensor arccos(Tensor... input) {
-        return new ScalarOperator("Arccos", input) {
-
-            public double compute() {
-                Tensor inx = getInput(0);
-                double valx = inx.data();
-                return Math.acos(valx);
-            }
-
-            public void gradient(double grad) {
-                Tensor inx = getInput(0);
-                double valx = inx.data();
-                inx.grad(grad / -Math.pow(1 - Math.pow(valx, 2), -2));
+            public void gradient() {
+                Tenser<Tensor> A = getInput(0), O = getOutput();
+                forEach(A, O, (Tensor a, Tensor o) -> a.grad(o.grad() * -Math.pow(1 / Math.sin(a.data()), 2)));
             }
 
         };
     }
 
-    public Tensor arctan(Tensor... input) {
-        return new ScalarOperator("Arctan", input) {
+    public Tensor sec(Tensor input) {
+        return new TensorOperator("Sec", input.getShape(), input) {
 
-            public double compute() {
-                Tensor inx = getInput(0);
-                double valx = inx.data();
-                return Math.atan(valx);
+            public Tenser<Tensor> compute() {
+                Tenser<Tensor> A = getInput(0), O = getOutput();
+                forEach(A, O, (Tensor a, Tensor o) -> o.data(1 / Math.cos(a.data())));
+                return output;
             }
 
-            public void gradient(double grad) {
-                Tensor inx = getInput(0);
-                double valx = inx.data();
-                inx.grad(grad / (1 + Math.pow(valx, 2)));
+            public void gradient() {
+                Tenser<Tensor> A = getInput(0), O = getOutput();
+                forEach(A, O, (Tensor a, Tensor o) -> a.grad(o.grad() * Math.tan(a.data()) / Math.cos(a.data())));
             }
 
         };
     }
 
-    public Tensor arccot(Tensor... input) {
-        return new ScalarOperator("Arccot", input) {
+    public Tensor csc(Tensor input) {
+        return new TensorOperator("Csc", input.getShape(), input) {
 
-            public double compute() {
-                Tensor inx = getInput(0);
-                double valx = inx.data();
-                return Math.atan(1 / valx);
+            public Tenser<Tensor> compute() {
+                Tenser<Tensor> A = getInput(0), O = getOutput();
+                forEach(A, O, (Tensor a, Tensor o) -> o.data(1 / Math.sin(a.data())));
+                return output;
+            }
+
+            public void gradient() {
+                Tenser<Tensor> A = getInput(0), O = getOutput();
+                forEach(A, O, (Tensor a, Tensor o) -> a.grad(o.grad() * -Math.cos(a.data()) / Math.pow(Math.sin(a.data()), 2)));
+            }
+
+        };
+    }
+
+    public Tensor arcsin(Tensor input) {
+        return new TensorOperator("Arcsin", input.getShape(), input) {
+
+            public Tenser<Tensor> compute() {
+                Tenser<Tensor> A = getInput(0), O = getOutput();
+                forEach(A, O, (Tensor a, Tensor o) -> o.data(Math.asin(a.data())));
+                return output;
+            }
+
+            public void gradient() {
+                Tenser<Tensor> A = getInput(0), O = getOutput();
+                forEach(A, O, (Tensor a, Tensor o) -> a.grad(o.grad() / Math.pow(1 - Math.pow(a.data(), 2), -2)));
+            }
+
+        };
+    }
+
+    public Tensor arccos(Tensor input) {
+        return new TensorOperator("Arccos", input.getShape(), input) {
+
+            public Tenser<Tensor> compute() {
+                Tenser<Tensor> A = getInput(0), O = getOutput();
+                forEach(A, O, (Tensor a, Tensor o) -> o.data(Math.acos(a.data())));
+                return output;
             }
 
             public void gradient(double grad) {
-                Tensor inx = getInput(0);
-                double valx = inx.data();
-                inx.grad(grad / -(1 + Math.pow(valx, 2)));
+                Tenser<Tensor> A = getInput(0), O = getOutput();
+                forEach(A, O, (Tensor a, Tensor o) -> a.grad(o.grad() / -Math.pow(1 - Math.pow(a.data(), 2), -2)));
+            }
+
+        };
+    }
+
+    public Tensor arctan(Tensor input) {
+        return new TensorOperator("Arctan", input.getShape(), input) {
+
+            public Tenser<Tensor> compute() {
+                Tenser<Tensor> A = getInput(0), O = getOutput();
+                forEach(A, O, (Tensor a, Tensor o) -> o.data(Math.atan(a.data())));
+                return output;
+            }
+
+            public void gradient() {
+                Tenser<Tensor> A = getInput(0), O = getOutput();
+                forEach(A, O, (Tensor a, Tensor o) ->a.grad(o.grad() / (1 + Math.pow(a.data(), 2))));
+            }
+
+        };
+    }
+
+    public Tensor arccot(Tensor input) {
+        return new TensorOperator("Arccot", input.getShape(), input) {
+
+            public Tenser<Tensor> compute() {
+                Tenser<Tensor> A = getInput(0), O = getOutput();
+                forEach(A, O, (Tensor a, Tensor o) -> o.data(Math.atan(1 / a.data())));
+                return output;
+            }
+
+            public void gradient() {
+                Tenser<Tensor> A = getInput(0), O = getOutput();
+                forEach(A, O, (Tensor a, Tensor o) -> a.grad(o.grad() / -(1 + Math.pow(a.data(), 2))));
             }
 
         };
@@ -869,56 +851,52 @@ public class TensorFlow implements Serializable {
         };
     }
 
-    public Tensor layerNormal(Tensor... input) {
-        return new TensorOperator("LayerNormal", input[0].getShape(), input) {
-            int length;
-            double[] std;
-            double[][] input_sub_mean;
+    public Tensor expand(Tensor input, int... shape) {
+        return new TensorOperator("Softmax", shape, input) {
 
             public Tenser<Tensor> compute() {
-                int dim = shape(0);
-                std = new double[dim];
-                input_sub_mean = new double[dim][];
-                for (int l = 0; l < dim; l++) {
-                    double[] input_data = new Tensors(getInput()[0]).get(l).getData();
-                    double[] scale = new Tensors(getInput()[1]).get(l).getData();
-                    double[] bias = new Tensors(getInput()[2]).get(l).getData();
-                    length = input_data.length;
-                    double mean = DoubleStream.of(input_data).parallel().sum() / length;
-                    input_sub_mean[l] = DoubleStream.of(input_data).map(a -> a - mean).toArray();
-                    std[l] = DoubleStream.of(input_sub_mean[l]).parallel().map(a -> Math.pow(a, 2)).sum() / length;
-                    double a = Math.pow(std[l] + 1.0E-7, 0.5);
-                    for (int i = 0; i < length; i++) {
-                        int idx = l * dim + i;
-                        data[idx] = scale[idx] * input_sub_mean[l][idx] / a + bias[idx];
+                Tensor inx = getInput()[0];
+                int a = next()[0], b = inx.next()[0], c = a / b;
+
+                for (int l = 0; l < shape[0]; l++) {
+                    int d = l * a, e = l * b;
+                    for (int m = 0; m < c; m++) {
+                        int o = m * b;
+                        for (int n = 0; n < b; n++) {
+                            data[d + o + n] = inx.getData()[e + n];
+                        }
                     }
                 }
                 return output;
             }
 
             public void gradient() {
-                int dim = shape(0);
-                for (int l = 0; l < shape(0); l++) {
-                    int H = l;
-                    double[] input_grad = new Tensors(getInput()[0]).get(l).getGrad();
-                    double[] scale = new Tensors(getInput()[1]).get(l).getData();
-                    double[] scale_grad = new Tensors(getInput()[1]).get(l).getGrad();
-                    double[] bias_grad = new Tensors(getInput()[2]).get(l).getGrad();
+                Tensor inx = getInput()[0];
+                int a = next()[0], b = inx.next()[0], c = a / b;
 
-                    double grad_scale_sum = IntStream.range(0, length).parallel().mapToDouble(i -> getGrad()[i] * scale[i]).sum();
-
-                    double grad_input_sub_mean_sum = IntStream.range(0, length).parallel().mapToDouble(i -> getGrad()[i] * scale[i] * input_sub_mean[H][i]).sum();
-                    double input_sub_mean_sum = DoubleStream.of(input_sub_mean[l]).parallel().sum();
-
-                    double a = std[l] + 1.0E-7;
-                    double b = Math.pow(a, 0.5);
-                    for (int i = 0; i < length; i++) {
-                        int idx = l * dim + i;
-                        input_grad[idx] = getGrad()[idx] * scale[idx] / b - grad_scale_sum / b / length + (-input_sub_mean[l][idx] + input_sub_mean_sum / length) * grad_input_sub_mean_sum * Math.pow(a, -1.5) / length;
-                        scale_grad[idx] = getGrad()[idx] * input_sub_mean[l][idx] / b;
-                        bias_grad[idx] = getGrad()[idx];
+                for (int l = 0; l < shape[0]; l++) {
+                    int d = l * a, e = l * b;
+                    for (int m = 0; m < c; m++) {
+                        int o = m * b;
+                        for (int n = 0; n < b; n++) {
+                            inx.getGrad()[e + n] = grad[d + o + n];
+                        }
                     }
                 }
+            }
+        };
+    }
+
+    public Tensor layerNormal(Tensor... input) {
+        return new TensorOperator("LayerNormal", input[0].getShape(), input) {
+
+            public Tenser<Tensor> compute() {
+                Tensor A = getInput()[0], B = getInput()[1], C = getInput()[2];
+                Tensor minus = minus(A, expand(mean(A), A.getShape()));
+                Tensor std = mean(pow(minus, cons(2, shape)));
+                Tensor a = pow(addx(std, cons(1.0E-7)), cons(0.5));
+                Tensor add = addx(mul(B, div(minus, a)), C);
+                return new Tenser<>(add);
             }
 
         };

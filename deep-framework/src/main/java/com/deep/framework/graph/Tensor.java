@@ -1,5 +1,6 @@
 package com.deep.framework.graph;
 
+import com.deep.framework.lang.Shape;
 import com.deep.framework.lang.Tenser;
 import com.deep.framework.lang.Tenserx;
 import com.deep.framework.optimizer.AdamOptimizer;
@@ -11,7 +12,10 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.stream.DoubleStream;
+import java.util.stream.IntStream;
 
+import static com.deep.framework.lang.Shape.Tensors;
 import static com.deep.framework.lang.Shape.*;
 
 @Data
@@ -55,6 +59,23 @@ public class Tensor implements Serializable {
         this.data = values(shape, value);
         this.grad = zeros(shape);
         this.reduce = true;
+    }
+
+    public Tensor(Tensor tensor) {
+        this.shape = tensor.getShape();
+        this.size = Shape.size(shape);
+        this.data = tensor.getData();
+        this.grad = tensor.getGrad();
+        this.nexts = next();
+    }
+
+    private Tensor(double[] data, double[] grad, int[] shape, int start) {
+        this.start = start;
+        this.shape = shape;
+        this.size = Shape.size(shape);
+        this.data = data;
+        this.grad = grad;
+        this.nexts = next();
     }
 
     public Tensor(Tensor tensor, int idx) {
@@ -135,12 +156,44 @@ public class Tensor implements Serializable {
 
     public int shape(int i) { return shape[i]; }
 
+    public Tensor get(int... index) {
+        return new Tensor(this.data, this.grad, getNext(index), start(index));
+    }
+
+    private DoubleStream streamData() {
+        return IntStream.range(0, size()).mapToDouble(i -> data[start + i]);
+    }
+
+    private DoubleStream streamGrad() {
+        return IntStream.range(0, size()).mapToDouble(i -> grad[start + i]);
+    }
+
+    private int start(int[] index) {
+        int next = this.start, length = index.length - 1;
+        for (int i = 0; i < length; i++) next += index[i] * nexts[i];
+        return next + index[length] * nexts[length];
+    }
+
+    public int[] next() {
+        int[] next = new int[shape.length];
+        Arrays.fill(next, 1);
+        for (int i = next.length - 1; 0 < i; i--) next[i - 1] = next[i] * shape[i];
+        return next;
+    }
+
+    private int[] getNext(int[] index) {
+        return Arrays.copyOfRange(this.shape, index.length, this.shape.length);
+    }
+
+    public int size() {return size;}
+
     private int idx;
     private Tensor tensor;
     private String name = "";
     private Tensor[] input;
+    private int start = 0, size = 1;
 
-    protected int[] shape;
+    protected int[] shape, nexts;
     protected double[] data, grad;
     protected boolean reduce;
     protected Tenser<Tensor> output, function;
