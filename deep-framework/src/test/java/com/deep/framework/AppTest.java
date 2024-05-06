@@ -6,8 +6,6 @@ import com.deep.framework.core.TensorFlow;
 import com.deep.framework.graph.Tensor;
 import org.junit.Test;
 
-import java.util.Arrays;
-
 public class AppTest {
 
     @Test
@@ -183,9 +181,10 @@ public class AppTest {
         Tensor scale = new Tensor(weightData, new int[]{2, 3, 2});
         Tensor bias = new Tensor(biasData, new int[]{2, 3, 2});
         Tensor layerNormal = tf.layerNormal(input, scale, bias);
-        layerNormal.forward();
-        Arrays.fill(layerNormal.getGrad(), 1);
-        layerNormal.backward();
+
+        TensorExecutor executor = new TensorExecutor(layerNormal);
+        executor.forward();
+        executor.backward();
 
         System.out.println("output    " + JSONObject.toJSONString(layerNormal.getData()));
         System.out.println("input Grad" + JSONObject.toJSONString(input.getGrad()));

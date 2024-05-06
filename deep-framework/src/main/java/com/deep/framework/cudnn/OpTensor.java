@@ -13,6 +13,7 @@ import static jcuda.jcudnn.JCudnn.*;
 import static jcuda.jcudnn.cudnnDataType.CUDNN_DATA_DOUBLE;
 import static jcuda.jcudnn.cudnnNanPropagation.CUDNN_NOT_PROPAGATE_NAN;
 import static jcuda.jcudnn.cudnnOpTensorOp.CUDNN_OP_TENSOR_ADD;
+import static jcuda.jcudnn.cudnnOpTensorOp.CUDNN_OP_TENSOR_MUL;
 import static jcuda.jcudnn.cudnnTensorFormat.CUDNN_TENSOR_NCHW;
 
 public class OpTensor {
@@ -29,6 +30,12 @@ public class OpTensor {
         CudaContext context = new CudaContext(output);
         addTensorBackward(inputx, output, Shape.shapes(inputx.getShape()), context);
         addTensorBackward(inputy, output, Shape.shapes(inputy.getShape()), context);
+        context.clear();
+    }
+
+    public static void mulForward(Tensor inputx, Tensor inputy, Tensor output) {
+        CudaContext context = new CudaContext(output);
+        opTensor(inputx, inputy, output, Shape.shapes(inputx.getShape()), CUDNN_OP_TENSOR_MUL, context);
         context.clear();
     }
 

@@ -852,7 +852,7 @@ public class TensorFlow implements Serializable {
     }
 
     public Tensor expand(Tensor input, int... shape) {
-        return new TensorOperator("Softmax", shape, input) {
+        return new TensorOperator("Expand", shape, input) {
 
             public Tenser<Tensor> compute() {
                 Tensor inx = getInput()[0];
@@ -879,7 +879,7 @@ public class TensorFlow implements Serializable {
                     for (int m = 0; m < c; m++) {
                         int o = m * b;
                         for (int n = 0; n < b; n++) {
-                            inx.getGrad()[e + n] = grad[d + o + n];
+                            inx.getGrad()[e + n] += grad[d + o + n];
                         }
                     }
                 }
@@ -888,14 +888,14 @@ public class TensorFlow implements Serializable {
     }
 
     public Tensor layerNormal(Tensor... input) {
-        return new TensorOperator("LayerNormal", input[0].getShape(), input) {
+        return new TensorFunction("LayerNormal", input[0].getShape(), input) {
 
             public Tenser<Tensor> compute() {
                 Tensor A = getInput()[0], B = getInput()[1], C = getInput()[2];
                 Tensor minus = minus(A, expand(mean(A), A.getShape()));
                 Tensor std = mean(pow(minus, cons(2, shape)));
-                Tensor a = pow(addx(std, cons(1.0E-7)), cons(0.5));
-                Tensor add = addx(mul(B, div(minus, a)), C);
+                Tensor a = pow(addx(std, cons(1.0E-7, Shape.shape(shape[0]))), cons(0.5, Shape.shape(shape[0])));
+                Tensor add = addx(mul(B, div(minus, expand(a, shape))), C);
                 return new Tenser<>(add);
             }
 
@@ -929,7 +929,7 @@ public class TensorFlow implements Serializable {
 
             public void gradient() {
                 Tensor inx = getInput()[0];
-                mulTensorScalarBackward(inx, cons(1d / Shape.size(inx.getShape()) / inx.shape(0)), this);
+                forEach(inx.getGrad().length, (int i) -> inx.getGrad()[i] += getGrad()[i / inx.getNexts()[0]] / inx.getNexts()[0]);
             }
 
         };

@@ -14,6 +14,7 @@ public class TensorOperator extends Tensor {
     public TensorOperator(String name, int[] shape, Tensor... input) {
         super(name, input);
         this.shape = shape;
+        this.nexts = next();
         concat(this);
     }
 

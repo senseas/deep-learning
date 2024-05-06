@@ -35,6 +35,7 @@ public class Tensor implements Serializable {
         this.data = random(shape);
         this.grad = zeros(shape);
         this.reduce = true;
+        this.nexts = next();
     }
 
     public Tensor(double[] data, int[] shape) {
@@ -43,6 +44,7 @@ public class Tensor implements Serializable {
         this.data = data;
         this.grad = zeros(shape);
         this.reduce = true;
+        this.nexts = next();
     }
 
     public Tensor(String name, int[] shape) {
@@ -51,6 +53,7 @@ public class Tensor implements Serializable {
         this.data = random(shape);
         this.grad = zeros(shape);
         this.reduce = true;
+        this.nexts = next();
     }
 
     public Tensor(int[] shape, double value) {
@@ -59,6 +62,7 @@ public class Tensor implements Serializable {
         this.data = values(shape, value);
         this.grad = zeros(shape);
         this.reduce = true;
+        this.nexts = next();
     }
 
     public Tensor(Tensor tensor) {
