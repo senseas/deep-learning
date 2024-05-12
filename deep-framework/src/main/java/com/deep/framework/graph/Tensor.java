@@ -32,6 +32,7 @@ public class Tensor implements Serializable {
     public Tensor(int[] shape) {
         this.name = "None";
         this.shape = shape;
+        this.size = Shape.size(shape);
         this.data = random(shape);
         this.grad = zeros(shape);
         this.reduce = true;
@@ -41,6 +42,7 @@ public class Tensor implements Serializable {
     public Tensor(double[] data, int[] shape) {
         this.name = "None";
         this.shape = shape;
+        this.size = Shape.size(shape);
         this.data = data;
         this.grad = zeros(shape);
         this.reduce = true;
@@ -50,6 +52,7 @@ public class Tensor implements Serializable {
     public Tensor(String name, int[] shape) {
         this.name = "None::".concat(name);
         this.shape = shape;
+        this.size = Shape.size(shape);
         this.data = random(shape);
         this.grad = zeros(shape);
         this.reduce = true;
@@ -59,6 +62,7 @@ public class Tensor implements Serializable {
     public Tensor(int[] shape, double value) {
         this.name = "None";
         this.shape = shape;
+        this.size = Shape.size(shape);
         this.data = values(shape, value);
         this.grad = zeros(shape);
         this.reduce = true;
@@ -87,9 +91,12 @@ public class Tensor implements Serializable {
         this.tensor = tensor;
     }
 
-    public Tensor(String name, Tensor... input) {
+    public Tensor(String name, int[] shape, Tensor... input) {
         this.name = this.name.concat(name);
         this.input = input;
+        this.shape = shape;
+        this.size = Shape.size(shape);
+        this.nexts = next();
     }
 
     public void forward() {
@@ -107,7 +114,7 @@ public class Tensor implements Serializable {
 
     public Tenser<Tensor> getOutput() {
         if (Objects.nonNull(output)) return output;
-        if (Objects.isNull(shape)) return new Tenser<>(this);
+        if (Objects.equals(size, 1)) return new Tenser<>(this);
         return output = Tensors(this);
     }
 

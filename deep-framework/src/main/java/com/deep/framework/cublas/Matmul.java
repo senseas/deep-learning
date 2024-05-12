@@ -26,9 +26,9 @@ public class Matmul {
         // alpha, beta
         Pointer alpha = Pointer.to(new double[]{1}), beta = Pointer.to(new double[]{0});
 
-        int M = inputx.shape(0), K = inputx.shape(1), N = inputy.shape(1);
+        int M = inputx.shape(1), K = inputx.shape(2), N = inputy.shape(2);
         // NM = [NK * KM]
-        forEach(inputx.shape(0), i -> cublasDgemm(handle, CUBLAS_OP_N, CUBLAS_OP_N, N, M, K, alpha, inputy_data.deviceData, N, inputx_data.get(i).deviceData, K, beta, output_data.get(i).deviceData, N));
+        forEach(inputx.shape(0), i -> cublasDgemm(handle, CUBLAS_OP_N, CUBLAS_OP_N, N, M, K, alpha, inputy_data.get(i).deviceData, N, inputx_data.get(i).deviceData, K, beta, output_data.get(i).deviceData, N));
         // Copy the result from the device to the host
         context.copyDataToHost(output);
         context.clear();
@@ -50,9 +50,9 @@ public class Matmul {
         // alpha, beta
         Pointer alpha = Pointer.to(new double[]{1}), beta = Pointer.to(new double[]{0});
 
-        int M = inputx.shape(0), K = inputx.shape(1), N = inputy.shape(1);
+        int M = inputx.shape(1), K = inputx.shape(2), N = inputy.shape(2);
         // KM = [KN * NM]
-        forEach(inputx.shape(0), i -> cublasDgemm(handle, CUBLAS_OP_T, CUBLAS_OP_N, K, M, N, alpha, inputy_data.deviceData, N, output_grad.get(i).deviceData, N, beta, inputx_grad.get(i).deviceData, K));
+        forEach(inputx.shape(0), i -> cublasDgemm(handle, CUBLAS_OP_T, CUBLAS_OP_N, K, M, N, alpha, inputy_data.get(i).deviceData, N, output_grad.get(i).deviceData, N, beta, inputx_grad.get(i).deviceData, K));
         // Copy the result from the device to the host
         context.copyGradToHost(inputx);
 
@@ -76,9 +76,9 @@ public class Matmul {
         // alpha, beta
         Pointer alpha = Pointer.to(new double[]{alphas.length == 1 ? alphas[0].data() : 1}), beta = Pointer.to(new double[]{0});
 
-        int M = inputx.shape(0), K = inputx.shape(1), N = inputy.shape(0);
+        int M = inputx.shape(1), K = inputx.shape(2), N = inputy.shape(1);
         // NM = [NK * KM]
-        forEach(inputx.shape(0), i -> cublasDgemm(handle, CUBLAS_OP_T, CUBLAS_OP_N, N, M, K, alpha, inputy_data.deviceData, K, inputx_data.get(i).deviceData, K, beta, output_data.get(i).deviceData, N));
+        forEach(inputx.shape(0), i -> cublasDgemm(handle, CUBLAS_OP_T, CUBLAS_OP_N, N, M, K, alpha, inputy_data.get(i).deviceData, K, inputx_data.get(i).deviceData, K, beta, output_data.get(i).deviceData, N));
         // Copy the result from the device to the host
         context.copyDataToHost(output);
         context.clear();
@@ -100,9 +100,9 @@ public class Matmul {
         // alpha, beta
         Pointer alpha = Pointer.to(new double[]{alphas.length == 1 ? alphas[0].data() : 1}), beta = Pointer.to(new double[]{0});
 
-        int M = inputx.shape(0), K = inputx.shape(1), N = inputy.shape(0);
+        int M = inputx.shape(1), K = inputx.shape(2), N = inputy.shape(1);
         // KM = [KN * NM]
-        forEach(inputx.shape(0), i -> cublasDgemm(handle, CUBLAS_OP_N, CUBLAS_OP_N, K, M, N, alpha, inputy_data.deviceData, K, output_grad.get(i).deviceData, N, beta, inputx_grad.get(i).deviceData, K));
+        forEach(inputx.shape(0), i -> cublasDgemm(handle, CUBLAS_OP_N, CUBLAS_OP_N, K, M, N, alpha, inputy_data.get(i).deviceData, K, output_grad.get(i).deviceData, N, beta, inputx_grad.get(i).deviceData, K));
         // Copy the result from the device to the host
         context.copyGradToHost(inputx);
 

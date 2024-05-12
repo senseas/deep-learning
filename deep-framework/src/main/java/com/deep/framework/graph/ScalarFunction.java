@@ -7,9 +7,7 @@ import java.util.Objects;
 public class ScalarFunction extends Tensor {
 
     public ScalarFunction(String name, Tensor... input) {
-        super(name, input);
-        this.data = new double[1];
-        this.grad = new double[1];
+        super(name, new int[]{1}, input);
     }
 
     public Tensor compute() { return null; }
@@ -18,6 +16,7 @@ public class ScalarFunction extends Tensor {
 
     public void forward() {
         clearOutput();
+        create();
         getFunction().forEach(a -> data[0] = a.data());
     }
 
@@ -31,13 +30,20 @@ public class ScalarFunction extends Tensor {
         return function = new Tenser<>(compute());
     }
 
-    public void clearOutput() {
+    private void clearOutput() {
+        if (Objects.isNull(data)) return;
         data[0] = 0;
         grad[0] = 0;
     }
 
-    public void clearGrad() {
+    private void clearGrad() {
         grad[0] = 0;
+    }
+
+    private void create() {
+        if (Objects.nonNull(data)) return;
+        this.data = new double[1];
+        this.grad = new double[1];
     }
 
     public Tenser<Tensor> getInput(int i) {
@@ -46,7 +52,7 @@ public class ScalarFunction extends Tensor {
 
     public Tenser<Tensor> getOutput() {
         if (Objects.nonNull(output)) return output;
-        return output = new Tenser<>(new Tensor(this, 0));
+        return output = new Tenser<>(this);
     }
 
 }

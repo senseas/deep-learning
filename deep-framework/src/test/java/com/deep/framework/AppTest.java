@@ -193,4 +193,12 @@ public class AppTest {
         System.out.println(" ");
     }
 
+    @Test
+    public void expandTest() {
+        TensorFlow tf = new TensorFlow();
+        Tensor tensor = tf.expandx(new Tensor(new int[]{3, 2}), new int[]{2, 3, 2});
+        TensorExecutor executor = new TensorExecutor(tensor);
+        executor.forward();
+    }
+
 }

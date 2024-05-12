@@ -56,9 +56,9 @@ public class Reduce {
         context.clear();
     }
 
-    public static void mean(Tensor input, Tensor output) {
+    public static void mean(Tensor input, Tensor output, int... shape) {
         CudaContext context = new CudaContext(output);
-        reduce(input, output, CUDNN_REDUCE_TENSOR_AVG, context);
+        reduce(input, output, CUDNN_REDUCE_TENSOR_AVG, context, shape);
         context.clear();
     }
 
@@ -88,8 +88,8 @@ public class Reduce {
         context.clear();
     }
 
-    public static void reduce(Tensor input, Tensor output, int op, CudaContext context) {
-        int[] input_shape = Shape.shapes(input.getShape()), output_shape = Shape.shapes(output.getShape());
+    public static void reduce(Tensor input, Tensor output, int op, CudaContext context, int... shape) {
+        int[] input_shape = Shape.shapes(shape.length == 0 ? input.getShape() : shape), output_shape = Shape.shapes(output.getShape());
 
         cudnnHandle handle = context.getCudnnHandle();
         // Define input tensor

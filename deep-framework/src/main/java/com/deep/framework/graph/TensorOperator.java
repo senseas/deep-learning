@@ -12,9 +12,7 @@ import static com.deep.framework.lang.Shape.zeros;
 public class TensorOperator extends Tensor {
 
     public TensorOperator(String name, int[] shape, Tensor... input) {
-        super(name, input);
-        this.shape = shape;
-        this.nexts = next();
+        super(name, shape, input);
         concat(this);
     }
 
