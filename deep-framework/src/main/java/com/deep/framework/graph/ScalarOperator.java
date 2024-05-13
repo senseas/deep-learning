@@ -9,10 +9,8 @@ import static com.deep.framework.core.TensorFlux.concat;
 public class ScalarOperator extends Tensor {
 
     public ScalarOperator(String name, Tensor... input) {
-        super(name, input);
+        super(name, null, input);
         concat(this);
-        this.data = new double[1];
-        this.grad = new double[1];
     }
 
     public double compute() { return 0; }
@@ -21,6 +19,7 @@ public class ScalarOperator extends Tensor {
 
     public void forward() {
         clearOutput();
+        create();
         data[0] = compute();
     }
 
@@ -29,13 +28,20 @@ public class ScalarOperator extends Tensor {
         clearGrad();
     }
 
-    public void clearOutput() {
+    private void clearOutput() {
+        if (Objects.isNull(data)) return;
         data[0] = 0;
         grad[0] = 0;
     }
 
-    public void clearGrad() {
+    private void clearGrad() {
         grad[0] = 0;
+    }
+
+    private void create() {
+        if (Objects.nonNull(data)) return;
+        this.data = new double[1];
+        this.grad = new double[1];
     }
 
     public Tensor getInput(int i) {
@@ -44,7 +50,7 @@ public class ScalarOperator extends Tensor {
 
     public Tenser<Tensor> getOutput() {
         if (Objects.nonNull(output)) return output;
-        return output = new Tenser<>(new Tensor(this, 0));
+        return output = new Tenser<>(this);
     }
 
 }

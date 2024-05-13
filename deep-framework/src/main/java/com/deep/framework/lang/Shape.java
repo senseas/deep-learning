@@ -131,9 +131,9 @@ public class Shape extends ForEach {
     public static int[] shapes(int[] arr) {
         switch (arr.length) {
             case 1:
-                return new int[]{1, 1, 1, arr[0]};
+                return new int[]{1, arr[0], 1, 1};
             case 2:
-                return new int[]{1, 1, arr[0], arr[1]};
+                return new int[]{1, arr[0], arr[1], 1};
             case 3:
                 return new int[]{1, arr[0], arr[1], arr[2]};
             default:

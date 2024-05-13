@@ -11,7 +11,6 @@ import java.util.Arrays;
 import java.util.List;
 
 import static com.deep.framework.lang.util.Sequence.getTokenOneHotList;
-import static com.deep.framework.lang.util.Sequence.getTokenIndex;
 
 public class EmbeddingTest {
     int num = 28, dim = 13;

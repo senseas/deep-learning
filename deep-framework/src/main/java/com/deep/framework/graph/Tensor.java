@@ -62,9 +62,10 @@ public class Tensor implements Serializable {
         this.tensor = tensor;
     }
 
-    public Tensor(String name, Tensor... input) {
+    public Tensor(String name, int[] shape, Tensor... input) {
         this.name = this.name.concat(name);
         this.input = input;
+        this.shape = shape;
     }
 
     public void forward() {

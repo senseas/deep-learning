@@ -13,13 +13,11 @@ import static com.deep.framework.lang.Shape.zeros;
 public class TensorFunction extends Tensor {
 
     public TensorFunction(String name, int[] shape, Tensor... input) {
-        super(name, input);
-        this.shape = shape;
+        super(name, shape, input);
     }
 
     public TensorFunction(Tenser<Tensor> function) {
-        super("");
-        this.shape = function.shape;
+        super("", function.shape);
         this.function = function;
         create();
     }
@@ -37,17 +35,17 @@ public class TensorFunction extends Tensor {
         clearGrad();
     }
 
-    public void clearOutput() {
+    private void clearOutput() {
         if (Objects.isNull(data)) return;
         Arrays.fill(data, 0d);
         Arrays.fill(grad, 0d);
     }
 
-    public void clearGrad() {
+    private void clearGrad() {
         Arrays.fill(grad, 0d);
     }
 
-    public void create() {
+    private void create() {
         if (Objects.nonNull(data)) return;
         this.data = zeros(shape);
         this.grad = zeros(shape);
