@@ -7,7 +7,7 @@ import java.util.Objects;
 public class ScalarFunction extends Tensor {
 
     public ScalarFunction(String name, Tensor... input) {
-        super(name, new int[]{1}, input);
+        super(name, null, input);
     }
 
     public Tensor compute() { return null; }

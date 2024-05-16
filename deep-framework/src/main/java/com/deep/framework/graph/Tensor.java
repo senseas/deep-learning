@@ -12,8 +12,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
-import java.util.stream.DoubleStream;
-import java.util.stream.IntStream;
 
 import static com.deep.framework.lang.Shape.Tensors;
 import static com.deep.framework.lang.Shape.*;
@@ -36,7 +34,6 @@ public class Tensor implements Serializable {
         this.data = random(shape);
         this.grad = zeros(shape);
         this.reduce = true;
-        this.nexts = next();
     }
 
     public Tensor(double[] data, int[] shape) {
@@ -46,7 +43,6 @@ public class Tensor implements Serializable {
         this.data = data;
         this.grad = zeros(shape);
         this.reduce = true;
-        this.nexts = next();
     }
 
     public Tensor(String name, int[] shape) {
@@ -56,7 +52,6 @@ public class Tensor implements Serializable {
         this.data = random(shape);
         this.grad = zeros(shape);
         this.reduce = true;
-        this.nexts = next();
     }
 
     public Tensor(int[] shape, double value) {
@@ -66,7 +61,6 @@ public class Tensor implements Serializable {
         this.data = values(shape, value);
         this.grad = zeros(shape);
         this.reduce = true;
-        this.nexts = next();
     }
 
     public Tensor(Tensor tensor) {
@@ -74,7 +68,6 @@ public class Tensor implements Serializable {
         this.size = Shape.size(shape);
         this.data = tensor.getData();
         this.grad = tensor.getGrad();
-        this.nexts = next();
     }
 
     private Tensor(double[] data, double[] grad, int[] shape, int start) {
@@ -83,7 +76,6 @@ public class Tensor implements Serializable {
         this.size = Shape.size(shape);
         this.data = data;
         this.grad = grad;
-        this.nexts = next();
     }
 
     public Tensor(Tensor tensor, int idx) {
@@ -94,9 +86,9 @@ public class Tensor implements Serializable {
     public Tensor(String name, int[] shape, Tensor... input) {
         this.name = this.name.concat(name);
         this.input = input;
+        if (Objects.isNull(shape)) return;
         this.shape = shape;
         this.size = Shape.size(shape);
-        this.nexts = next();
     }
 
     public void forward() {
@@ -114,7 +106,7 @@ public class Tensor implements Serializable {
 
     public Tenser<Tensor> getOutput() {
         if (Objects.nonNull(output)) return output;
-        if (Objects.equals(size, 1)) return new Tenser<>(this);
+        if (Objects.isNull(shape)) return new Tenser<>(this);
         return output = Tensors(this);
     }
 
@@ -165,50 +157,39 @@ public class Tensor implements Serializable {
         return deviceGradMap = new HashMap<>();
     }
 
-    public int shape(int i) { return shape[i]; }
+    public int shape(int i) {return shape[i];}
+
+    public int size() {return size;}
 
     public Tensor get(int... index) {
-        return new Tensor(this.data, this.grad, getNext(index), start(index));
-    }
-
-    private DoubleStream streamData() {
-        return IntStream.range(0, size()).mapToDouble(i -> data[start + i]);
-    }
-
-    private DoubleStream streamGrad() {
-        return IntStream.range(0, size()).mapToDouble(i -> grad[start + i]);
+        int[] shapeNext = Arrays.copyOfRange(this.shape, index.length, this.shape.length);
+        return new Tensor(this.data, this.grad, shapeNext, start(index));
     }
 
     private int start(int[] index) {
+        int[] nexts = getNext();
         int next = this.start, length = index.length - 1;
         for (int i = 0; i < length; i++) next += index[i] * nexts[i];
         return next + index[length] * nexts[length];
     }
 
-    public int[] next() {
+    public int[] getNext(int... shape) {
+        shape = shape.length > 0 ? shape : this.shape;
         int[] next = new int[shape.length];
         Arrays.fill(next, 1);
         for (int i = next.length - 1; 0 < i; i--) next[i - 1] = next[i] * shape[i];
         return next;
     }
 
-    private int[] getNext(int[] index) {
-        return Arrays.copyOfRange(this.shape, index.length, this.shape.length);
-    }
-
-    public int size() {return size;}
-
-    private int idx;
-    private Tensor tensor;
     private String name = "";
     private Tensor[] input;
-    private int start = 0, size = 1;
+    private Tensor tensor;
+    private int idx, start, size = 1;
 
-    protected int[] shape, nexts;
+    protected int[] shape;
     protected double[] data, grad;
     protected boolean reduce;
     protected Tenser<Tensor> output, function;
-    protected boolean status;
 
     transient private AdamOptimizer optimizer;
 

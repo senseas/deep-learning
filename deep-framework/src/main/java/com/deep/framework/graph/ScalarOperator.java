@@ -9,7 +9,7 @@ import static com.deep.framework.core.TensorFlux.concat;
 public class ScalarOperator extends Tensor {
 
     public ScalarOperator(String name, Tensor... input) {
-        super(name, new int[]{1}, input);
+        super(name, null, input);
         concat(this);
     }
 

@@ -7,6 +7,9 @@ import com.deep.framework.lang.Tenser;
 
 import java.io.Serializable;
 import java.util.Arrays;
+import java.util.Objects;
+import java.util.stream.DoubleStream;
+import java.util.stream.IntStream;
 
 import static com.deep.framework.cublas.Matmul.*;
 import static com.deep.framework.cudnn.Activation.*;
@@ -438,7 +441,7 @@ public class TensorFlow implements Serializable {
     }
 
     public Tensor matmul(Tensor... input) {
-        return new TensorOperator("Matmul", Shape.shape(input[0].shape(0), input[0].shape(1), input[1].shape(1)), input) {
+        return new TensorOperator("Matmul", Shape.shape(input[0].shape(0), input[0].shape(1), input[1].shape(2)), input) {
 
             public Tenser<Tensor> compute() {
                 matmulForward(getInput()[0], getInput()[1], this);
@@ -454,7 +457,7 @@ public class TensorFlow implements Serializable {
     }
 
     public Tensor matmulTran(Tensor... input) {
-        return new TensorOperator("MatmulTran", Shape.shape(input[0].shape(0), input[0].shape(1), input[1].shape(1)), input) {
+        return new TensorOperator("MatmulTran", Shape.shape(input[0].shape(0), input[0].shape(1), input[1].shape(2)), input) {
             final Tensor alpha = getInput().length == 3 ? getInput()[2] : cons(1);
 
             public Tenser<Tensor> compute() {
@@ -470,7 +473,7 @@ public class TensorFlow implements Serializable {
     }
 
     public Tensor matTran(Tensor input) {
-        return new TensorOperator("MatmulTran", Shape.shape(input.shape(1), input.shape(0)), input) {
+        return new TensorOperator("MatTran", Shape.shape(input.shape(1), input.shape(0)), input) {
 
             public Tenser<Tensor> compute() {
                 Tenser<Tensor> A = getInput(0);
@@ -881,7 +884,7 @@ public class TensorFlow implements Serializable {
         return new TensorOperator("Expand", shape, input) {
 
             final Tensor inx = getInput()[0];
-            final int a = next()[0], b = inx.next()[0], c = a / b;
+            final int a = getNext()[0], b = inx.getNext()[0], c = a / b;
 
             public Tenser<Tensor> compute() {
                 for (int l = 0; l < shape[0]; l++) {
@@ -914,7 +917,7 @@ public class TensorFlow implements Serializable {
         return new TensorOperator("Expand", shape, input) {
 
             final Tensor inx = getInput()[0];
-            final int a = next()[0], b = Shape.next(in_shape)[0], c = a / b;
+            final int a = getNext()[0], b = getNext(in_shape)[0], c = a / b;
 
             public Tenser<Tensor> compute() {
                 for (int l = 0; l < shape[0]; l++) {
@@ -947,7 +950,7 @@ public class TensorFlow implements Serializable {
         return new TensorOperator("expandre", shape, input) {
 
             final Tensor inx = getInput()[0];
-            final int a = next()[0], b = inx.next()[0], c = a / b;
+            final int a = getNext()[0], b = inx.getNext()[0], c = a / b;
 
             public Tenser<Tensor> compute() {
                 for (int l = 0; l < shape[0]; l++) {
@@ -980,7 +983,7 @@ public class TensorFlow implements Serializable {
         return new TensorOperator("expandre", shape, input) {
 
             final  Tensor inx = getInput()[0];
-            final int a = next()[0], b = Shape.next(in_shape)[0], c = a / b;
+            final int a = getNext()[0], b = getNext(in_shape)[0], c = a / b;
 
             public Tenser<Tensor> compute() {
                 for (int l = 0; l < shape[0]; l++) {
@@ -1194,7 +1197,7 @@ public class TensorFlow implements Serializable {
     }
 
     public Tensor linear(Tensor... input) {
-        int[] shape = {input[0].shape(0), input[0].shape(1), input[1].shape(1),};
+        int[] shape = {input[0].shape(0), input[0].shape(1), input[1].shape(2)};
         return new TensorFunction("Linear", shape, input) {
 
             public Tenser<Tensor> compute() {
@@ -1212,9 +1215,9 @@ public class TensorFlow implements Serializable {
 
             public Tenser<Tensor> compute() {
                 Tensor A = getInput()[0];
-                Tensor C0 = matmul(A, expandx(new Tensor(new int[]{dim, dim}), new int[]{A.shape(0), dim, dim}));
-                Tensor C1 = matmul(A, expandx(new Tensor(new int[]{dim, dim}), new int[]{A.shape(0), dim, dim}));
-                Tensor C2 = matmul(A, expandx(new Tensor(new int[]{dim, dim}), new int[]{A.shape(0), dim, dim}));
+                Tensor C0 = matmul(A, new Tensor(new int[]{A.shape(0), dim, dim}));
+                Tensor C1 = matmul(A, new Tensor(new int[]{A.shape(0), dim, dim}));
+                Tensor C2 = matmul(A, new Tensor(new int[]{A.shape(0), dim, dim}));
                 Tensor C3 = matmulTran(C0, C1, cons(scaler));
                 Tensor C4 = softmax(mask(C3), A.shape(0), A.shape(1) * A.shape(2), A.shape(2));
                 return new Tenser<>(matmul(C4, C2));
@@ -1232,7 +1235,7 @@ public class TensorFlow implements Serializable {
                 Tensor M = new Tensor(new int[]{A.shape(0), context_size, dim});
                 Tensor N = new Tensor(new int[]{A.shape(0), context_size, dim});
 
-                Tensor[] arr = new Tensor[A.shape(0) * header_num];
+                Tensor[] arr = new Tensor[header_num];
                 forEach(header_num, i -> arr[i] = selfAttention(dim, scaler, A));
                 Tensor addx = addx(A, matmul(concat(arr), C));
                 Tensor normal = layerNormal(addx, M, N);

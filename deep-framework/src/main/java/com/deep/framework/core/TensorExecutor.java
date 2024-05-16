@@ -92,15 +92,4 @@ public class TensorExecutor<E> implements Serializable {
         Shape.copy(data, label.getData());
     }
 
-    public void clearFunction() {
-        Stream.of(operators).forEach(o -> {
-            if (Stream.of(o.getInput()).anyMatch(a -> a.isReduce() && Objects.isNull(a.getTensor()) || a.isStatus())) {
-                o.setStatus(true);
-            }
-            if (Objects.nonNull(o.getFunction()) && !o.getFunction().data(0).isStatus()) {
-                o.setOutput(null).setFunction(null);
-            }
-        });
-    }
-
 }

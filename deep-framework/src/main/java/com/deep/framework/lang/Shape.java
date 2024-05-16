@@ -111,27 +111,14 @@ public class Shape extends ForEach {
         return shape;
     }
 
-    public static int[] next(int[] shape) {
-        int[] next = new int[shape.length];
-        Arrays.fill(next, 1);
-        for (int i = next.length - 1; 0 < i; i--) next[i - 1] = next[i] * shape[i];
-        return next;
-    }
-
     public static Class getArrayDeepClass(Object arr) {
         while (Objects.nonNull(arr) && arr.getClass().isArray()) arr = Array.get(arr, 0);
         return arr.getClass();
     }
 
-    public static Class getTenserDeepClass(Tenser o) {
-        return o.data.getClass().getComponentType();
-    }
-
     public static int size(int[] arr) {
         int size = 1;
-        for (int a : arr) {
-            size *= a;
-        }
+        for (int a : arr) size *= a;
         return size;
     }
 

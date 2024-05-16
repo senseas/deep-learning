@@ -28,52 +28,52 @@ public class TransformerTest {
         Tensor input = new Tensor(new int[]{batch_size, context_size, num});//500*16224
         Tensor inputx = new Tensor(new int[]{batch_size, context_size});
 
-        Tensor tensor11 = tf.matmul(input, tf.expandx(new Tensor(new int[]{num, dim}), new int[]{batch_size, num, dim}));//500*512
+        Tensor tensor11 = tf.matmul(input, new Tensor(new int[]{batch_size, num, dim}));//500*512
         Tensor tensor12 = tf.positionalEmbedding(tensor11.getShape(), inputx);//500*512
         Tensor tensor13 = tf.addx(tensor11, tensor12);//500*512
 
         //MultiHeadAttention & Linear Add & Normal
         Tensor tensor21 = tf.multiHeadAttention(context_size, dim, header_num, scaler, tensor13);//500*512
-        Tensor tensor22 = tf.linear(tensor21, tf.expandx(new Tensor(new int[]{dim, dim}), new int[]{batch_size, dim, dim}));//500*512
+        Tensor tensor22 = tf.linear(tensor21, new Tensor(new int[]{1, dim, dim}));//500*512
         Tensor tensor23 = tf.addx(tensor21, tensor22);//500*512
         Tensor tensor24 = tf.layerNormal(tensor23, new Tensor(tensor23.getShape()), new Tensor(tensor23.getShape()));//500*512
 
         //MultiHeadAttention & Linear Add & Normal
         Tensor tensor31 = tf.multiHeadAttention(context_size, dim, header_num, scaler, tensor24);//500*512
-        Tensor tensor32 = tf.linear(tensor31, tf.expandx(new Tensor(new int[]{dim, dim}), new int[]{batch_size, dim, dim}));//500*512
+        Tensor tensor32 = tf.linear(tensor31, new Tensor(new int[]{1, dim, dim}));//500*512
         Tensor tensor33 = tf.addx(tensor31, tensor32);//500*512
         Tensor tensor34 = tf.layerNormal(tensor33, new Tensor(tensor33.getShape()), new Tensor(tensor33.getShape()));//500*512
 
         //MultiHeadAttention & Linear Add & Normal
         Tensor tensor41 = tf.multiHeadAttention(context_size, dim, header_num, scaler, tensor34);//500*512
-        Tensor tensor42 = tf.linear(tensor41, tf.expandx(new Tensor(new int[]{dim, dim}), new int[]{batch_size, dim, dim}));//500*512
+        Tensor tensor42 = tf.linear(tensor41, new Tensor(new int[]{1, dim, dim}));//500*512
         Tensor tensor43 = tf.addx(tensor41, tensor42);//500*512
         Tensor tensor44 = tf.layerNormal(tensor43, new Tensor(tensor43.getShape()), new Tensor(tensor43.getShape()));//500*512
 
         //MultiHeadAttention & Linear Add & Normal
         Tensor tensor51 = tf.multiHeadAttention(context_size, dim, header_num, scaler, tensor44);//500*512
-        Tensor tensor52 = tf.linear(tensor51, tf.expandx(new Tensor(new int[]{dim, dim}), new int[]{batch_size, dim, dim}));//500*512
+        Tensor tensor52 = tf.linear(tensor51, new Tensor(new int[]{1, dim, dim}));//500*512
         Tensor tensor53 = tf.addx(tensor51, tensor52);//500*512
         Tensor tensor54 = tf.layerNormal(tensor53, new Tensor(tensor53.getShape()), new Tensor(tensor53.getShape()));//500*512
 
         //MultiHeadAttention & Linear Add & Normal
         Tensor tensor61 = tf.multiHeadAttention(context_size, dim, header_num, scaler, tensor54);//500*512
-        Tensor tensor62 = tf.linear(tensor61, tf.expandx(new Tensor(new int[]{dim, dim}), new int[]{batch_size, dim, dim}));//500*512
+        Tensor tensor62 = tf.linear(tensor61, new Tensor(new int[]{1, dim, dim}));//500*512
         Tensor tensor63 = tf.addx(tensor61, tensor62);//500*512
         Tensor tensor64 = tf.layerNormal(tensor63, new Tensor(tensor63.getShape()), new Tensor(tensor63.getShape()));//500*512
 
         //MultiHeadAttention & Linear Add & Normal
         Tensor tensor71 = tf.multiHeadAttention(context_size, dim, header_num, scaler, tensor64);//500*512
-        Tensor tensor72 = tf.linear(tensor71, tf.expandx(new Tensor(new int[]{dim, dim}), new int[]{batch_size, dim, dim}));//500*512
+        Tensor tensor72 = tf.linear(tensor71, new Tensor(new int[]{1, dim, dim}));//500*512
         Tensor tensor73 = tf.addx(tensor71, tensor72);//500*512
         Tensor tensor74 = tf.layerNormal(tensor73, new Tensor(tensor73.getShape()), new Tensor(tensor73.getShape()));//500*512
 
         //Linear
-        Tensor tensor55 = tf.linear(tensor74, tf.expandx(new Tensor(new int[]{dim, num}), new int[]{batch_size, dim, dim}));//500*61224
-        Tensor tensor56 = tf.linear(new Tensor(new int[]{batch_size, context_size}), tensor55);//1*61224
+        Tensor tensor55 = tf.linear(tensor74, new Tensor(new int[]{1, dim, num}));//500*61224
+        Tensor tensor56 = tf.linear(new Tensor(new int[]{batch_size, 1, context_size}), tensor55);//1*61224
 
         //Softmax & Loss
-        Tensor label = new Tensor(new int[]{batch_size, num});
+        Tensor label = new Tensor(new int[]{batch_size, 1, num});
         Tensor softmax = tf.softmax(tensor56);
         Tensor crossx = tf.softmaxCrossx(label, softmax);
 
