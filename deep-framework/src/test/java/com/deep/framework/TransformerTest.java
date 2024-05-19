@@ -74,7 +74,7 @@ public class TransformerTest {
 
         //Softmax & Loss
         Tensor label = new Tensor(new int[]{batch_size, 1, num});
-        Tensor softmax = tf.softmax(tensor56);
+        Tensor softmax = tf.softmax(tensor56, 0);
         Tensor crossx = tf.softmaxCrossx(label, softmax);
 
         TensorExecutor executor = new TensorExecutor(crossx, input, inputx, label);

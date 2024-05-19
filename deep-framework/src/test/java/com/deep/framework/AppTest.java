@@ -61,7 +61,7 @@ public class AppTest {
     @Test
     public void softmaxTest() {
         TensorFlow tf = new TensorFlow();
-        Tensor tensor = tf.softmax(new Tensor(new int[]{2}));
+        Tensor tensor = tf.softmax(new Tensor(new int[]{2}), 0);
         TensorExecutor executor = new TensorExecutor(tensor);
         executor.run();
     }
@@ -133,7 +133,7 @@ public class AppTest {
     @Test
     public void meanTest() {
         TensorFlow tf = new TensorFlow();
-        Tensor tensor = tf.mean(new Tensor(new int[]{3, 2}));
+        Tensor tensor = tf.mean(new Tensor(new int[]{3, 2}), 0);
         TensorExecutor executor = new TensorExecutor(tensor);
         executor.run();
     }
@@ -142,7 +142,7 @@ public class AppTest {
     public void standardTest() {
         TensorFlow tf = new TensorFlow();
         Tensor data = new Tensor(new int[]{3, 2});
-        Tensor mean = tf.mean(data);
+        Tensor mean = tf.mean(data, 0);
         Tensor tensor = tf.standard(data, mean);
         TensorExecutor executor = new TensorExecutor(tensor);
         executor.run();

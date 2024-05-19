@@ -26,57 +26,57 @@ public class Reduce {
 
     private static final int DATA_TYPE = CUDNN_DATA_DOUBLE;
 
-    public static void sum(Tensor input, Tensor output) {
+    public static void sum(Tensor input, Tensor output, int axis) {
         CudaContext context = new CudaContext(output);
-        reduce(input, output, CUDNN_REDUCE_TENSOR_ADD, context);
+        reduce(input, output, CUDNN_REDUCE_TENSOR_ADD, axis, context);
         context.clear();
     }
 
-    public static void mul(Tensor input, Tensor output) {
+    public static void mul(Tensor input, Tensor output, int axis) {
         CudaContext context = new CudaContext(output);
-        reduce(input, output, CUDNN_REDUCE_TENSOR_MUL, context);
+        reduce(input, output, CUDNN_REDUCE_TENSOR_MUL, axis, context);
         context.clear();
     }
 
-    public static void min(Tensor input, Tensor output) {
+    public static void min(Tensor input, Tensor output, int axis) {
         CudaContext context = new CudaContext(output);
-        reduce(input, output, CUDNN_REDUCE_TENSOR_MIN, context);
+        reduce(input, output, CUDNN_REDUCE_TENSOR_MIN, axis, context);
         context.clear();
     }
 
-    public static void max(Tensor input, Tensor output) {
+    public static void max(Tensor input, Tensor output, int axis) {
         CudaContext context = new CudaContext(output);
-        reduce(input, output, CUDNN_REDUCE_TENSOR_MAX, context);
+        reduce(input, output, CUDNN_REDUCE_TENSOR_MAX, axis, context);
         context.clear();
     }
 
-    public static void amax(Tensor input, Tensor output) {
+    public static void amax(Tensor input, Tensor output, int axis) {
         CudaContext context = new CudaContext(output);
-        reduce(input, output, CUDNN_REDUCE_TENSOR_AMAX, context);
+        reduce(input, output, CUDNN_REDUCE_TENSOR_AMAX, axis, context);
         context.clear();
     }
 
-    public static void mean(Tensor input, Tensor output, int... shape) {
+    public static void mean(Tensor input, Tensor output, int axis) {
         CudaContext context = new CudaContext(output);
-        reduce(input, output, CUDNN_REDUCE_TENSOR_AVG, context, shape);
+        reduce(input, output, CUDNN_REDUCE_TENSOR_AVG, axis, context);
         context.clear();
     }
 
-    public static void norm1(Tensor input, Tensor output) {
+    public static void norm1(Tensor input, Tensor output, int axis) {
         CudaContext context = new CudaContext(output);
-        reduce(input, output, CUDNN_REDUCE_TENSOR_NORM1, context);
+        reduce(input, output, CUDNN_REDUCE_TENSOR_NORM1, axis, context);
         context.clear();
     }
 
-    public static void norm2(Tensor input, Tensor output) {
+    public static void norm2(Tensor input, Tensor output, int axis) {
         CudaContext context = new CudaContext(output);
-        reduce(input, output, CUDNN_REDUCE_TENSOR_NORM2, context);
+        reduce(input, output, CUDNN_REDUCE_TENSOR_NORM2, axis, context);
         context.clear();
     }
 
-    public static void mulNoZeros(Tensor input, Tensor output) {
+    public static void mulNoZeros(Tensor input, Tensor output, int axis) {
         CudaContext context = new CudaContext(output);
-        reduce(input, output, CUDNN_REDUCE_TENSOR_MUL_NO_ZEROS, context);
+        reduce(input, output, CUDNN_REDUCE_TENSOR_MUL_NO_ZEROS, axis, context);
         context.clear();
     }
 
@@ -88,8 +88,8 @@ public class Reduce {
         context.clear();
     }
 
-    public static void reduce(Tensor input, Tensor output, int op, CudaContext context, int... shape) {
-        int[] input_shape = Shape.shapes(shape.length == 0 ? input.getShape() : shape), output_shape = Shape.shapes(output.getShape());
+    public static void reduce(Tensor input, Tensor output, int op, int axis, CudaContext context) {
+        int[] input_shape = Shape.shapes(input.getShape(), axis), output_shape = Shape.shapes(new int[]{input_shape[0]});
 
         cudnnHandle handle = context.getCudnnHandle();
         // Define input tensor

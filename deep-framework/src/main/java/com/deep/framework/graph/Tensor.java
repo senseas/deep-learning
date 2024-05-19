@@ -12,6 +12,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 import static com.deep.framework.lang.Shape.Tensors;
 import static com.deep.framework.lang.Shape.*;
@@ -162,8 +163,14 @@ public class Tensor implements Serializable {
     public int size() {return size;}
 
     public Tensor get(int... index) {
+        String id = Arrays.stream(index).mapToObj(String::valueOf).collect(Collectors.joining());
+        if (Objects.isNull(cache)) cache = new HashMap<>();
+        Tensor tensor = cache.get(id);
+        if (Objects.nonNull(tensor)) return tensor;
         int[] shapeNext = Arrays.copyOfRange(this.shape, index.length, this.shape.length);
-        return new Tensor(this.data, this.grad, shapeNext, start(index));
+        tensor = new Tensor(this.data, this.grad, shapeNext, start(index));
+        cache.put(id, tensor);
+        return tensor;
     }
 
     private int start(int[] index) {
@@ -194,6 +201,7 @@ public class Tensor implements Serializable {
     transient private AdamOptimizer optimizer;
 
     transient private int deviceId;
+    transient private Map<String, Tensor> cache;
     transient private Map<Integer, Tenserx> deviceDataMap;
     transient private Map<Integer, Tenserx> deviceGradMap;
 }

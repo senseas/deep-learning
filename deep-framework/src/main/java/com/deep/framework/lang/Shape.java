@@ -14,11 +14,11 @@ public class Shape extends ForEach {
 
     public static double[] random(int[] shape) {
         RandomDataGenerator random = new RandomDataGenerator();
-        return IntStream.range(0, size(shape)).mapToDouble(i -> random.nextGaussian(0, 0.1)).toArray();
+        return IntStream.range(0, size(shape)).parallel().mapToDouble(i -> random.nextGaussian(0, 0.1)).toArray();
     }
 
     public static double[] values(int[] shape, double value) {
-        return IntStream.range(0, size(shape)).mapToDouble(i -> value).toArray();
+        return IntStream.range(0, size(shape)).parallel().mapToDouble(i -> value).toArray();
     }
 
     public static Tenser<Tensor> Tensors(Tensor tensor) {
@@ -134,4 +134,14 @@ public class Shape extends ForEach {
                 return arr;
         }
     }
+
+    public static int[] shapes(int[] arr, int axis) {
+        int size = 1;
+        int[] arrx = new int[arr.length - axis];
+        for (int i = 0; i <= axis; i++) size *= arr[i];
+        arrx[0] = size;
+        for (int i = axis + 1; i < arr.length; i++) arrx[i - axis] = arr[i];
+        return shapes(arrx);
+    }
+
 }

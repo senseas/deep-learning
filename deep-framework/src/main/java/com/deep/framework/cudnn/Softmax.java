@@ -21,15 +21,15 @@ public class Softmax {
     private static final int softmaxAlgo = CUDNN_SOFTMAX_ACCURATE;
     private static final int softmaxMode = CUDNN_SOFTMAX_MODE_INSTANCE;
 
-    public static void softmaxForward(Tensor input, Tensor output, int... shape) {
+    public static void softmaxForward(Tensor input, Tensor output, int axis) {
         CudaContext context = new CudaContext(output);
-        softmaxForward(input, output, Shape.shapes(shape), context);
+        softmaxForward(input, output, Shape.shapes(input.getShape(), axis), context);
         context.clear();
     }
 
-    public static void softmaxBackward(Tensor input, Tensor output, int... shape) {
+    public static void softmaxBackward(Tensor input, Tensor output, int axis) {
         CudaContext context = new CudaContext(output);
-        softmaxBackward(input, output, Shape.shapes(shape), context);
+        softmaxBackward(input, output, Shape.shapes(input.getShape(), axis), context);
         context.clear();
     }
 

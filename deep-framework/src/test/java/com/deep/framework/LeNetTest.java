@@ -53,7 +53,7 @@ public class LeNetTest {
         Tensor tensor52 = tf.addx(tensor51, new Tensor("bias", new int[]{10, 1}));//10
         Tensor tensor53 = tf.elu(tensor52);//10
 
-        Tensor softmax = tf.softmax(tensor53);
+        Tensor softmax = tf.softmax(tensor53, 1);
         Tensor crossx = tf.softmaxCrossx(label, softmax);
         TensorExecutor.rate = 0.003;
         TensorExecutor executor = new TensorExecutor(crossx, input, label);
