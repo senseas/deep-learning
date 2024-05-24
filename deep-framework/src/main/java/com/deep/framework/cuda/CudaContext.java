@@ -47,9 +47,9 @@ public class CudaContext implements Serializable {
     public Tenserx getDeviceData(Tensor tensor) {
         Tenserx deviceData = tensor.getDeviceDataMap().get(deviceId);
         if (Objects.isNull(deviceData)) {
-            tensor.getDeviceDataMap().put(deviceId, deviceData = new Tenserx(tensor.getData(), tensor.getShape(), deviceId));
+            tensor.getDeviceDataMap().put(deviceId, deviceData = new Tenserx(tensor.getData(), tensor.getShape(), tensor.getStart(), deviceId));
         } else {
-            copyDataHostToDevice(tensor.getData(), deviceData.deviceData, stream);
+            copyDataHostToDevice(tensor.getData(), deviceData.deviceData, tensor.getStart(), tensor.size(), stream);
         }
         return deviceData;
     }
@@ -57,9 +57,9 @@ public class CudaContext implements Serializable {
     public Tenserx getDeviceGrad(Tensor tensor) {
         Tenserx deviceGrad = tensor.getDeviceGradMap().get(deviceId);
         if (Objects.isNull(deviceGrad)) {
-            tensor.getDeviceGradMap().put(deviceId, deviceGrad = new Tenserx(tensor.getGrad(), tensor.getShape(), deviceId));
+            tensor.getDeviceGradMap().put(deviceId, deviceGrad = new Tenserx(tensor.getGrad(), tensor.getShape(), tensor.getStart(), deviceId));
         } else {
-            copyDataHostToDevice(tensor.getGrad(), deviceGrad.deviceData, stream);
+            copyDataHostToDevice(tensor.getGrad(), deviceGrad.deviceData, tensor.getStart(), tensor.size(), stream);
         }
         return deviceGrad;
     }
@@ -67,13 +67,13 @@ public class CudaContext implements Serializable {
     public void copyDataToHost(Tensor tensor) {
         Tenserx deviceData = tensor.getDeviceDataMap().get(deviceId);
         if (Objects.isNull(deviceData)) return;
-        copyDataDeviceToHost(tensor.getData(), deviceData.deviceData, stream);
+        copyDataDeviceToHost(tensor.getData(), deviceData.deviceData, tensor.getStart(), tensor.size(), stream);
     }
 
     public void copyGradToHost(Tensor tensor) {
         Tenserx deviceGrad = tensor.getDeviceGradMap().get(deviceId);
         if (Objects.isNull(deviceGrad)) return;
-        copyDataDeviceToHost(tensor.getGrad(), deviceGrad.deviceData, stream);
+        copyDataDeviceToHost(tensor.getGrad(), deviceGrad.deviceData, tensor.getStart(), tensor.size(), stream);
     }
 
     public void clear() {

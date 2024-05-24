@@ -200,6 +200,26 @@ public class Cuda {
     }
 
     /**
+     * copy host data to device
+     * @param data The value of the elements
+     * @return void
+     */
+    public static void copyDataHostToDevice(double[] data, Pointer deviceData, int start, int size, cudaStream_t stream) {
+        size = size * Sizeof.DOUBLE;
+        cudaMemcpyAsync(deviceData, Pointer.to(data).withByteOffset(start * Sizeof.DOUBLE), size, cudaMemcpyHostToDevice, stream);
+    }
+
+    /**
+     * copy device data to host
+     * @param data The value of the elements
+     * @return void
+     */
+    public static void copyDataDeviceToHost(double[] data, Pointer deviceData, int start, int size, cudaStream_t stream) {
+        size = size * Sizeof.DOUBLE;
+        cudaMemcpyAsync(Pointer.to(data).withByteOffset(start * Sizeof.DOUBLE), deviceData, size, cudaMemcpyDeviceToHost, stream);
+    }
+
+    /**
      * copy device data to host
      * @param data The value of the elements
      * @return void

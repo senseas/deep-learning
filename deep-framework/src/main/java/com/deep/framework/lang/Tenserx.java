@@ -23,11 +23,11 @@ public class Tenserx implements Serializable {
         this.nexts = next();
     }
 
-    public Tenserx(double[] data, int[] shape, int deviceId) {
-        this.start = 0;
+    public Tenserx(double[] data, int[] shape, int start, int deviceId) {
+        this.start = start;
         this.shape = shape;
         this.size = Shape.size(shape);
-        this.deviceData = createDevicePointer(data, deviceId);
+        this.deviceData = createDevicePointer(data, deviceId).withByteOffset(start * Sizeof.DOUBLE);
         this.nexts = next();
     }
 
