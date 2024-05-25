@@ -4,6 +4,7 @@ import com.deep.framework.lang.Tenser;
 
 import java.util.Arrays;
 import java.util.Objects;
+import java.util.Optional;
 
 import static com.deep.framework.core.TensorFlux.concat;
 import static com.deep.framework.lang.Shape.Tensors;
@@ -12,7 +13,7 @@ import static com.deep.framework.lang.Shape.zeros;
 public class TensorOperator extends Tensor {
 
     public TensorOperator(String name, int[] shape, Tensor... input) {
-        super(name, shape, input);
+        super(name, Optional.ofNullable(shape).orElse(new int[]{1}), input);
         concat(this);
     }
 

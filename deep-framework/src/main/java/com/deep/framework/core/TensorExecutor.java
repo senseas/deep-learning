@@ -5,7 +5,6 @@ import com.deep.framework.lang.Shape;
 import lombok.Data;
 
 import java.io.Serializable;
-import java.util.Objects;
 import java.util.stream.Stream;
 
 import static com.deep.framework.core.TensorFlux.intit;

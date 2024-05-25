@@ -81,7 +81,7 @@ public interface Operator extends Serializable {
                 if (tensors.size() > 1) {
                     double data = tensors.stream().mapToDouble(a -> Double.parseDouble(a.data)).reduce((a, b) -> a * b).getAsDouble();
                     list = Arrays.stream(getInput()).filter(a -> !(a instanceof TensorConst)).collect(Collectors.toList());
-                    if (data != 1) list.add(new TensorConst(data + ""));
+                    if (data != 1) list.add(new TensorConst(String.valueOf(data)));
                 }
 
                 return list.stream().map(a -> {

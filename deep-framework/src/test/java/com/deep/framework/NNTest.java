@@ -4,7 +4,6 @@ import com.alibaba.fastjson.JSONObject;
 import com.deep.framework.core.TensorExecutor;
 import com.deep.framework.core.TensorFlow;
 import com.deep.framework.graph.Tensor;
-import com.deep.framework.lang.Shape;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Test;
 
@@ -16,29 +15,29 @@ public class NNTest{
     @Test
     public void NNTest() {
 
-        double[][] inputSet = Shape.reshape(new double[][][] {
-            {{0.1}, {0.1}}, {{0.1}, {0.2}}, {{0.1}, {0.3}},
-            {{0.2}, {0.2}}, {{0.2}, {0.3}}, {{0.2}, {0.5}},
-            {{0.3}, {0.3}}, {{0.3}, {0.4}}, {{0.3}, {0.7}},
-            {{0.4}, {0.5}}, {{0.4}, {0.6}}, {{0.4}, {0.8}},
-            {{0.5}, {0.3}}, {{0.5}, {0.6}}, {{0.5}, {0.9}},
-            {{0.8}, {0.2}}, {{0.8}, {0.7}}, {{0.8}, {0.9}},
-            {{0.9}, {0.3}}, {{0.9}, {0.6}}, {{0.9}, {0.9}}
-        });
+        double[] inputSet = new double[]{
+            0.1, 0.1, 0.1, 0.2, 0.1, 0.3,
+            0.2, 0.2, 0.2, 0.3, 0.2, 0.5,
+            0.3, 0.3, 0.3, 0.4, 0.3, 0.7,
+            0.4, 0.5, 0.4, 0.6, 0.4, 0.8,
+            0.5, 0.3, 0.5, 0.6, 0.5, 0.9,
+            0.8, 0.2, 0.8, 0.7, 0.8, 0.9,
+            0.9, 0.3, 0.9, 0.6, 0.9, 0.9
+        };
 
-        double[][] labelSet = Shape.reshape(new double[][][] {{
-            {0.01}}, {{0.02}}, {{0.03}},
-            {{0.04}}, {{0.06}},{{0.10}},
-            {{0.09}}, {{0.12}}, {{0.21}},
-            {{0.20}}, {{0.24}}, {{0.32}},
-            {{0.15}}, {{0.30}}, {{0.45}},
-            {{0.16}}, {{0.56}}, {{0.72}},
-            {{0.27}}, {{0.45}}, {{0.81}},
-        });
+        double[] labelSet = new double[]{
+            0.01, 0.02, 0.03,
+            0.04, 0.06, 0.10,
+            0.09, 0.12, 0.21,
+            0.20, 0.24, 0.32,
+            0.15, 0.30, 0.45,
+            0.16, 0.56, 0.72,
+            0.27, 0.45, 0.81,
+        };
 
         TensorFlow tf = new TensorFlow();
-        Tensor input = new Tensor(new int[]{2, 1});
-        Tensor label = new Tensor(new int[]{1, 1});
+        Tensor input = new Tensor(new int[]{21, 2, 1});
+        Tensor label = new Tensor(new int[]{21, 1, 1});
 
         Tensor tensor11 = tf.matmul(new Tensor("weight", new int[]{4, 2}), input);
         Tensor tensor12 = tf.addx(tensor11, new Tensor("bias", new int[]{4, 1}));
@@ -55,16 +54,14 @@ public class NNTest{
 
         TensorExecutor executor = new TensorExecutor(tensor34, input, label);
         forEach(100000000, i -> {
-            int l = (int) (Math.random() * labelSet.length);
-            double[] inSet = inputSet[l], labSet = labelSet[l];
-            executor.run(inSet, labSet);
+            executor.run(inputSet, labelSet);
             if (i % 1000 == 0) {
                 log.info("---------{}------------", i);
                 Tensor loss = tensor34;
-                log("输入：", inSet);
-                log("标签：", labSet);
-                log("输出：", tensor33.data());
-                log("误差：", loss.data());
+                log("输入：", inputSet);
+                log("标签：", labelSet);
+                log("输出：", tensor33.getData());
+                log("误差：", loss.getData());
             }
         });
     }

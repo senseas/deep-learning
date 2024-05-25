@@ -167,6 +167,7 @@ public class Tensor implements Serializable {
         if (Objects.isNull(cache)) cache = new HashMap<>();
         Tensor tensor = cache.get(id);
         if (Objects.nonNull(tensor)) return tensor;
+        if (shape[0] == 1) index[0] = 0;
         int[] shapeNext = Arrays.copyOfRange(this.shape, index.length, this.shape.length);
         tensor = new Tensor(this.data, this.grad, shapeNext, start(index));
         cache.put(id, tensor);

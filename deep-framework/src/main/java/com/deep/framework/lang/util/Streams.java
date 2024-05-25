@@ -7,7 +7,7 @@ import java.util.function.IntConsumer;
 
 public class Streams {
 
-    private static int threads = Runtime.getRuntime().availableProcessors();
+    private static final int threads = Runtime.getRuntime().availableProcessors();
     private static final ExecutorService executor = Executors.newFixedThreadPool(threads);
     private final int workNum;
     private final AtomicInteger count;

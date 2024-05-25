@@ -9,16 +9,17 @@ import java.lang.reflect.Array;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 public class Shape extends ForEach {
 
     public static double[] random(int[] shape) {
         RandomDataGenerator random = new RandomDataGenerator();
-        return IntStream.range(0, size(shape)).parallel().mapToDouble(i -> random.nextGaussian(0, 0.1)).toArray();
+        return IntStream.range(0, size(shape)).mapToDouble(i -> random.nextGaussian(0, 0.1)).toArray();
     }
 
     public static double[] values(int[] shape, double value) {
-        return IntStream.range(0, size(shape)).parallel().mapToDouble(i -> value).toArray();
+        return IntStream.range(0, size(shape)).mapToDouble(i -> value).toArray();
     }
 
     public static Tenser<Tensor> Tensors(Tensor tensor) {
@@ -142,6 +143,37 @@ public class Shape extends ForEach {
         arrx[0] = size;
         for (int i = axis + 1; i < arr.length; i++) arrx[i - axis] = arr[i];
         return shapes(arrx);
+    }
+
+    public static int[] shape(int[] shape, int... index) {
+        for (int i = 0; i < shape.length; i++) {
+            if (shape[i] == 1) {
+                index[0] = 0;
+                break;
+            }
+        }
+        return index;
+    }
+
+    public static int[] shapeAligned(Tensor... tensors) {
+        int max_length = Stream.of(tensors).map(a -> a.getShape().length).reduce(Math::max).get();
+        int[] maxarr = new int[max_length];
+        for (Tensor tensor : tensors) {
+            int[] shape = tensor.getShape();
+            int[] array = new int[max_length];
+            int x = max_length - shape.length;
+            for (int l = 0; l < x; l++) {
+                array[l] = 1;
+                if (maxarr[l] < array[l]) maxarr[l] = array[l];
+            }
+
+            for (int l = x; l < max_length; l++) {
+                array[l] = shape[l - x];
+                if (maxarr[l] < array[l]) maxarr[l] = array[l];
+            }
+            tensor.setShape(array);
+        }
+        return maxarr;
     }
 
 }

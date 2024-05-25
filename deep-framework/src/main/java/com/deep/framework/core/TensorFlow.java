@@ -48,15 +48,20 @@ public class TensorFlow implements Serializable {
     }
 
     public Tensor addx(Tensor inx, Tensor iny) {
-        return new TensorOperator("Addx", inx.getShape(), inx, iny) {
+        int[] maxShape = shapeAligned(inx, iny);
+        return new TensorOperator("Addx", maxShape, inx, iny) {
 
             public Tenser<Tensor> compute() {
-                Arrays.stream(getInput()).forEach(A -> addTensorForward(A, this));
+                Arrays.stream(getInput()).forEach(A -> {
+                    forEach(maxShape[0], i -> addTensorForward(A.get(i), this.get(i)));
+                });
                 return output;
             }
 
             public void gradient() {
-                Arrays.stream(getInput()).forEach(A -> addTensorBackward(A, this));
+                Arrays.stream(getInput()).forEach(A -> {
+                    forEach(maxShape[0], i -> addTensorBackward(A.get(i), this.get(i)));
+                });
             }
 
         };
@@ -438,15 +443,16 @@ public class TensorFlow implements Serializable {
     }
 
     public Tensor matmul(Tensor... input) {
-        return new TensorOperator("Matmul", Shape.shape(input[0].shape(0), input[0].shape(1), input[1].shape(2)), input) {
+        int[] maxShape = shapeAligned(input);
+        return new TensorOperator("Matmul", Shape.shape(maxShape[0], input[0].shape(1), input[1].shape(2)), input) {
 
             public Tenser<Tensor> compute() {
-                matmulForward(getInput()[0].get(0), getInput()[1].get(0), this.get(0));
+                forEach(maxShape[0], i -> matmulForward(getInput()[0].get(i), getInput()[1].get(i), this.get(i)));
                 return output;
             }
 
             public void gradient() {
-                matmulBackward(getInput()[0].get(0), getInput()[1].get(0), this.get(0));
+                forEach(maxShape[0], i -> matmulBackward(getInput()[0].get(i), getInput()[1].get(i), this.get(i)));
             }
 
         };
@@ -454,16 +460,17 @@ public class TensorFlow implements Serializable {
     }
 
     public Tensor matmulTran(Tensor... input) {
-        return new TensorOperator("MatmulTran", Shape.shape(input[0].shape(0), input[0].shape(1), input[1].shape(2)), input) {
+        int[] maxShape = shapeAligned(input);
+        return new TensorOperator("MatmulTran", Shape.shape(maxShape[0], input[0].shape(1), input[1].shape(1)), input) {
             final Tensor alpha = getInput().length == 3 ? getInput()[2] : cons(1);
 
             public Tenser<Tensor> compute() {
-                matmulTranbForward(getInput()[0].get(0), getInput()[1].get(0), this.get(0), alpha);
+                forEach(maxShape[0], i -> matmulTranbForward(getInput()[0].get(i), getInput()[1].get(i), this.get(i), alpha));
                 return output;
             }
 
             public void gradient() {
-                matmulTranbBackward(getInput()[0].get(0), getInput()[1].get(0), this.get(0), alpha);
+                forEach(maxShape[0], i -> matmulTranbBackward(getInput()[0].get(i), getInput()[1].get(i), this.get(i), alpha));
             }
 
         };
@@ -565,8 +572,6 @@ public class TensorFlow implements Serializable {
                 });
                 return C[0];
             }
-
-            public void gradient() { }
 
         };
     }
@@ -721,7 +726,7 @@ public class TensorFlow implements Serializable {
         };
     }
 
-    public Tensor deconvx(int[] stride, int padding[], Tensor... input) {
+    public Tensor deconvx(int[] stride, int[] padding, Tensor... input) {
         Tensor A = input[0], B = input[1];
         int height = (B.shape(1) - 1) * stride[0] + A.shape(1) - 2 * padding[0];
         int width = (B.shape(2) - 1) * stride[1] + A.shape(2) - 2 * padding[1];

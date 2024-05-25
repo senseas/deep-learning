@@ -16,7 +16,7 @@ import java.util.stream.Stream;
 public class Sequence {
     private static final int batch_size = 500;
     private static final JiebaSegmenter jieba_segmenter = new JiebaSegmenter();
-    private static List<String> wordTable = getTokentList();
+    private static final List<String> wordTable = getTokentList();
 
     public static int getWordDicSize() {
         return wordTable.size();
