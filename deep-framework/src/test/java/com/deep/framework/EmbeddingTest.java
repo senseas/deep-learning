@@ -22,7 +22,7 @@ public class EmbeddingTest {
 
         TensorFlow tf = new TensorFlow();
         Tensor tensor1 = new Tensor(input, new int[]{index.size(), num});
-        Tensor tensor = tf.wordEmbedding(tensor1, new Tensor(new int[]{num, dim}));
+        Tensor tensor = tf.matmul(tensor1, new Tensor(new int[]{num, dim}));
         TensorExecutor executor = new TensorExecutor(tensor);
         executor.run();
         System.out.println(JSONObject.toJSONString(tensor));

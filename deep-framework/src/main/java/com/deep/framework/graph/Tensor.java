@@ -12,7 +12,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 import static com.deep.framework.lang.Shape.Tensors;
 import static com.deep.framework.lang.Shape.*;
@@ -69,14 +68,6 @@ public class Tensor implements Serializable {
         this.size = Shape.size(shape);
         this.data = tensor.getData();
         this.grad = tensor.getGrad();
-    }
-
-    private Tensor(double[] data, double[] grad, int[] shape, int start) {
-        this.start = start;
-        this.shape = shape;
-        this.size = Shape.size(shape);
-        this.data = data;
-        this.grad = grad;
     }
 
     public Tensor(Tensor tensor, int idx) {
@@ -163,15 +154,10 @@ public class Tensor implements Serializable {
     public int size() {return size;}
 
     public Tensor get(int... index) {
-        String id = Arrays.stream(index).mapToObj(String::valueOf).collect(Collectors.joining());
-        if (Objects.isNull(cache)) cache = new HashMap<>();
-        Tensor tensor = cache.get(id);
-        if (Objects.nonNull(tensor)) return tensor;
         if (shape[0] == 1) index[0] = 0;
+        if (shape.length == 1) return new Tensorx(this, new int[0], start(index));
         int[] shapeNext = Arrays.copyOfRange(this.shape, index.length, this.shape.length);
-        tensor = new Tensor(this.data, this.grad, shapeNext, start(index));
-        cache.put(id, tensor);
-        return tensor;
+        return new Tensorx(this, shapeNext, start(index));
     }
 
     private int start(int[] index) {
@@ -202,7 +188,6 @@ public class Tensor implements Serializable {
     transient private AdamOptimizer optimizer;
 
     transient private int deviceId;
-    transient private Map<String, Tensor> cache;
     transient private Map<Integer, Tenserx> deviceDataMap;
     transient private Map<Integer, Tenserx> deviceGradMap;
 }

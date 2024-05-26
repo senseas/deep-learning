@@ -7,6 +7,7 @@ import com.deep.framework.lang.Tenser;
 
 import java.io.Serializable;
 import java.util.Arrays;
+import java.util.stream.IntStream;
 
 import static com.deep.framework.cublas.Matmul.*;
 import static com.deep.framework.cudnn.Activation.*;
@@ -68,10 +69,11 @@ public class TensorFlow implements Serializable {
     }
 
     public Tensor minus(Tensor... input) {
-        return new TensorOperator("Minus", input[0].getShape(), input) {
+        int[] shaped = shapeAligned(input);
+        return new TensorOperator("Minus", shaped, input) {
 
             public Tenser<Tensor> compute() {
-                Tenser<Tensor> A = getInput(0), B = getInput(1), O = getOutput();
+                Tensor A = getInput()[0], B = getInput()[1], O = this;
                 forEach(A, B, O, (Tensor a, Tensor b, Tensor o) -> {
                     double valx = a.data(), valy = b.data();
                     o.data(valx - valy);
@@ -80,7 +82,7 @@ public class TensorFlow implements Serializable {
             }
 
             public void gradient() {
-                Tenser<Tensor> A = getInput(0), B = getInput(1), O = getOutput();
+                Tensor A = getInput()[0], B = getInput()[1], O = this;
                 forEach(A, B, O, (Tensor a, Tensor b, Tensor o) -> {
                     a.grad(o.grad());
                     b.grad(-o.grad());
@@ -108,10 +110,11 @@ public class TensorFlow implements Serializable {
     }
 
     public Tensor mul(Tensor... input) {
-        return new TensorOperator("Mul", input[0].getShape(), input) {
+        int[] shaped = shapeAligned(input);
+        return new TensorOperator("Mul", shaped, input) {
 
             public Tenser<Tensor> compute() {
-                Tenser<Tensor> A = getInput(0), B = getInput(1), O = getOutput();
+                Tensor A = getInput()[0], B = getInput()[1], O = this;
                 forEach(A, B, O, (Tensor a, Tensor b, Tensor o) -> {
                     double valx = a.data(), valy = b.data();
                     o.data(valx * valy);
@@ -120,7 +123,7 @@ public class TensorFlow implements Serializable {
             }
 
             public void gradient() {
-                Tenser<Tensor> A = getInput(0), B = getInput(1), O = getOutput();
+                Tensor A = getInput()[0], B = getInput()[1], O = this;
                 forEach(A, B, O, (Tensor a, Tensor b, Tensor o) -> {
                     double valx = a.data(), valy = b.data();
                     a.grad(o.grad() * valy);
@@ -370,7 +373,7 @@ public class TensorFlow implements Serializable {
 
             public void gradient() {
                 Tenser<Tensor> A = getInput(0), O = getOutput();
-                forEach(A, O, (Tensor a, Tensor o) ->a.grad(o.grad() / (1 + Math.pow(a.data(), 2))));
+                forEach(A, O, (Tensor a, Tensor o) -> a.grad(o.grad() / (1 + Math.pow(a.data(), 2))));
             }
 
         };
@@ -459,18 +462,17 @@ public class TensorFlow implements Serializable {
 
     }
 
-    public Tensor matmulTran(Tensor... input) {
-        int[] maxShape = shapeAligned(input);
-        return new TensorOperator("MatmulTran", Shape.shape(maxShape[0], input[0].shape(1), input[1].shape(1)), input) {
-            final Tensor alpha = getInput().length == 3 ? getInput()[2] : cons(1);
+    public Tensor matmulTran(Tensor inx, Tensor iny, Tensor alpha) {
+        int[] shaped = shapeAligned(inx, iny);
+        return new TensorOperator("MatmulTran", Shape.shape(shaped[0], inx.shape(1), iny.shape(1)), inx, iny) {
 
             public Tenser<Tensor> compute() {
-                forEach(maxShape[0], i -> matmulTranbForward(getInput()[0].get(i), getInput()[1].get(i), this.get(i), alpha));
+                forEach(shaped[0], i -> matmulTranbForward(getInput()[0].get(i), getInput()[1].get(i), this.get(i), alpha));
                 return output;
             }
 
             public void gradient() {
-                forEach(maxShape[0], i -> matmulTranbBackward(getInput()[0].get(i), getInput()[1].get(i), this.get(i), alpha));
+                forEach(shaped[0], i -> matmulTranbBackward(getInput()[0].get(i), getInput()[1].get(i), this.get(i), alpha));
             }
 
         };
@@ -510,8 +512,6 @@ public class TensorFlow implements Serializable {
                 reshape(A, C);
                 return C;
             }
-
-            public void gradient() { }
 
         };
     }
@@ -555,8 +555,6 @@ public class TensorFlow implements Serializable {
                 Tensor a = getInput()[0], b = getInput()[1];
                 return mul(cons(0.5), pow(minus(a, b), cons(2d)));
             }
-
-            public void gradient() { }
 
         };
     }
@@ -622,8 +620,6 @@ public class TensorFlow implements Serializable {
                 return minus(add(mul(a, log(b)), mul(minus(cons(1), a), log(minus(cons(1), b)))));
             }
 
-            public void gradient() { }
-
         };
     }
 
@@ -638,8 +634,6 @@ public class TensorFlow implements Serializable {
                 });
                 return C[0];
             }
-
-            public void gradient() { }
 
         };
     }
@@ -689,8 +683,6 @@ public class TensorFlow implements Serializable {
                 });
                 return C;
             }
-
-            public void gradient() { }
 
         };
     }
@@ -742,8 +734,6 @@ public class TensorFlow implements Serializable {
                 return C;
             }
 
-            public void gradient() { }
-
         };
     }
 
@@ -789,8 +779,6 @@ public class TensorFlow implements Serializable {
                 return B;
             }
 
-            public void gradient() { }
-
         };
     }
 
@@ -834,8 +822,6 @@ public class TensorFlow implements Serializable {
                 });
                 return B;
             }
-
-            public void gradient() { }
 
         };
     }
@@ -1017,7 +1003,7 @@ public class TensorFlow implements Serializable {
         return new TensorFunction("LayerNormal", input[0].getShape(), input) {
 
             public Tenser<Tensor> compute() {
-                Tensor A = getInput()[0], B = getInput()[1], C = getInput()[2];
+                Tensor A = getInput()[0], B = new Tensor(new int[]{A.shape(1), A.shape(2)}), C = new Tensor(new int[]{A.shape(1), A.shape(2)});
                 Tensor minus = minus(A, expand(mean(A, 1), shape));
                 Tensor std = mean(pow(minus, cons(2, shape)), 1);
                 Tensor a = pow(addx(std, cons(1.0E-7, std.getShape())), cons(0.5, std.getShape()));
@@ -1058,19 +1044,6 @@ public class TensorFlow implements Serializable {
                 int sizex = inx.getSize() / getSize();
                 forEach(inx.getGrad().length, (int i) -> inx.getGrad()[i] += getGrad()[i / sizex] / sizex);
             }
-
-        };
-    }
-
-    public Tensor wordEmbedding(Tensor... input) {
-        return new ScalarFunction("WordEmbedding", input) {
-
-            public Tensor compute() {
-                Tensor A = getInput()[0], B = getInput()[1];
-                return matmul(A, B);
-            }
-
-            public void gradient() {}
 
         };
     }
@@ -1192,9 +1165,10 @@ public class TensorFlow implements Serializable {
         };
     }
 
-    public Tensor linear(Tensor... input) {
-        int[] shape = {input[0].shape(0), input[0].shape(1), input[1].shape(2)};
-        return new TensorFunction("Linear", shape, input) {
+    public Tensor linear(Tensor inx, Tensor iny) {
+        int[] shaped = shapeAligned(inx, iny);
+        int[] shape = {shaped[0], inx.shape(1), iny.shape(2)};
+        return new TensorFunction("Linear", shape, inx, iny) {
 
             public Tenser<Tensor> compute() {
                 Tensor tensor1 = matmul(getInput()[0], getInput()[1]);
@@ -1211,9 +1185,9 @@ public class TensorFlow implements Serializable {
 
             public Tenser<Tensor> compute() {
                 Tensor A = getInput()[0];
-                Tensor C0 = matmul(A, new Tensor(new int[]{A.shape(0), dim, dim}));
-                Tensor C1 = matmul(A, new Tensor(new int[]{A.shape(0), dim, dim}));
-                Tensor C2 = matmul(A, new Tensor(new int[]{A.shape(0), dim, dim}));
+                Tensor C0 = matmul(A, new Tensor(new int[]{dim, dim}));
+                Tensor C1 = matmul(A, new Tensor(new int[]{dim, dim}));
+                Tensor C2 = matmul(A, new Tensor(new int[]{dim, dim}));
                 Tensor C3 = matmulTran(C0, C1, cons(scaler));
                 Tensor C4 = softmax(mask(C3), 1);
                 return new Tenser<>(matmul(C4, C2));
@@ -1222,30 +1196,25 @@ public class TensorFlow implements Serializable {
         };
     }
 
-    public Tensor multiHeadAttention(int context_size, int dim, int header_num, double scaler, Tensor input) {
+    public Tensor multiHeadAttention(int dim, int header_num, double scaler, Tensor input) {
         return new TensorFunction("MultiHeadAttention", input.getShape(), input) {
 
             public Tenser<Tensor> compute() {
                 Tensor A = getInput()[0];
-                Tensor C = new Tensor(new int[]{A.shape(0), header_num * dim, dim});
-                Tensor M = new Tensor(new int[]{A.shape(0), context_size, dim});
-                Tensor N = new Tensor(new int[]{A.shape(0), context_size, dim});
-
-                Tensor[] arr = new Tensor[header_num];
-                forEach(header_num, i -> arr[i] = selfAttention(dim, scaler, A));
-                Tensor addx = addx(A, matmul(concat(arr), C));
-                Tensor normal = layerNormal(addx, M, N);
+                Tensor[] attentions = IntStream.range(0, header_num).mapToObj(i -> selfAttention(dim, scaler, A)).toArray(Tensor[]::new);
+                Tensor addx = addx(A, matmul(concat(attentions), new Tensor(new int[]{header_num * dim, dim})));
+                Tensor normal = layerNormal(addx);
                 return new Tenser<>(normal);
             }
 
         };
     }
 
-    public Tensor transformer(int context_size, int dim, int header_num, double scaler, Tensor... input) {
+    public Tensor transformer(int dim, int header_num, double scaler, Tensor... input) {
         return new TensorFunction("Transformer", new int[]{input[0].shape(0), input[0].shape(1)}, input) {
 
             public Tenser<Tensor> compute() {
-                Tensor tensor11 = multiHeadAttention(context_size, dim, header_num, scaler, getInput()[0]);
+                Tensor tensor11 = multiHeadAttention(dim, header_num, scaler, getInput()[0]);
                 Tensor tensor12 = linear(tensor11, new Tensor(new int[]{dim, dim}));
                 Tensor tensor13 = addx(tensor11, tensor12);
                 Tensor tensor14 = layerNormal(tensor13, new Tensor(tensor13.getShape()), new Tensor(tensor13.getShape()));

@@ -47,7 +47,7 @@ public class CublasTest {
         Tensor weight = new Tensor(new double[]{0.01, 0.02, 0.03, 0.04, 0.06, 0.10}, new int[]{2, 3});
 
         TensorFlow tf = new TensorFlow();
-        Tensor tensor = tf.matmulTran(input, weight);
+        Tensor tensor = tf.matmulTran(input, weight, tf.cons(1));
         tensor.forward();
         tensor.setGrad(new double[]{0.2731f, 0.1389f, 0.7491f, -0.2307f, 0.3411f, 0.6492f});
         tensor.backward();
