@@ -582,8 +582,6 @@ public class TensorFlow implements Serializable {
                 return minus(mul(a, log(b)));
             }
 
-            public void gradient() {}
-
         };
     }
 
@@ -999,8 +997,8 @@ public class TensorFlow implements Serializable {
         };
     }
 
-    public Tensor layerNormal(Tensor... input) {
-        return new TensorFunction("LayerNormal", input[0].getShape(), input) {
+    public Tensor layerNormal(Tensor input) {
+        return new TensorFunction("LayerNormal", input.getShape(), input) {
 
             public Tenser<Tensor> compute() {
                 Tensor A = getInput()[0], B = new Tensor(new int[]{A.shape(1), A.shape(2)}), C = new Tensor(new int[]{A.shape(1), A.shape(2)});
@@ -1024,8 +1022,6 @@ public class TensorFlow implements Serializable {
                 forEach(inx, pows, (Tensor a) -> pow(minus(a, mean), cons));
                 return mean(Tensor(pows), 0);
             }
-
-            public void gradient() {}
 
         };
     }
@@ -1097,8 +1093,6 @@ public class TensorFlow implements Serializable {
                 });
                 return output;
             }
-
-            public void gradient() {}
 
         };
     }
@@ -1217,7 +1211,7 @@ public class TensorFlow implements Serializable {
                 Tensor tensor11 = multiHeadAttention(dim, header_num, scaler, getInput()[0]);
                 Tensor tensor12 = linear(tensor11, new Tensor(new int[]{dim, dim}));
                 Tensor tensor13 = addx(tensor11, tensor12);
-                Tensor tensor14 = layerNormal(tensor13, new Tensor(tensor13.getShape()), new Tensor(tensor13.getShape()));
+                Tensor tensor14 = layerNormal(tensor13);
                 return new Tenser<>(tensor14);
             }
 

@@ -174,13 +174,9 @@ public class AppTest {
     @Test
     public void layerNormalTest() {
         double[] inputData = {-0.04976376334757029, -0.03794349033548409, -0.010064684799984737, 0.07645589251434087, 0.07582835718990744, 0.08298664791825114, -0.04976376334757029, -0.03794349033548409, -0.010064684799984737, 0.07645589251434087, 0.07582835718990744, 0.08298664791825114};
-        double[] weightData = {-0.11638942929027168, 0.00272052007755666, -0.06962990835464268, -0.08540677407104012, 0.009078374800942644, 0.14757164208870013, -0.11638942929027168, 0.00272052007755666, -0.06962990835464268, -0.08540677407104012, 0.009078374800942644, 0.14757164208870013};
-        double[] biasData = {-0.003444951583010782, 0.016457531606025765, -0.060589160254410995, -0.0038500237038360235, 0.0362456731331325, -0.032999063080729654, -0.003444951583010782, 0.016457531606025765, -0.060589160254410995, -0.0038500237038360235, 0.0362456731331325, -0.032999063080729654};
         TensorFlow tf = new TensorFlow();
         Tensor input = new Tensor(inputData, new int[]{2, 3, 2});
-        Tensor scale = new Tensor(weightData, new int[]{2, 3, 2});
-        Tensor bias = new Tensor(biasData, new int[]{2, 3, 2});
-        Tensor layerNormal = tf.layerNormal(input, scale, bias);
+        Tensor layerNormal = tf.layerNormal(input);
 
         TensorExecutor executor = new TensorExecutor(layerNormal);
         executor.forward();
@@ -188,8 +184,6 @@ public class AppTest {
 
         System.out.println("output    " + JSONObject.toJSONString(layerNormal.getData()));
         System.out.println("input Grad" + JSONObject.toJSONString(input.getGrad()));
-        System.out.println("scale Grad" + JSONObject.toJSONString(scale.getGrad()));
-        System.out.println("bias  Grad" + JSONObject.toJSONString(bias.getGrad()));
         System.out.println(" ");
     }
 

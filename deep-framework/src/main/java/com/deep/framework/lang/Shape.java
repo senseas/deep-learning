@@ -156,6 +156,7 @@ public class Shape extends ForEach {
     }
 
     public static int[] shapeAligned(Tensor... tensors) {
+        if (Stream.of(tensors).anyMatch(a -> Objects.isNull(a.getShape()))) return new int[]{1};
         int max_length = Stream.of(tensors).map(a -> a.getShape().length).reduce(Math::max).get();
         int[] maxarr = new int[max_length];
         for (Tensor tensor : tensors) {

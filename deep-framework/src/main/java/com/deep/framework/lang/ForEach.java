@@ -122,14 +122,22 @@ public class ForEach implements Serializable {
     }
 
     public static void forEach(Tensor a, Tensor b, Tensor c, Func3<Tensor> func) {
-        forEach(a.shape(0), i -> {
-            Tensor m = a.get(i), n = b.get(i), o = c.get(i);
-            if (m.getSize() == 1 && o.getSize() == 1) {
-                func.apply(m, n, o);
-            } else {
-                forEach(m, n, o, func);
-            }
-        });
+        if (a.getSize() == 1 && b.getSize() == 1) {
+            func.apply(a, b, c);
+        } else if (IntStream.range(0, a.getShape().length).anyMatch(i -> a.shape(i) != b.shape(i))) {
+            forEach(a.shape(0), i -> {
+                Tensor m = a.get(i), n = b.get(i), o = c.get(i);
+                if (m.getSize() == 1 && n.getSize() == 1) {
+                    func.apply(m, n, o);
+                } else {
+                    forEach(m, n, o, func);
+                }
+            });
+        } else {
+            IntStream.range(0, a.size()).forEach(i -> {
+                func.apply(a.getx(i), b.getx(i), c.getx(i));
+            });
+        }
     }
 
     public static <M> void forEach(Tenser<M> a, Tenser<M> b, Tenser<M> c, Func3<M> func) {

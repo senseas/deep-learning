@@ -160,6 +160,10 @@ public class Tensor implements Serializable {
         return new Tensorx(this, shapeNext, start(index));
     }
 
+    public Tensor getx(int index) {
+        return new Tensorx(this, new int[]{1}, start + index);
+    }
+
     private int start(int[] index) {
         int[] nexts = getNext();
         int next = this.start, length = index.length - 1;
@@ -180,7 +184,7 @@ public class Tensor implements Serializable {
     private Tensor tensor;
     private int idx, start, size = 1;
 
-    protected int[] shape;
+    protected int[] shape = new int[]{1};
     protected double[] data, grad;
     protected boolean reduce;
     protected Tenser<Tensor> output, function;
