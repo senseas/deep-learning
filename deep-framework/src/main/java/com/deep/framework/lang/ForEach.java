@@ -91,18 +91,18 @@ public class ForEach implements Serializable {
         }
     }
 
-    public static <M, N> void forEach(Object a, Object b, Func2<M, N> func) {
+    public static <M> void forEach(Object a, Object b, Func2<M> func) {
         if (BeanUtil.isTenser(a)) {
             forEach(Tensers.getLength(a), i -> {
                 Object m = Tensers.get(a, i), n = Tensers.get(b, i);
                 if (BeanUtil.isNotTenser(m)) {
-                    func.apply((M) m, (N) n);
+                    func.apply((M) m, (M) n);
                 } else {
                     forEach(m, n, func);
                 }
             });
         } else {
-            func.apply((M) a, (N) b);
+            func.apply((M) a, (M) b);
         }
     }
 
@@ -118,6 +118,31 @@ public class ForEach implements Serializable {
             });
         } else {
             func.apply((M) a, (M) b, (M) c);
+        }
+    }
+
+    public static void forEach(Tensor a, Func1<Tensor> func) {
+        IntStream.range(0, a.size()).forEach(i -> {
+            func.apply(a.getx(i));
+        });
+    }
+
+    public static void forEach(Tensor a, Tensor b, Func2<Tensor> func) {
+        if (a.getSize() == 1 && b.getSize() == 1) {
+            func.apply(a, b);
+        } else if (IntStream.range(0, a.getShape().length).anyMatch(i -> a.shape(i) != b.shape(i))) {
+            forEach(a.shape(0), i -> {
+                Tensor m = a.get(i), n = b.get(i);
+                if (m.getSize() == 1 && n.getSize() == 1) {
+                    func.apply(m, n);
+                } else {
+                    forEach(m, n, func);
+                }
+            });
+        } else {
+            IntStream.range(0, a.size()).forEach(i -> {
+                func.apply(a.getx(i), b.getx(i));
+            });
         }
     }
 
@@ -184,7 +209,7 @@ public class ForEach implements Serializable {
         });
     }
 
-    public static <M> void forEach(Tenser<M> a, Tenser<M> b, Func2<M, M> func) {
+    public static <M> void forEach(Tenser<M> a, Tenser<M> b, Func2<M> func) {
         IntStream.range(0, a.size()).forEach(i -> {
             func.apply(a.data(i), b.data(i));
         });

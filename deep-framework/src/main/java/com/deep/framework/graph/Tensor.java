@@ -92,7 +92,7 @@ public class Tensor implements Serializable {
     public void reducer() {
         if (reduce) {
             createOptimizer();
-            getOutput().forEach(none -> optimizer.adam(none));
+            forEach(this, none -> optimizer.adam(none));
         }
     }
 
