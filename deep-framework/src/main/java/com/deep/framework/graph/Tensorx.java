@@ -7,9 +7,8 @@ import java.util.Map;
 
 public class Tensorx extends Tensor {
 
-    public Tensorx(Tensor tensor, int[] shape, int start) {
-        super(tensor, start);
-        this.setStart(start);
+    public Tensorx(Tensor tensor, int[] shape, int offset) {
+        super(tensor, offset);
         this.setShape(shape);
         this.setSize(Shape.size(shape));
     }
@@ -23,19 +22,19 @@ public class Tensorx extends Tensor {
     }
 
     public double data() {
-        return getTensor().getData()[getIdx()];
+        return getTensor().getData()[getOffset()];
     }
 
     public void data(double value) {
-        getTensor().getData()[getIdx()] = value;
+        getTensor().getData()[getOffset()] = value;
     }
 
     public double grad() {
-        return getTensor().getGrad()[getIdx()];
+        return getTensor().getGrad()[getOffset()];
     }
 
     public void grad(double grad) {
-        getTensor().getGrad()[getIdx()] += grad;
+        getTensor().getGrad()[getOffset()] += grad;
     }
 
     public Map<Integer, Tenserx> getDeviceDataMap() {

@@ -2,9 +2,11 @@ package com.deep.framework.core;
 
 import com.deep.framework.graph.Tensor;
 import com.deep.framework.lang.Shape;
+import com.deep.framework.lang.util.Streams;
 import lombok.Data;
 
 import java.io.Serializable;
+import java.util.Objects;
 import java.util.stream.Stream;
 
 import static com.deep.framework.core.TensorFlux.intit;
@@ -12,7 +14,7 @@ import static com.deep.framework.lang.ForEach.forBack;
 import static com.deep.framework.lang.ForEach.forEach;
 
 @Data
-public class TensorExecutor<E> implements Serializable {
+public class TensorExecutor implements Serializable {
     public static double rate = 0.003;
     public static final double eps = 0.0000001d;
     private Tensor tensor;
@@ -66,7 +68,17 @@ public class TensorExecutor<E> implements Serializable {
     }
 
     public void forward() {
-        forEach(operators.length, i -> operators[i].forward());
+        Streams.forEach(operators, (Tensor o) -> {
+            while (true) {
+                if (Stream.of(o.getInput()).filter(a -> Objects.nonNull(a.getInput()) || Objects.nonNull(a.getTensor())).anyMatch(a -> !a.isStatus())) continue;
+                if (Objects.nonNull(o.getFunction()) && o.getFunction().stream().anyMatch(a -> !a.isStatus())) continue;
+
+                o.forward();
+                o.setStatus(true);
+                return;
+            }
+        });
+        Stream.of(operators).forEach(a -> a.setStatus(false));
         Stream.of(params).forEach(Tensor::forward);
     }
 

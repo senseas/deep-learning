@@ -12,39 +12,39 @@ public class Tenserx implements Serializable {
 
     public final Pointer deviceData;
     public final int[] shape, nexts;
-    private final int start, size;
+    private final int offset, size;
     public int deviceId;
 
     public Tenserx(double[] data, int[] shape) {
-        this.start = 0;
+        this.offset = 0;
         this.shape = shape;
         this.size = Shape.size(shape);
         this.deviceData = createDevicePointer(data, deviceId);
         this.nexts = next();
     }
 
-    public Tenserx(double[] data, int[] shape, int start, int deviceId) {
-        this.start = start;
+    public Tenserx(double[] data, int[] shape, int offset, int deviceId) {
+        this.offset = offset;
         this.shape = shape;
         this.size = Shape.size(shape);
-        this.deviceData = createDevicePointer(data, deviceId).withByteOffset(start * Sizeof.DOUBLE);
+        this.deviceData = createDevicePointer(data, deviceId).withByteOffset(offset * Sizeof.DOUBLE);
         this.nexts = next();
     }
 
-    private Tenserx(Pointer deviceData, int[] shape, int start) {
-        this.start = start;
+    private Tenserx(Pointer deviceData, int[] shape, int offset) {
+        this.offset = offset;
         this.shape = shape;
         this.size = Shape.size(shape);
-        this.deviceData = deviceData.withByteOffset(start * Sizeof.DOUBLE);
+        this.deviceData = deviceData.withByteOffset(offset * Sizeof.DOUBLE);
         this.nexts = next();
     }
 
     public Tenserx get(int... index) {
-        return new Tenserx(this.deviceData, getNext(index), start(index));
+        return new Tenserx(this.deviceData, getNext(index), offset(index));
     }
 
-    private int start(int[] index) {
-        int next = this.start, length = index.length - 1;
+    private int offset(int[] index) {
+        int next = this.offset, length = index.length - 1;
         for (int i = 0; i < length; i++) next += index[i] * nexts[i];
         return next + index[length] * nexts[length];
     }

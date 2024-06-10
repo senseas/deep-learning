@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.function.Consumer;
 import java.util.function.IntConsumer;
 
 public class Streams {
@@ -21,6 +22,18 @@ public class Streams {
     private static Runnable work(int i, IntConsumer action) {
         return () -> {
             action.accept(i);
+        };
+    }
+
+    public static <M> void forEach(M[] data, Consumer<M> action) {
+        List<Future> list = new ArrayList<>();
+        for (M m : data) list.add(executor.submit(work(m, action)));
+        synchronize(list);
+    }
+
+    private static <M> Runnable work(M m, Consumer<M> action) {
+        return () -> {
+            action.accept(m);
         };
     }
 

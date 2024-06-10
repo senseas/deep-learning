@@ -13,21 +13,21 @@ public class Tenser<T> implements Serializable {
 
     public final T[] data;
     public final int[] shape, nexts;
-    private final int start, size;
+    private final int offset, size;
 
     public Tenser(T[] data, int[] shape) {
         this.shape = shape;
         this.size = Shape.size(shape);
         this.data = data;
-        this.start = 0;
+        this.offset = 0;
         this.nexts = next();
     }
 
-    private Tenser(T[] data, int[] shape, int start) {
+    private Tenser(T[] data, int[] shape, int offset) {
         this.shape = shape;
         this.size = Shape.size(shape);
         this.data = data;
-        this.start = start;
+        this.offset = offset;
         this.nexts = next();
     }
 
@@ -35,7 +35,7 @@ public class Tenser<T> implements Serializable {
         this.shape = new int[]{1};
         this.size = Shape.size(shape);
         this.data = (T[]) new Object[]{data};
-        this.start = 0;
+        this.offset = 0;
         this.nexts = next();
     }
 
@@ -43,12 +43,12 @@ public class Tenser<T> implements Serializable {
         this.shape = shape;
         this.size = Shape.size(shape);
         this.data = (T[]) Array.newInstance(clas, size());
-        this.start = 0;
+        this.offset = 0;
         this.nexts = next();
     }
 
     public <E> E get(int... index) {
-        int start = start(index);
+        int start = offset(index);
         if (index.length == this.shape.length) {
             return (E) this.data[start];
         } else {
@@ -57,27 +57,27 @@ public class Tenser<T> implements Serializable {
     }
 
     public T data(int index) {
-        return this.data[start + index];
+        return this.data[offset + index];
     }
 
     public void set(T[] data, int... index) {
-        int start = start(index), end = end(start, index);
+        int start = offset(index), end = end(start, index);
         for (int i = start; i < end; i++) {
             this.data[i] = data[i - start];
         }
     }
 
     public void set(T data, int... index) {
-        int start = start(index);
+        int start = offset(index);
         this.data[start] = data;
     }
 
     public void set(T data, int index) {
-        this.data[start + index] = data;
+        this.data[offset + index] = data;
     }
 
-    private int start(int[] index) {
-        int next = this.start, length = index.length - 1;
+    private int offset(int[] index) {
+        int next = this.offset, length = index.length - 1;
         for (int i = 0; i < length; i++) {
             next += index[i] * nexts[i];
         }
@@ -112,18 +112,18 @@ public class Tenser<T> implements Serializable {
 
     public void forEach(For<T> func) {
         for (int i = 0; i < size(); i++) {
-            func.apply(data[start + i], i);
+            func.apply(data[offset + i], i);
         }
     }
 
     public void forEach(Func1<T> func) {
         for (int i = 0; i < size(); i++) {
-            func.apply(data[start + i]);
+            func.apply(data[offset + i]);
         }
     }
 
     public Stream<T> stream() {
-        return IntStream.range(0, size()).mapToObj(i -> data[start + i]);
+        return IntStream.range(0, size()).mapToObj(i -> data[offset + i]);
     }
 
     private int[] getNext(int[] index) {

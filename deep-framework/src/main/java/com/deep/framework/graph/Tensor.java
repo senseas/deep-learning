@@ -70,8 +70,8 @@ public class Tensor implements Serializable {
         this.grad = tensor.getGrad();
     }
 
-    public Tensor(Tensor tensor, int idx) {
-        this.idx = idx;
+    public Tensor(Tensor tensor, int offset) {
+        this.offset = offset;
         this.tensor = tensor;
     }
 
@@ -104,33 +104,51 @@ public class Tensor implements Serializable {
 
     public double data() {
         if (Objects.isNull(tensor)) {
-            return this.data[idx];
+            return this.data[offset];
         } else {
-            return tensor.getData()[idx];
+            return tensor.getData()[offset];
         }
     }
 
     public void data(double value) {
         if (Objects.isNull(tensor)) {
-            this.data[idx] = value;
+            this.data[offset] = value;
         } else {
-            tensor.getData()[idx] = value;
+            tensor.getData()[offset] = value;
         }
     }
 
     public double grad() {
         if (Objects.isNull(tensor)) {
-            return this.grad[idx];
+            return this.grad[offset];
         } else {
-            return tensor.getGrad()[idx];
+            return tensor.getGrad()[offset];
         }
     }
 
     public void grad(double grad) {
         if (Objects.isNull(tensor)) {
-            this.grad[idx] += grad;
+            this.grad[offset] += grad;
         } else {
-            tensor.getGrad()[idx] += grad;
+            tensor.getGrad()[offset] += grad;
+        }
+    }
+
+    public void setStatus(boolean status) {
+        if (Objects.isNull(tensor)) {
+            this.status = status;
+        } else {
+            tensor.setStatus(status);
+        }
+    }
+
+    public boolean isStatus() {
+        if (Objects.isNull(tensor)) {
+            return this.status;
+        } else if (tensor.isReduce()) {
+            return true;
+        } else {
+            return tensor.isStatus();
         }
     }
 
@@ -155,18 +173,18 @@ public class Tensor implements Serializable {
 
     public Tensor get(int... index) {
         if (shape[0] == 1) index[0] = 0;
-        if (shape.length == 1) return new Tensorx(this, new int[0], start(index));
+        if (shape.length == 1) return new Tensorx(this, new int[0], offset(index));
         int[] shapeNext = Arrays.copyOfRange(this.shape, index.length, this.shape.length);
-        return new Tensorx(this, shapeNext, start(index));
+        return new Tensorx(this, shapeNext, offset(index));
     }
 
     public Tensor getx(int index) {
-        return new Tensorx(this, new int[]{1}, start + index);
+        return new Tensorx(this, new int[]{1}, this.offset + index);
     }
 
-    private int start(int[] index) {
+    private int offset(int[] index) {
         int[] nexts = getNext();
-        int next = this.start, length = index.length - 1;
+        int next = this.offset, length = index.length - 1;
         for (int i = 0; i < length; i++) next += index[i] * nexts[i];
         return next + index[length] * nexts[length];
     }
@@ -182,11 +200,11 @@ public class Tensor implements Serializable {
     private String name = "";
     private Tensor[] input;
     private Tensor tensor;
-    private int idx, start, size = 1;
+    private int offset, size = 1;
 
     protected int[] shape = new int[]{1};
     protected double[] data, grad;
-    protected boolean reduce;
+    protected boolean reduce, status;
     protected Tenser<Tensor> output, function;
 
     transient private AdamOptimizer optimizer;

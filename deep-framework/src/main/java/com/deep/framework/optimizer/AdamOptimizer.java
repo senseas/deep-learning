@@ -15,13 +15,13 @@ public class AdamOptimizer {
     }
 
     public void adam(Tensor tensor) {
-        double m1 = beta1 * m[tensor.getIdx()] + (1 - beta1) * tensor.grad();
-        double n1 = beta2 * n[tensor.getIdx()] + (1 - beta1) * tensor.grad() * tensor.grad();
+        double m1 = beta1 * m[tensor.getOffset()] + (1 - beta1) * tensor.grad();
+        double n1 = beta2 * n[tensor.getOffset()] + (1 - beta1) * tensor.grad() * tensor.grad();
         double m2 = m1 / (1 - beta1);
         double n2 = n1 / (1 - beta2);
         double data = tensor.data() - lr * m2 / (Math.pow(n2, 0.5) + eps);
-        m[tensor.getIdx()] = m1;
-        n[tensor.getIdx()] = n1;
+        m[tensor.getOffset()] = m1;
+        n[tensor.getOffset()] = n1;
         tensor.data(data);
     }
 }
