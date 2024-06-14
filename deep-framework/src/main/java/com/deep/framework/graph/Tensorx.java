@@ -7,6 +7,10 @@ import java.util.Map;
 
 public class Tensorx extends Tensor {
 
+    public Tensorx(Tensor tensor, int offset) {
+        super(tensor, offset);
+    }
+
     public Tensorx(Tensor tensor, int[] shape, int offset) {
         super(tensor, offset);
         this.setShape(shape);
@@ -35,6 +39,10 @@ public class Tensorx extends Tensor {
 
     public void grad(double grad) {
         getTensor().getGrad()[getOffset()] += grad;
+    }
+
+    public boolean isReduce() {
+        return getTensor().isReduce();
     }
 
     public Map<Integer, Tenserx> getDeviceDataMap() {

@@ -172,14 +172,14 @@ public class Tensor implements Serializable {
     public int size() {return size;}
 
     public Tensor get(int... index) {
-        if (shape[0] == 1) index[0] = 0;
-        if (shape.length == 1) return new Tensorx(this, new int[0], offset(index));
-        int[] shapeNext = Arrays.copyOfRange(this.shape, index.length, this.shape.length);
-        return new Tensorx(this, shapeNext, offset(index));
+        if (this.shape[0] == 1) index[0] = 0;
+        if (this.shape.length == 1) return new Tensorx(this, offset(index));
+        int[] shape = Arrays.copyOfRange(this.shape, index.length, this.shape.length);
+        return new Tensorx(this, shape, offset(index));
     }
 
     public Tensor getx(int index) {
-        return new Tensorx(this, new int[]{1}, this.offset + index);
+        return new Tensorx(this, this.offset + index);
     }
 
     private int offset(int[] index) {
@@ -202,7 +202,7 @@ public class Tensor implements Serializable {
     private Tensor tensor;
     private int offset, size = 1;
 
-    protected int[] shape = new int[]{1};
+    protected int[] shape;
     protected double[] data, grad;
     protected boolean reduce, status;
     protected Tenser<Tensor> output, function;

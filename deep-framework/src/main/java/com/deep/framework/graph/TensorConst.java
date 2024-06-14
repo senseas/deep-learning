@@ -18,7 +18,7 @@ public class TensorConst extends Tensor {
         this.reduce = false;
     }
 
-    public TensorConst(Tensor tensor, int idx) { super(tensor, idx); }
+    public TensorConst(Tensor tensor, int offset) { super(tensor, offset); }
 
     public void forward() {}
 
