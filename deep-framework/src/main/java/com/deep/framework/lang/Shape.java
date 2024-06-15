@@ -2,6 +2,7 @@ package com.deep.framework.lang;
 
 import com.deep.framework.graph.Tensor;
 import com.deep.framework.graph.TensorConst;
+import com.deep.framework.graph.Tensorx;
 import com.deep.framework.lang.function.Func;
 import org.apache.commons.math3.random.RandomDataGenerator;
 
@@ -23,7 +24,7 @@ public class Shape extends ForEach {
     }
 
     public static Tenser<Tensor> Tensors(Tensor tensor) {
-        Tensor[] tensors = IntStream.range(0, size(tensor.getShape())).mapToObj(i -> new Tensor(tensor, i)).toArray(Tensor[]::new);
+        Tensor[] tensors = IntStream.range(0, size(tensor.getShape())).mapToObj(i -> new Tensorx(tensor, i)).toArray(Tensor[]::new);
         return new Tenser<>(tensors, tensor.getShape());
     }
 

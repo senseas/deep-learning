@@ -138,7 +138,7 @@ public class TensorFlow implements Serializable {
         return new TensorOperator("Div", input[0].getShape(), input) {
 
             public Tenser<Tensor> compute() {
-                Tenser<Tensor> A = getInput(0), B = getInput(1), O = getOutput();
+                Tensor A = getInput()[0], B = getInput()[1], O = this;
                 forEach(A, B, O, (Tensor a, Tensor b, Tensor o) -> {
                     double valx = a.data(), valy = b.data();
                     o.data(valx / valy);
@@ -147,7 +147,7 @@ public class TensorFlow implements Serializable {
             }
 
             public void gradient() {
-                Tenser<Tensor> A = getInput(0), B = getInput(1), O = getOutput();
+                Tensor A = getInput()[0], B = getInput()[1], O = this;
                 forEach(A, B, O, (Tensor a, Tensor b, Tensor o) -> {
                     double valx = a.data(), valy = b.data();
                     a.grad(o.grad() / valy);
@@ -179,13 +179,13 @@ public class TensorFlow implements Serializable {
         return new TensorOperator("Pow", input[0].getShape(), input) {
 
             public Tenser<Tensor> compute() {
-                Tenser<Tensor> A = getInput(0), B = getInput(1), O = getOutput();
+                Tensor A = getInput()[0], B = getInput()[1], O = this;
                 forEach(A, B, O, (Tensor a, Tensor b, Tensor o) -> o.data(Math.pow(a.data(), b.data())));
                 return output;
             }
 
             public void gradient() {
-                Tenser<Tensor> A = getInput(0), B = getInput(1), O = getOutput();
+                Tensor A = getInput()[0], B = getInput()[1], O = this;
                 forEach(A, B, O, (Tensor a, Tensor b, Tensor o) -> a.grad(o.grad() * b.data() * Math.pow(a.data(), b.data() - 1)));
             }
 

@@ -1,12 +1,17 @@
 package com.deep.framework.lang.util;
 
+import com.deep.framework.graph.Tensor;
+
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.function.Consumer;
 import java.util.function.IntConsumer;
+import java.util.stream.Stream;
 
 public class Streams {
 
@@ -28,6 +33,21 @@ public class Streams {
     public static <M> void forEach(M[] data, Consumer<M> action) {
         List<Future> list = new ArrayList<>();
         for (M m : data) list.add(executor.submit(work(m, action)));
+        synchronize(list);
+    }
+
+    public static void forEach(Tensor[] data, Consumer<Tensor> action) {
+        List<Future> list = new ArrayList<>();
+        List<Tensor> tensors = new CopyOnWriteArrayList<>(data);
+        while (!tensors.isEmpty()) {
+            for (Tensor o : tensors) {
+                if (Stream.of(o.getInput()).parallel().filter(a -> Objects.nonNull(a.getInput()) || Objects.nonNull(a.getTensor())).anyMatch(a -> !a.isStatus())) continue;
+                if (Objects.nonNull(o.getFunction()) && o.getFunction().stream().parallel().anyMatch(a -> !a.isStatus())) continue;
+
+                list.add(executor.submit(work(o, action)));
+                tensors.remove(o);
+            }
+        }
         synchronize(list);
     }
 

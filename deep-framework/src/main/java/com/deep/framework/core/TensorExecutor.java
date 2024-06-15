@@ -68,14 +68,8 @@ public class TensorExecutor implements Serializable {
 
     public void forward() {
         Streams.forEach(operators, (Tensor o) -> {
-            while (true) {
-                if (Stream.of(o.getInput()).filter(a -> Objects.nonNull(a.getInput()) || Objects.nonNull(a.getTensor())).anyMatch(a -> !a.isStatus())) continue;
-                if (Objects.nonNull(o.getFunction()) && o.getFunction().stream().anyMatch(a -> !a.isStatus())) continue;
-
-                o.forward();
-                o.setStatus(true);
-                return;
-            }
+            o.forward();
+            o.setStatus(true);
         });
         Stream.of(operators).forEach(a -> a.setStatus(false));
         Stream.of(params).forEach(Tensor::forward);

@@ -2,9 +2,9 @@ package com.deep.framework.functions;
 
 import com.deep.framework.lang.Tenser;
 
-import static com.deep.framework.core.TensorExecutor.eps;
 import static com.deep.framework.lang.ForEach.forEach;
 import static com.deep.framework.lang.Shape.size;
+import static com.deep.framework.optimizer.AdamOptimizer.eps;
 
 public class TensorFlow implements Operator {
 
