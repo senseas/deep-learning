@@ -63,6 +63,7 @@ public class TensorFlux implements Serializable {
                 }
             }
             tensor.setInput(stream.toArray(Tensor[]::new));
+            for (Tensor in : tensor.getInput()) in.clearSetRefer(tensor);
         }
     }
 

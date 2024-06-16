@@ -13,7 +13,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
-import static com.deep.framework.lang.Shape.Tensors;
 import static com.deep.framework.lang.Shape.*;
 
 @Data
@@ -78,6 +77,7 @@ public class Tensor implements Serializable {
     public Tensor(String name, int[] shape, Tensor... input) {
         this.name = this.name.concat(name);
         this.input = input;
+        for (Tensor in : input) in.setRefer(this);
         if (Objects.isNull(shape)) return;
         this.shape = shape;
         this.size = Shape.size(shape);
@@ -197,6 +197,16 @@ public class Tensor implements Serializable {
         return next;
     }
 
+    public Tensor setRefer(Tensor refer) {
+        if (this.refer == refer) return this;
+        if (Objects.isNull(this.refer)) this.refer = refer;
+        return new TensorConst(0);
+    }
+
+    public void clearSetRefer(Tensor refer) {
+        this.refer = refer;
+    }
+
     private String name = "";
     private Tensor[] input;
     private Tensor tensor;
@@ -206,6 +216,7 @@ public class Tensor implements Serializable {
     protected double[] data, grad;
     protected boolean reduce, status;
     protected Tenser<Tensor> output, function;
+    transient protected Tensor refer;
 
     transient private AdamOptimizer optimizer;
 

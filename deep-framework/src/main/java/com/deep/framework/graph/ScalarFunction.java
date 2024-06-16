@@ -15,14 +15,25 @@ public class ScalarFunction extends Tensor {
     public void gradient() { }
 
     public void forward() {
-        clearOutput();
+        for (Tensor o : getInput()) o.setRefer(this).forward();
+
         create();
+        clearOutput();
+        getFunction().forEach(Tensor::forward);
         getFunction().forEach(a -> data[0] = a.data());
     }
 
     public void backward() {
         getFunction().forEach(a -> a.grad(grad[0]));
+        getFunction().forEach(Tensor::backward);
         clearGrad();
+
+        for (Tensor o : getInput()) o.setRefer(this).backward();
+    }
+
+    public void reducer() {
+        getFunction().forEach(Tensor::reducer);
+        for (Tensor o : getInput()) o.setRefer(this).reducer();
     }
 
     public Tenser<Tensor> getFunction() {
@@ -31,7 +42,6 @@ public class ScalarFunction extends Tensor {
     }
 
     private void clearOutput() {
-        if (Objects.isNull(data)) return;
         data[0] = 0;
         grad[0] = 0;
     }

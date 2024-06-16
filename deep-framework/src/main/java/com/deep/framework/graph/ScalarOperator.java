@@ -18,18 +18,24 @@ public class ScalarOperator extends Tensor {
     public void gradient(double grad) { }
 
     public void forward() {
-        clearOutput();
+        for (Tensor o : getInput()) o.setRefer(this).forward();
+
         create();
+        clearOutput();
         data[0] = compute();
     }
 
     public void backward() {
         gradient(grad[0]);
         clearGrad();
+        for (Tensor o : getInput()) o.setRefer(this).backward();
+    }
+
+    public void reducer() {
+        for (Tensor o : getInput()) o.setRefer(this).reducer();
     }
 
     private void clearOutput() {
-        if (Objects.isNull(data)) return;
         data[0] = 0;
         grad[0] = 0;
     }

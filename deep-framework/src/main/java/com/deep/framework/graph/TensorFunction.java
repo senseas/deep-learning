@@ -25,18 +25,28 @@ public class TensorFunction extends Tensor {
     public Tenser<Tensor> compute() { return null; }
 
     public void forward() {
-        clearOutput();
+        for (Tensor o : getInput()) o.setRefer(this).forward();
+
         create();
+        clearOutput();
+        getFunction().forEach(Tensor::forward);
         syncOutputData(this);
     }
 
     public void backward() {
         syncFunctionGrad(this);
+        getFunction().forEach(Tensor::backward);
         clearGrad();
+
+        for (Tensor o : getInput()) o.setRefer(this).backward();
+    }
+
+    public void reducer() {
+        getFunction().forEach(Tensor::reducer);
+        for (Tensor o : getInput()) o.setRefer(this).reducer();
     }
 
     private void clearOutput() {
-        if (Objects.isNull(data)) return;
         Arrays.fill(data, 0d);
         Arrays.fill(grad, 0d);
     }

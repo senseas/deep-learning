@@ -23,14 +23,12 @@ public class TensorExecutor implements Serializable {
 
     public TensorExecutor(Tensor tensor) {
         this.tensor = tensor;
-        intit(this);
     }
 
     public TensorExecutor(Tensor tensor, Tensor input, Tensor label) {
         this.tensor = tensor;
         this.input = input;
         this.label = label;
-        intit(this);
     }
 
     public TensorExecutor(Tensor tensor, Tensor input, Tensor inputx, Tensor label) {
@@ -38,7 +36,6 @@ public class TensorExecutor implements Serializable {
         this.input = input;
         this.inputx = inputx;
         this.label = label;
-        intit(this);
     }
 
     public void run(double[] input, double[] label) {
@@ -67,21 +64,16 @@ public class TensorExecutor implements Serializable {
     }
 
     public void forward() {
-        Streams.forEach(operators, (Tensor o) -> {
-            o.forward();
-            o.setStatus(true);
-        });
-        Stream.of(operators).forEach(a -> a.setStatus(false));
-        Stream.of(params).forEach(Tensor::forward);
+        tensor.forward();
     }
 
     public void backward() {
         forEach(tensor, none -> none.grad(1d));
-        forBack(operators.length, i -> operators[i].backward());
+        tensor.backward();
     }
 
     public void reduce() {
-        Stream.of(params).forEach(Tensor::reducer);
+        tensor.reducer();
     }
 
     public void setInput(double[] data) {
