@@ -11,8 +11,6 @@ public class ScalarOperator extends Tensor {
     public ScalarOperator(String name, Tensor... input) {
         super(name, input);
         concat(this);
-        this.data = new double[1];
-        this.grad = new double[1];
     }
 
     public double compute() { return 0; }
@@ -20,36 +18,36 @@ public class ScalarOperator extends Tensor {
     public void gradient(double grad) { }
 
     public void forward() {
-        if (status) return;
-        for (Tensor o : getInput()) o.setRefer(1).forward();
+        for (Tensor o : getInput()) o.setRefer(this).forward();
 
+        create();
         clearOutput();
         data[0] = compute();
-        status = true;
     }
 
     public void backward() {
-        if (refer != 0) return;
         gradient(grad[0]);
         clearGrad();
-        for (Tensor o : getInput()) o.setRefer(-1).backward();
+        for (Tensor o : getInput()) o.setRefer(this).backward();
     }
 
     public void reducer() {
-        if (states) return;
-        for (Tensor o : getInput()) o.reducer();
-        states = true;
+        for (Tensor o : getInput()) o.setRefer(this).reducer();
     }
 
     public void clearOutput() {
-        states = false;
         data[0] = 0;
         grad[0] = 0;
     }
 
     public void clearGrad() {
-        status = false;
         grad[0] = 0;
+    }
+
+    private void create() {
+        if (Objects.nonNull(data)) return;
+        this.data = new double[1];
+        this.grad = new double[1];
     }
 
     public Tensor getInput(int i) {

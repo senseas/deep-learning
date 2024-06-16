@@ -8,8 +8,6 @@ public class ScalarFunction extends Tensor {
 
     public ScalarFunction(String name, Tensor... input) {
         super(name, input);
-        this.data = new double[1];
-        this.grad = new double[1];
     }
 
     public Tensor compute() { return null; }
@@ -17,32 +15,25 @@ public class ScalarFunction extends Tensor {
     public void gradient() { }
 
     public void forward() {
-        if (status) return;
-        for (Tensor o : getInput()) o.setRefer(1).forward();
+        for (Tensor o : getInput()) o.setRefer(this).forward();
 
+        create();
         clearOutput();
-        Tensor tensor = getFunction().data(0);
-        tensor.forward();
-        data[0] = tensor.data();
-        status = true;
+        getFunction().forEach(Tensor::forward);
+        getFunction().forEach(a -> data[0] = a.data());
     }
 
     public void backward() {
-        if (refer != 0) return;
-
-        Tensor tensor = getFunction().data(0);
-        tensor.grad(grad[0]);
-        tensor.backward();
+        getFunction().forEach(a -> a.grad(grad[0]));
+        getFunction().forEach(Tensor::backward);
         clearGrad();
 
-        for (Tensor o : getInput()) o.setRefer(-1).backward();
+        for (Tensor o : getInput()) o.setRefer(this).backward();
     }
 
     public void reducer() {
-        if (states) return;
         getFunction().forEach(Tensor::reducer);
-        for (Tensor o : getInput()) o.reducer();
-        states = true;
+        for (Tensor o : getInput()) o.setRefer(this).reducer();
     }
 
     public Tenser<Tensor> getFunction() {
@@ -51,14 +42,18 @@ public class ScalarFunction extends Tensor {
     }
 
     public void clearOutput() {
-        states = false;
         data[0] = 0;
         grad[0] = 0;
     }
 
     public void clearGrad() {
-        status = false;
         grad[0] = 0;
+    }
+
+    private void create() {
+        if (Objects.nonNull(data)) return;
+        this.data = new double[1];
+        this.grad = new double[1];
     }
 
     public Tenser<Tensor> getInput(int i) {

@@ -13,6 +13,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
+import static com.deep.framework.core.TensorFlux.tensorRefer;
 import static com.deep.framework.lang.Shape.*;
 
 @Data
@@ -66,6 +67,7 @@ public class Tensor implements Serializable {
     public Tensor(String name, Tensor... input) {
         this.name = this.name.concat(name);
         this.input = input;
+        for (Tensor in : input) in.setRefer(this);
     }
 
     public void forward() {
@@ -136,9 +138,14 @@ public class Tensor implements Serializable {
 
     public int shape(int i) { return shape[i]; }
 
-    public Tensor setRefer(int refer) {
-        this.refer += refer;
-        return this;
+    public Tensor setRefer(Tensor refer) {
+        if (Objects.isNull(this.refer)) this.refer = refer;
+        if (this.refer == refer) return this;
+        return tensorRefer;
+    }
+
+    public void clearSetRefer(Tensor refer) {
+        this.refer = refer;
     }
 
     private int idx;
@@ -150,11 +157,10 @@ public class Tensor implements Serializable {
     protected double[] data, grad;
     protected boolean reduce;
     protected Tenser<Tensor> output, function;
-    protected int refer;
+    transient protected Tensor refer;
 
     transient private AdamOptimizer optimizer;
     transient private Palce palce;
-    transient protected boolean status, states;
 
     transient private int deviceId;
     transient private Map<Integer, Pointer> deviceDataMap;

@@ -27,42 +27,33 @@ public class TensorFunction extends Tensor {
     public Tenser<Tensor> compute() { return null; }
 
     public void forward() {
-        if (status) return;
-        for (Tensor o : getInput()) o.setRefer(1).forward();
+        for (Tensor o : getInput()) o.setRefer(this).forward();
 
+        create();
         clearOutput();
         getFunction().forEach(Tensor::forward);
-        create();
         syncOutputData(this);
-        status = true;
     }
 
     public void backward() {
-        if (refer != 0) return;
-
         syncFunctionGrad(this);
         getFunction().forEach(Tensor::backward);
         clearGrad();
 
-        for (Tensor o : getInput()) o.setRefer(-1).backward();
+        for (Tensor o : getInput()) o.setRefer(this).backward();
     }
 
     public void reducer() {
-        if (states) return;
         getFunction().forEach(Tensor::reducer);
-        for (Tensor o : getInput()) o.reducer();
-        states = true;
+        for (Tensor o : getInput()) o.setRefer(this).reducer();
     }
 
     public void clearOutput() {
-        states = false;
-        if (Objects.isNull(data)) return;
         Arrays.fill(data, 0d);
         Arrays.fill(grad, 0d);
     }
 
     public void clearGrad() {
-        status = false;
         Arrays.fill(grad, 0d);
     }
 
