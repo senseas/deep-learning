@@ -2,15 +2,10 @@ package com.deep.framework.core;
 
 import com.deep.framework.graph.Tensor;
 import com.deep.framework.lang.Shape;
-import com.deep.framework.lang.util.Streams;
 import lombok.Data;
 
 import java.io.Serializable;
-import java.util.Objects;
-import java.util.stream.Stream;
 
-import static com.deep.framework.core.TensorFlux.intit;
-import static com.deep.framework.lang.ForEach.forBack;
 import static com.deep.framework.lang.ForEach.forEach;
 
 @Data
