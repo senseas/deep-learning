@@ -18,8 +18,8 @@ public class ScalarOperator extends Tensor {
     public void gradient(double grad) { }
 
     public void forward() {
-        clearOutput();
         create();
+        clearOutput();
         data[0] = compute();
     }
 
@@ -29,7 +29,6 @@ public class ScalarOperator extends Tensor {
     }
 
     private void clearOutput() {
-        if (Objects.isNull(data)) return;
         data[0] = 0;
         grad[0] = 0;
     }

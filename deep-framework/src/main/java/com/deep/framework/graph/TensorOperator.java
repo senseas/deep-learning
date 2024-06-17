@@ -21,8 +21,8 @@ public class TensorOperator extends Tensor {
     public void gradient() { }
 
     public void forward() {
-        clearOutput();
         create();
+        clearOutput();
         compute();
     }
 
@@ -32,7 +32,6 @@ public class TensorOperator extends Tensor {
     }
 
     public void clearOutput() {
-        if (Objects.isNull(data)) return;
         Arrays.fill(data, 0d);
         Arrays.fill(grad, 0d);
     }

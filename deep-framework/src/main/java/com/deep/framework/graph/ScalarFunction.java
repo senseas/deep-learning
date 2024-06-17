@@ -15,8 +15,8 @@ public class ScalarFunction extends Tensor {
     public void gradient() { }
 
     public void forward() {
-        clearOutput();
         create();
+        clearOutput();
         getFunction().forEach(a -> data[0] = a.data());
     }
 
@@ -31,7 +31,6 @@ public class ScalarFunction extends Tensor {
     }
 
     private void clearOutput() {
-        if (Objects.isNull(data)) return;
         data[0] = 0;
         grad[0] = 0;
     }

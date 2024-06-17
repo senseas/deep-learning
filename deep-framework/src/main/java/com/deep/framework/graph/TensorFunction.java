@@ -25,8 +25,8 @@ public class TensorFunction extends Tensor {
     public Tenser<Tensor> compute() { return null; }
 
     public void forward() {
-        clearOutput();
         create();
+        clearOutput();
         syncOutputData(this);
     }
 
@@ -36,7 +36,6 @@ public class TensorFunction extends Tensor {
     }
 
     private void clearOutput() {
-        if (Objects.isNull(data)) return;
         Arrays.fill(data, 0d);
         Arrays.fill(grad, 0d);
     }
