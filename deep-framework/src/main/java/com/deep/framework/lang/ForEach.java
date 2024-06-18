@@ -131,7 +131,7 @@ public class ForEach implements Serializable {
         if (a.getSize() == 1 && b.getSize() == 1) {
             func.apply(a, b);
         } else if (IntStream.range(0, a.getShape().length).anyMatch(i -> a.shape(i) != b.shape(i))) {
-            forEach(a.shape(0), i -> {
+            forEach(Math.max(a.shape(0), b.shape(0)), i -> {
                 Tensor m = a.get(i), n = b.get(i);
                 if (m.getSize() == 1 && n.getSize() == 1) {
                     func.apply(m, n);
@@ -150,7 +150,7 @@ public class ForEach implements Serializable {
         if (a.getSize() == 1 && b.getSize() == 1) {
             func.apply(a, b, c);
         } else if (IntStream.range(0, a.getShape().length).anyMatch(i -> a.shape(i) != b.shape(i))) {
-            forEach(a.shape(0), i -> {
+            forEach(Math.max(Math.max(a.shape(0), b.shape(0)), c.shape(0)), i -> {
                 Tensor m = a.get(i), n = b.get(i), o = c.get(i);
                 if (m.getSize() == 1 && n.getSize() == 1) {
                     func.apply(m, n, o);
