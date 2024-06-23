@@ -44,14 +44,14 @@ public class Tenserx implements Serializable {
     }
 
     private int offset(int[] index) {
-        int next = this.offset, length = index.length - 1;
-        for (int i = 0; i < length; i++) next += index[i] * nexts[i];
-        return next + index[length] * nexts[length];
+        int next = this.offset;
+        for (int i = 0; i < index.length; i++) next += index[i] * nexts[i];
+        return next;
     }
 
     private int[] next() {
         int[] next = new int[shape.length];
-        Arrays.fill(next, 1);
+        next[next.length - 1] = 1;
         for (int i = next.length - 1; 0 < i; i--) next[i - 1] = next[i] * shape[i];
         return next;
     }

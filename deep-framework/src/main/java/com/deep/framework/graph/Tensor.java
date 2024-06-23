@@ -184,15 +184,15 @@ public class Tensor implements Serializable {
 
     private int offset(int[] index) {
         int[] nexts = getNext();
-        int next = this.offset, length = index.length - 1;
-        for (int i = 0; i < length; i++) next += index[i] * nexts[i];
-        return next + index[length] * nexts[length];
+        int next = this.offset;
+        for (int i = 0; i < index.length; i++) next += index[i] * nexts[i];
+        return next;
     }
 
     public int[] getNext(int... shape) {
         shape = shape.length > 0 ? shape : this.shape;
         int[] next = new int[shape.length];
-        Arrays.fill(next, 1);
+        next[next.length - 1] = 1;
         for (int i = next.length - 1; 0 < i; i--) next[i - 1] = next[i] * shape[i];
         return next;
     }
