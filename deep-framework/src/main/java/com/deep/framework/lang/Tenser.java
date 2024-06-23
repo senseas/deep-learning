@@ -77,11 +77,9 @@ public class Tenser<T> implements Serializable {
     }
 
     private int offset(int[] index) {
-        int next = this.offset, length = index.length - 1;
-        for (int i = 0; i < length; i++) {
-            next += index[i] * nexts[i];
-        }
-        return next + index[length] * nexts[length];
+        int offset = this.offset;
+        for (int i = 0; i < index.length; i++) offset += index[i] * nexts[i];
+        return offset;
     }
 
     private int end(int start, int[] index) {
@@ -91,10 +89,8 @@ public class Tenser<T> implements Serializable {
 
     private int[] next() {
         int[] next = new int[shape.length];
-        Arrays.fill(next, 1);
-        for (int i = next.length - 1; 0 < i; i--) {
-            next[i - 1] = next[i] * shape[i];
-        }
+        next[next.length - 1] = 1;
+        for (int i = next.length - 1; 0 < i; i--) next[i - 1] = next[i] * shape[i];
         return next;
     }
 
