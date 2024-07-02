@@ -1049,11 +1049,11 @@ public class TensorFlow implements Serializable {
 
             public Tenser<Tensor> compute() {
                 Tensor input = getInput()[0];
-                int J = shape(0), N = shape(1), M = shape(2);
-                for (int j = 0; j < J; j++) {
+                int L = shape(0), N = shape(1), M = shape(2);
+                for (int l = 0; l < L; l++) {
                     for (int m = 0; m < M; m++) {
                         for (int n = m; n < N; n++) {
-                            int idx = j * M * N + M * n + m;
+                            int idx = l * M * N + M * n + m;
                             data[idx] = input.getData()[idx];
                         }
                     }
@@ -1063,11 +1063,11 @@ public class TensorFlow implements Serializable {
 
             public void gradient() {
                 Tensor input = getInput()[0];
-                int J = shape(0), N = shape(1), M = shape(2);
-                for (int j = 0; j < J; j++) {
+                int L = shape(0), N = shape(1), M = shape(2);
+                for (int l = 0; l < L; l++) {
                     for (int m = 0; m < M; m++) {
                         for (int n = m; n < N; n++) {
-                            int idx = j * M * N + M * n + m;
+                            int idx = l * M * N + M * n + m;
                             input.getGrad()[idx] = grad[idx];
                         }
                     }
@@ -1082,13 +1082,13 @@ public class TensorFlow implements Serializable {
 
             public Tenser<Tensor> compute() {
                 Tensor input = getInput()[0];
-                int dim0 = shape[0], dim1 = shape[1], dim2 = shape[2];
-                forEach(dim0, dim1, dim2, (int j, int i, int l) -> {
-                    int index0 = j * dim1 * dim2 + i * dim2 + l, index1 = j * dim1 + i;
-                    if (l % 2 == 0) {
-                        data[index0] = Math.sin(input.getData()[index1] / Math.pow(1000, 2 * l / dim2));
+                int L = shape[0], M = shape[1], N = shape[2];
+                forEach(L, M, N, (int l, int m, int n) -> {
+                    int index0 = l * M * N + m * N + n, index1 = l * M + m;
+                    if (n % 2 == 0) {
+                        data[index0] = Math.sin(input.getData()[index1] / Math.pow(1000, 2 * n / N));
                     } else {
-                        data[index0] = Math.cos(input.getData()[index1] / Math.pow(1000, 2 * l / dim2));
+                        data[index0] = Math.cos(input.getData()[index1] / Math.pow(1000, 2 * n / N));
                     }
                 });
                 return output;
@@ -1104,13 +1104,13 @@ public class TensorFlow implements Serializable {
 
             public Tenser<Tensor> compute() {
                 Tensor inx = getInput()[0];
-                int I = input.length, J = inx.shape(0), M = inx.shape(1), N = inx.shape(2);
+                int I = input.length, L = inx.shape(0), M = inx.shape(1), N = inx.shape(2);
                 for (int i = 0; i < I; i++) {
                     Tensor in = getInput()[i];
-                    for (int j = 0; j < J; j++) {
+                    for (int l = 0; l < L; l++) {
                         for (int m = 0; m < M; m++) {
                             for (int n = 0; n < N; n++) {
-                                int x = j * M * N + m * N;
+                                int x = l * M * N + m * N;
                                 int idx = i * N + I * x + n;
                                 int idy = x + n;
                                 data[idx] = in.getData()[idy];
@@ -1123,13 +1123,13 @@ public class TensorFlow implements Serializable {
 
             public void gradient() {
                 Tensor inx = getInput()[0];
-                int I = input.length, J = inx.shape(0), M = inx.shape(1), N = inx.shape(2);
+                int I = input.length, L = inx.shape(0), M = inx.shape(1), N = inx.shape(2);
                 for (int i = 0; i < I; i++) {
                     Tensor in = getInput()[i];
-                    for (int j = 0; j < J; j++) {
+                    for (int l = 0; l < L; l++) {
                         for (int m = 0; m < M; m++) {
                             for (int n = 0; n < N; n++) {
-                                int x = j * M * N + m * N;
+                                int x = l * M * N + m * N;
                                 int idx = i * N + I * x + n;
                                 int idy = x + n;
                                 in.getGrad()[idy] += grad[idx];

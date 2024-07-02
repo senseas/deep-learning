@@ -6,6 +6,8 @@ import com.deep.framework.core.TensorFlow;
 import com.deep.framework.graph.Tensor;
 import org.junit.Test;
 
+import java.util.stream.IntStream;
+
 public class AppTest {
 
     @Test
@@ -124,10 +126,16 @@ public class AppTest {
 
     @Test
     public void concatTest() {
+        double[] data1 = new double[]{0.01, 0.02, 0.03, 0.04, 0.06, 0.10, 0.09, 0.12, 0.21, 0.20, 0.24, 0.32};
+        double[] data2 = new double[]{0.15, 0.30, 0.45, 0.16, 0.56, 0.72, 0.27, 0.45, 0.81, 0.27, 0.45, 0.81};
         TensorFlow tf = new TensorFlow();
-        Tensor tensor = tf.concat(new Tensor(new int[]{2, 3, 2}), new Tensor(new int[]{2, 3, 2}));
+        Tensor tensor = tf.concat(new Tensor(data1, new int[]{2, 3, 2}), new Tensor(data2, new int[]{2, 3, 2}));
         TensorExecutor executor = new TensorExecutor(tensor);
         executor.forward();
+        IntStream.range(0, 24).forEach(i -> tensor.getGrad()[i] = i);
+        executor.backward();
+        System.out.println("input grad0" + JSONObject.toJSONString(tensor.getInput()[0].getGrad()));
+        System.out.println("input grad1" + JSONObject.toJSONString(tensor.getInput()[1].getGrad()));
     }
 
     @Test
@@ -173,9 +181,9 @@ public class AppTest {
      */
     @Test
     public void layerNormalTest() {
-        double[] inputData = {-0.04976376334757029, -0.03794349033548409, -0.010064684799984737, 0.07645589251434087, 0.07582835718990744, 0.08298664791825114, -0.04976376334757029, -0.03794349033548409, -0.010064684799984737, 0.07645589251434087, 0.07582835718990744, 0.08298664791825114};
+        double[] inputData = {-0.04976376334757029, -0.03794349033548409, -0.010064684799984737, 0.07645589251434087, 0.07582835718990744, 0.08298664791825114};
         TensorFlow tf = new TensorFlow();
-        Tensor input = new Tensor(inputData, new int[]{2, 3, 2});
+        Tensor input = new Tensor(inputData, new int[]{1, 2, 3});
         Tensor layerNormal = tf.layerNormal(input);
 
         TensorExecutor executor = new TensorExecutor(layerNormal);
@@ -193,6 +201,16 @@ public class AppTest {
         Tensor tensor = tf.expandx(new Tensor(new int[]{3, 2}), new int[]{2, 3, 2});
         TensorExecutor executor = new TensorExecutor(tensor);
         executor.forward();
+    }
+
+    @Test
+    public void positionalEmbeddingTest() {
+        double[] data = new double[]{0.01, 0.02, 0.03, 0.04, 0.06, 0.10, 0.09, 0.12, 0.21, 0.20, 0.24, 0.32};
+        TensorFlow tf = new TensorFlow();
+        Tensor tensor = tf.positionalEmbedding(new int[]{2, 3, 2}, new Tensor(data, new int[]{2, 3, 2}));
+        TensorExecutor executor = new TensorExecutor(tensor);
+        executor.forward();
+        System.out.println("output    " + JSONObject.toJSONString(tensor.getData()));
     }
 
 }
